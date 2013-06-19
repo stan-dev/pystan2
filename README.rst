@@ -11,6 +11,9 @@ Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
 Installation
 ------------
 
+`NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
+are required.
+
 ::
 
    git clone https://github.com/ariddell/pystan.git
