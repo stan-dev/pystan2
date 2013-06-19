@@ -59,11 +59,23 @@ if not ISRELEASED:
     FULLVERSION += '.dev'
 
 import os
+import distutils.core
+from distutils.errors import CCompilerError, DistutilsError
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
+from numpy.distutils.command import install, install_clib
+from numpy.distutils.misc_util import InstallableLib
 
 ## static libraries
+stan_include_dirs = ["pystan/stan/src/",
+                     "pystan/stan/lib/eigen_3.1.3/",
+                     "pystan/stan/lib/boost_1.53.0/"]
+
+stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
+               ('BOOST_NO_DECLTYPE', None),
+               ('BOOST_DISABLE_ASSERTS', None)]
+
 libstanc_sources = [
     "pystan/stan/src/stan/command/stanc.cpp",
     "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
@@ -77,12 +89,19 @@ libstanc_sources = [
 ]
 
 libstanc = ('stanc', {'sources': libstanc_sources,
-                      'include_dirs': ["pystan/stan/src/",
-                                       "pystan/stan/lib/eigen_3.1.3/",
-                                       "pystan/stan/lib/boost_1.53.0/"],
-                      'macros': [('BOOST_RESULT_OF_USE_TR1', None),
-                                 ('BOOST_NO_DECLTYPE', None),
-                                 ('BOOST_DISABLE_ASSERTS', None)]})
+                      'include_dirs': stan_include_dirs,
+                      'macros': stan_macros})
+
+libstan_sources = [
+    "pystan/stan/src/stan/agrad/rev/var_stack.cpp",
+    "pystan/stan/src/stan/math/matrix.cpp",
+    "pystan/stan/src/stan/agrad/matrix.cpp"
+]
+
+# FIXME: I'd like to pass -O3 somehow
+libstan = ('stan', {'sources': libstan_sources,
+                    'include_dirs': stan_include_dirs,
+                    'macros': stan_macros})
 
 ## extensions
 extensions = [Extension("pystan._api",
@@ -105,25 +124,42 @@ package_data_pats = ['*.hpp',
                      'io.pxd',
                      'stan_fit.pxd',
                      'stanc.pxd',
-                     'stanfit4model.pyx',
-                     'bin/libstan.a']  # FIXME: goal is to remove libstan.a
+                     'stanfit4model.pyx']
 package_data_pats += stan_files_all
 
 ## setup
-
-setup(
-    name=NAME,
-    version=FULLVERSION,
-    maintainer=AUTHOR,
-    packages=['pystan'],
-    ext_modules=cythonize(extensions),
-    libraries=[libstanc],
-    package_dir={'pystan', 'pystan'},
-    package_data={'pystan': package_data_pats},
-    maintainer_email=AUTHOR_EMAIL,
-    description=DESCRIPTION,
-    license=LICENSE,
-    url=URL,
-    long_description=LONG_DESCRIPTION,
-    classifiers=CLASSIFIERS,
-)
+if __name__ == '__main__':
+    distutils.core._setup_stop_after = 'commandline'
+    dist = setup(
+        name=NAME,
+        version=FULLVERSION,
+        maintainer=AUTHOR,
+        packages=['pystan'],
+        ext_modules=cythonize(extensions),
+        libraries=[libstanc, libstan],
+        package_dir={'pystan': 'pystan'},
+        package_data={'pystan': package_data_pats},
+        maintainer_email=AUTHOR_EMAIL,
+        description=DESCRIPTION,
+        license=LICENSE,
+        url=URL,
+        long_description=LONG_DESCRIPTION,
+        classifiers=CLASSIFIERS,
+        # use numpy.distutils machinery to install libstan.a
+        cmdclass={'install': install.install,
+                  'install_clib': install_clib.install_clib},
+    )
+    # use numpy.distutils machinery to install libstan.a
+    dist.installed_libraries = [InstallableLib(libstan[0],
+                                               libstan[1],
+                                               'pystan/bin/')]
+    try:
+        dist.run_commands()
+    except KeyboardInterrupt:
+        raise SystemExit("interrupted")
+    except (IOError, os.error) as exc:
+        from distutils.util import grok_environment_error
+        error = grok_environment_error(exc)
+    except (DistutilsError,
+            CCompilerError) as msg:
+            raise SystemExit("error: " + str(msg))
