@@ -58,42 +58,58 @@ FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
 
+import os
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
-extensions = [
-    Extension("pystan._api",
-              ["pystan/_api.pyx"],
-              language="c++",
-              include_dirs=["pystan/stan/src/",
-                            "pystan/stan/lib/boost_1.53.0/"],
-              library_dirs=["pystan/bin"],
-              libraries=["stanc"]
-              )]
-
-package_dir = {'pystan': 'pystan'}
-package_data_pats = [
-    '*.hpp',
-    'io.pxd',
-    'stan_fit.pxd',
-    'stanc.pxd',
-    'stanfit4model.pyx',
-    'bin/*.a',
-    'stan/src/stan/*.hpp',
-    'stan/src/stan/gm/*.hpp',
-    'stan/src/stan/io/*.hpp',
-    'stan/src/stan/agrad/*.hpp',
-    'stan/src/stan/mcmc/hmc/static/*.hpp',
-    'stan/src/stan/mcmc/hmc/nuts/*.hpp',
-    'stan/src/optimization/*.hpp',
-    'stan/lib/boost_1.53.0/boost/date_time/posix_time/posix_time.hpp',
-    'stan/lib/boost_1.53.0/boost/date_time/posix_time/posix_time_types.hpp',
-    'stan/lib/boost_1.53.0/boost/math/special_functions/fpclassify.hpp',
-    'stan/lib/boost_1.53.0/boost/random/additive_combine.hpp',
-    'stan/lib/boost_1.53.0/boost/random/uniform_real_distribution.hpp',
+## static libraries
+libstanc_sources = [
+    "pystan/stan/src/stan/command/stanc.cpp",
+    "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/statement_2_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/statement_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/term_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/program_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/whitespace_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/ast_def.cpp"
 ]
-package_data = {'pystan': package_data_pats}
+
+libstanc = ('stanc', {'sources': libstanc_sources,
+                      'include_dirs': ["pystan/stan/src/",
+                                       "pystan/stan/lib/eigen_3.1.3/",
+                                       "pystan/stan/lib/boost_1.53.0/"],
+                      'macros': [('BOOST_RESULT_OF_USE_TR1', None),
+                                 ('BOOST_NO_DECLTYPE', None),
+                                 ('BOOST_DISABLE_ASSERTS', None)]})
+
+## extensions
+extensions = [Extension("pystan._api",
+                        ["pystan/_api.pyx"],
+                        language="c++",
+                        include_dirs=["pystan/stan/src/",
+                                      "pystan/stan/lib/boost_1.53.0/"],
+                        library_dirs=["pystan/bin"],
+                        libraries=['stanc'])]
+
+## package data
+
+# get every file under pystan/stan/ (the stan source tree) and
+# trim the leading "pystan/"
+stan_files_all = sum(
+    [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
+     for path, dirs, files in os.walk('pystan/stan')], [])
+
+package_data_pats = ['*.hpp',
+                     'io.pxd',
+                     'stan_fit.pxd',
+                     'stanc.pxd',
+                     'stanfit4model.pyx',
+                     'bin/libstan.a']  # FIXME: goal is to remove libstan.a
+package_data_pats += stan_files_all
+
+## setup
 
 setup(
     name=NAME,
@@ -101,8 +117,9 @@ setup(
     maintainer=AUTHOR,
     packages=['pystan'],
     ext_modules=cythonize(extensions),
-    package_dir=package_dir,
-    package_data=package_data,
+    libraries=[libstanc],
+    package_dir={'pystan', 'pystan'},
+    package_data={'pystan': package_data_pats},
     maintainer_email=AUTHOR_EMAIL,
     description=DESCRIPTION,
     license=LICENSE,
