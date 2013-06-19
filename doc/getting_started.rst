@@ -27,12 +27,14 @@ issuing the command `apt-get install build-essential`.
 Installation
 ============
 
-If you have `pip <https://pypi.python.org/pypi/pip>`_ installed, PyStan can be
-installed with a single command::
+PyStan currently needs to be installed from source. First make sure you have
+installed the dependencies, then issue the commands:
 
-    pip install -e https://github.com/ariddell/pystan.git
+::
 
-Alternatively, download the package and install manually.
+   git clone https://github.com/ariddell/pystan.git
+   cd pystan
+   python setup.py install
 
 Using PyStan
 ============
@@ -101,10 +103,8 @@ of arrays for parameters of interest, or just an array.
 
 .. FIXME: fill in rest when features added
 
-.. code-block:: python
-
-    eta = fit.extract(permuted=True)['eta']
-    np.mean(eta, axis=0)
-
-    array([ 0.38781197,  0.02531919, -0.14462554,  0.00364737, -0.32423842,
-        -0.2012991 ,  0.4047828 ,  0.12202298])
+>>> eta = fit.extract(permuted=True)['eta']
+>>> import numpy as np
+>>> np.mean(eta, axis=0)
+array([ 0.38781197,  0.02531919, -0.14462554,  0.00364737, -0.32423842,
+    -0.2012991 ,  0.4047828 ,  0.12202298])
