@@ -1,0 +1,62 @@
+#include <stan/version.hpp>
+#include <stan/gm/compiler.hpp>
+
+#include <exception>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+/* REF: rstan/rstan/src/stanc.cpp */
+
+typedef struct PyStancResult {
+    int status;
+    std::string msg; // for communicating errors
+    std::string model_cppname;
+    std::string cppcode;
+} PyStancResult;
+
+
+std::string stan_version() {
+  std::string stan_version 
+    = stan::MAJOR_VERSION + "." +
+      stan::MINOR_VERSION + "." +
+      stan::PATCH_VERSION;
+  return stan_version;
+} 
+
+int stanc(std::string model_stancode, std::string model_name, PyStancResult& result) { 
+  static const int SUCCESS_RC = 0;
+  static const int EXCEPTION_RC = -1;
+  static const int PARSE_FAIL_RC = -2;
+  
+  static const bool INCLUDE_MAIN = true; 
+  /*
+  std::string stan_version 
+    = stan::MAJOR_VERSION + "." +
+      stan::MINOR_VERSION + "." +
+      stan::PATCH_VERSION;
+  */
+
+  std::string mcode_ = model_stancode; 
+  std::string mname_ = model_name; 
+   
+  std::stringstream out;
+  std::istringstream in(mcode_); 
+  try {
+    bool valid_model
+      = stan::gm::compile(&std::cerr,in,out,mname_,!INCLUDE_MAIN);
+    if (!valid_model) {
+      result.status = PARSE_FAIL_RC;  
+      return PARSE_FAIL_RC;
+    }
+  } catch(const std::exception& e) {
+    // REprintf("\nERROR PARSING\n %s\n", e.what()); 
+    result.status = EXCEPTION_RC;
+    result.msg = e.what();
+    return EXCEPTION_RC; 
+  }
+  result.status = SUCCESS_RC;
+  result.model_cppname = mname_;
+  result.cppcode = out.str();
+  return SUCCESS_RC;
+}
