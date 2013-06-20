@@ -12,6 +12,7 @@ import pystan._api  # stanc wrapper
 from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
+
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
           verbose=False, obsfucate_model_name=False):
     """Translate Stan model specification into C++ code.
@@ -92,11 +93,21 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     'normal1'
 
     """
+    if file and model_code:
+        raise ValueError("Specify stan model with `file` or `model_code`, "
+                         "not both.")
     if file is None and model_code is None:
         raise ValueError("Model file missing and empty model_code.")
     if file is not None:
-        # FIXME: need to implement, see misc.R get_model_strcode
-        raise NotImplementedError("loading code from file not available yet.")
+        if isinstance(file, str):
+            try:
+                with open(file) as f:
+                    model_code = f.read()
+            except:
+                logging.critical("Unable to read file specified by `file`.")
+                raise
+        else:
+            model_code = file.read()
 
     # bytes, going into C++ code
     model_name_bytes = model_name.encode('ascii')
@@ -111,7 +122,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     return result
 
 
-def stan(file=None, model_name="anon_model", model_code="", fit=None,
+def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=random.randint(0, MAX_UINT), sample_file=None,
          save_dso=True, verbose=False, boost_lib=None, eigen_lib=None,
@@ -209,17 +220,20 @@ def stan(file=None, model_name="anon_model", model_code="", fit=None,
 
 
     """
+    # NOTE: this is a thin wrapper for other functions. Error handling occurs
+    # elsewhere.
     if data is None:
         data = {}
     if warmup is None:
         warmup = int(iter // 2)
     if fit is not None:
-        raise NotImplementedError
+        m = fit.stanmodel
+    else:
+        m = StanModel(file=file, model_name=model_name, model_code=model_code,
+                      boost_lib=boost_lib, eigen_lib=eigen_lib,
+                      save_dso=save_dso, verbose=verbose, **kwargs)
     if sample_file is not None:
         raise NotImplementedError
-    m = StanModel(file=file, model_name=model_name, model_code=model_code,
-                  boost_lib=boost_lib, eigen_lib=eigen_lib, save_dso=save_dso,
-                  verbose=verbose, **kwargs)
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
                      sample_file=sample_file, verbose=verbose, **kwargs)
     return fit

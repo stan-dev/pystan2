@@ -365,7 +365,7 @@ def _pars_total_indexes(names, dims, fnames, pars):
     return indexes
 
 
-def get_kept_samples(n, sim):
+def _get_kept_samples(n, sim):
     # NOTE: this is in stanfit-class.R in RStan (rather than misc.R)
     """Get samples to be kept from the chain(s) for `n`th parameter.
 
@@ -391,7 +391,7 @@ def get_kept_samples(n, sim):
     return np.asarray(ss)
 
 
-def get_samples(n, sim, inc_warmup=True):
+def _get_samples(n, sim, inc_warmup=True):
     # NOTE: this is in stanfit-class.R in RStan (rather than misc.R)
     """Get chain for `n`th parameter.
 

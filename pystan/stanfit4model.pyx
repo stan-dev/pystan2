@@ -70,7 +70,7 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     r['sampler_param_names'] = [n.decode('utf-8') \
                                 for n in holder.sampler_param_names]
     return r
-    
+
 
 cdef dict _dict_from_pystanargs(PyStanArgs* args):
     d = {}
@@ -104,7 +104,7 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
 
 
 cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
-    """Insert values in dictionary `args` into `p`""" 
+    """Insert values in dictionary `args` into `p`"""
     # _call_sampler requires a specially crafted dictionary of arguments
     # intended for the c++ function sampler_command(...) in stan_fit.hpp
     # If the dictionary doesn't contain the correct keys (arguments),
@@ -152,7 +152,7 @@ cdef class StanFit4$model_cppname:
     The only unexpected difference between PyStan and RStan is this: where RStan
     stores samples for a parameter directly in, say, fit@sim$samples[[1]]$theta,
     in PyStan they are in fit.sim['samples'][0]['chains']['theta'].
-    
+
     The difference is due to Python lacking a dictionary structure that can also
     have attributes.
 
@@ -198,7 +198,7 @@ cdef class StanFit4$model_cppname:
         del self.thisptr
 
     # public methods
-    
+
     def extract(self, pars=None, permuted=True, inc_warmup=False):
         """Extract samples in different forms for different parameters.
 
@@ -220,7 +220,7 @@ cdef class StanFit4$model_cppname:
         parameter (or other quantity) named in `pars`.
 
         If `permuted` is False, return an array with the following dimensions:
-        (# of iter (with or w.o. warmup), # of chains, # of flat parameters). 
+        (# of iter (with or w.o. warmup), # of chains, # of flat parameters).
 
         """
         if self.mode == 1:
@@ -251,7 +251,8 @@ cdef class StanFit4$model_cppname:
         if permuted:
             extracted = OrderedDict()
             for par in pars:
-                sss = [pystan.misc.get_kept_samples(p, self.sim) for p in tidx[par]]
+                sss = [pystan.misc._get_kept_samples(p, self.sim)
+                       for p in tidx[par]]
                 s = {par: np.column_stack(sss)}
                 extracted.update(s)
                 par_idx = self.sim['pars_oi'].index(par)
@@ -266,7 +267,7 @@ cdef class StanFit4$model_cppname:
         else:
             extracted = None
             for n in range(len(self.sim['fnames_oi'])):
-                chains = pystan.misc.get_samples(n, self.sim, inc_warmup)
+                chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
                 n_save = self.sim['n_save'][0]
                 if not inc_warmup:
                     n_save = n_save - self.sim['warmup2'][0]

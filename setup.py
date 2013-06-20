@@ -76,7 +76,19 @@ stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
                ('BOOST_NO_DECLTYPE', None),
                ('BOOST_DISABLE_ASSERTS', None)]
 
-libstanc_sources = [
+libstan_sources = [
+    "pystan/stan/src/stan/agrad/rev/var_stack.cpp",
+    "pystan/stan/src/stan/math/matrix.cpp",
+    "pystan/stan/src/stan/agrad/matrix.cpp"
+]
+
+libstan = ('stan', {'sources': libstan_sources,
+                    'include_dirs': stan_include_dirs,
+                    'extra_compile_args': ['-O3'],
+                    'macros': stan_macros})
+
+## extensions
+stanc_sources = [
     "pystan/stan/src/stan/command/stanc.cpp",
     "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
@@ -88,29 +100,12 @@ libstanc_sources = [
     "pystan/stan/src/stan/gm/ast_def.cpp"
 ]
 
-libstanc = ('stanc', {'sources': libstanc_sources,
-                      'include_dirs': stan_include_dirs,
-                      'macros': stan_macros})
-
-libstan_sources = [
-    "pystan/stan/src/stan/agrad/rev/var_stack.cpp",
-    "pystan/stan/src/stan/math/matrix.cpp",
-    "pystan/stan/src/stan/agrad/matrix.cpp"
-]
-
-# FIXME: I'd like to pass -O3 somehow
-libstan = ('stan', {'sources': libstan_sources,
-                    'include_dirs': stan_include_dirs,
-                    'macros': stan_macros})
-
-## extensions
 extensions = [Extension("pystan._api",
-                        ["pystan/_api.pyx"],
+                        ["pystan/_api.pyx"] + stanc_sources,
                         language="c++",
-                        include_dirs=["pystan/stan/src/",
-                                      "pystan/stan/lib/boost_1.53.0/"],
-                        library_dirs=["pystan/bin"],
-                        libraries=['stanc'])]
+                        define_macros=stan_macros,
+                        include_dirs=stan_include_dirs,
+                        extra_compile_args=['-O3'])]
 
 ## package data
 
@@ -136,7 +131,7 @@ if __name__ == '__main__':
         maintainer=AUTHOR,
         packages=['pystan'],
         ext_modules=cythonize(extensions),
-        libraries=[libstanc, libstan],
+        libraries=[libstan],
         package_dir={'pystan': 'pystan'},
         package_data={'pystan': package_data_pats},
         maintainer_email=AUTHOR_EMAIL,

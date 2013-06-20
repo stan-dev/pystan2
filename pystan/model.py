@@ -155,7 +155,7 @@ class StanModel:
 
     """
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
-                 model_code='', stanc_ret=None, boost_lib=None,
+                 model_code=None, stanc_ret=None, boost_lib=None,
                  eigen_lib=None, save_dso=True, verbose=False, **kwargs):
 
         if stanc_ret is None:
@@ -228,7 +228,8 @@ class StanModel:
                               sources=[pyx_file],
                               include_dirs=include_dirs,
                               library_dirs=library_dirs,
-                              libraries=libraries)
+                              libraries=libraries,
+                              extra_compile_args=['-O3'])
 
         cython_include_dirs = ['.', pystan_dir]
         build_extension = _get_build_extension()

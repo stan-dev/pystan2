@@ -2,11 +2,11 @@ NOSETESTS ?= nosetests
 
 default: test
 
-build: pystan/stanfit4model.pyx
+build: pystan/_api.pyx
 	python setup.py build_ext --inplace
 
-test: build
-	$(NOSETESTS) -v pystan
+test:
+	$(NOSETESTS) -v --process-timeout=360 --processes=-1 -w pystan/tests
 
 clean:
-	rm -rf pystan/*.so
+	rm -rf pystan/*.so pystan/bin/libstan.a
