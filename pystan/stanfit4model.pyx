@@ -181,13 +181,17 @@ cdef class StanFit4$model_cppname:
         # The dimension for a single value is an empty vector. A list of
         # values is indicated by an entry with the number of values.
         # The dimensions of an array are indicated as one would expect.
+        #
+        # note, array.flat yields values in C-contiguous style, with the
+        # last index varying the fastest. So the transpose is taken
+        # so that the ordering matches that used by stan.
         for key in data_i:
             assert isinstance(key, bytes), "Variable name must be bytes."
-            val = (data_i[key].flat, data_i[key].shape)
+            val = (data_i[key].T.flat, data_i[key].shape)
             vars_i[key] = val
         for key in data_r:
             assert isinstance(key, bytes), "Variable name must be bytes."
-            val = (data_r[key].flat, data_r[key].shape)
+            val = (data_r[key].T.flat, data_r[key].shape)
             vars_r[key] = val
 
         self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)

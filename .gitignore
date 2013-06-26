@@ -4,3 +4,5 @@ __pycache__
 *.cpp
 doc/_build
 *.pyc
+pystan/bin
+*.egg-info
