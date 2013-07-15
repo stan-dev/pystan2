@@ -204,11 +204,10 @@ class StanModel:
                                                          Cython.__version__)
             logging.info(msg)
         if boost_lib is not None:
-            # FIXME: allow boos_lib, eigen_lib to be specified
-            raise NotImplemented
+            # FIXME: allow boost_lib, eigen_lib to be specified
+            raise NotImplementedError
         if eigen_lib is not None:
-            raise NotImplemented
-            pass
+            raise NotImplementedError
 
         key = tuple([self.model_code, self.model_cppcode, sys.version_info,
                      sys.executable])
