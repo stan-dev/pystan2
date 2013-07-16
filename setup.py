@@ -89,7 +89,6 @@ libstan = ('stan', {'sources': libstan_sources,
 
 ## extensions
 stanc_sources = [
-    "pystan/stan/src/stan/command/stanc.cpp",
     "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/statement_2_grammar_inst.cpp",

@@ -5,9 +5,15 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
-from collections.abc import Callable, Iterable
+try:
+    # Python 3
+    from collections.abc import Callable, Sequence
+except ImportError:
+    # Python 2.7
+    from collections import Callable, Sequence
 import datetime
 import importlib
+import imp
 import logging
 from numbers import Number
 import os
@@ -32,6 +38,18 @@ import numpy as np
 import pystan.api
 from pystan.constants import MAX_UINT
 import pystan.misc
+
+def load_module(module_name, module_path):
+    """Load the module named `module_name` from  `module_path`
+    independently of the Python version."""
+    if hasattr(importlib, 'find_loader'):
+        # Python 3
+        loader = importlib.find_loader(module_name, [module_path])
+        return loader.load_module()
+    else:
+        # Python 2.7
+        module_info = imp.find_module(module_name, [module_path])
+        return imp.load_module(module_name, *module_info)
 
 
 # NOTE: StanModel instance stores references to a compiled, uninstantiated
@@ -127,16 +145,16 @@ class StanModel:
     More details of Stan, including the full user's guide and
     reference manual can be found at <URL: http://mc-stan.org/>.
 
-    There are three ways to specify the model's code for ‘stan_model’.
+    There are three ways to specify the model's code for `stan_model`.
 
-    1. parameter ‘model_code’, containing a string to whose value is
+    1. parameter `model_code`, containing a string to whose value is
        the Stan model specification,
 
-    2. parameter ‘file’, indicating a file (or a connection) from
+    2. parameter `file`, indicating a file (or a connection) from
        which to read the Stan model specification, or
 
-    3. parameter ‘stanc_ret’, indicating the re-use of a model
-         generated in a previous call to ‘stanc’.
+    3. parameter `stanc_ret`, indicating the re-use of a model
+         generated in a previous call to `stanc`.
 
     References
     ----------
@@ -198,7 +216,7 @@ class StanModel:
                        hashlib.md5(str(key).encode('utf-8')).hexdigest())
 
         lib_dir = os.path.join(tempfile.gettempdir(), 'pystan')
-        pystan_dir = os.path.dirname(importlib.find_loader('pystan').path)
+        pystan_dir = os.path.dirname(__file__)
         include_dirs = [lib_dir,
                         pystan_dir,
                         os.path.join(pystan_dir, "stan/src/"),
@@ -241,8 +259,7 @@ class StanModel:
         build_extension.run()
 
         module_path = lib_dir
-        loader = importlib.find_loader(module_name, [module_path])
-        self.module = loader.load_module()
+        self.module = load_module(module_name, module_path)
         self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
 
     def show(self):

@@ -15,7 +15,12 @@ by the Cython file `stan_fit.pxd`.
 # REF: rstan/rstan/R/misc.R
 
 from collections import OrderedDict
-from collections.abc import Callable, Sequence
+try:
+    # Python 3
+    from collections.abc import Callable, Sequence
+except ImportError:
+    # Python 2.7
+    from collections import Callable, Sequence
 import inspect
 import logging
 from numbers import Number
