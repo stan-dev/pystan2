@@ -4,8 +4,8 @@ python:
   - "3.3"
 # command to install dependencies
 install:
-  - "python setup.py install"
-  - "pip install cython"
-  - "pip install numpy"
+  - "pip install cython --use-mirrors"
+  - "pip install numpy --use-mirrors"
+  - "pip install . --use-mirrors"
 # command to run tests
 script: nosetests

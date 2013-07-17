@@ -14,8 +14,6 @@ def test_linear_regression():
 
     # OLS
     beta = np.linalg.lstsq(X, y)[0]
-    print(beta)
-    print(np.std(y, ddof=1))
 
     mode_code = """
     data {
@@ -37,7 +35,6 @@ def test_linear_regression():
 
     fit = stan(model_code=mode_code, data=data, iter=2000)
 
-    print(fit)
     np.mean(fit.extract()['beta'], axis=0)
     np.mean(fit.extract()['sigma'])
 

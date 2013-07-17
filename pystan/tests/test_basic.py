@@ -1,3 +1,4 @@
+import logging
 import time
 import unittest
 
@@ -42,7 +43,7 @@ class TestBernoulli(unittest.TestCase):
         model = StanModel(model_code=model_code)
         assert model is not None
         msg = "Compile time: {}s (vs. RStan 28s)\n".format(int(time.time()-t0))
-        print(msg)
+        logging.info(msg)
 
     def test_bernoulli_sampling(self):
         fit = self.model.sampling(data=self.bernoulli_data)

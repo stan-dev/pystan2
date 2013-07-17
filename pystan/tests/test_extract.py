@@ -28,10 +28,7 @@ class TestExtract(unittest.TestCase):
         alpha = ss['alpha']
         beta = ss['beta']
         lp__ = ss['lp__']
-        assert ss.keys() == {'alpha', 'beta', 'lp__'}
-        print(alpha.shape)
-        print(beta.shape)
-        print(lp__.shape)
+        assert sorted(ss.keys()) == sorted({'alpha', 'beta', 'lp__'})
         assert alpha.shape == (4000, 2, 3)
         assert beta.shape == (4000, 2)
         assert lp__.shape == (4000,)
