@@ -24,7 +24,9 @@ except ImportError:
 import inspect
 import logging
 from numbers import Number
+import os
 import random
+import sys
 import time
 
 import numpy as np
@@ -421,3 +423,21 @@ def _get_samples(n, sim, inc_warmup=True):
         r = s['chains'][nth_key] if inc_warmup else s['chains'][nth_key][nw:]
         ss.append(np.asarray(r))
     return ss
+
+def redirect_stderr():
+    """Redirect stderr for subprocesses to /dev/null
+
+    Silences copious compilation messages.
+
+    Returns
+    -------
+    orig_stderr : file descriptor
+        Copy of original stderr file descriptor
+    """
+    sys.stderr.flush()
+    stderr_fileno = sys.stderr.fileno()
+    orig_stderr = os.dup(stderr_fileno)
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, stderr_fileno)
+    os.close(devnull)
+    return orig_stderr

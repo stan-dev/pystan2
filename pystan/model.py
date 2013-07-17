@@ -256,7 +256,16 @@ class StanModel:
                                             quiet=not verbose)
         build_extension.build_temp = os.path.dirname(pyx_file)
         build_extension.build_lib = lib_dir
+
+        if not verbose:
+            # silence stderr for compilation
+            orig_stderr = pystan.misc.redirect_stderr()
+
         build_extension.run()
+
+        if not verbose:
+            # restore stderr
+            os.dup2(orig_stderr, sys.stderr.fileno())
 
         module_path = lib_dir
         self.module = load_module(module_name, module_path)
