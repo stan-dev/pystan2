@@ -214,7 +214,8 @@ class StanModel:
         module_name = ("stanfit4" + self.model_name + '_' +
                        hashlib.md5(str(key).encode('utf-8')).hexdigest())
 
-        lib_dir = os.path.join(tempfile.gettempdir(), 'pystan')
+        temp_dir = tempfile.mkdtemp()
+        lib_dir = os.path.join(temp_dir, 'pystan')
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [lib_dir,
                         pystan_dir,
