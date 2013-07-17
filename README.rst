@@ -1,11 +1,11 @@
-NOTE: This is alpha software. No guarantees are made about stability of the api
-or the repository.
-
 PyStan: The Python Interface to Stan
 ====================================
 
+.. image:: https://travis-ci.org/ariddell/pystan.png
+        :target: https://travis-ci.org/ariddell/pystan
+
 PyStan has an interface similar to that of RStan. For an introduction to Stan
-and RStan see: `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
+and RStan see `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
 Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
 
 Installation
