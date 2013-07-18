@@ -51,8 +51,8 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     -------
     stanc_ret : dict
         A dictionary with the following keys: model_name, model_code,
-        cpp_code, and status. Status indicates the success (True or False)
-        of the translation from Stan code into C++ code.
+        cpp_code, and status. Status indicates the success of the translation 
+        from Stan code into C++ code (success = 0, error = -1).
 
     Notes
     -----

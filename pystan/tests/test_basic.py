@@ -59,6 +59,12 @@ class TestBernoulli(unittest.TestCase):
         assert 0.01 < np.var(fit.sim['samples'][2]['chains']['theta']) < 0.02
         assert 0.01 < np.var(fit.sim['samples'][3]['chains']['theta']) < 0.02
 
+    def test_bernoulli_sampling_error(self):
+        bad_data = self.bernoulli_data.copy()
+        del bad_data['N']
+        with self.assertRaisesRegex(RuntimeError, 'variable does not exist'):
+            fit = self.model.sampling(data=bad_data)
+
     def test_bernoulli_extract(self):
         fit = self.model.sampling(data=self.bernoulli_data)
         extr = fit.extract(permuted=True)
