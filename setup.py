@@ -101,25 +101,24 @@ stanc_sources = [
 
 extensions = [Extension("pystan._api",
                         ["pystan/_api.pyx"] + stanc_sources,
-                        language="c++",
                         define_macros=stan_macros,
                         include_dirs=stan_include_dirs,
                         extra_compile_args=['-O3'])]
 
 ## package data
+package_data_pats = ['*.hpp', '*.pxd', '*.pyx']
 
-# get every file under pystan/stan/ (the stan source tree) and
-# trim the leading "pystan/"
+# get every file under pystan/stan/src and pystan/stan/lib
 stan_files_all = sum(
     [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
-     for path, dirs, files in os.walk('pystan/stan')], [])
+     for path, dirs, files in os.walk('pystan/stan/src/')], [])
 
-package_data_pats = ['*.hpp',
-                     'io.pxd',
-                     'stan_fit.pxd',
-                     'stanc.pxd',
-                     'stanfit4model.pyx']
+lib_files_all = sum(
+    [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
+     for path, dirs, files in os.walk('pystan/stan/lib/')], [])
+
 package_data_pats += stan_files_all
+package_data_pats += lib_files_all
 
 ## setup
 if __name__ == '__main__':
@@ -128,7 +127,7 @@ if __name__ == '__main__':
         name=NAME,
         version=FULLVERSION,
         maintainer=AUTHOR,
-        packages=['pystan'],
+        packages=['pystan', 'pystan.tests'],
         ext_modules=cythonize(extensions),
         libraries=[libstan],
         package_dir={'pystan': 'pystan'},

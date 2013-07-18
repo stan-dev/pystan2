@@ -17,5 +17,9 @@ class TestStanfit(unittest.TestCase):
         }
         """
         sm = StanModel(model_code=code)
-        with self.assertRaisesRegex(RuntimeError, 'divergent gradient'):
+        try:
+            assertRaisesRegex = self.assertRaisesRegex
+        except AttributeError:
+            assertRaisesRegex = self.assertRaisesRegexp
+        with assertRaisesRegex(RuntimeError, 'divergent gradient'):
             sm.sampling(init='0', iter=1)

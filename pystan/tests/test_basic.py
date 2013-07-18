@@ -62,7 +62,11 @@ class TestBernoulli(unittest.TestCase):
     def test_bernoulli_sampling_error(self):
         bad_data = self.bernoulli_data.copy()
         del bad_data['N']
-        with self.assertRaisesRegex(RuntimeError, 'variable does not exist'):
+        try:
+            assertRaisesRegex = self.assertRaisesRegex
+        except AttributeError:
+            assertRaisesRegex = self.assertRaisesRegexp
+        with assertRaisesRegex(RuntimeError, 'variable does not exist'):
             fit = self.model.sampling(data=bad_data)
 
     def test_bernoulli_extract(self):

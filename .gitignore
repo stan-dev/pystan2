@@ -1,8 +1,13 @@
 build/
+dist/
+doc/_build
+
+pystan/bin
+
 __pycache__
 *.so
 *.cpp
-doc/_build
 *.pyc
-pystan/bin
 *.egg-info
+
+.tox/

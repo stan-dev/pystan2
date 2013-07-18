@@ -8,6 +8,14 @@ PyStan has an interface similar to that of RStan. For an introduction to Stan
 and RStan see `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
 Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
 
+Important links
+---------------
+
+- Source code repo: https://github.com/ariddell/pystan
+- HTML documentation: http://pystan.readthedocs.org
+- Issue tracker: https://github.com/ariddell/pystan/issues
+- Stan: http://mc-stan.org/
+
 Installation
 ------------
 

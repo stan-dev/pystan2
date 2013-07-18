@@ -1,10 +1,8 @@
-include MANIFEST.in
-include LICENSE
-include README.rst
+include MANIFEST.in LICENSE README.rst Makefile
 include setup.py
 
 graft doc
-prune doc/build
+prune doc/_build
 
 global-exclude *.so
 global-exclude *.pyc
