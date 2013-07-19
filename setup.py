@@ -31,12 +31,13 @@ the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
 
 NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
-AUTHOR       = 'Allen B. Riddell',
-AUTHOR_EMAIL = 'abr@ariddell.org',
+AUTHOR       = 'Allen B. Riddell'
+AUTHOR_EMAIL = 'abr@ariddell.org'
 URL          = 'https://github.com/ariddell/pystan'
 LICENSE      = 'GPLv3'
 CLASSIFIERS = [
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Programming Language :: Cython',
     'Development Status :: 2 - Pre-Alpha',
@@ -50,8 +51,8 @@ CLASSIFIERS = [
 ]
 MAJOR = 0
 MINOR = 1
-MICRO = 0
-ISRELEASED = False
+MICRO = 1
+ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 FULLVERSION = VERSION
@@ -127,12 +128,12 @@ if __name__ == '__main__':
         name=NAME,
         version=FULLVERSION,
         maintainer=AUTHOR,
+        maintainer_email=AUTHOR_EMAIL,
         packages=['pystan', 'pystan.tests'],
         ext_modules=cythonize(extensions),
         libraries=[libstan],
         package_dir={'pystan': 'pystan'},
         package_data={'pystan': package_data_pats},
-        maintainer_email=AUTHOR_EMAIL,
         description=DESCRIPTION,
         license=LICENSE,
         url=URL,

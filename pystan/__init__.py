@@ -7,3 +7,7 @@
 
 from pystan.api import stanc, stan
 from pystan.model import StanModel
+
+
+# make sure this matches version found in setup.py
+__version__ = "0.1.1"
