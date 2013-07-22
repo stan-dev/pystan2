@@ -286,8 +286,7 @@ class StanModel:
         raise NotImplementedError
 
     def optimizing(self, data=None, seed=random.randint(0, MAX_UINT),
-                   init='random', check_data=True, sample_file=None,
-                   verbose=False):
+                   init='random', sample_file=None, verbose=False):
         """Obtain a point estimate by maximizing the joint posterior.
 
         Parameters
@@ -320,13 +319,7 @@ class StanModel:
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=random.randint(0, MAX_UINT),
-                 init='random', check_data=True, sample_file=None,
-                 verbose=False, **kwargs):
-        """
-        NB: remove this check_data business -- either you supply a dict
-        or you dont!
-
-        """
+                 init='random', sample_file=None, verbose=False, **kwargs):
         # NOTE: in this function, iter masks iter() the python function.
         # If this ever turns out to be a problem just add:
         # iter_ = iter
@@ -335,11 +328,6 @@ class StanModel:
             data = {}
         if warmup is None:
             warmup = int(iter // 2)
-
-        # FIXME: remove this check? check_data stuff in rstan isn't pythonic
-        if check_data:
-            if not isinstance(data, dict):
-                raise ValueError("data must be a dictionary.")
 
         data_r, data_i = pystan.misc._split_data(data)
         fit = self.fit_class(data_r, data_i)
