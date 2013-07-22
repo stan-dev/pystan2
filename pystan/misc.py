@@ -14,13 +14,12 @@ by the Cython file `stan_fit.pxd`.
 
 # REF: rstan/rstan/R/misc.R
 
+from pystan._compat import PY2, string_types
 from collections import OrderedDict
-try:
-    # Python 3
-    from collections.abc import Callable, Sequence
-except ImportError:
-    # Python 2.7
+if PY2:
     from collections import Callable, Sequence
+else:
+    from collections.abc import Callable, Sequence
 import inspect
 import logging
 from numbers import Number
@@ -32,7 +31,6 @@ import time
 import numpy as np
 
 from pystan.constants import MAX_UINT
-
 
 def _split_data(data):
     data_r = {}
@@ -76,7 +74,7 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
     # slight difference here from rstan; Python's lists are not typed.
     if isinstance(init, Number):
         init = str(init)
-    if isinstance(init, str):
+    if isinstance(init, string_types):
         if init in ['0', 'random']:
             inits = [init] * chains
         else:
@@ -194,7 +192,7 @@ def _get_valid_stan_args(base_args=None):
 
 
 def _check_seed(seed, raise_exception=True):
-    if isinstance(seed, str):
+    if isinstance(seed, string_types):
         try:
             seed = int(seed)
         except ValueError:

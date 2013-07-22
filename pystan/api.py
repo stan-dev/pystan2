@@ -5,10 +5,12 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
+import io
 import logging
 import random
 
 import pystan._api  # stanc wrapper
+from pystan._compat import string_types
 from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
@@ -51,7 +53,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     -------
     stanc_ret : dict
         A dictionary with the following keys: model_name, model_code,
-        cpp_code, and status. Status indicates the success of the translation 
+        cpp_code, and status. Status indicates the success of the translation
         from Stan code into C++ code (success = 0, error = -1).
 
     Notes
@@ -99,9 +101,9 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     if file is None and model_code is None:
         raise ValueError("Model file missing and empty model_code.")
     if file is not None:
-        if isinstance(file, str):
+        if isinstance(file, string_types):
             try:
-                with open(file) as f:
+                with io.open(file, 'rt', encoding='utf-8') as f:
                     model_code = f.read()
             except:
                 logging.critical("Unable to read file specified by `file`.")

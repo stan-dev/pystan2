@@ -5,12 +5,13 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
-try:
-    # Python 3
-    from collections.abc import Callable, Sequence
-except ImportError:
-    # Python 2.7
+from pystan._compat import PY2, string_types
+if PY2:
     from collections import Callable, Sequence
+    import md5 as hashlib
+else:
+    from collections.abc import Callable, Sequence
+    import hashlib
 import datetime
 import importlib
 import imp
@@ -21,11 +22,6 @@ import random
 import tempfile
 import string
 import sys
-
-try:
-    import hashlib
-except ImportError:
-    import md5 as hashlib
 
 from distutils.core import Extension
 
@@ -303,7 +299,7 @@ class StanModel:
         if isinstance(init, Number):
             init = str(init)
         elif isinstance(init, Callable) or isinstance(init, Iterable) or \
-                isinstance(init, str):
+                isinstance(init, string_types):
             pass
         else:
             raise ValueError("Incorrect specification of initial values.")

@@ -36,6 +36,7 @@ import logging
 import numpy as np
 
 import pystan.misc
+from pystan._compat import string_types
 
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
     cdef cppclass additive_combine_engine[T, U]:
@@ -239,7 +240,7 @@ cdef class StanFit4$model_cppname:
 
         if pars is None:
             pars = self.sim['pars_oi']
-        elif isinstance(pars, str):
+        elif isinstance(pars, string_types):
             pars = [pars]
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
