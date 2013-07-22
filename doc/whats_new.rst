@@ -6,7 +6,8 @@
  What's New 
 ============
 
-v.0.1.0
-=======
+v.0.1.1 (19. July 2013)
+=======================
 
-- Initial release
+- Support for Python 2.7 and Python 3.3
+- ``stan`` and ``stanc`` working with common arguments

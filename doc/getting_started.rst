@@ -22,7 +22,7 @@ PyStan has the following dependencies:
 
 PyStan also requires that a C++ compiler be available to Python during
 installation and at runtime. On Debian-based systems this is accomplished by
-issuing the command `apt-get install build-essential`.
+issuing the command ``apt-get install build-essential``.
 
 Installation
 ============
@@ -39,7 +39,7 @@ installed the dependencies, then issue the commands:
 Using PyStan
 ============
 
-The module's name is `pystan` so we load the module as follows:
+The module's name is ``pystan`` so we load the module as follows:
 
 .. code-block:: python
 
@@ -82,36 +82,37 @@ which studied coaching effects from eight schools.
     fit = pystan.stan(model_code=schools_code, data=schools_dat,
                       iter=1000, chains=4)
 
-In this model, we let `theta` be transformed parameters of `mu` and `eta`
+In this model, we let ``theta`` be transformed parameters of ``mu`` and ``eta``
 instead of directly declaring theta as parameters. By parameterizing this way,
 the sampler will run more efficiently.
 
-In PyStan, we can also specify the Stan model using a file. For example, we
-can download the file `8schools.stan <8schools.stan>`_ into our working
-directory and use the following call to `stan` instead:
+In PyStan, we can also specify the Stan model using a file. For example, we can
+download the file `8schools.stan
+<http://wiki.stan.googlecode.com/git/rstangettingstarted/8schools.stan>`_ into
+our working directory and use the following call to ``stan`` instead:
 
 .. code-block:: python
 
     fit1 = pystan.stan(file='8schools.stan', data=schools_dat, iter=1000, chains=4)
 
 Once a model is fitted, we can use the fitted result as an input to the model
-with other data or settings. This saves us time compiling the C++ code
-for the model. By specifying the parameter `fit` for the `stan` function, we
-can fit the model again. For example, if we want to sample more iterations, we
-proceed as follows:
+with other data or settings. This saves us time compiling the C++ code for the
+model. By specifying the parameter ``fit`` for the ``stan`` function, we can fit
+the model again. For example, if we want to sample more iterations, we proceed
+as follows:
 
 .. code-block:: python
 
     fit2 = pystan.stan(fit=fit1, data=schools_dat, iter=10000, chains=4)
 
-The object `fit`, returned from function `stan` stores samples from the
-posterior distribution. The `fit` object has a number of methods, including
-`plot` and `extract`. We can also print the `fit` object and receive a summary
-of the posterior samples as well as the log-posterior (which has the name
-`lp__`).
+The object ``fit``, returned from function ``stan`` stores samples from the
+posterior distribution. The ``fit`` object has a number of methods, including
+``plot`` and ``extract``. We can also print the ``fit`` object and receive
+a summary of the posterior samples as well as the log-posterior (which has the
+name ``lp__``).
 
-The method `extract` extracts samples into
-a dictionary of arrays for parameters of interest, or just an array.
+The method ``extract`` extracts samples into a dictionary of arrays for
+parameters of interest, or just an array.
 
 .. code-block:: python
 
