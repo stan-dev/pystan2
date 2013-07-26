@@ -10,4 +10,4 @@ from pystan.model import StanModel
 
 
 # make sure this matches version found in setup.py
-__version__ = "0.1.1"
+__version__ = "0.1.2"
