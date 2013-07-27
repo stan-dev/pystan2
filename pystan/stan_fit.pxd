@@ -56,8 +56,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         string chain_id_src
         bool append_samples
         bool test_grad
-        bool point_estimate
-        bool point_estimate_newton
+        int point_estimate
         string init
         map[string, pair[vector[double], vector[size_t] ] ] init_vars_r
         map[string, pair[vector[int], vector[size_t] ] ] init_vars_i

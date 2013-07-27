@@ -7,12 +7,6 @@ import numpy as np
 from pystan import StanModel
 
 
-def test_model_constructor():
-    m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}',
-                  model_name="normal1")
-    assert m.model_name == "normal1"
-
-
 class TestBernoulli(unittest.TestCase):
 
     bernoulli_model_code = """
@@ -32,24 +26,29 @@ class TestBernoulli(unittest.TestCase):
 
     model = StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
 
+    def test_simple_model_constructor(self):
+        m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}',
+                    model_name="normal1", verbose=True)
+        self.assertEqual(m.model_name, "normal1")
+
     def test_bernoulli_constructor(self):
         model = self.model
-        assert model.model_name == "bernoulli"
-        assert model.model_cppname.endswith("bernoulli")
+        self.assertEqual(model.model_name, "bernoulli")
+        self.assertTrue(model.model_cppname.endswith("bernoulli"))
 
     def test_bernoulli_compile_time(self):
         model_code = self.bernoulli_model_code
         t0 = time.time()
         model = StanModel(model_code=model_code)
-        assert model is not None
+        self.assertIsNotNone(model)
         msg = "Compile time: {}s (vs. RStan 28s)\n".format(int(time.time()-t0))
         logging.info(msg)
 
     def test_bernoulli_sampling(self):
         fit = self.model.sampling(data=self.bernoulli_data)
-        assert fit.sim['iter'] == 2000
-        assert fit.sim['pars_oi'] == ['theta', 'lp__']
-        assert len(fit.sim['samples']) == 4
+        self.assertEqual(fit.sim['iter'], 2000)
+        self.assertEqual(fit.sim['pars_oi'], ['theta', 'lp__'])
+        self.assertEqual(len(fit.sim['samples']), 4)
         assert 0.1 < np.mean(fit.sim['samples'][0]['chains']['theta']) < 0.4
         assert 0.1 < np.mean(fit.sim['samples'][1]['chains']['theta']) < 0.4
         assert 0.1 < np.mean(fit.sim['samples'][2]['chains']['theta']) < 0.4
@@ -78,8 +77,8 @@ class TestBernoulli(unittest.TestCase):
 
         # permuted=False
         extr = fit.extract(permuted=False)
-        assert extr.shape == (1000, 4, 2)
-        assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
+        self.assertEqual(extr.shape, (1000, 4, 2))
+        self.assertTrue(0.1 < np.mean(extr[:, 0, 0]) < 0.4)
 
         # permuted=True
         extr = fit.extract('lp__', permuted=True)

@@ -99,7 +99,6 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     d['append_samples'] = args.append_samples
     d['test_grad'] = args.test_grad
     d['point_estimate'] = args.point_estimate
-    d['point_estimate_newton'] = args.point_estimate_newton
     d['nondiag_mass'] = args.nondiag_mass
     return d
 
@@ -134,7 +133,6 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     p.append_samples = args['append_samples']
     p.test_grad = args['test_grad']
     p.point_estimate = args['point_estimate']
-    p.point_estimate_newton = args['point_estimate_newton']
     p.nondiag_mass = args['nondiag_mass']
 
 

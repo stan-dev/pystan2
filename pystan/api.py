@@ -127,31 +127,35 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=random.randint(0, MAX_UINT), sample_file=None,
-         save_dso=True, verbose=False, boost_lib=None, eigen_lib=None,
-         **kwargs):
+         diagnostic_file=None, save_dso=True, verbose=False, boost_lib=None,
+         eigen_lib=None, **kwargs):
     """Fit a model using Stan.
 
     Parameters
     ----------
 
-    file : string {'filename', 'file'}
-        If filename, the string passed as an argument is expected to
-        be a filename containing the Stan model specification.
+    file : string {'filename', file-like object}
+        Model code must found via one of the following parameters: `file` or
+        `model_code`.
 
-        If file, the object passed must have a 'read' method (file-like
-        object) that is called to fetch the Stan model specification.
+        If `file` is a filename, the string passed as an argument is expected
+        to be a filename containing the Stan model specification.
 
-    charset : string, 'utf-8' by default
-        If bytes or files are provided, this charset is used to decode.
+        If `file` is a file object, the object passed must have a 'read' method
+        (file-like object) that is called to fetch the Stan model specification.
 
-    model_code : string, optional
+    charset : string, optional
+        If bytes or files are provided, this charset is used to decode. 'utf-8'
+        by default.
+
+    model_code : string
         A string containing the Stan model specification. Alternatively,
         the model may be provided with the parameter `file`.
 
-    model_name: string, 'anon_model' by default
+    model_name: string, optional
         A string naming the model. If none is provided 'anon_model' is
         the default. However, if `file` is a filename, then the filename
-        will be used to provide a name.
+        will be used to provide a name. 'anon_model' by default.
 
     fit : StanFit instance
         An instance of StanFit derived from a previous fit, None by
@@ -168,8 +172,8 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         A list of strings indicating parameters of interest. By default
         all parameters specified in the model will be stored.
 
-    chains : int, 4 by default
-        Positive integer specifying number of chains.
+    chains : int, optional
+        Positive integer specifying number of chains. 4 by default.
 
     iter : int, 2000 by default
         Positive integer specifying how many iterations for each chain
@@ -180,10 +184,11 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         As `warmup` also specifies the number of iterations used for step-size
         adaption, warmup samples should not be used for inference.
 
-    thin : int, 1 by default
+    thin : int, optional
         Positive integer specifying the period for saving samples.
+        Default is 1.
 
-    init : {0, '0', 'random', function returning dict, list of dict}
+    init : {0, '0', 'random', function returning dict, list of dict}, optional
         Specifies how initial parameter values are chosen: 0 or '0'
         initializes all to be zero on the unconstrained support; 'random'
         generates random initial values; list of size equal to the number
@@ -191,34 +196,41 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         parameter values; function returning a dict with initial parameter
         values. The function may take an optional argument `chain_id`.
 
-    seed : int, random.randint(0, sys.maxsize) by default
+    seed : int, optional
         The seed, a positive integer for random number generation. Only
         one seed is needed when multiple chains are used, as the other
         chain's seeds are generated from the first chain's to prevent
-        dependency among random number streams.
+        dependency among random number streams. By default, seed is
+        ``random.randint(0, MAX_UINT)``.
 
-    sample_file : string
+    sample_file : string, optional
         File name specifying where samples for *all* parameters and other
         saved quantities will be written. If not provided, no samples
         will be written. If the folder given is not writable, a temporary
         directory will be used. When there are multiple chains, an underscore
-        and chain number are appended to the file name.
+        and chain number are appended to the file name. By default do not
+        write samples to file.
 
-    boost_lib : string
+    diagnostic_file : string, optional
+        File name specifying where diagnostic information should be written.
+        By default no diagnostic information is recorded.
+
+    boost_lib : string, optional
         The path to a version of the Boost C++ library to use instead of
         the one supplied with PyStan.
 
-    eigen_lib : string
+    eigen_lib : string, optional
         The path to a version of the Eigen C++ library to use instead of
         the one in the supplied with PyStan.
 
-    save_dso : boolean, True by default
+    save_dso : boolean, optional
         Indicates whether the dynamic shared object (DSO) compiled from
-        C++ code will be saved for use in a future Python session.
+        C++ code will be saved for use in a future Python session. True by
+        default.
 
-    verbose : boolean, False by default
+    verbose : boolean, optional
         Indicates whether intermediate output should be piped to the console.
-        This output may be useful for debugging.
+        This output may be useful for debugging. False by default.
 
 
     """
@@ -237,5 +249,6 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     if sample_file is not None:
         raise NotImplementedError
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
-                     sample_file=sample_file, verbose=verbose, **kwargs)
+                     sample_file=sample_file, diagnostic_file=diagnostic_file,
+                     verbose=verbose, **kwargs)
     return fit

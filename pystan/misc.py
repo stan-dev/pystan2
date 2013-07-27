@@ -51,7 +51,7 @@ def _split_data(data):
 
 
 def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
-                  **kwargs):
+                  diagnostic_file, **kwargs):
     iter = int(iter)
     if iter < 1:
         raise ValueError("`iter` should be a positive integer.")
@@ -108,8 +108,7 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
     else:
         seed = _check_seed(seed)
 
-    kwargs['point_estimate'] = False
-    kwargs['point_estimate_newton'] = False
+    kwargs['point_estimate'] = -1
 
     # use chain_id argument if specified
     if kwargs.get('chain_id') is None:
@@ -135,6 +134,9 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
     if sample_file is not None:
         # FIXME: to implement
         raise NotImplementedError
+    
+    if diagnostic_file is not None:
+        raise NotImplementedError("diagnostic_file not implemented yet.")
 
     for i in range(chains):
         argss[i].update(kwargs)
@@ -156,7 +158,11 @@ def _get_valid_stan_args(base_args=None):
     # prepare them accordingly---e.g., bytes -> std::string
     args['save_warmup'] = args.get('save_warmup', True)
     args['sample_file_flag'] = args.get('sample_file_flag', False)
-    args['diagnostic_file_flag'] = args.get('diagnostic_file_flag', False)
+    args['diagnostic_file'] = args.get('diagnostic_file', '')
+    if args['diagnostic_file']:
+        args['diagnostic_file_flag'] = True
+    else:
+        args['diagnostic_file_flag'] = False
     args['iter'] = args.get('iter', 2000)
     args['warmup'] = args.get('warmup', args['iter'] // 2)
     args['thin'] = args.get('thin', (args['iter'] - args['warmup']) // 2)
@@ -184,10 +190,8 @@ def _get_valid_stan_args(base_args=None):
     args['init'] = args.get('init', "random").encode('utf-8')
     args['append_samples'] = args.get('append_samples', False)
     args['test_grad'] = args.get('test_grad', False)
-    args['point_estimate'] = args.get('point_estimate', False)
-    args['point_estimate_newton'] = args.get('point_estimate_newton',
-                                             False)
     args['nondiag_mass'] = args.get('nondiag_mass', False)
+    args['point_estimate'] = args.get('point_estimate', -1)
     return args
 
 

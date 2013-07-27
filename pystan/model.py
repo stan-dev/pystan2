@@ -5,12 +5,13 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
-from pystan._compat import PY2, string_types
+from pystan._compat import PY2, string_types, implements_to_string
+from collections import OrderedDict
 if PY2:
-    from collections import Callable, Sequence
+    from collections import Callable, Iterable
     import md5 as hashlib
 else:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable
     import hashlib
 import datetime
 import importlib
@@ -50,6 +51,7 @@ def load_module(module_name, module_path):
 
 # NOTE: StanModel instance stores references to a compiled, uninstantiated
 # C++ model.
+@implements_to_string
 class StanModel:
     """
     Model described in Stan's modeling language compiled from C++ code.
@@ -215,9 +217,9 @@ class StanModel:
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [lib_dir,
                         pystan_dir,
-                        os.path.join(pystan_dir, "stan/src/"),
-                        os.path.join(pystan_dir, "stan/lib/eigen_3.1.3"),
-                        os.path.join(pystan_dir, "stan/lib/boost_1.53.0/")]
+                        os.path.join(pystan_dir, "stan/src"),
+                        os.path.join(pystan_dir, "stan/lib/eigen_3.2.0"),
+                        os.path.join(pystan_dir, "stan/lib/boost_1.54.0")]
         library_dirs = [os.path.join(pystan_dir, "bin")]
         libraries = ['stan']
 
@@ -267,6 +269,18 @@ class StanModel:
         self.module = load_module(module_name, module_path)
         self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
 
+    def __str__(self):
+        # NOTE: returns unicode even for Python 2.7, implements_to_string
+        # decorator creates __unicode__ and __str__
+        desc = u"StanModel object '{}' coded as follows:\n{}"
+        return desc.format(self.model_name, self.model_code)
+
+    def __repr__(self):
+        modulename = str(self.__module__)
+        classname = str(self.__class__.__name__)
+        return "<{}.{} '{}' at {}>".format(modulename, classname,
+                                           self.model_name, hex(id(self)))
+
     def show(self):
         return self.model_code
 
@@ -282,44 +296,223 @@ class StanModel:
         raise NotImplementedError
 
     def optimizing(self, data=None, seed=random.randint(0, MAX_UINT),
-                   init='random', sample_file=None, verbose=False):
+                   init='random', sample_file=None, method="Newton",
+                   verbose=False, **kwargs):
         """Obtain a point estimate by maximizing the joint posterior.
 
         Parameters
         ----------
+        data : dict
+            A Python dictionary providing the data for the model. Variables
+            for Stan are stored in the dictionary as expected. Variable
+            names are the keys and the values are their associated values.
+            Stan only accepts certain kinds of values; see Notes.
+
+        seed : int, optional
+            The seed, a positive integer for random number generation. Only
+            one seed is needed when multiple chains are used, as the other
+            chain's seeds are generated from the first chain's to prevent
+            dependency among random number streams. By default, seed is
+            ``random.randint(0, MAX_UINT)``.
+
+        init : {0, '0', 'random', function returning dict, list of dict}, optional
+            Specifies how initial parameter values are chosen: 0 or '0'
+            initializes all to be zero on the unconstrained support; 'random'
+            generates random initial values; list of size equal to the number
+            of chains (`chains`), where the list contains a dict with initial
+            parameter values; function returning a dict with initial parameter
+            values. The function may take an optional argument `chain_id`.
+
+        sample_file : string, optional
+            File name specifying where samples for *all* parameters and other
+            saved quantities will be written. If not provided, no samples
+            will be written. If the folder given is not writable, a temporary
+            directory will be used. When there are multiple chains, an
+            underscore and chain number are appended to the file name.
+            By default do not write samples to file.
+
+        method : {"BFGS", "Nesterov", "Newton"}, optional
+            Name of optimization method to be used. Default is Newton's method.
+
+        verbose : boolean, optional
+            Indicates whether intermediate output should be piped to the console.
+            This output may be useful for debugging. False by default.
+
+        Returns
+        -------
+        optim : dict or None
+            Dictionary with components 'par' and 'value' if the optimization is
+            successful. `optim`['par'] is a dictionary of point estimates,
+            indexed by the parameter name. `optim`['value'] stores the value
+            of the log-posterior (up to an additive constant, the ``lp__`` in
+            Stan) corresponding to the point identified by `optim`['par'].
+
+        Other parameters
+        ----------------
+        iter : int, optional
+        epsilon : float, optional
+        save_warmup : bool, optional
+        refresh : int, optional
+
+        Examples
+        --------
+        >>> from pystan import StanModel
+        >>> m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}')
+        >>> f = m.optimizing()
 
         """
+        if sample_file is not None:
+            raise NotImplementedError("sample_file not supported yet")
+        methods = ("BFGS", "Nesterov", "Newton")
+        if method not in methods:
+            raise ValueError("Method must be one of {}".format(methods))
         if data is None:
             data = {}
+
         data_r, data_i = pystan.misc._split_data(data)
         fit = self.fit_class(data_r, data_i)
-        m_pars = fit.get_param_names()
+        # store a copy of the data passed to fit in the class
+        fit.data = {}
+        fit.data.update(data_i)
+        fit.data.update(data_r)
+
+        m_pars = fit._get_param_names()
+        p_dims = fit._get_param_dims()
+
         idx_of_lp = m_pars.index('lp__')
         del m_pars[idx_of_lp]
+        del p_dims[idx_of_lp]
+
         if isinstance(init, Number):
             init = str(init)
-        elif isinstance(init, Callable) or isinstance(init, Iterable) or \
-                isinstance(init, string_types):
-            pass
-        else:
-            raise ValueError("Incorrect specification of initial values.")
+        elif isinstance(init, Callable):
+            init = init()
+        elif not isinstance(init, Iterable) and \
+                not isinstance(init, string_types):
+            raise ValueError("Wrong specification of initial values.")
         seed = int(seed)
+        stan_args = {'init': init, 'seed': seed}
+        # methods: 1: newton; 2: nesterov; 3: bfgs
+        stan_args['point_estimate'] = methods.index(method) + 1
+        # set test gradient flag to false explicitly
+        stan_args['test_grad'] = False
+        stan_args.update(kwargs)
 
-        stan_args = {'init': init, 'seed': seed, 'point_estimate': True}
-
-        stan_args.update({'test_grad': False})  # not to test gradient
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
-        ret = fit._call_sampler(stan_args)
-        optim = None
-        return optim
+        ret, sample = fit._call_sampler(stan_args)
+        return OrderedDict([('par', OrderedDict(zip(m_pars, sample['par']))),
+                            ('value', sample['value'])])
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=random.randint(0, MAX_UINT),
-                 init='random', sample_file=None, verbose=False, **kwargs):
+                 init='random', sample_file=None, diagnostic_file=None,
+                 verbose=False, **kwargs):
+        """Draw samples from the model.
+
+        Parameters
+        ----------
+        data : dict
+            A Python dictionary providing the data for the model. Variables
+            for Stan are stored in the dictionary as expected. Variable
+            names are the keys and the values are their associated values.
+            Stan only accepts certain kinds of values; see Notes.
+
+        pars : list of string, optional
+            A list of strings indicating parameters of interest. By default
+            all parameters specified in the model will be stored.
+
+        chains : int, optional
+            Positive integer specifying number of chains. 4 by default.
+
+        iter : int, 2000 by default
+            Positive integer specifying how many iterations for each chain
+            including warmup.
+
+        warmup : int, iter//2 by default
+            Positive integer specifying number of warmup (aka burin) iterations.
+            As `warmup` also specifies the number of iterations used for step-size
+            adaption, warmup samples should not be used for inference.
+
+        thin : int, 1 by default
+            Positive integer specifying the period for saving samples.
+
+        seed : int, optional
+            The seed, a positive integer for random number generation. Only
+            one seed is needed when multiple chains are used, as the other
+            chain's seeds are generated from the first chain's to prevent
+            dependency among random number streams. By default, seed is
+            ``random.randint(0, MAX_UINT)``.
+
+        init : {0, '0', 'random', function returning dict, list of dict}, optional
+            Specifies how initial parameter values are chosen: 0 or '0'
+            initializes all to be zero on the unconstrained support; 'random'
+            generates random initial values; list of size equal to the number
+            of chains (`chains`), where the list contains a dict with initial
+            parameter values; function returning a dict with initial parameter
+            values. The function may take an optional argument `chain_id`.
+
+        sample_file : string, optional
+            File name specifying where samples for *all* parameters and other
+            saved quantities will be written. If not provided, no samples
+            will be written. If the folder given is not writable, a temporary
+            directory will be used. When there are multiple chains, an underscore
+            and chain number are appended to the file name. By default do not
+            write samples to file.
+
+        diagnostic_file : str, optional
+            File name indicating where diagonstic data for all parameters
+            should be written. If not writable, a temporary directory is used.
+
+        verbose : boolean, False by default
+            Indicates whether intermediate output should be piped to the
+            console. This output may be useful for debugging.
+
+        Returns
+        -------
+        fit : StanFit4<model_name>
+            Instance containing the fitted results.
+
+        Other parameters
+        ----------------
+        chain_id : int, optional
+            Iterable of unique ints naming chains or int with which to start.
+        leapfrog_steps : int, optional
+        epsilon : float, optional
+        gamma : float, optional
+        delta : float, optional
+        equal_step_sizes : bool, optional
+        max_treedepth : int, optional
+        nondiag_mass : bool, optional
+        test_grad : bool
+            If True, Stan will not perform any sampling. Instead the gradient
+            calculation is tested and printed out and the fitted stanfit4model
+            object will be in test gradient mode. False is the default.
+        refresh : int, optional
+            Controls how to indicate progress during sampling. By default,
+            `refresh` = max(iter//10, 1).
+
+        Notes
+        -----
+
+        More details can be found in Stan's manual. The default sampler is
+        NUTS2, where `leapfrog_steps` is ``-1`` and `equal_step_sizes` is
+        False. To use NUTS with full mass matrix, set `nondiag_mass` to True.
+
+        Examples
+        --------
+        >>> from pystan import StanModel
+        >>> m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}')
+        >>> m.sampling(iter=100)
+
+        """
         # NOTE: in this function, iter masks iter() the python function.
         # If this ever turns out to be a problem just add:
         # iter_ = iter
         # del iter  # now builtins.iter is available
+        if sample_file is not None:
+            raise NotImplementedError("sample_file not supported yet")
+        if diagnostic_file is not None:
+            raise NotImplementedError("diagnostic_file not supported yet")
         if data is None:
             data = {}
         if warmup is None:
@@ -349,6 +542,7 @@ class StanModel:
                                               warmup=warmup, thin=thin,
                                               init=init, seed=seed,
                                               sample_file=sample_file,
+                                              diagnostic_file=diagnostic_file,
                                               **kwargs)
 
         # number of samples saved after thinning
