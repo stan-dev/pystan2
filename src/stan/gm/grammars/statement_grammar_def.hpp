@@ -1,10 +1,6 @@
 #ifndef __STAN__GM__PARSER__STATEMENT_GRAMMAR_DEF__HPP__
 #define __STAN__GM__PARSER__STATEMENT_GRAMMAR_DEF__HPP__
 
-// Suppress Clang error: multiple unsequenced
-// modifications to _pass and/or _val.
-#pragma GCC diagnostic ignored "-Wunsequenced"
-
 #include <cstddef>
 #include <iomanip>
 #include <iostream>
@@ -388,6 +384,7 @@ namespace stan {
       using boost::spirit::qi::eps;
       using boost::spirit::qi::lexeme;
       using boost::spirit::qi::lit;
+      using boost::spirit::qi::no_skip;
       using boost::spirit::qi::_pass;
       using boost::spirit::qi::_val;
 
@@ -473,7 +470,7 @@ namespace stan {
       printable_string_r.name("printable quoted string");
       printable_string_r
         %= lit('"')
-        > lexeme[*char_("a-zA-Z0-9/~!@#$%^&*()`_+-={}|[]:;'<>?,./ ")]
+        > no_skip[*char_("a-zA-Z0-9/~!@#$%^&*()`_+-={}|[]:;'<>?,./ ")]
         > lit('"');
       
       identifier_r.name("identifier");
@@ -491,8 +488,8 @@ namespace stan {
 
       assignment_r.name("variable assignment by expression");
       assignment_r
-        %= var_lhs_r(_r1)
-        >> lit("<-")
+        %= ( var_lhs_r(_r1)
+             >> lit("<-") )
         > expression_g(_r1)
         > lit(';') 
         ;
@@ -518,8 +515,8 @@ namespace stan {
       // inherited  _r1 = true if samples allowed as statements
       sample_r.name("distribution of expression");
       sample_r 
-        %= expression_g(_r2)
-        >> lit('~')
+        %= ( expression_g(_r2)
+             >> lit('~') )
         > eps
         [_pass 
          = validate_allow_sample_f(_r1,boost::phoenix::ref(error_msgs_))] 
@@ -529,9 +526,9 @@ namespace stan {
 
       distribution_r.name("distribution and parameters");
       distribution_r
-        %= identifier_r
-        >> lit('(')
-        >> -(expression_g(_r1) % ',')
+        %= ( identifier_r
+             >> lit('(')
+             >> -(expression_g(_r1) % ',') )
         > lit(')');
 
       truncation_range_r.name("range pair");
