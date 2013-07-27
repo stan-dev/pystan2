@@ -1,10 +1,6 @@
 #ifndef __STAN__GM__PARSER__VAR_DECLS_GRAMMAR_DEF__HPP__
 #define __STAN__GM__PARSER__VAR_DECLS_GRAMMAR_DEF__HPP__
 
-// Suppress Clang error: multiple unsequenced
-// modifications to _pass and/or _val.
-#pragma GCC diagnostic ignored "-Wunsequenced"
-
 #include <boost/spirit/include/qi.hpp>
 // FIXME: get rid of unused include
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -225,9 +221,16 @@ namespace stan {
         if (vm.exists(var_decl.name_)) {
           // variable already exists
           pass = false;
-          error_msgs << "variable already declared, name="
-                     << var_decl.name_ 
-                     << std::endl;
+          error_msgs << "duplicate declaration of variable, name="
+                     << var_decl.name_;
+
+          error_msgs << "; attempt to redeclare as ";
+          print_var_origin(error_msgs,vo);  // FIXME -- need original vo
+
+          error_msgs << "; original declaration as ";
+          print_var_origin(error_msgs,vm.get_origin(var_decl.name_));
+
+          error_msgs << std::endl;
           return var_decl;
         } 
         if ((vo == parameter_origin || vo == transformed_parameter_origin)
@@ -404,13 +407,26 @@ namespace stan {
         if (len >= 2
             && identifier[len-1] == '_'
             && identifier[len-2] == '_') {
-          error_msgs << "variable identifier (name) cannot end in double underscore (__)"
-                     << "; found identifer=" << identifier;
+          error_msgs << "variable identifier (name) may not end in double underscore (__)"
+                     << std::endl
+                     << "    found identifer=" << identifier << std::endl;
+          return false;
+        }
+        size_t period_position = identifier.find('.');
+        if (period_position != std::string::npos) {
+          error_msgs << "variable identifier may not contain a period (.)"
+                     << std::endl
+                     << "    found period at position (indexed from 0)=" << period_position
+                     << std::endl
+                     << "    found identifier=" << identifier 
+                     << std::endl;
           return false;
         }
         if (reserved_word_set_.find(identifier) != reserved_word_set_.end()) {
-          error_msgs << "variable identifier (name) cannot be reserved word"
-                     << "; found identifier=" << identifier;
+          error_msgs << "variable identifier (name) may not be reserved word"
+                     << std::endl
+                     << "    found identifier=" << identifier 
+                     << std::endl;
           return false;
         }
         return true;
@@ -611,8 +627,8 @@ namespace stan {
 
       int_decl_r.name("integer declaration");
       int_decl_r 
-        %= lit("int")
-        >> no_skip[!char_("a-zA-Z0-9_")]
+        %= ( lit("int")
+             >> no_skip[!char_("a-zA-Z0-9_")] )
         > -range_brackets_int_r(_r1)
         // >> (lit(' ') | lit('\n') | lit('\t') | lit('\r'))
         > identifier_r 
@@ -621,8 +637,8 @@ namespace stan {
 
       double_decl_r.name("real declaration");
       double_decl_r 
-        %= lit("real")
-        >> no_skip[!char_("a-zA-Z0-9_")]
+        %= ( lit("real")
+             >> no_skip[!char_("a-zA-Z0-9_")] )
         > -range_brackets_double_r(_r1)
         > identifier_r
         > opt_dims_r(_r1)

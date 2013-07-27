@@ -12,13 +12,17 @@
 #include <stan/version.hpp>
 #include <stan/io/cmd_line.hpp>
 #include <stan/io/dump.hpp>
+#include <stan/io/mcmc_writer.hpp>
 
+#include <stan/mcmc/sample.hpp>
 #include <stan/mcmc/hmc/static/adapt_unit_e_static_hmc.hpp>
 #include <stan/mcmc/hmc/static/adapt_diag_e_static_hmc.hpp>
 #include <stan/mcmc/hmc/static/adapt_dense_e_static_hmc.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_unit_e_nuts.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_diag_e_nuts.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_dense_e_nuts.hpp>
+
+#include <stan/model/util.hpp>
 
 #include <stan/optimization/newton.hpp>
 #include <stan/optimization/nesterov_gradient.hpp>
@@ -60,6 +64,11 @@ namespace stan {
                         "samples", "file",
                         "File into which samples are written",
                         "default = samples.csv");
+      
+      print_help_option(&std::cout,
+                        "diagnostics", "file",
+                        "File into which diagnostics are written",
+                        "default = no diagnostic output");
       
       print_help_option(&std::cout,
                         "append_samples", "",
@@ -141,15 +150,15 @@ namespace stan {
       
       print_help_option(&std::cout,
                         "point_estimate","",
-                        "Fit point estimate of hidden parameters by maximizing log joint probability using Nesterov's accelerated gradient method");
+                        "Fit point estimate of hidden parameters by maximizing log joint probability using the BFGS method with line search");
       
       print_help_option(&std::cout,
                         "point_estimate_newton","",
                         "Fit point estimate of hidden parameters by maximizing log joint probability using Newton's method");
 
       print_help_option(&std::cout,
-                        "point_estimate_bfgs","",
-                        "Fit point estimate of hidden parameters by maximizing log joint probability using the BFGS method with line search");
+                        "point_estimate_nesterov","",
+                        "Fit point estimate of hidden parameters by maximizing log joint probability using Nesterov's accelerated gradient method");
       
       print_help_option(&std::cout,
                         "nondiag_mass", "",
@@ -224,29 +233,6 @@ namespace stan {
       }
     
     }
-
-    template <class Sampler, class Model, class RNG>
-    void print_sample(std::ostream& sample_file_stream,
-                      std::ostream& debug_file_stream,
-                      stan::mcmc::sample& s, 
-                      Sampler& sampler,
-                      Model& model,
-                      RNG& base_rng) {
-      
-      // Temporary as model::write_csv isn't a const method
-      std::vector<double> cont(s.cont_params());
-      std::vector<int> disc(s.disc_params());
-      
-      sample_file_stream << s.log_prob() << ",";
-      sampler.write_sampler_params(sample_file_stream);
-      model.write_csv(base_rng, cont, disc, 
-                      sample_file_stream, &std::cout);
-      
-      //sampler.z().write(debug_file_stream);
-      //debug_file_stream << std::endl;
-      
-      
-    }
     
     template <class Sampler, class Model, class RNG>
     void run_markov_chain(Sampler& sampler,
@@ -257,21 +243,20 @@ namespace stan {
                           int refresh,
                           bool save,
                           bool warmup,
-                          std::ostream& sample_file_stream,
-                          std::ostream& debug_file_stream,
+                          stan::io::mcmc_writer<Model>& writer,
                           stan::mcmc::sample& init_s,
                           Model& model,
                           RNG& base_rng) {
       
-      for (size_t m = 0; m < num_iterations; ++m) {
+      for (int m = 0; m < num_iterations; ++m) {
       
         print_progress(m, start, finish, refresh, warmup);
       
         init_s = sampler.transition(init_s);
           
         if ( save && ( (m % num_thin) == 0) ) {
-          print_sample<Sampler, Model, RNG>(sample_file_stream, debug_file_stream,
-                                            init_s, sampler, model, base_rng);
+          writer.print_sample_params(base_rng, init_s, sampler, model);
+          writer.print_diagnostic_params(init_s, sampler);
         }
 
       }
@@ -285,16 +270,14 @@ namespace stan {
                 int num_thin,
                 int refresh,
                 bool save,
-                std::ostream& sample_file_stream,
-                std::ostream& debug_file_stream,
+                stan::io::mcmc_writer<Model>& writer,
                 stan::mcmc::sample& init_s,
                 Model& model,
                 RNG& base_rng) {
       
       run_markov_chain<Sampler, Model, RNG>(sampler, num_warmup, 0, num_warmup + num_samples, num_thin,
                                             refresh, save, true,
-                                            sample_file_stream,
-                                            debug_file_stream,
+                                            writer,
                                             init_s, model, base_rng);
       
     }
@@ -306,22 +289,20 @@ namespace stan {
                 int num_thin,
                 int refresh,
                 bool save,
-                std::ostream& sample_file_stream,
-                std::ostream& debug_file_stream,
+                stan::io::mcmc_writer<Model>& writer,
                 stan::mcmc::sample& init_s,
                 Model& model,
                 RNG& base_rng) {
       
       run_markov_chain<Sampler, Model, RNG>(sampler, num_samples, num_warmup, num_warmup + num_samples, num_thin,
                                             refresh, save, false,
-                                            sample_file_stream,
-                                            debug_file_stream,
+                                            writer,
                                             init_s, model, base_rng);
       
     }
     
     template <class Model>
-    int nuts_command(int argc, const char* argv[]) {
+    int command(int argc, const char* argv[]) {
 
       stan::io::cmd_line command(argc,argv);
       
@@ -340,16 +321,15 @@ namespace stan {
       data_stream.close();
       
       // Input arguments
-      bool point_estimate = command.has_flag("point_estimate");
+      bool point_estimate_nesterov = command.has_flag("point_estimate_nesterov");
       bool point_estimate_newton = command.has_flag("point_estimate_newton");
-      bool point_estimate_bfgs = command.has_flag("point_estimate_bfgs");
+      bool point_estimate = command.has_flag("point_estimate");
 
       std::string sample_file = "samples.csv";
       command.val("samples", sample_file);
-      
-      // Fix so that default somehow does not produce output
-      std::string diagnostic_file = "diagnostic.csv";
-      command.val("diagnostic", diagnostic_file);
+ 
+      std::string diagnostic_file = "";
+      command.val("diagnostics", diagnostic_file);
       
       unsigned int num_iterations = 2000U;
       command.val("iter", num_iterations);
@@ -456,8 +436,36 @@ namespace stan {
       if (command.has_key("init")) {
         command.val("init", init_val);
         if (init_val == "0") {
+          
           cont_params = std::vector<double>(model.num_params_r(), 0.0);
           disc_params = std::vector<int>(model.num_params_i(), 0);
+                    
+          double init_log_prob;
+          std::vector<double> init_grad;
+          
+          try {
+            init_log_prob 
+              = stan::model::log_prob_grad<true,true>(model,
+                                                      cont_params, 
+                                                      disc_params, init_grad,
+                                                      &std::cout);
+          } catch (std::domain_error e) {
+            std::cout << "Rejecting inititialization at zero because of log_prob_grad failure." << std::endl;
+            return 0;
+          }
+          
+          if (!boost::math::isfinite(init_log_prob)) {
+            std::cout << "Rejecting inititialization at zero because of vanishing density." << std::endl;
+            return 0;
+          }
+          
+          for (size_t i = 0; i < init_grad.size(); ++i) {
+            if (!boost::math::isfinite(init_grad[i])) {
+              std::cout << "Rejecting inititialization at zero because of divergent gradient." << std::endl;
+              return 0;
+            }
+          }
+          
         } else {
           
           try {
@@ -476,6 +484,31 @@ namespace stan {
                       << e.what() 
                       << std::endl;
             return -5;
+          }
+          
+          double init_log_prob;
+          std::vector<double> init_grad;
+          
+          try {
+            init_log_prob 
+              = stan::model::log_prob_grad<true,true>(model,cont_params, 
+                                                      disc_params, init_grad, 
+                                                      &std::cout);
+          } catch (std::domain_error e) {
+            std::cout << "Rejecting user-specified inititialization because of log_prob_grad failure." << std::endl;
+            return 0;
+          }
+          
+          if (!boost::math::isfinite(init_log_prob)) {
+            std::cout << "Rejecting user-specified inititialization because of vanishing density." << std::endl;
+            return 0;
+          }
+          
+          for (size_t i = 0; i < init_grad.size(); ++i) {
+            if (!boost::math::isfinite(init_grad[i])) {
+              std::cout << "Rejecting user-specified inititialization because of divergent gradient." << std::endl;
+              return 0;
+            }
           }
           
         }
@@ -504,7 +537,10 @@ namespace stan {
           // FIXME: allow config vs. std::cout
           double init_log_prob;
           try {
-            init_log_prob = model.grad_log_prob(cont_params, disc_params, init_grad, &std::cout);
+            init_log_prob 
+              = stan::model::log_prob_grad<true,true>(model, cont_params, 
+                                                      disc_params, init_grad, 
+                                                      &std::cout);
           } catch (std::domain_error e) {
             write_error_msg(&std::cout, e);
             std::cout << "Rejecting proposed initial value with zero density." << std::endl;
@@ -533,8 +569,8 @@ namespace stan {
       }
       
       if (command.has_flag("test_grad")) {
-        std::cout << std::endl << "TEST GRADIENT MODE" << std::endl;
-        return model.test_gradients(cont_params, disc_params);
+        std::cout << std::endl << "TEST GRADIENT MODE (+propto)" << std::endl;
+        return stan::model::test_gradients<true,true>(model,cont_params, disc_params);
       }
       
       //////////////////////////////////////////////////
@@ -555,12 +591,13 @@ namespace stan {
         
         std::cout << "output = " << sample_file << std::endl;
         std::cout << "save_warmup = " << save_warmup<< std::endl;
-        
+
         std::cout << "seed = " << random_seed 
                   << " (" << (command.has_key("seed") 
                     ? "user specified"
                     : "randomly generated") << ")"
                   << std::endl;
+        std::cout << "algorithm = Newton" << std::endl;
         
         std::fstream sample_stream(sample_file.c_str(), 
                                    samples_append_mode);
@@ -574,6 +611,7 @@ namespace stan {
         write_comment_property(sample_stream, "init", init_val);
         write_comment_property(sample_stream, "save_warmup", save_warmup);
         write_comment_property(sample_stream, "seed", random_seed);
+        write_comment_property(sample_stream, "algorithm","Newton");
         write_comment(sample_stream);
         
         sample_stream << "lp__,";
@@ -582,7 +620,8 @@ namespace stan {
         std::vector<double> gradient;
         double lp;
         try {
-          lp = model.grad_log_prob(cont_params, disc_params, gradient);
+          lp = stan::model::log_prob_grad<true,true>(model,cont_params, 
+                                                     disc_params, gradient);
         } catch (std::domain_error e) {
           write_error_msg(&std::cout, e);
           lp = -std::numeric_limits<double>::infinity();
@@ -617,7 +656,7 @@ namespace stan {
         
       }
       
-      if (point_estimate) {
+      if (point_estimate_nesterov) {
         
         std::cout << "STAN OPTIMIZATION COMMAND" << std::endl;
         if (data_file == "")
@@ -638,6 +677,8 @@ namespace stan {
                     : "randomly generated") << ")"
                   << std::endl;
         
+        std::cout << "algorithm = Nesterov" << std::endl;
+
         std::fstream sample_stream(sample_file.c_str(), 
                                    samples_append_mode);
         
@@ -650,13 +691,14 @@ namespace stan {
         write_comment_property(sample_stream, "init", init_val);
         write_comment_property(sample_stream, "save_warmup", save_warmup);
         write_comment_property(sample_stream, "seed", random_seed);
+        write_comment_property(sample_stream, "algorithm","Nesterov");
         write_comment(sample_stream);
         
         sample_stream << "lp__,";
         model.write_csv_header(sample_stream);
 
-        stan::optimization::NesterovGradient ng(model, cont_params, disc_params,
-                                                epsilon, &std::cout);
+        stan::optimization::NesterovGradient<Model> ng(model, cont_params, disc_params,
+                                                       epsilon, &std::cout);
 
         double lp = ng.logp();
         
@@ -692,7 +734,7 @@ namespace stan {
         return 0;
       }
       
-      if (point_estimate_bfgs) {
+      if (point_estimate) {
         std::cout << "STAN OPTIMIZATION COMMAND" << std::endl;
         if (data_file == "")
           std::cout << "data = (specified model requires no data)" << std::endl;
@@ -713,6 +755,8 @@ namespace stan {
                     : "randomly generated") << ")"
         << std::endl;
         
+        std::cout << "algorithm = BFGS" << std::endl;
+
         std::fstream sample_stream(sample_file.c_str(), 
                                    samples_append_mode);
         
@@ -726,25 +770,24 @@ namespace stan {
         write_comment_property(sample_stream,"save_warmup",save_warmup);
         write_comment_property(sample_stream,"seed",random_seed);
         write_comment_property(sample_stream,"epsilon",epsilon);
+        write_comment_property(sample_stream,"algorithm","BFGS");
         write_comment(sample_stream);
         
         sample_stream << "lp__,"; // log probability first
         model.write_csv_header(sample_stream);
         
-        stan::optimization::BFGSLineSearch ng(model, cont_params, disc_params,
-                                              &std::cout);
+        stan::optimization::BFGSLineSearch<Model> ng(model, cont_params, disc_params,
+                                                     &std::cout);
         if (epsilon > 0)
           ng._opts.alpha0 = epsilon;
         
         double lp = ng.logp();
         
-        double lastlp = lp - 1;
         std::cout << "initial log joint probability = " << lp << std::endl;
         int m = 0;
         int ret = 0;
         for (size_t i = 0; i < num_iterations && ret == 0; i++) {
           ret = ng.step();
-          lastlp = lp;
           lp = ng.logp();
           ng.params_r(cont_params);
           if (do_print(i, 50*refresh)) {
@@ -757,7 +800,7 @@ namespace stan {
             std::cout << " # evals ";
             std::cout << " Notes " << std::endl;
           }
-          if (do_print(i, refresh)) {
+          if (do_print(i, refresh) || ret != 0 || !ng.note().empty()) {
             std::cout << " " << std::setw(7) << (m + 1) << " ";
             std::cout << " " << std::setw(12) << std::setprecision(6) << lp << " ";
             std::cout << " " << std::setw(12) << std::setprecision(6) << ng.prev_step_size() << " ";
@@ -778,6 +821,8 @@ namespace stan {
         }
         if (ret != 0)
           std::cout << "Optimization terminated with code " << ret << std::endl;
+        else
+          std::cout << "Maximum number of iterations hit, optimization terminated." << std::endl;
         
         sample_stream << lp << ',';
         model.write_csv(base_rng,cont_params,disc_params,sample_stream);
@@ -790,6 +835,7 @@ namespace stan {
       //             Sampling Algorithms              // 
       //////////////////////////////////////////////////
       
+      // Combine this outpot wtih below calling std::cout instead of sample_stream?
       std::cout << "STAN SAMPLING COMMAND" << std::endl;
       if (data_file == "")
         std::cout << "data = (specified model requires no data)" << std::endl;
@@ -831,14 +877,22 @@ namespace stan {
       std::fstream sample_stream(sample_file.c_str(), 
                                  samples_append_mode);
       
-      std::fstream diagnostic_stream(diagnostic_file.c_str(), 
-                                 std::fstream::out);
+      std::fstream* diagnostic_stream = 0;
+      
+      if (diagnostic_file.size() != 0) {
+      
+        diagnostic_stream = new std::fstream(diagnostic_file.c_str(),
+                                             std::fstream::out);
+      }
+      
+      stan::io::mcmc_writer<Model> writer(&sample_stream, diagnostic_stream);
       
       write_comment(sample_stream,"Samples Generated by Stan");
       write_comment(sample_stream);
       write_comment_property(sample_stream, "stan_version_major", stan::MAJOR_VERSION);
       write_comment_property(sample_stream, "stan_version_minor", stan::MINOR_VERSION);
       write_comment_property(sample_stream, "stan_version_patch", stan::PATCH_VERSION);
+      write_comment_property(sample_stream, "model", model.model_name());
       write_comment_property(sample_stream, "data", data_file);
       write_comment_property(sample_stream, "init", init_val);
       write_comment_property(sample_stream, "append_samples", append_samples);
@@ -856,13 +910,38 @@ namespace stan {
       write_comment_property(sample_stream, "epsilon_pm", epsilon_pm);
       write_comment_property(sample_stream, "delta", delta);
       write_comment_property(sample_stream, "gamma", gamma);
-      write_comment(sample_stream);
+
+      if(diagnostic_stream) {
       
-      double warmDeltaT;
-      double sampleDeltaT;
+        write_comment_property(*diagnostic_stream, "stan_version_major", stan::MAJOR_VERSION);
+        write_comment_property(*diagnostic_stream, "stan_version_minor", stan::MINOR_VERSION);
+        write_comment_property(*diagnostic_stream, "stan_version_patch", stan::PATCH_VERSION);
+        write_comment_property(*diagnostic_stream, "model", model.model_name());
+        write_comment_property(*diagnostic_stream, "data", data_file);
+        write_comment_property(*diagnostic_stream, "init", init_val);
+        write_comment_property(*diagnostic_stream, "append_samples", append_samples);
+        write_comment_property(*diagnostic_stream, "save_warmup", save_warmup);
+        write_comment_property(*diagnostic_stream, "seed", random_seed);
+        write_comment_property(*diagnostic_stream, "chain_id", chain_id);
+        write_comment_property(*diagnostic_stream, "iter", num_iterations);
+        write_comment_property(*diagnostic_stream, "warmup", num_warmup);
+        write_comment_property(*diagnostic_stream, "thin", num_thin);
+        write_comment_property(*diagnostic_stream, "nondiag_mass", nondiag_mass);
+        write_comment_property(*diagnostic_stream, "equal_step_sizes", equal_step_sizes);
+        write_comment_property(*diagnostic_stream, "leapfrog_steps", leapfrog_steps);
+        write_comment_property(*diagnostic_stream, "max_treedepth", max_treedepth);
+        write_comment_property(*diagnostic_stream, "epsilon", epsilon);
+        write_comment_property(*diagnostic_stream, "epsilon_pm", epsilon_pm);
+        write_comment_property(*diagnostic_stream, "delta", delta);
+        write_comment_property(*diagnostic_stream, "gamma", gamma);
+        
+      }
+      
+      double warmDeltaT = 0;
+      double sampleDeltaT = 0;
       
       if (nondiag_mass) {
-
+        
         // Euclidean NUTS with Dense Metric
         stan::mcmc::sample s(cont_params, disc_params, 0, 0);
         
@@ -870,15 +949,32 @@ namespace stan {
         a_Dm_nuts sampler(model, base_rng, num_warmup);
         sampler.seed(cont_params, disc_params);
         
+        write_comment_property(sample_stream, "algorithm", sampler.name());
+        write_comment(sample_stream);
+
+        if (diagnostic_stream) {
+          write_comment_property(*diagnostic_stream, "algorithm", sampler.name());
+          write_comment(*diagnostic_stream);
+        }
+
         if (!append_samples) {
-          sample_stream << "lp__,";
-          sampler.write_sampler_param_names(sample_stream);
-          model.write_csv_header(sample_stream);
+          writer.print_sample_names(s, sampler, model);
+          writer.print_diagnostic_names(s, sampler, model);
         }
         
         // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else             sampler.set_nominal_stepsize(epsilon);
+        if (epsilon <= 0) {
+
+          try {
+            sampler.init_stepsize();
+          } catch (std::runtime_error e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+          }
+        }
+        else {
+          sampler.set_nominal_stepsize(epsilon);
+        }
         
         sampler.set_stepsize_jitter(epsilon_pm);
         
@@ -893,26 +989,20 @@ namespace stan {
         
         warmup<a_Dm_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin,
                                         refresh, save_warmup, 
-                                        sample_stream, diagnostic_stream,
-                                        s, model, base_rng); 
+                                        writer, s, model, base_rng); 
         
         clock_t end = clock();
         warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
         
         sampler.disengage_adaptation();
-
-        sample_stream << "# (" << sampler.name() << ")" << std::endl;
-        sample_stream << "# Adaptation terminated" << std::endl;
-        sample_stream << "# Step size = " << sampler.get_nominal_stepsize() << std::endl;
-        sampler.z().write_metric(sample_stream);
+        writer.print_adapt_finish(sampler);
         
         // Sampling
         start = clock();
         
         sample<a_Dm_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin,
                                         refresh, true, 
-                                        sample_stream, diagnostic_stream, 
-                                        s, model, base_rng); 
+                                        writer, s, model, base_rng);
         
         end = clock();
         sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
@@ -924,18 +1014,36 @@ namespace stan {
         stan::mcmc::sample s(cont_params, disc_params, 0, 0);
         
         typedef stan::mcmc::adapt_diag_e_nuts<Model, rng_t> a_dm_nuts;
+
         a_dm_nuts sampler(model, base_rng, num_warmup);
         sampler.seed(cont_params, disc_params);
         
-        if (!append_samples) {
-          sample_stream << "lp__,";
-          sampler.write_sampler_param_names(sample_stream);
-          model.write_csv_header(sample_stream);          
+        write_comment_property(sample_stream, "algorithm", sampler.name());
+        write_comment(sample_stream);
+        
+        if (diagnostic_stream) {
+          write_comment_property(*diagnostic_stream, "algorithm", sampler.name());
+          write_comment(*diagnostic_stream);
         }
         
+        if (!append_samples) {
+          writer.print_sample_names(s, sampler, model);
+          writer.print_diagnostic_names(s, sampler, model);
+        }
+      
         // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else             sampler.set_nominal_stepsize(epsilon);
+        if (epsilon <= 0) {
+          
+          try {
+            sampler.init_stepsize();
+          } catch (std::runtime_error e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+          }
+        }
+        else {
+          sampler.set_nominal_stepsize(epsilon);
+        }
         
         sampler.set_stepsize_jitter(epsilon_pm);
         
@@ -950,32 +1058,27 @@ namespace stan {
         
         warmup<a_dm_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin, 
                                         refresh, save_warmup, 
-                                        sample_stream, diagnostic_stream,
-                                        s, model, base_rng); 
+                                        writer, s, model, base_rng); 
         
         clock_t end = clock();
         warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
         
         sampler.disengage_adaptation();
-        
-        sample_stream << "# (" << sampler.name() << ")" << std::endl;
-        sample_stream << "# Adaptation terminated" << std::endl;
-        sample_stream << "# Step size = " << sampler.get_nominal_stepsize() << std::endl;
-        sampler.z().write_metric(sample_stream);
+        writer.print_adapt_finish(sampler);
         
         // Sampling
         start = clock();
         
         sample<a_dm_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin,
                                         refresh, true, 
-                                        sample_stream, diagnostic_stream, 
-                                        s, model, base_rng);
+                                        writer, s, model, base_rng);
         
         end = clock();
         sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
 
         
       } else if (leapfrog_steps < 0 && equal_step_sizes) {
+        
         
         // Euclidean NUTS with Unit Metric
         stan::mcmc::sample s(cont_params, disc_params, 0, 0);
@@ -984,15 +1087,32 @@ namespace stan {
         a_um_nuts sampler(model, base_rng);
         sampler.seed(cont_params, disc_params);
         
+        write_comment_property(sample_stream, "algorithm", sampler.name());
+        write_comment(sample_stream);
+        
+        if (diagnostic_stream) {
+          write_comment_property(*diagnostic_stream, "algorithm", sampler.name());
+          write_comment(*diagnostic_stream);
+        }
+        
         if (!append_samples) {
-          sample_stream << "lp__,";
-          sampler.write_sampler_param_names(sample_stream);
-          model.write_csv_header(sample_stream);
+          writer.print_sample_names(s, sampler, model);
+          writer.print_diagnostic_names(s, sampler, model);
         }
         
         // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else             sampler.set_nominal_stepsize(epsilon);
+        if (epsilon <= 0) {
+          
+          try {
+            sampler.init_stepsize();
+          } catch (std::runtime_error e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+          }
+        }
+        else {
+          sampler.set_nominal_stepsize(epsilon);
+        }
         
         sampler.set_stepsize_jitter(epsilon_pm);
         
@@ -1007,31 +1127,26 @@ namespace stan {
         
         warmup<a_um_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin, 
                                         refresh, save_warmup, 
-                                        sample_stream, diagnostic_stream,
-                                        s, model, base_rng); 
+                                        writer, s, model, base_rng); 
         
         clock_t end = clock();
         warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
         
         sampler.disengage_adaptation();
-
-        sample_stream << "# (" << sampler.name() << ")" << std::endl;
-        sample_stream << "# Adaptation terminated" << std::endl;
-        sample_stream << "# Step size = " << sampler.get_nominal_stepsize() << std::endl;
-        sampler.z().write_metric(sample_stream);
+        writer.print_adapt_finish(sampler);
         
         // Sampling
         start = clock();
         
         sample<a_um_nuts, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin,
                                         refresh, true, 
-                                        sample_stream, diagnostic_stream, 
-                                        s, model, base_rng); 
+                                        writer, s, model, base_rng); 
         
         end = clock();
         sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
         
       } else {
+        
         
         // Unit Metric HMC with Static Integration Time
         stan::mcmc::sample s(cont_params, disc_params, 0, 0);
@@ -1040,15 +1155,32 @@ namespace stan {
         a_um_hmc sampler(model, base_rng);
         sampler.seed(cont_params, disc_params);
         
+        write_comment_property(sample_stream, "algorithm", sampler.name());
+        write_comment(sample_stream);
+        
+        if (diagnostic_stream) {
+          write_comment_property(*diagnostic_stream, "algorithm", sampler.name());
+          write_comment(*diagnostic_stream);
+        }
+        
         if (!append_samples) {
-          sample_stream << "lp__,";
-          sampler.write_sampler_param_names(sample_stream);
-          model.write_csv_header(sample_stream);
+          writer.print_sample_names(s, sampler, model);
+          writer.print_diagnostic_names(s, sampler, model);
         }
         
         // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else              sampler.set_nominal_stepsize(epsilon);
+        if (epsilon <= 0) {
+          
+          try {
+            sampler.init_stepsize();
+          } catch (std::runtime_error e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+          }
+        }
+        else {
+          sampler.set_nominal_stepsize(epsilon);
+        }
         
         sampler.set_stepsize_jitter(epsilon_pm);
         
@@ -1063,43 +1195,34 @@ namespace stan {
         
         warmup<a_um_hmc, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin, 
                                        refresh, save_warmup, 
-                                       sample_stream, diagnostic_stream,
-                                       s, model, base_rng); 
+                                       writer, s, model, base_rng);
         
         clock_t end = clock();
         warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
         
         sampler.disengage_adaptation();
-
-        sample_stream << "# (" << sampler.name() << ")" << std::endl;
-        sample_stream << "# Adaptation terminated" << std::endl;
-        sample_stream << "# Step size = " << sampler.get_nominal_stepsize() << std::endl;
-        sampler.z().write_metric(sample_stream);
+        writer.print_adapt_finish(sampler);
         
         // Sampling
         start = clock();
         
         sample<a_um_hmc, Model, rng_t>(sampler, num_warmup, num_iterations - num_warmup, num_thin,
                                        refresh, true, 
-                                       sample_stream, diagnostic_stream, 
-                                       s, model, base_rng); 
+                                       writer, s, model, base_rng);
         
         end = clock();
         sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-
+        
       }
       
-      std::cout << std::endl
-                << "Elapsed Time: " << warmDeltaT 
-                << " seconds (Warm Up)"  << std::endl
-                << "              " << sampleDeltaT 
-                << " seconds (Sampling)"  << std::endl
-                << "              " << warmDeltaT + sampleDeltaT 
-                << " seconds (Total)"  << std::endl
-                << std::endl << std::endl;
+      writer.print_timing(warmDeltaT, sampleDeltaT);
       
       sample_stream.close();
       
+      if (diagnostic_stream) {
+        diagnostic_stream->close();
+        delete diagnostic_stream;
+      }
       
       return 0;
       
