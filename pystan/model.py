@@ -255,13 +255,13 @@ class StanModel:
         build_extension.build_temp = os.path.dirname(pyx_file)
         build_extension.build_lib = lib_dir
 
-        if not verbose:
+        if not verbose and hasattr(sys.stderr, 'fileno'):
             # silence stderr for compilation
-            orig_stderr = pystan.misc.redirect_stderr()
+            orig_stderr = pystan.misc._redirect_stderr()
 
         build_extension.run()
 
-        if not verbose:
+        if not verbose and hasattr(sys.stderr, 'fileno'):
             # restore stderr
             os.dup2(orig_stderr, sys.stderr.fileno())
 

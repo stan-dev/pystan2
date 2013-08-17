@@ -426,7 +426,7 @@ def _get_samples(n, sim, inc_warmup=True):
         ss.append(np.asarray(r))
     return ss
 
-def redirect_stderr():
+def _redirect_stderr():
     """Redirect stderr for subprocesses to /dev/null
 
     Silences copious compilation messages.
