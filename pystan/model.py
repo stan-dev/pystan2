@@ -260,11 +260,12 @@ class StanModel:
             # silence stderr for compilation
             orig_stderr = pystan.misc._redirect_stderr()
 
-        build_extension.run()
-
-        if redirect_stderr:
-            # restore stderr
-            os.dup2(orig_stderr, sys.stderr.fileno())
+        try:
+            build_extension.run()
+        finally:
+            if redirect_stderr:
+                # restore stderr
+                os.dup2(orig_stderr, sys.stderr.fileno())
 
         module_path = lib_dir
         self.module = load_module(module_name, module_path)
