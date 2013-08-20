@@ -21,6 +21,7 @@ if PY2:
 else:
     from collections.abc import Callable, Sequence
 import inspect
+import io
 import logging
 from numbers import Number
 import os
@@ -443,3 +444,24 @@ def _redirect_stderr():
     os.dup2(devnull, stderr_fileno)
     os.close(devnull)
     return orig_stderr
+
+def _has_fileno(stream):
+    """Returns whether the stream object seems to have a working fileno()
+
+    Tells whether _redirect_stderr is likely to work.
+
+    Parameters
+    ----------
+    stream : IO stream object
+
+    Returns
+    -------
+    has_fileno : bool
+        True if stream.fileno() exists and doesn't raise OSError or
+        UnsupportedOperation
+    """
+    try:
+        stream.fileno()
+    except (AttributeError, OSError, io.UnsupportedOperation):
+        return False
+    return True
