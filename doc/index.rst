@@ -19,6 +19,7 @@ Documentation
    :maxdepth: 1
 
    getting_started
+   optimizing
    whats_new
    api
 
