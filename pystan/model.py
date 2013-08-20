@@ -297,7 +297,7 @@ class StanModel:
         # FIXME: implement this?
         raise NotImplementedError
 
-    def optimizing(self, data=None, seed=random.randint(0, MAX_UINT),
+    def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, method="Newton",
                    verbose=False, **kwargs):
         """Obtain a point estimate by maximizing the joint posterior.
@@ -392,7 +392,11 @@ class StanModel:
         elif not isinstance(init, Iterable) and \
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
+
+        if seed is None:
+            seed = random.randint(0, MAX_UINT)
         seed = int(seed)
+
         stan_args = {'init': init, 'seed': seed}
         # methods: 1: newton; 2: nesterov; 3: bfgs
         stan_args['point_estimate'] = methods.index(method) + 1
@@ -406,7 +410,7 @@ class StanModel:
                             ('value', sample['value'])])
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
-                 warmup=None, thin=1, seed=random.randint(0, MAX_UINT),
+                 warmup=None, thin=1, seed=None,
                  init='random', sample_file=None, diagnostic_file=None,
                  verbose=False, **kwargs):
         """Draw samples from the model.
@@ -539,6 +543,10 @@ class StanModel:
         if chains < 1:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
+
+        if seed is None:
+            seed = random.randint(0, MAX_UINT)
+        seed = int(seed)
 
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
