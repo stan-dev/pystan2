@@ -300,7 +300,8 @@ def _par_vector2dict(v, pars, dims, starts=None):
         y = np.asarray(v[start:end])
         if len(dims[i]) > 1:
             y = y.reshape(dims[i], order='F')  # 'F' = Fortran, column-major
-        d[pars[i]] = y.squeeze()  # squeeze deals with scalars (1,)
+        # squeeze deals with scalars (1,)
+        d[pars[i]] = y.squeeze() if len(dims[i]) == 0 else y
     return d
 
 
