@@ -46,3 +46,25 @@ def test_matrix_param_order():
     beta_colmeans = np.mean(beta_mean, axis=0)
     assert beta_colmeans[0] < 4
     assert beta_colmeans[1] > 100 - 4
+
+def test_matrix_param_order_optimizing():
+    model_code = """
+    data {
+    int<lower=2> K;
+    }
+    parameters {
+    matrix[K,2] beta;
+    }
+    model {
+    for (k in 1:K)
+      beta[k,1] ~ normal(0,1);
+    for (k in 1:K)
+      beta[k,2] ~ normal(100,1);
+    }"""
+    sm = StanModel(model_code=model_code)
+    op = sm.optimizing(data=dict(K=3))
+    beta = op['par']['beta']
+    assert beta.shape == (3, 2)
+    beta_colmeans = np.mean(beta, axis=0)
+    assert beta_colmeans[0] < 4
+    assert beta_colmeans[1] > 100 - 4
