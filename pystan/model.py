@@ -406,7 +406,8 @@ class StanModel:
 
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
         ret, sample = fit._call_sampler(stan_args)
-        return OrderedDict([('par', OrderedDict(zip(m_pars, sample['par']))),
+        pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
+        return OrderedDict([('par', pars),
                             ('value', sample['value'])])
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
