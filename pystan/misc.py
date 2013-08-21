@@ -283,9 +283,9 @@ def _par_vector2dict(v, pars, dims, starts=None):
 
     Examples
     --------
-    >>> v = list(range(30))
-    >>> dims = [[5], [5, 5]]
-    >>> pars = ['mu', 'Phi']
+    >>> v = list(range(31))
+    >>> dims = [[5], [5, 5], []]
+    >>> pars = ['mu', 'Phi', 'eta']
     >>> _par_vector2dict(v, pars, dims)  # doctest: +ELLIPSIS
     OrderedDict([('mu', array([0, 1, 2, 3, 4])), ('Phi', array([[ 5, ...
 
@@ -300,7 +300,7 @@ def _par_vector2dict(v, pars, dims, starts=None):
         y = np.asarray(v[start:end])
         if len(dims[i]) > 1:
             y.shape = dims[i]
-        d[pars[i]] = y
+        d[pars[i]] = y.squeeze()  # squeeze deals with scalars (1,)
     return d
 
 
