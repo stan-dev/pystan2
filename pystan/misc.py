@@ -299,7 +299,7 @@ def _par_vector2dict(v, pars, dims, starts=None):
         end = start + l
         y = np.asarray(v[start:end])
         if len(dims[i]) > 1:
-            y.shape = dims[i]
+            y = y.reshape(dims[i], order='F')  # 'F' = Fortran, column-major
         d[pars[i]] = y.squeeze()  # squeeze deals with scalars (1,)
     return d
 

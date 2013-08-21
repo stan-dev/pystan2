@@ -22,7 +22,7 @@ def test_matrix_param():
     extracted = fit.extract(permuted=False)
     assert extracted.shape == (1000, 4, 13)
     assert np.mean(extracted[:,:,0:11]) < 4
-    assert all(extracted[:,:,12] < 0)  # lp__
+    assert np.all(extracted[:,:,12] < 0)  # lp__
 
 
 def test_matrix_param_order():
