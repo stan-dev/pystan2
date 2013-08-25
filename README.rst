@@ -20,7 +20,7 @@ Installation
 ------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
-are required.
+(version 0.19.1 or greater) are required.
 
 ::
 
