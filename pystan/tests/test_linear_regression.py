@@ -35,6 +35,8 @@ def test_linear_regression():
 
     fit = stan(model_code=model_code, data=data, iter=2000)
 
+    assert fit.sim['dims_oi'] == fit._get_param_dims()
+
     np.mean(fit.extract()['beta'], axis=0)
     np.mean(fit.extract()['sigma'])
 

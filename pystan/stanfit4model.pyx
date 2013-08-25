@@ -36,7 +36,7 @@ import logging
 import numpy as np
 
 import pystan.misc
-from pystan._compat import string_types
+from pystan._compat import PY2, string_types
 
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
     cdef cppclass additive_combine_engine[T, U]:
@@ -99,6 +99,7 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     d['append_samples'] = args.append_samples
     d['test_grad'] = args.test_grad
     d['point_estimate'] = args.point_estimate
+    d['sampler'] = args.sampler.decode('utf-8')
     d['nondiag_mass'] = args.nondiag_mass
     return d
 
@@ -280,6 +281,17 @@ cdef class StanFit4$model_cppname:
                 else:
                     extracted = np.dstack([extracted, samples])
         return extracted
+
+    def __unicode__(self):
+        # for Python 2.x
+        return pystan.misc._print_stanfit(self)
+
+    def __str__(self):
+        s = pystan.misc._print_stanfit(self)
+        return s.encode('utf-8') if PY2 else s
+
+    def summary(self):
+        return pystan.misc._summary(self)
 
     # "private" Python methods
 

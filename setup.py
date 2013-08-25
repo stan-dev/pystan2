@@ -129,7 +129,7 @@ if __name__ == '__main__':
         version=FULLVERSION,
         maintainer=AUTHOR,
         maintainer_email=AUTHOR_EMAIL,
-        packages=['pystan', 'pystan.tests'],
+        packages=['pystan', 'pystan.tests', 'pystan.external'],
         ext_modules=cythonize(extensions),
         libraries=[libstan],
         package_dir={'pystan': 'pystan'},

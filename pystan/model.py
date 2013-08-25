@@ -274,14 +274,8 @@ class StanModel:
     def __str__(self):
         # NOTE: returns unicode even for Python 2.7, implements_to_string
         # decorator creates __unicode__ and __str__
-        desc = u"StanModel object '{}' coded as follows:\n{}"
-        return desc.format(self.model_name, self.model_code)
-
-    def __repr__(self):
-        modulename = str(self.__module__)
-        classname = str(self.__class__.__name__)
-        return "<{}.{} '{}' at {}>".format(modulename, classname,
-                                           self.model_name, hex(id(self)))
+        s = u"StanModel object '{}' coded as follows:\n{}"
+        return s.format(self.model_name, self.model_code)
 
     def show(self):
         return self.model_code
@@ -592,8 +586,11 @@ class StanModel:
         fnames_oi = fit._get_param_fnames_oi()
         n_flatnames = len(fnames_oi)
         fit.sim = {'samples': samples,
+                    # rstan has this; name clashes with 'chains' in samples[0]['chains']
+                   'chains': len(samples),
                    'iter': iter,
                    'warmup': warmup,
+                   'thin': thin,
                    'n_save': [n_save] * chains,
                    'warmup2': [warmup2] * chains,
                    'permutation': perm_lst,
@@ -608,5 +605,5 @@ class StanModel:
         fit.inits = inits_used
         fit.stan_args = args_list
         fit.stanmodel = self
-        fit.date = datetime.datetime.now().isoformat()
+        fit.date = datetime.datetime.now()
         return fit

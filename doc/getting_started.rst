@@ -122,3 +122,6 @@ parameters of interest, or just an array.
     ## return an array of three dimensions: iterations, chains, parameters
     a = fit.extract(permuted=False)
 
+.. code-block:: python
+
+    print(fit)

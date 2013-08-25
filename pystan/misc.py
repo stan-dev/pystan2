@@ -14,6 +14,8 @@ by the Cython file `stan_fit.pxd`.
 
 # REF: rstan/rstan/R/misc.R
 
+from __future__ import unicode_literals
+
 from pystan._compat import PY2, string_types
 from collections import OrderedDict
 if PY2:
@@ -22,6 +24,7 @@ else:
     from collections.abc import Callable, Sequence
 import inspect
 import io
+import itertools
 import logging
 from numbers import Number
 import os
@@ -30,8 +33,262 @@ import sys
 import time
 
 import numpy as np
+try:
+    from scipy.stats.mstats import mquantiles
+except ImportError:
+    from pystan.external.scipy import mquantiles
 
 from pystan.constants import MAX_UINT
+
+def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
+                  digits_summary=1):
+        if fit.mode == 1:
+            return "Stan model '{}' is of mode 'test_grad';\n"\
+                   "sampling is not conducted.".format(fit.model_name)
+        elif fit.mode == 2:
+            return "Stan model '{}' does not contain samples.".format(fit.model_name)
+        if pars is None:
+            pars = fit.sim['pars_oi']
+            fnames = fit.sim['fnames_oi']
+        else:
+            # FIXME: does this case ever occur?
+            # need a way of getting fnames matching specified pars
+            raise NotImplementedError
+
+        n_kept = [s - w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+        header = "Inference for Stan model: {}.\n".format(fit.model_name)
+        header += "{} chains, each with iter={}; warmup={}; thin={}; \n"
+        header = header.format(fit.sim['chains'], fit.sim['iter'], fit.sim['warmup'],
+                               fit.sim['thin'], sum(n_kept))
+        header += "post-warmup draws per chain={}, total post-warmup draws={}.\n\n"
+        header = header.format(n_kept[0], sum(n_kept))
+        footer = "\n\nSamples were drawn using {} at {}.\n"\
+            "For each parameter, n_eff is a crude measure of effective sample size,\n"\
+            "and Rhat is the potential scale reduction factor on split chains (at \n"\
+            "convergence, Rhat=1)."
+        sampler = fit.sim['samples'][0]['args']['sampler']
+        date = fit.date.strftime('%c')  # %c is locale's representation
+        footer = footer.format(sampler, date)
+        s = _summary(fit, pars, probs)
+        body = _array_to_table(s['summary'], s['summary_rownames'],
+                                 s['summary_colnames'], digits_summary)
+        return header + body + footer
+
+
+def _array_to_table(arr, rownames, colnames, n_digits):
+    """Print an array with row and column names
+
+    Example:
+                  mean se_mean  sd 2.5%  25%  50%  75% 97.5% n_eff Rhat
+        beta[1,1]  0.0     0.0 1.0 -2.0 -0.7  0.0  0.7   2.0  4000    1
+        beta[1,2]  0.0     0.0 1.0 -2.1 -0.7  0.0  0.7   2.0  4000    1
+        beta[2,1]  0.0     0.0 1.0 -2.0 -0.7  0.0  0.7   2.0  4000    1
+        beta[2,2]  0.0     0.0 1.0 -1.9 -0.6  0.0  0.7   2.0  4000    1
+        lp__      -4.2     0.1 2.1 -9.4 -5.4 -3.8 -2.7  -1.2   317    1
+    """
+    assert arr.shape == (len(rownames), len(colnames))
+    rownames_maxwidth = max(len(n) for n in rownames)
+    widths = [rownames_maxwidth + 1] + [max(5, len(n) + 1) for n in colnames]
+    header = '{:>{width}}'.format('', width=widths[0])
+    for name, width in zip(colnames, widths[1:]):
+        header += '{name:>{width}}'.format(name=name, width=width)
+    lines = [header]
+    for rowname, row in zip(rownames, arr):
+        line = '{name:{width}}'.format(name=rowname, width=widths[0])
+        for num, width in zip(row, widths[1:]):
+            line += '{num:{width}}'.format(num=round(num, n_digits), width=width)
+        lines.append(line)
+    return '\n'.join(lines)
+
+
+def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
+    """Summarize samples (compute mean, SD, quantiles) in all chains.
+
+    REF: stanfit-class.R summary method
+
+    Parameters
+    ----------
+    fit : stanfit4model object
+    pars : sequence of str
+        Parameter names
+    probs : sequence of float
+        quantiles
+
+    Returns
+    -------
+    summaries : OrderedDict of array
+        Array indexed by 'summary' has dimensions (num_params, num_statistics).
+        Parameters are unraveled in *row-major order*. Statistics include: mean,
+        se_mean, sd, probs_0, ..., probs_n, n_eff, and Rhat. Array indexed by
+        'c_summary' breaks down the statistics by chain and has dimensions
+        (num_params, num_statistics_c_summary, num_chains). Statistics for
+        `c_summary` are the same as for `summary` with the exception that
+        se_mean, n_eff, and Rhat are absent. Row names and column names are
+        also included in the OrderedDict.
+    """
+    if fit.mode == 1:
+        msg = "Stan model {} is of mode 'test_grad'; sampling is not conducted."
+        msg = msg.format(fit.model_name)
+        raise ValueError(msg)
+    elif fit.mode == 2:
+        msg = "Stan model {} contains no samples.".format(fit.model_name)
+        raise ValueError(msg)
+
+    if fit.sim['n_save'] == fit.sim['warmup2']:
+        msg = "Stan model {} contains no samples.".format(fit.model_name)
+        raise ValueError(msg)
+
+    # rstan checks for cached summaries here
+
+    if pars is None:
+        pars = fit.sim['pars_oi']
+
+    ss = _summary_sim(fit.sim, pars, probs)
+    # TODO: include sem, ess and rhat: ss['ess'], ss['rhat']
+    s1 = np.column_stack([ss['msd'][:, 0], ss['msd'][:, 1], ss['quan']])
+    s1_rownames = ss['c_msd_names']['parameters']
+    s1_colnames = ss['c_msd_names']['stats'] + ss['c_quan_names']['stats']
+    s2 = _combine_msd_quan(ss['c_msd'], ss['c_quan'])
+    s2_rownames = ss['c_msd_names']['parameters']
+    s2_colnames = ss['c_msd_names']['stats'] + ss['c_quan_names']['stats']
+    return OrderedDict(summary=s1, c_summary=s2,
+                       summary_rownames=s1_rownames,
+                       summary_colnames=s1_colnames,
+                       c_summary_rownames=s2_rownames,
+                       c_summary_colnames=s2_colnames)
+
+
+def _combine_msd_quan(msd, quan):
+    """Combine msd and quantiles in chain summary
+
+    Parameters
+    ----------
+    msd : array of shape (num_params, 2, num_chains)
+       mean and sd for chains
+    cquan : array of shape (num_params, num_quan, num_chains)
+        quantiles for chains
+
+    Returns
+    -------
+    msdquan : array of shape (num_params, 2 + num_quan, num_chains)
+    """
+    dim1 = msd.shape
+    dim2 = quan.shape
+    n_par, _, n_chains = dim1
+    n_stat = dim1[1] + dim2[1]
+    ll = []
+    for i in range(n_chains):
+        a1 = msd[:, :, i]
+        a2 = quan[:, :, i]
+        ll.append(np.column_stack([a1, a2]))
+    msdquan = np.dstack(ll)
+    return msdquan
+
+
+def _summary_sim(sim, pars, probs):
+    """Summarize chains together and separately
+
+    REF: rstan/rstan/R/misc.R
+
+    Parameters are unraveled in *column-major order*.
+
+    Parameters
+    ----------
+    sim : dict
+        dict from from a stanfit fit object, i.e., fit['sim']
+    pars : Iterable of str
+        parameter names
+    probs : Iterable of probs
+        desired quantiles
+
+    Returns
+    -------
+    summaries : OrderedDict of array
+        This dictionary contains the following arrays indexed by the keys
+        given below:
+        - 'msd' : array of shape (num_params, 2) with mean and sd
+        - 'sem' : array of length num_params with standard error for the mean
+        - 'c_msd' : array of shape (num_params, 2, num_chains)
+        - 'quan' : array of shape (num_params, num_quan)
+        - 'c_quan' : array of shape (num_params, num_quan, num_chains)
+        - 'ess' : array of shape (num_params, 1)
+        - 'rhat' : array of shape (num_params, 1)
+
+    Note
+    ----
+    `_summary_sim` has the parameters in *column-major* order whereas `_summary`
+    gives them in *row-major* order. (This follows RStan.)
+    """
+    # NOTE: this follows RStan rather closely. Some of the calculations here
+    probs_len = len(probs)
+    n_chains = len(sim['samples'])
+    # tidx is a dict with keys that are parameters and values that are their
+    # indices using column-major ordering
+    tidx = _pars_total_indexes(sim['pars_oi'], sim['dims_oi'], sim['fnames_oi'], pars)
+    tidx_colm = [tidx[par] for par in pars]
+    tidx_colm = list(itertools.chain(*tidx_colm))  # like R's unlist()
+    tidx_rowm = [tidx[par+'_rowmajor'] for par in pars]
+    tidx_rowm = list(itertools.chain(*tidx_rowm))
+    tidx_len = len(tidx_colm)
+    lmsdq = [_get_par_summary(sim, i, probs) for i in tidx_colm]
+    msd = np.row_stack([x['msd'] for x in lmsdq])
+    quan = np.row_stack([x['quan'] for x in lmsdq])
+    probs_str = tuple(["{:g}%".format(100*p) for p in probs])
+    msd.shape = (tidx_len, 2)
+    quan.shape = (tidx_len, probs_len)
+
+    c_msd = np.row_stack([x['c_msd'] for x in lmsdq])
+    c_quan = np.row_stack([x['c_quan'] for x in lmsdq])
+    c_msd.shape = (tidx_len, 2, n_chains)
+    c_quan.shape = (tidx_len, probs_len, n_chains)
+    sim_attr_args = sim.get('args', None)
+    if sim_attr_args is None:
+        cids = list(range(n_chains))
+    else:
+        cids = [x['chain_id'] for x in sim_attr_args]
+
+    c_msd_names = dict(parameters=np.asarray(sim['fnames_oi'])[tidx_colm],
+                       stats=("mean", "sd"),
+                       chains=tuple("chain:{}".format(cid) for cid in cids))
+    c_quan_names = dict(parameters=np.asarray(sim['fnames_oi'])[tidx_colm],
+                        stats=probs_str,
+                        chains=tuple("chain:{}".format(cid) for cid in cids))
+    # TODO: include sem, ess and rhat, see rstan/rstan/src/chains.cpp
+    # ess = np.array([chains.effective_sample_size(sim, n) for n in tidx_colm])
+    # rhat = np.array([chains.split_potential_scale_reduction(sim, n) for n in tidx_colm])
+    return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
+                c_quan=c_quan, c_quan_names=c_quan_names,
+                # sem=msd[:, 2] / np.sqrt(ess), ess=ess, rhat=rhat,
+                row_major_idx=tidx_rowm, col_major_idx=tidx_colm)
+
+
+def _get_par_summary(sim, n, probs):
+    """Summarize chains merged and individually
+
+    Parameters
+    ----------
+    sim : dict from stanfit object
+    n : int
+        parameter index
+    probs : iterable of int
+        quantiles
+
+    Returns
+    -------
+    summary : dict
+       Dictionary containing summaries
+    """
+    # _get_samples gets chains for nth parameter
+    ss = _get_samples(n, sim, inc_warmup=False)
+    msdfun = lambda chain: (np.mean(chain), np.std(chain, ddof=1))
+    qfun = lambda chain: mquantiles(chain, probs)
+    c_msd = np.array([msdfun(s) for s in ss]).flatten()
+    c_quan = np.array([qfun(s) for s in ss]).flatten()
+    ass = np.asarray(ss).flatten()
+    msd = np.asarray(msdfun(ass))
+    quan = qfun(np.asarray(ass))
+    return dict(msd=msd, quan=quan, c_msd=c_msd, c_quan=c_quan)
+
 
 def _split_data(data):
     data_r = {}
@@ -135,7 +392,7 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
     if sample_file is not None:
         # FIXME: to implement
         raise NotImplementedError
-    
+
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
 
@@ -332,7 +589,9 @@ def _pars_total_indexes(names, dims, fnames, pars):
     Returns
     -------
     indexes : OrderedDict of list of int
-        Dictionary uses parameter names as keys.
+        Dictionary uses parameter names as keys. Indexes are column-major order.
+        For each parameter there is also a key `par`+'_rowmajor' that stores the
+        row-major indexing.
 
     Note
     ----
@@ -363,16 +622,29 @@ def _pars_total_indexes(names, dims, fnames, pars):
         # if `par` is a scalar, it will match one of `fnames`
         if par in fnames:
             p = fnames.index(par)
-            return {par: tuple([p])}
+            idx = tuple([p])
+            return OrderedDict([(par, idx), (par+'_rowmajor', idx)])
         else:
             p = names.index(par)
-            indexes = starts[p] + np.arange(np.prod(dims[p]))
-            return {par: tuple(indexes)}
+            idx = starts[p] + np.arange(np.prod(dims[p]))
+            idx_rowmajor = starts[p] + _idx_col2rowm(dims[p])
+        return OrderedDict([(par, tuple(idx)), (par+'_rowmajor', tuple(idx_rowmajor))])
 
     indexes = OrderedDict()
     for par in pars:
         indexes.update(par_total_indexes(par))
     return indexes
+
+
+def _idx_col2rowm(d):
+  """Generate indexes to change from col-major to row-major ordering"""
+  if 0 == len(d):
+      return 1
+  if 1 == len(d):
+      return np.arange(d[0])
+  # order='F' indicates column-major ordering
+  idx = np.array(np.arange(np.prod(d))).reshape(d, order='F').T
+  return idx.flatten(order='F')
 
 
 def _get_kept_samples(n, sim):
@@ -403,7 +675,7 @@ def _get_kept_samples(n, sim):
 
 def _get_samples(n, sim, inc_warmup=True):
     # NOTE: this is in stanfit-class.R in RStan (rather than misc.R)
-    """Get chain for `n`th parameter.
+    """Get chains for `n`th parameter.
 
     Parameters
     ----------
@@ -426,6 +698,7 @@ def _get_samples(n, sim, inc_warmup=True):
         r = s['chains'][nth_key] if inc_warmup else s['chains'][nth_key][nw:]
         ss.append(np.asarray(r))
     return ss
+
 
 def _redirect_stderr():
     """Redirect stderr for subprocesses to /dev/null

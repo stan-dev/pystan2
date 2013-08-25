@@ -89,3 +89,9 @@ class TestBernoulli(unittest.TestCase):
         extr = fit.extract('theta', permuted=False)
         assert extr.shape == (1000, 4, 2)
         assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
+
+    def test_bernoulli_summary(self):
+        fit = self.model.sampling(data=self.bernoulli_data)
+        s = fit.summary()
+        repr(fit)
+        print(fit)
