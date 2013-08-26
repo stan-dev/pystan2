@@ -12,7 +12,7 @@ Important links
 ---------------
 
 - Source code repo: https://github.com/ariddell/pystan
-- HTML documentation: http://pystan.readthedocs.org
+- HTML documentation: https://pystan.readthedocs.org
 - Issue tracker: https://github.com/ariddell/pystan/issues
 - Stan: http://mc-stan.org/
 

@@ -16,7 +16,7 @@ drawn from normal distribution with known standard deviation:
 
     y_1, \ldots, y_n \sim \text{normal}(\mu,1).
 
-Specifying an improper prior for :math:`\mu` of :math:`p(\mu) \propto 1$`,
+Specifying an improper prior for :math:`\mu` of :math:`p(\mu) \propto 1`,
 the posterior obtains a maximum at the sample mean. The following Python
 code illustrates how to use Stan's optimizer methods via a call to
 ``optimizing``:
