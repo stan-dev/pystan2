@@ -29,7 +29,9 @@ import logging
 from numbers import Number
 import os
 import random
+import re
 import sys
+import tempfile
 import time
 
 import numpy as np
@@ -390,8 +392,12 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
                     'warmup': warmups[i], 'init': inits[i]}
 
     if sample_file is not None:
-        # FIXME: to implement
-        raise NotImplementedError
+        sample_file = _writable_sample_file(sample_file)
+        if chains == 1:
+            argss[0]['sample_file'] = sample_file
+        elif chains > 1:
+            for i in range(chains):
+                argss[i]['sample_file'] = _append_id(sample_file, i)
 
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
@@ -415,7 +421,8 @@ def _get_valid_stan_args(base_args=None):
     # values in args are going to be converted into C++ objects so
     # prepare them accordingly---e.g., bytes -> std::string
     args['save_warmup'] = args.get('save_warmup', True)
-    args['sample_file_flag'] = args.get('sample_file_flag', False)
+    args['sample_file_flag'] = True if args.get('sample_file') else False
+    args['sample_file'] = args.get('sample_file', '').encode('utf-8')
     args['diagnostic_file'] = args.get('diagnostic_file', '')
     if args['diagnostic_file']:
         args['diagnostic_file_flag'] = True
@@ -738,3 +745,26 @@ def _has_fileno(stream):
     except (AttributeError, OSError, io.UnsupportedOperation):
         return False
     return True
+
+
+def _append_id(file, id, suffix='.csv'):
+    fname = os.path.basename(file)
+    fpath = os.path.dirname(file)
+    fname2 = re.sub(r'\.csv\s*$', '_{}.csv'.format(id), fname)
+    if fname2 == fname:
+        fname2 = '{}_{}.csv'.format(fname, id)
+    return os.path.join(fpath, fname2)
+
+
+def _writable_sample_file(file, warn=True, wfun=None):
+    """Check to see if file is writable, if not use temporary file"""
+    if wfun is None:
+        wfun = lambda x, y: '"{}" is not writable; use "{}" instead'.format(x, y)
+    dir = os.path.dirname(file)
+    if os.access(dir, os.W_OK):
+        return file
+    else:
+        dir2 = tempfile.mkdtemp()
+        if warn:
+            logging.warning(wfun(dir, dir2))
+        return os.path.join(dir2, os.path.basename(file))

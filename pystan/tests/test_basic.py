@@ -1,5 +1,7 @@
 import logging
+import os
 import time
+import tempfile
 import unittest
 
 import numpy as np
@@ -95,3 +97,19 @@ class TestBernoulli(unittest.TestCase):
         s = fit.summary()
         repr(fit)
         print(fit)
+
+    def test_bernoulli_sample_file(self):
+        tmpdir = tempfile.mkdtemp()
+        sample_file = os.path.join(tmpdir, 'sampling.csv')
+        sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
+        fit = self.model.sampling(data=self.bernoulli_data, sample_file=sample_file)
+        assert all([sample_file_base in fn for fn in os.listdir(tmpdir)])
+
+        fit = self.model.sampling(data=self.bernoulli_data, sample_file='/tmp/doesnotexist')
+        assert fit is not None
+
+        tmpdir = tempfile.mkdtemp()
+        sample_file = 'opt.csv'
+        sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
+        fit = self.model.optimizing(data=self.bernoulli_data, sample_file=sample_file)
+        # not working right now -- it's a stan issue, not a pystan issue.

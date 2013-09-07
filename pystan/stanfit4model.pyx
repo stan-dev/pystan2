@@ -77,6 +77,7 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     d = {}
     d['save_warmup'] = args.save_warmup
     d['sample_file_flag'] = args.sample_file_flag
+    d['sample_file'] = args.sample_file
     d['diagnostic_file_flag'] = args.diagnostic_file_flag
     d['iter'] = args.iter
     d['warmup'] = args.warmup
@@ -112,6 +113,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     # the function will raise a KeyError exception (as it should!).
     p.save_warmup = args['save_warmup']
     p.sample_file_flag = args['sample_file_flag']
+    p.sample_file = args['sample_file']
     p.diagnostic_file_flag = args['diagnostic_file_flag']
     p.iter = args['iter']
     p.warmup = args['warmup']

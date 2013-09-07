@@ -357,8 +357,6 @@ class StanModel:
         >>> f = m.optimizing()
 
         """
-        if sample_file is not None:
-            raise NotImplementedError("sample_file not supported yet")
         methods = ("BFGS", "Nesterov", "Newton")
         if method not in methods:
             raise ValueError("Method must be one of {}".format(methods))
@@ -510,8 +508,6 @@ class StanModel:
         # If this ever turns out to be a problem just add:
         # iter_ = iter
         # del iter  # now builtins.iter is available
-        if sample_file is not None:
-            raise NotImplementedError("sample_file not supported yet")
         if diagnostic_file is not None:
             raise NotImplementedError("diagnostic_file not supported yet")
         if data is None:
