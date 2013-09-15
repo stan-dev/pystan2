@@ -193,6 +193,7 @@ class StanModel:
         self.model_name = stanc_ret['model_name']
         self.model_code = model_code
         self.model_cppcode = stanc_ret['cppcode']
+        self.save_dso = save_dso
 
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
         logging.warn(msg.format(self.model_name))
@@ -267,8 +268,7 @@ class StanModel:
                 # restore stderr
                 os.dup2(orig_stderr, sys.stderr.fileno())
 
-        module_path = lib_dir
-        self.module = load_module(module_name, module_path)
+        self.module = load_module(module_name, lib_dir)
         self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
 
     def __str__(self):
@@ -290,6 +290,47 @@ class StanModel:
     def get_cxxflags(self):
         # FIXME: implement this?
         raise NotImplementedError
+
+    def __getstate__(self):
+        """Specify how instances are to be pickled
+        self.module is unpicklable, for example.
+        """
+        state = self.__dict__.copy()
+        if state['save_dso']:
+            module_filename = state['module'].__file__
+            state['module_filename'] = module_filename
+            state['module_name'] = state['module'].__name__
+            with open(module_filename, 'rb') as f:
+                state['module_bytes'] = f.read()
+        del state['module']
+        del state['fit_class']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if self.save_dso:
+            # the following attributes are temporary and exist only in the
+            # pickled object to facilitate reloading the module
+            module_filename = self.module_filename
+            module_bytes = self.module_bytes
+            module_name = self.module_name
+            del self.module_filename
+            del self.module_bytes
+            del self.module_name
+            temp_dir = tempfile.mkdtemp()
+            lib_dir = os.path.join(temp_dir, 'pystan')
+            if not os.path.exists(lib_dir):
+                os.makedirs(lib_dir)
+            module_basename = os.path.basename(module_filename)
+            with open(os.path.join(lib_dir, module_basename), 'wb') as f:
+                f.write(module_bytes)
+            try:
+                self.module = load_module(module_name, lib_dir)
+                self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
+            except Exception as e:
+                logging.warning(e)
+                logging.warning("Something went wrong while unpickling "
+                                "the StanModel. Consider recompiling.")
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, method="Newton",
@@ -365,7 +406,11 @@ class StanModel:
 
         data_r, data_i = pystan.misc._split_data(data)
         fit = self.fit_class(data_r, data_i)
-        # store a copy of the data passed to fit in the class
+        # store a copy of the data passed to fit in the class. The reason for
+        # assigning data here rather than in StanFit4model's __cinit__
+        # is that when __cinit__ is called there is no guarantee that the 
+        # instance is ready for use as a normal Python instance. See the Cython
+        # documentation on __cinit__.
         fit.data = {}
         fit.data.update(data_i)
         fit.data.update(data_r)

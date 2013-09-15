@@ -1,7 +1,7 @@
 import logging
 import os
-import time
 import tempfile
+import time
 import unittest
 
 import numpy as np
