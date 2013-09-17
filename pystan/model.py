@@ -196,7 +196,7 @@ class StanModel:
         self.save_dso = save_dso
 
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
-        logging.warn(msg.format(self.model_name))
+        logging.warning(msg.format(self.model_name))
         if verbose:
             msg = "OS: {}, Python: {}, Cython {}".format(sys.platform,
                                                          sys.version,
