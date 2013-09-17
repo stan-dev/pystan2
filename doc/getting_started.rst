@@ -27,14 +27,42 @@ issuing the command ``apt-get install build-essential``.
 Installation
 ============
 
-PyStan currently needs to be installed from source. First make sure you have
-installed the dependencies, then issue the commands:
+Unix-based Systems including Mac OS X
+-------------------------------------
+
+PyStan and the required packages may be installed from the `Python Package Index
+<https://pypi.python.org/pypi>`_ using ``pip``. (A recent version of
+``setuptools`` is required under Python 2.7; installation from source may prove
+easier.)
 
 ::
 
-   git clone https://github.com/ariddell/pystan.git
-   cd pystan
+   pip install numpy Cython
+   pip install pystan
+
+To install PyStan from source, first make sure you have installed the
+dependencies, then issue the commands:
+
+::
+
+   wget https://github.com/ariddell/pystan/archive/0.2.0.zip
+   unzip 0.2.0.zip
+   cd pystan-0.2.0
    python setup.py install
+   cd ..  # change out of the source directory before using pystan
+
+Windows
+-------
+
+Installation under Windows it not well tested. `Python(x,y)
+<https://code.google.com/p/pythonxy/>`_ provides a distribution of Python that
+includes NumPy, Cython, and the GNU Compiler `MinGW
+<http://docs.cython.org/src/tutorial/appendix.html>`_. (Note that Cython should
+be selected during installation of Python(x,y), as it is not installed by
+default).
+
+.. note:: Installing PyStan involves compiling Stan. This may take
+    a considerable amount of time.
 
 Using PyStan
 ============

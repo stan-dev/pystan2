@@ -27,7 +27,7 @@ Stan documentation
 ------------------
 
 - Stan: http://mc-stan.org/
-- Stan `User's Guide and Reference Manual <http://stan.googlecode.com/files/stan-reference-1.3.0.pdf>`_
+- `Stan User's Guide and Reference Manual <http://stan.googlecode.com/files/stan-reference-1.3.0.pdf>`_
 - `BUGS Examples <https://github.com/stan-dev/stan/tree/master/src/models/bugs_examples>`_
 
 Important links

@@ -25,8 +25,11 @@
 
 LONG_DESCRIPTION    = \
 """
-Python Interface to Stan, a package for Bayesian inference using
+**PyStan**: Python Interface to Stan, a package for Bayesian inference using
 the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
+
+For more information on `Stan <http://mc-stan.org>`_ and its modeling language, see the
+Stan User's Guide and Reference Manual.
 """
 
 NAME         = 'pystan'
@@ -59,14 +62,34 @@ FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
 
+## exit if attempting to install without Cython or numpy
+try:
+    import Cython
+    import numpy
+except ImportError:
+    raise SystemExit("Cython>=0.19.1 and NumPy are required.")
+
+## if setuptools is available, check the version of Cython
+try:
+    import pkg_resources
+    try:
+        pkg_resources.require("Cython>=0.19.1")
+    except pkg_resources.VersionConflict:
+        raise SystemExit("Cython>=0.19.1 is required.")
+except ImportError:
+    # no setuptools
+    pass
+
 import os
 import distutils.core
 from distutils.errors import CCompilerError, DistutilsError
 from distutils.core import setup
 from distutils.extension import Extension
+
 from Cython.Build import cythonize
 from numpy.distutils.command import install, install_clib
 from numpy.distutils.misc_util import InstallableLib
+
 
 ## static libraries
 stan_include_dirs = ["pystan/stan/src",
@@ -102,6 +125,7 @@ stanc_sources = [
 
 extensions = [Extension("pystan._api",
                         ["pystan/_api.pyx"] + stanc_sources,
+                        language='c++',
                         define_macros=stan_macros,
                         include_dirs=stan_include_dirs,
                         extra_compile_args=['-O3'])]
@@ -132,7 +156,6 @@ if __name__ == '__main__':
         packages=['pystan', 'pystan.tests', 'pystan.external'],
         ext_modules=cythonize(extensions),
         libraries=[libstan],
-        package_dir={'pystan': 'pystan'},
         package_data={'pystan': package_data_pats},
         description=DESCRIPTION,
         license=LICENSE,

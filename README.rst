@@ -22,6 +22,17 @@ Installation
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
 (version 0.19.1 or greater) are required.
 
+PyStan and the required packages may be installed from the `Python Package Index
+<https://pypi.python.org/pypi>`_ using ``pip``.
+
+::
+
+   pip install numpy Cython
+   pip install pystan
+
+Alternatively, if Cython (version 0.19.1 or greater) and NumPy are already
+available, PyStan may be installed from source with the following commands
+
 ::
 
    git clone https://github.com/ariddell/pystan.git
@@ -50,7 +61,7 @@ Example
     transformed parameters {
         real theta[J];
         for (j in 1:J)
-        theta[j] <- mu + tau * eta[j];
+            theta[j] <- mu + tau * eta[j];
     }
     model {
         eta ~ normal(0, 1);
