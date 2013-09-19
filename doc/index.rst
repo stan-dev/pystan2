@@ -20,6 +20,7 @@ Documentation
 
    getting_started
    optimizing
+   differences_pystan_and_rstan
    whats_new
    api
 

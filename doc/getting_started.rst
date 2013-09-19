@@ -1,4 +1,4 @@
-.. _getting_started:
+.. _getting-started:
 
 .. currentmodule:: pystan
 
@@ -45,9 +45,9 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://github.com/ariddell/pystan/archive/0.2.0.zip
-   unzip 0.2.0.zip
-   cd pystan-0.2.0
+   wget https://github.com/ariddell/pystan/archive/0.2.1.zip
+   unzip 0.2.1.zip
+   cd pystan-0.2.1
    python setup.py install
    cd ..  # change out of the source directory before using pystan
 
