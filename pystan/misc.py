@@ -42,8 +42,9 @@ except ImportError:
 
 from pystan.constants import MAX_UINT
 
+
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
-                  digits_summary=1):
+                   digits_summary=1):
         if fit.mode == 1:
             return "Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(fit.model_name)
@@ -73,7 +74,7 @@ def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
         footer = footer.format(sampler, date)
         s = _summary(fit, pars, probs)
         body = _array_to_table(s['summary'], s['summary_rownames'],
-                                 s['summary_colnames'], digits_summary)
+                               s['summary_colnames'], digits_summary)
         return header + body + footer
 
 
@@ -177,7 +178,6 @@ def _combine_msd_quan(msd, quan):
     dim1 = msd.shape
     dim2 = quan.shape
     n_par, _, n_chains = dim1
-    n_stat = dim1[1] + dim2[1]
     ll = []
     for i in range(n_chains):
         a1 = msd[:, :, i]
