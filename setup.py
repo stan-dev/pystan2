@@ -128,6 +128,12 @@ extensions = [Extension("pystan._api",
                         language='c++',
                         define_macros=stan_macros,
                         include_dirs=stan_include_dirs,
+                        extra_compile_args=['-O3']),
+              Extension("pystan._chains",
+                        ["pystan/_chains.pyx"],
+                        language='c++',
+                        define_macros=stan_macros,
+                        include_dirs=stan_include_dirs,
                         extra_compile_args=['-O3'])]
 
 ## package data

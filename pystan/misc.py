@@ -40,6 +40,8 @@ try:
 except ImportError:
     from pystan.external.scipy import mquantiles
 
+from pystan.chains import effective_sample_size, split_potential_scale_reduction
+
 from pystan.constants import MAX_UINT
 
 
@@ -98,7 +100,9 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     lines = [header]
     for rowname, row in zip(rownames, arr):
         line = '{name:{width}}'.format(name=rowname, width=widths[0])
-        for num, width in zip(row, widths[1:]):
+        for j, (num, width) in enumerate(zip(row, widths[1:])):
+            if colnames[j] == 'n_eff':
+                num = int(round(num, 0))
             line += '{num:{width}}'.format(num=round(num, n_digits), width=width)
         lines.append(line)
     return '\n'.join(lines)
@@ -148,9 +152,11 @@ def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
 
     ss = _summary_sim(fit.sim, pars, probs)
     # TODO: include sem, ess and rhat: ss['ess'], ss['rhat']
-    s1 = np.column_stack([ss['msd'][:, 0], ss['msd'][:, 1], ss['quan']])
+    s1 = np.column_stack([ss['msd'][:, 0], ss['sem'], ss['msd'][:, 1], ss['quan'], ss['ess'], ss['rhat']])
     s1_rownames = ss['c_msd_names']['parameters']
-    s1_colnames = ss['c_msd_names']['stats'] + ss['c_quan_names']['stats']
+    s1_colnames = (ss['c_msd_names']['stats'][0],) + ('se_mean',) + \
+            (ss['c_msd_names']['stats'][1],) + ss['c_quan_names']['stats'] + \
+            ('n_eff', 'Rhat')
     s2 = _combine_msd_quan(ss['c_msd'], ss['c_quan'])
     s2_rownames = ss['c_msd_names']['parameters']
     s2_colnames = ss['c_msd_names']['stats'] + ss['c_quan_names']['stats']
@@ -256,11 +262,11 @@ def _summary_sim(sim, pars, probs):
                         stats=probs_str,
                         chains=tuple("chain:{}".format(cid) for cid in cids))
     # TODO: include sem, ess and rhat, see rstan/rstan/src/chains.cpp
-    # ess = np.array([chains.effective_sample_size(sim, n) for n in tidx_colm])
-    # rhat = np.array([chains.split_potential_scale_reduction(sim, n) for n in tidx_colm])
+    ess = np.array([effective_sample_size(sim, n) for n in tidx_colm], dtype=int)
+    rhat = np.array([split_potential_scale_reduction(sim, n) for n in tidx_colm])
     return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
                 c_quan=c_quan, c_quan_names=c_quan_names,
-                # sem=msd[:, 2] / np.sqrt(ess), ess=ess, rhat=rhat,
+                sem=msd[:, 1] / np.sqrt(ess), ess=ess, rhat=rhat,
                 row_major_idx=tidx_rowm, col_major_idx=tidx_colm)
 
 

@@ -2,7 +2,7 @@ NOSETESTS ?= nosetests
 
 default: test
 
-build: pystan/_api.pyx
+build: pystan/_api.pyx pystan/_chains.pyx
 	python setup.py build_ext --inplace
 
 test:

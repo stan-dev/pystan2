@@ -76,5 +76,8 @@ Example
     fit = pystan.stan(model_code=schools_code, data=schools_dat,
                       iter=1000, chains=4)
 
+    print(fit)
+
     eta = fit.extract(permuted=True)['eta']
     np.mean(eta, axis=0)
+
