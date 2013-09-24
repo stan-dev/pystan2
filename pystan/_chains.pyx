@@ -1,15 +1,17 @@
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
 
+cimport numpy as np
+
 ctypedef unsigned int uint  # needed for templates
 
 cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
     void stan_autocovariance "stan::prob::autocovariance<double>"(vector[double]& y, vector[double] acov)
 
 cdef extern from "stan/math.hpp" namespace "stan::math":
-    double sum(vector[double]& x)
-    double mean(vector[double]& x)
-    double variance(vector[double]& x)
+    double stan_sum "stan::math::sum"(vector[double]& x)
+    double stan_mean "stan::math::mean"(vector[double]& x)
+    double stan_variance "stan::math::variance"(vector[double]& x)
 
 cdef double get_chain_mean(dict sim, uint k, uint n):
     allsamples = sim['samples']
@@ -18,10 +20,8 @@ cdef double get_chain_mean(dict sim, uint k, uint n):
     slst = allsamples[k]['chains']  # chain k, an OrderedDict
     param_names = list(slst.keys())  # e.g., 'beta[1]', 'beta[2]', ...
     cdef vector[double] nv = slst[param_names[n]]  # parameter n
-    cdef double mean = 0
-    for i in range(nv.size() - warmup2[k]):
-        mean += nv[warmup2[k] + i]
-    return mean / (nv.size() - warmup2[k])
+    # Cython will let you slice C++ vectors. Is there a performance hit?
+    return stan_mean(nv[warmup2[k]:])
 
 
 cdef void get_kept_samples(dict sim, uint k, uint n, vector[double]& samples):
@@ -121,30 +121,30 @@ def effective_sample_size(dict sim, uint n):
     for chain in range(m):
         n_kept_samples = ns_kept[chain]
         chain_mean.push_back(get_chain_mean(sim, chain, n))
-        chain_var.push_back(acov[chain][0]*n_kept_samples/(n_kept_samples-1))
+        chain_var.push_back(acov[chain][0] * n_kept_samples / (n_kept_samples-1))
 
-    cdef double mean_var = mean(chain_var)
-    cdef double var_plus = mean_var*(n_samples-1)/n_samples
+    cdef double mean_var = stan_mean(chain_var)
+    cdef double var_plus = mean_var * (n_samples-1) / n_samples
 
     if m > 1:
-        var_plus += variance(chain_mean)
+        var_plus = var_plus + stan_variance(chain_mean)
 
     cdef vector[double] rho_hat_t
     cdef double rho_hat = 0
-    cdef uint t = 0
     cdef vector[double] acov_t
+    cdef uint t = 0
     while t < n_samples and rho_hat >= 0:
         acov_t.clear()
         for chain in range(m):
             acov_t.push_back(acov[chain][t])
-        rho_hat = 1 - (mean_var - mean(acov_t)) / var_plus
+        rho_hat = 1 - (mean_var - stan_mean(acov_t)) / var_plus
         if rho_hat >= 0:
             rho_hat_t.push_back(rho_hat)
         t += 1
 
-    cdef double ess = m*n_samples
+    cdef double ess = m * n_samples
     if rho_hat_t.size() > 0:
-        ess = ess / (1 + 2 * sum(rho_hat_t))
+        ess = ess / (1 + 2 * stan_sum(rho_hat_t))
 
     return ess
 
@@ -191,17 +191,23 @@ def split_potential_scale_reduction(dict sim, uint n):
         split_chain.clear()
         for i in range(n_samples/2):
             split_chain.push_back(samples[i])
-        split_chain_mean.push_back(mean(split_chain))
-        split_chain_var.push_back(variance(split_chain))
+        split_chain_mean.push_back(stan_mean(split_chain))
+        split_chain_var.push_back(stan_variance(split_chain))
 
         split_chain.clear()
         for i in range(n_samples/2, n_samples):
             split_chain.push_back(samples[i])
-        split_chain_mean.push_back(mean(split_chain))
-        split_chain_var.push_back(variance(split_chain))
+        split_chain_mean.push_back(stan_mean(split_chain))
+        split_chain_var.push_back(stan_variance(split_chain))
 
-    cdef double var_between = n_samples/2 * variance(split_chain_mean)
-    cdef double var_within = mean(split_chain_var)
+    cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
+    cdef double var_within = stan_mean(split_chain_var)
 
     cdef double srhat = sqrt((var_between/var_within + n_samples/2 -1)/(n_samples/2))
     return srhat
+
+def stan_prob_autocovariance(np.ndarray v):
+    cdef vector[double] dv = v
+    cdef vector[double] acov
+    stan_autocovariance(dv, acov)
+    return acov

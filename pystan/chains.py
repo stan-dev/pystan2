@@ -1,7 +1,7 @@
 import pystan._chains as _chains
 
 
-def effective_sample_size(sim, n):
+def ess(sim, n):
     """Calculate effective sample size
 
     Parameters
@@ -13,7 +13,7 @@ def effective_sample_size(sim, n):
     return _chains.effective_sample_size(sim, n)
 
 
-def split_potential_scale_reduction(sim, n):
+def splitrhat(sim, n):
     """Calculate rhat
 
     Parameters

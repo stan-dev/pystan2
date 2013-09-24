@@ -40,8 +40,7 @@ try:
 except ImportError:
     from pystan.external.scipy import mquantiles
 
-from pystan.chains import effective_sample_size, split_potential_scale_reduction
-
+import pystan.chains as chains
 from pystan.constants import MAX_UINT
 
 
@@ -262,8 +261,8 @@ def _summary_sim(sim, pars, probs):
                         stats=probs_str,
                         chains=tuple("chain:{}".format(cid) for cid in cids))
     # TODO: include sem, ess and rhat, see rstan/rstan/src/chains.cpp
-    ess = np.array([effective_sample_size(sim, n) for n in tidx_colm], dtype=int)
-    rhat = np.array([split_potential_scale_reduction(sim, n) for n in tidx_colm])
+    ess = np.array([chains.ess(sim, n) for n in tidx_colm], dtype=int)
+    rhat = np.array([chains.splitrhat(sim, n) for n in tidx_colm])
     return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
                 c_quan=c_quan, c_quan_names=c_quan_names,
                 sem=msd[:, 1] / np.sqrt(ess), ess=ess, rhat=rhat,
