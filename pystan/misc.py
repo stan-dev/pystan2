@@ -93,7 +93,7 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     """
     assert arr.shape == (len(rownames), len(colnames))
     rownames_maxwidth = max(len(n) for n in rownames)
-    widths = [rownames_maxwidth + 1] + [max(5, len(n) + 1) for n in colnames]
+    widths = [rownames_maxwidth] + [max(5, len(n) + 1) for n in colnames]
     header = '{:>{width}}'.format('', width=widths[0])
     for name, width in zip(colnames, widths[1:]):
         header += '{name:>{width}}'.format(name=name, width=width)
