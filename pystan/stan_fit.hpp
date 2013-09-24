@@ -289,7 +289,7 @@ namespace pystan {
       fnames.clear(); 
       for (size_t i = 0; i < names.size(); ++i) {
         std::vector<std::string> i_names; 
-        get_flatnames(names[i], dims[i], i_names, col_major, true); // col_major = true
+        get_flatnames(names[i], dims[i], i_names, col_major, false); // col_major = true, first_is_one = false for PyStan (true for RStan)
         fnames.insert(fnames.end(), i_names.begin(), i_names.end());
       } 
     } 
