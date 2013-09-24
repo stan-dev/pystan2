@@ -1,4 +1,3 @@
-from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
 
@@ -11,7 +10,6 @@ cdef extern from "stan/math.hpp" namespace "stan::math":
     double sum(vector[double]& x)
     double mean(vector[double]& x)
     double variance(vector[double]& x)
-
 
 cdef double get_chain_mean(dict sim, uint k, uint n):
     allsamples = sim['samples']
@@ -73,11 +71,10 @@ cdef vector[double] autocovariance(dict sim, uint k, uint n):
     of copies are made where RStan passes around references. This is done
     mainly for convenience; the Cython code is simpler.
     """
-    cdef vector[double]* samples = new vector[double]()
-    cdef vector[double]* acov = new vector[double]()
-    get_kept_samples(sim, k, n, deref(samples))
-    stan_autocovariance(deref(samples), deref(acov))
-    return deref(acov)
+    cdef vector[double] samples, acov
+    get_kept_samples(sim, k, n, samples)
+    stan_autocovariance(samples, acov)
+    return acov
 
 def effective_sample_size(dict sim, uint n):
     """
@@ -135,19 +132,19 @@ def effective_sample_size(dict sim, uint n):
     cdef vector[double] rho_hat_t
     cdef double rho_hat = 0
     cdef uint t = 0
-    cdef vector[double] *acov_t
+    cdef vector[double] acov_t
     while t < n_samples and rho_hat >= 0:
-        acov_t = new vector[double](m)
+        acov_t.clear()
         for chain in range(m):
-            deref(acov_t)[chain] = acov[chain][t]
-        rho_hat = 1 - (mean_var - mean(deref(acov_t))) / var_plus
+            acov_t.push_back(acov[chain][t])
+        rho_hat = 1 - (mean_var - mean(acov_t)) / var_plus
         if rho_hat >= 0:
             rho_hat_t.push_back(rho_hat)
         t += 1
 
     cdef double ess = m*n_samples
     if rho_hat_t.size() > 0:
-        ess /= 1 + 2 * sum(rho_hat_t)
+        ess = ess / (1 + 2 * sum(rho_hat_t))
 
     return ess
 
@@ -185,27 +182,26 @@ def split_potential_scale_reduction(dict sim, uint n):
     if n_samples % 2 == 1:
         n_samples = n_samples - 1
 
-    cdef vector[double]* split_chain_mean = new vector[double]()
-    cdef vector[double]* split_chain_var = new vector[double]()
-
-    cdef vector[double]* samples = new vector[double]()
-    cdef vector[double]* split_chain = new vector[double]()
+    cdef vector[double] split_chain_mean, split_chain_var
+    cdef vector[double] samples, split_chain
     for chain in range(n_chains):
-        get_kept_samples(sim, chain, n, deref(samples))
+        samples.clear()
+        get_kept_samples(sim, chain, n, samples)
         # c++ vector assign isn't available in Cython; this is a workaround
+        split_chain.clear()
         for i in range(n_samples/2):
-            split_chain.push_back(deref(samples)[i])
-        split_chain_mean.push_back(mean(deref(split_chain)))
-        split_chain_var.push_back(variance(deref(split_chain)))
+            split_chain.push_back(samples[i])
+        split_chain_mean.push_back(mean(split_chain))
+        split_chain_var.push_back(variance(split_chain))
 
         split_chain.clear()
         for i in range(n_samples/2, n_samples):
-            split_chain.push_back(deref(samples)[i])
-        split_chain_mean.push_back(mean(deref(split_chain)))
-        split_chain_var.push_back(variance(deref(split_chain)))
+            split_chain.push_back(samples[i])
+        split_chain_mean.push_back(mean(split_chain))
+        split_chain_var.push_back(variance(split_chain))
 
-    cdef double var_between = n_samples/2 * variance(deref(split_chain_mean))
-    cdef double var_within = mean(deref(split_chain_var))
+    cdef double var_between = n_samples/2 * variance(split_chain_mean)
+    cdef double var_within = mean(split_chain_var)
 
     cdef double srhat = sqrt((var_between/var_within + n_samples/2 -1)/(n_samples/2))
     return srhat
