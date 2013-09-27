@@ -1,8 +1,6 @@
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
 
-cimport numpy as np
-
 ctypedef unsigned int uint  # needed for templates
 
 cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
@@ -206,8 +204,7 @@ def split_potential_scale_reduction(dict sim, uint n):
     cdef double srhat = sqrt((var_between/var_within + n_samples/2 -1)/(n_samples/2))
     return srhat
 
-def stan_prob_autocovariance(np.ndarray v):
-    cdef vector[double] dv = v
+def stan_prob_autocovariance(vector[double] dv):
     cdef vector[double] acov
     stan_autocovariance(dv, acov)
     return acov
