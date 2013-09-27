@@ -7,7 +7,5 @@ install:
   - "pip install Cython --use-mirrors"
   - "pip install numpy --use-mirrors"
   - "pip install . --use-mirrors"
-  # pandas only needed for tests
-  - "pip install pandas --use-mirrors"
 # command to run tests
 script: nosetests -w /tmp pystan

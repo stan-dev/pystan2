@@ -3,7 +3,6 @@ import os
 import unittest
 
 import numpy as np
-import pandas as pd
 import pystan.chains
 import pystan._chains
 
@@ -15,14 +14,16 @@ class TestChains(unittest.TestCase):
     f1 = os.path.join(testdata_path, 'blocker1.csv')
     f2 = os.path.join(testdata_path, 'blocker2.csv')
 
-    # pandas does not support ignoring comment lines so we skip them instead
-    c1 = pd.read_csv(f1, header=0, skiprows=20).iloc[:, 2:]
-    c2 = pd.read_csv(f2, header=0, skiprows=20).iloc[:, 2:]
+    # read csv using numpy
+    c1 = np.loadtxt(f1, skiprows=21, delimiter=',')[:, 2:]
+    c1_colnames = open(f1, 'r').readlines()[20].strip().split(',')[2:]
+    c2 = np.loadtxt(f2, skiprows=21, delimiter=',')[:, 2:]
+    c2_colnames = open(f2, 'r').readlines()[20].strip().split(',')[2:]
 
     n_samples = len(c1)
 
-    c1 = OrderedDict((k, v) for k, v in c1.items())
-    c2 = OrderedDict((k, v) for k, v in c2.items())
+    c1 = OrderedDict((k, v) for k, v in zip(c1_colnames, c1.T))
+    c2 = OrderedDict((k, v) for k, v in zip(c2_colnames, c2.T))
 
     lst = dict(samples=[{'chains': c1}, {'chains': c2}],
                n_save=np.repeat(n_samples, 2), permutation=None,
