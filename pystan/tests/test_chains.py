@@ -10,7 +10,7 @@ import pystan._chains
 class TestChains(unittest.TestCase):
     # REF: runit.test.chains.R
 
-    testdata_path = os.path.join(os.path.dirname(__file__), 'testdata')
+    testdata_path = os.path.join(os.path.dirname(__file__), 'data')
     f1 = os.path.join(testdata_path, 'blocker1.csv')
     f2 = os.path.join(testdata_path, 'blocker2.csv')
 

@@ -137,7 +137,7 @@ extensions = [Extension("pystan._api",
                         extra_compile_args=['-O3'])]
 
 ## package data
-package_data_pats = ['*.hpp', '*.pxd', '*.pyx']
+package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv']
 
 # get every file under pystan/stan/src and pystan/stan/lib
 stan_files_all = sum(
