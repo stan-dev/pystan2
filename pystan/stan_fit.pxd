@@ -22,8 +22,8 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         bool update_param_oi(vector[string] pars)
         vector[double] unconstrain_pars(vars_r_t& vars_r, vars_i_t& vars_i)
         vector[double] constrain_pars(vector[double]& params_r) except +
-        double log_prob(vector[double]& par_r) except +
-        vector[double] grad_log_prob(vector[double]& par_r) except +
+        double log_prob(vector[double] upar, bool jacobian_adjust_transform, bool gradient) except +
+        vector[double] grad_log_prob(vector[double] upar, bool jacobian_adjust_transform) except +
         int num_pars_unconstrained()
         int call_sampler(PyStanArgs&, PyStanHolder&) except +
         vector[string] param_names()

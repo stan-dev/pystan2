@@ -36,6 +36,9 @@ import pystan.api
 from pystan.constants import MAX_UINT
 import pystan.misc
 
+logging.basicConfig(level=logging.INFO)
+
+
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""

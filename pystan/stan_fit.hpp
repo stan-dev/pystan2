@@ -1272,14 +1272,15 @@ namespace pystan {
     } 
 
     /**
-     * Expose the log_prob of the model to stan_fit so a Python
-     * user can call this function. 
+     * Expose the log_prob of the model to stan_fit so R user
+     * can call this function. 
      * 
-     * @param par_r The real parameters on the unconstrained 
+     * @param upar The real parameters on the unconstrained 
      *  space. 
      */
-    double log_prob(std::vector<double>& par_r) {
+    double log_prob(std::vector<double> upar, bool jacobian_adjust_transform, bool gradient) {
       using std::vector;
+      vector<double> par_r = upar;
       if (par_r.size() != model_.num_params_r()) {
         std::stringstream msg; 
         msg << "Number of unconstrained parameters does not match " 
@@ -1289,20 +1290,36 @@ namespace pystan {
             << ").";
         throw std::domain_error(msg.str()); 
       } 
-      vector<stan::agrad::var> par_r2; 
-      for (size_t i = 0; i < par_r.size(); i++) 
-        par_r2.push_back(stan::agrad::var(par_r[i]));
       vector<int> par_i(model_.num_params_i(), 0);
-      return model_.log_prob(par_r2, par_i, &std::cout).val();
-    }
+      if (!gradient) { 
+        if (jacobian_adjust_transform) {
+          return stan::model::log_prob_propto<true>(model_, par_r, par_i, &std::cout);
+        } else {
+          return stan::model::log_prob_propto<false>(model_, par_r, par_i, &std::cout);
+        } 
+      } 
+
+      std::vector<double> grad; 
+      double lp;
+      if (jacobian_adjust_transform)
+        lp = stan::model::log_prob_grad<true,true>(model_, par_r, par_i, grad, &std::cout);
+      else 
+        lp = stan::model::log_prob_grad<true,false>(model_, par_r, par_i, grad, &std::cout);
+      // RStan returns the gradient as an attribute. Python numbers don't have attributes.
+      return lp;
+    } 
+
     /**
-     * Expose the grad_log_prob of the model to stan_fit so Python user
+     * Expose the grad_log_prob of the model to stan_fit so R user
      * can call this function. 
      * 
      * @param upar The real parameters on the unconstrained 
      *  space. 
+     * @param jacobian_adjust_transform TRUE/FALSE, whether
+     *  we add the term due to the transform from constrained
+     *  space to unconstrained space implicitly done in Stan.
      */
-    std::vector<double> grad_log_prob(std::vector<double>& upar) {
+    std::vector<double> grad_log_prob(std::vector<double> upar, bool jacobian_adjust_transform) {
       std::vector<double> par_r = upar;
       if (par_r.size() != model_.num_params_r()) {
         std::stringstream msg; 
@@ -1315,11 +1332,12 @@ namespace pystan {
       } 
       std::vector<int> par_i(model_.num_params_i(), 0);
       std::vector<double> gradient; 
-      double lp = model_.grad_log_prob(par_r, par_i, gradient, &std::cout);
-      // NOTE: rstan also returns "log_prob" as a list attribute
-      // Rcpp::NumericVector grad = Rcpp::wrap(gradient); 
-      // grad.attr("log_prob") = lp;
-      // return grad;
+      double lp;
+      if (jacobian_adjust_transform)
+        lp = stan::model::log_prob_grad<true,true>(model_, par_r, par_i, gradient, &std::cout);
+      else 
+        lp = stan::model::log_prob_grad<true,false>(model_, par_r, par_i, gradient, &std::cout);
+      // RStan returns the lp as an attribute. Python numbers don't have attributes.
       return gradient;
     } 
 

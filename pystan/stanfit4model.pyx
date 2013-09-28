@@ -47,7 +47,6 @@ cdef extern from "$model_cppname.hpp" namespace "${model_cppname}_namespace":
     cdef cppclass $model_cppname:
         $model_cppname(var_context& context) except +
 
-
 # NOTE: Methods that aren't intended for public use are prefixed by '_'. For
 # example, _update_param_names_oi probably shouldn't be called unless you know
 # something about the state of the C++ class instance wrapped by the class.
@@ -294,6 +293,44 @@ cdef class StanFit4$model_cppname:
 
     def summary(self):
         return pystan.misc._summary(self)
+
+    def log_prob(self, upars, jacobian_adjust_transform=True, gradient=False):
+        """
+        Expose the log_prob of the model to stan_fit so user can call
+        this function.
+
+        Parameters
+        ----------
+        upar :
+            The real parameters on the unconstrained space. 
+        jacobian_adjust_transform : bool
+            Whether we add the term due to the transform from constrained
+            space to unconstrained space implicitly done in Stan.
+        """
+        # gradient is ignored for now. Call grad_log_prob to get the gradient.
+        cdef vector[double] par_r = np.asarray(upars).flat
+        return self.thisptr.log_prob(par_r, jacobian_adjust_transform, gradient)
+
+    # FIXME: adding this creates a strange Cython error
+    # redefinition of ‘PyObject* __pyx_convert_vector_to_py_double(const std::vector<double>&)
+    #
+    # def grad_log_prob(self, upars, jacobian_adjust_transform=True):
+    #     """
+    #     Expose the grad_log_prob of the model to stan_fit so user
+    #     can call this function.
+
+    #     Parameters
+    #     ----------
+    #     upar :
+    #         The real parameters on the unconstrained space. 
+    #     jacobian_adjust_transform : bool
+    #         Whether we add the term due to the transform from constrained
+    #         space to unconstrained space implicitly done in Stan.
+    #     """
+    #     cdef vector[double] par_r = upars
+    #     return self.thisptr.grad_log_prob(par_r, jacobian_adjust_transform)
+    def grad_log_prob(self, upars, jacobian_adjust_transform=True):
+        raise NotImplementedError("grad_log_prob is not yet implemented")
 
     # "private" Python methods
 

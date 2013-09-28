@@ -9,6 +9,22 @@ import numpy as np
 from pystan import StanModel
 
 
+class TestNormal(unittest.TestCase):
+
+    model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+    model = StanModel(model_code=model_code, model_name="normal1",
+                      verbose=True)
+
+    def test_constructor(self):
+        self.assertEqual(self.model.model_name, "normal1")
+
+    def test_log_prob(self):
+        fit = self.model.sampling()
+        extr = fit.extract()
+        y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
+        self.assertEqual(fit.log_prob(y_last), log_prob_last)
+
+
 class TestBernoulli(unittest.TestCase):
 
     bernoulli_model_code = """
@@ -27,11 +43,6 @@ class TestBernoulli(unittest.TestCase):
     bernoulli_data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
     model = StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
-
-    def test_simple_model_constructor(self):
-        m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}',
-                    model_name="normal1", verbose=True)
-        self.assertEqual(m.model_name, "normal1")
 
     def test_bernoulli_constructor(self):
         model = self.model
@@ -95,6 +106,7 @@ class TestBernoulli(unittest.TestCase):
     def test_bernoulli_summary(self):
         fit = self.model.sampling(data=self.bernoulli_data)
         s = fit.summary()
+        assert s is not None
         repr(fit)
         print(fit)
 
