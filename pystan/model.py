@@ -16,6 +16,7 @@ else:
 import datetime
 import importlib
 import imp
+import io
 import logging
 from numbers import Number
 import os
@@ -232,15 +233,15 @@ class StanModel:
             os.makedirs(lib_dir)
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
-        with open(model_cpp_file, 'w') as outfile:
+        with io.open(model_cpp_file, 'w') as outfile:
             outfile.write(self.model_cppcode)
 
         pyx_file = os.path.join(lib_dir, module_name + '.pyx')
         pyx_template_file = os.path.join(pystan_dir, 'stanfit4model.pyx')
-        with open(pyx_template_file) as infile:
+        with io.open(pyx_template_file, 'r', encoding='utf-8') as infile:
             s = infile.read()
             template = string.Template(s)
-        with open(pyx_file, 'w') as outfile:
+        with io.open(pyx_file, 'w') as outfile:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
@@ -304,7 +305,7 @@ class StanModel:
             module_filename = state['module'].__file__
             state['module_filename'] = module_filename
             state['module_name'] = state['module'].__name__
-            with open(module_filename, 'rb') as f:
+            with io.open(module_filename, 'rb') as f:
                 state['module_bytes'] = f.read()
         del state['module']
         del state['fit_class']
@@ -326,7 +327,7 @@ class StanModel:
             if not os.path.exists(lib_dir):
                 os.makedirs(lib_dir)
             module_basename = os.path.basename(module_filename)
-            with open(os.path.join(lib_dir, module_basename), 'wb') as f:
+            with io.open(os.path.join(lib_dir, module_basename), 'wb') as f:
                 f.write(module_bytes)
             try:
                 self.module = load_module(module_name, lib_dir)
