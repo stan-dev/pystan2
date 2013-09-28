@@ -36,7 +36,8 @@ import pystan.api
 from pystan.constants import MAX_UINT
 import pystan.misc
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('pystan')
+logger.setLevel(logging.INFO)
 
 
 def load_module(module_name, module_path):
@@ -199,12 +200,12 @@ class StanModel:
         self.save_dso = save_dso
 
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
-        logging.warning(msg.format(self.model_name))
+        logger.warning(msg.format(self.model_name))
         if verbose:
             msg = "OS: {}, Python: {}, Cython {}".format(sys.platform,
                                                          sys.version,
                                                          Cython.__version__)
-            logging.info(msg)
+            logger.info(msg)
         if boost_lib is not None:
             # FIXME: allow boost_lib, eigen_lib to be specified
             raise NotImplementedError
@@ -331,9 +332,9 @@ class StanModel:
                 self.module = load_module(module_name, lib_dir)
                 self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
             except Exception as e:
-                logging.warning(e)
-                logging.warning("Something went wrong while unpickling "
-                                "the StanModel. Consider recompiling.")
+                logger.warning(e)
+                logger.warning("Something went wrong while unpickling "
+                               "the StanModel. Consider recompiling.")
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, method="Newton",
@@ -609,7 +610,7 @@ class StanModel:
             if kwargs.get('refresh') is None or kwargs.get('refresh') > 0:
                 chain_num = i + 1
                 msg = "{} FOR MODEL {} NOW (CHAIN {})."
-                logging.info(msg.format(mode, self.model_name, chain_num))
+                logger.info(msg.format(mode, self.model_name, chain_num))
             ret, samples_i = fit._call_sampler(args_list[i])
             samples.append(samples_i)
             # call_sampler in stan_fit.hpp will raise a std::runtime_error

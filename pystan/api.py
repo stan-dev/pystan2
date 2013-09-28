@@ -14,6 +14,9 @@ from pystan._compat import string_types
 from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
+logger = logging.getLogger('pystan')
+logger.setLevel(logging.INFO)
+
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
           verbose=False, obsfucate_model_name=False):
@@ -106,7 +109,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
                 with io.open(file, 'rt', encoding='utf-8') as f:
                     model_code = f.read()
             except:
-                logging.critical("Unable to read file specified by `file`.")
+                logger.critical("Unable to read file specified by `file`.")
                 raise
         else:
             model_code = file.read()
@@ -117,7 +120,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
     if result['status'] == -1:  # EXCEPTION_RC = -1
-        logging.error("Error parsing:\n{}".format(result['msg']))
+        logger.error("Error parsing:\n{}".format(result['msg']))
     del result['msg']
     result.update({'model_name': model_name})
     result.update({'model_code': model_code})

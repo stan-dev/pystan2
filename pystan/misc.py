@@ -43,6 +43,9 @@ except ImportError:
 import pystan.chains as chains
 from pystan.constants import MAX_UINT
 
+logger = logging.getLogger('pystan')
+logger.setLevel(logging.INFO)
+
 
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
                    digits_summary=1):
@@ -473,14 +476,14 @@ def _check_seed(seed, raise_exception=True):
             if raise_exception is True:
                 raise ValueError("`seed` must be a string of digits.")
             else:
-                logging.warn("`seed` needs to be a string of digits.")
+                logger.warn("`seed` needs to be a string of digits.")
                 return None
     elif isinstance(seed, Number):
         seed = int(seed)
     elif seed is None:
         seed = random.randint(0, MAX_UINT)
     else:
-        logging.warn('`seed` did not have expected characteristics.')
+        logger.warn('`seed` did not have expected characteristics.')
 
     return seed
 
@@ -771,5 +774,5 @@ def _writable_sample_file(file, warn=True, wfun=None):
     else:
         dir2 = tempfile.mkdtemp()
         if warn:
-            logging.warning(wfun(dir, dir2))
+            logger.warning(wfun(dir, dir2))
         return os.path.join(dir2, os.path.basename(file))
