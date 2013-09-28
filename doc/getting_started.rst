@@ -45,9 +45,9 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://github.com/ariddell/pystan/archive/0.2.1.zip
-   unzip 0.2.1.zip
-   cd pystan-0.2.1
+   wget https://github.com/ariddell/pystan/archive/0.2.2.zip
+   unzip 0.2.2.zip
+   cd pystan-0.2.2
    python setup.py install
    cd ..  # change out of the source directory before using pystan
 

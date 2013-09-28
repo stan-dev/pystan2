@@ -6,11 +6,17 @@
  What's New 
 ============
 
+v.0.2.2 (28. September 2013)
+============================
+
+- ``log_prob`` method available from StanFit instances.
+- Estimated sample size and Rhat included in summary.
+
 v.0.2.1 (17. September 2013)
 ============================
 
-- ``StanModel`` instances can be pickled.
-- Basic support for saving output to ``sample_file``
+- ``StanModel`` instances can now be pickled.
+- Adds basic support for saving output to ``sample_file``.
 
 v.0.2.0 (25. August 2013)
 =========================
