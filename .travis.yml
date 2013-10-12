@@ -3,6 +3,8 @@ python:
   - "2.7"
   - "3.3"
 # command to install dependencies
+before_install:
+  - sudo apt-get install liblapack-dev gfortran libblas-dev
 install:
   - "pip install Cython --use-mirrors"
   - "pip install numpy --use-mirrors"
