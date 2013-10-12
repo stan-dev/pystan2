@@ -16,6 +16,11 @@ Important links
 - Issue tracker: https://github.com/ariddell/pystan/issues
 - Stan: http://mc-stan.org/
 
+Similar projects
+----------------
+
+- PyMC: http://pymc-devs.github.io/pymc/
+
 Installation
 ------------
 

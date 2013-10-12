@@ -1,3 +1,4 @@
+
 import logging
 import os
 import tempfile
@@ -44,6 +45,8 @@ class TestBernoulli(unittest.TestCase):
 
     model = StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
 
+    fit = model.sampling(data=bernoulli_data)
+
     def test_bernoulli_constructor(self):
         model = self.model
         self.assertEqual(model.model_name, "bernoulli")
@@ -58,7 +61,7 @@ class TestBernoulli(unittest.TestCase):
         logging.info(msg)
 
     def test_bernoulli_sampling(self):
-        fit = self.model.sampling(data=self.bernoulli_data)
+        fit = self.fit
         self.assertEqual(fit.sim['iter'], 2000)
         self.assertEqual(fit.sim['pars_oi'], ['theta', 'lp__'])
         self.assertEqual(len(fit.sim['samples']), 4)
@@ -82,7 +85,7 @@ class TestBernoulli(unittest.TestCase):
             fit = self.model.sampling(data=bad_data)
 
     def test_bernoulli_extract(self):
-        fit = self.model.sampling(data=self.bernoulli_data)
+        fit = self.fit
         extr = fit.extract(permuted=True)
         assert -7.4 < np.mean(extr['lp__']) < -7.0
         assert 0.1 < np.mean(extr['theta']) < 0.4
@@ -104,11 +107,16 @@ class TestBernoulli(unittest.TestCase):
         assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
 
     def test_bernoulli_summary(self):
-        fit = self.model.sampling(data=self.bernoulli_data)
+        fit = self.fit
         s = fit.summary()
         assert s is not None
         repr(fit)
         print(fit)
+
+    def test_bernoulli_plot(self):
+        fit = self.fit
+        fig = fit.plot()
+        assert fig is not None
 
     def test_bernoulli_sample_file(self):
         tmpdir = tempfile.mkdtemp()

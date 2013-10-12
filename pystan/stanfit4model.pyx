@@ -36,6 +36,7 @@ import logging
 import numpy as np
 
 import pystan.misc
+import pystan.plots
 from pystan._compat import PY2, string_types
 
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
@@ -203,6 +204,9 @@ cdef class StanFit4$model_cppname:
         del self.thisptr
 
     # public methods
+
+    def plot(self, pars=None):
+        return pystan.plots.traceplot(self, pars)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False):
         """Extract samples in different forms for different parameters.

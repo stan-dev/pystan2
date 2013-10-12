@@ -38,6 +38,11 @@ Important links
 - HTML documentation: http://pystan.readthedocs.org
 - Issue tracker: https://github.com/ariddell/pystan/issues
 
+Similar projects
+----------------
+
+- PyMC: http://pymc-devs.github.io/pymc/
+
 Indices and tables
 ------------------
 

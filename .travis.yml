@@ -6,6 +6,8 @@ python:
 install:
   - "pip install Cython --use-mirrors"
   - "pip install numpy --use-mirrors"
+  - "pip install scipy --use-mirrors"
+  - "pip install matplotlib --use-mirrors"
   - "pip install . --use-mirrors"
 # command to run tests
 script: nosetests -w /tmp pystan
