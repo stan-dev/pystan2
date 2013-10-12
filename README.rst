@@ -25,7 +25,8 @@ Installation
 ------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
-(version 0.19.1 or greater) are required.
+(version 0.19.1 or greater) are required. `matplotlib <http://matplotlib.org/>`_
+is optional.
 
 PyStan and the required packages may be installed from the `Python Package Index
 <https://pypi.python.org/pypi>`_ using ``pip``.
@@ -89,4 +90,8 @@ Example
 
     eta = fit.extract(permuted=True)['eta']
     np.mean(eta, axis=0)
+
+    # if matplotlib is installed (optional, not required), a visual summary and
+    # traceplot are available
+    fit.plot()
 

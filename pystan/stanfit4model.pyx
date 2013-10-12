@@ -208,6 +208,10 @@ cdef class StanFit4$model_cppname:
     def plot(self, pars=None):
         return pystan.plots.traceplot(self, pars)
 
+    def traceplot(self, pars=None):
+        # FIXME: for now plot and traceplot do the same thing
+        return pystan.plots.traceplot(self, pars)
+
     def extract(self, pars=None, permuted=True, inc_warmup=False):
         """Extract samples in different forms for different parameters.
 

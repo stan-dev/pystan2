@@ -153,3 +153,10 @@ parameters of interest, or just an array.
 .. code-block:: python
 
     print(fit)
+
+If `matplotlib <http://matplotlib.org/>`_ is installed, a visual summary may
+also be displayed using the ``plot()`` method.
+
+.. code-block:: python
+
+    fit.plot()
