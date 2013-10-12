@@ -38,7 +38,7 @@ import numpy as np
 try:
     from scipy.stats.mstats import mquantiles
 except ImportError:
-    from pystan.external.scipy import mquantiles
+    from pystan.external.mstats import mquantiles
 
 import pystan.chains as chains
 from pystan.constants import MAX_UINT
