@@ -17,6 +17,23 @@ ctypedef unsigned int uint  # needed for templates
 cdef extern from "stan_fit.hpp" namespace "pystan":
     ctypedef map[string, pair[vector[double], vector[size_t]]] vars_r_t
     ctypedef map[string, pair[vector[int], vector[size_t]]] vars_i_t
+    ctypedef enum sampling_algo_t:
+        NUTS = 1
+        HMC = 2
+        Metropolis = 3
+    ctypedef enum optim_algo_t:
+        Newton = 1
+        Nesterov = 2
+        BFGS = 3
+    ctypedef enum sampling_metric_t:
+        UNIT_E = 1
+        DIAG_E = 2
+        DENSE_E = 3
+    ctypedef enum stan_args_method_t:
+        SAMPLING = 1
+        OPTIM = 2
+        TEST_GRADIENT = 3
+
     cdef cppclass stan_fit[M, R]:
         stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) except +
         bool update_param_oi(vector[string] pars)
@@ -31,37 +48,55 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         vector[vector[uint]] param_dims()
         vector[string] param_fnames_oi()
 
-    cdef cppclass PyStanArgs:
-        bool sample_file_flag
-        bool diagnostic_file_flag
-        string sample_file
-        string diagnostic_file
+    cdef struct sampling_t:
         int iter
+        int refresh
+        sampling_algo_t algorithm
         int warmup
         int thin
-        int iter_save
-        int iter_save_wo_warmup
-        bool save_warmup
-        int refresh
-        int leapfrog_steps
-        double epsilon
-        int max_treedepth
-        double epsilon_pm
-        bool equal_step_sizes
-        double delta
-        double gamma
+        bool save_warmup  # whether to save warmup samples (always true now)
+        int iter_save # number of iterations saved 
+        int iter_save_wo_warmup  # number of iterations saved wo warmup
+        bool adapt_engaged
+        double adapt_gamma
+        double adapt_delta
+        double adapt_kappa
+        double adapt_t0
+        sampling_metric_t metric  # UNIT_E, DIAG_E, DENSE_E
+        double stepsize  # default to 1
+        double stepsize_jitter
+        int max_treedepth  # for NUTS, default to 10.  
+        double int_time  # for HMC, default to 2 * pi
+
+    cdef struct optim_t:
+        int iter  # default to 2000
+        int refresh  # default to 100
+        optim_algo_t algorithm  # Newton, Nesterov, BFGS
+        bool save_iterations  # default to false
+        double stepsize  # default to 1, for Nesterov
+        double init_alpha  # default to 0.0001, for BFGS
+        double tol_obj  # default to 1e-8, for BFGS
+        double tol_grad  # default to 1e-8, for BFGS
+        double tol_param  # default to 1e-8, for BFGS
+
+    cdef union ctrl_t:
+        sampling_t sampling
+        optim_t optim
+
+    cdef cppclass PyStanArgs:
         uint random_seed
-        string random_seed_src
         uint chain_id
-        string chain_id_src
-        bool append_samples
-        bool test_grad
-        int point_estimate
         string init
         map[string, pair[vector[double], vector[size_t] ] ] init_vars_r
         map[string, pair[vector[int], vector[size_t] ] ] init_vars_i
-        string sampler
-        bool nondiag_mass
+        double init_radius
+        string sample_file
+        bool append_samples
+        bool sample_file_flag
+        stan_args_method_t method
+        string diagnostic_file
+        bool diagnostic_file_flag
+        ctrl_t ctrl
 
     cdef cppclass PyStanHolder:
         int num_failed

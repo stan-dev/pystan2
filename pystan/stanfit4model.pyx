@@ -38,6 +38,7 @@ import numpy as np
 import pystan.misc
 import pystan.plots
 from pystan._compat import PY2, string_types
+from pystan.constants import sampling_algo_t, optim_algo_t, sampling_metric_t, stan_args_method_t
 
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
     cdef cppclass additive_combine_engine[T, U]:
@@ -74,34 +75,75 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
 
 
 cdef dict _dict_from_pystanargs(PyStanArgs* args):
-    d = {}
-    d['save_warmup'] = args.save_warmup
-    d['sample_file_flag'] = args.sample_file_flag
-    d['sample_file'] = args.sample_file
-    d['diagnostic_file_flag'] = args.diagnostic_file_flag
-    d['iter'] = args.iter
-    d['warmup'] = args.warmup
-    d['thin'] = args.thin
-    d['iter_save_wo_warmup'] = args.iter_save_wo_warmup
-    d['iter_save'] = args.iter_save
-    d['leapfrog_steps'] = args.leapfrog_steps
-    d['epsilon'] = args.epsilon
-    d['epsilon_pm'] = args.epsilon_pm
-    d['max_treedepth'] = args.max_treedepth
-    d['equal_step_sizes'] = args.equal_step_sizes
-    d['delta'] = args.delta
-    d['gamma'] = args.gamma
-    d['refresh'] = args.refresh
-    d['random_seed'] = args.random_seed
-    d['random_seed_src'] = args.random_seed_src
+    d = dict()
+    ctrl_d = dict()
+    d['random_seed'] = str(args.random_seed)
     d['chain_id'] = args.chain_id
-    d['chain_id_src'] = args.chain_id_src
     d['init'] = args.init
+    # FIXME: yet to be implemented: d['init_list'] = args.init_list
+    d['init_radius'] = args.init_radius
     d['append_samples'] = args.append_samples
-    d['test_grad'] = args.test_grad
-    d['point_estimate'] = args.point_estimate
-    d['sampler'] = args.sampler.decode('utf-8')
-    d['nondiag_mass'] = args.nondiag_mass
+    if args.sample_file_flag:
+        d['sample_file'] = args.sample_file
+    if args.diagnostic_file_flag:
+        d['diagnostic_file'] = args.diagnostic_file
+
+    method = stan_args_method_t(args.method)  # implicit cast to int, I think
+    if method == stan_args_method_t.SAMPLING:
+        d["method"] = "sampling"
+        d["iter"] = args.ctrl.sampling.iter
+        d["warmup"] = args.ctrl.sampling.warmup
+        d["thin"] = args.ctrl.sampling.thin
+        d["refresh"] = args.ctrl.sampling.refresh
+        d["test_grad"] = False
+        ctrl_d["adapt_engaged"] = args.ctrl.sampling.adapt_engaged
+        ctrl_d["adapt_gamma"] = args.ctrl.sampling.adapt_gamma
+        ctrl_d["adapt_delta"] = args.ctrl.sampling.adapt_delta
+        ctrl_d["adapt_kappa"] = args.ctrl.sampling.adapt_kappa
+        ctrl_d["adapt_t0"] = args.ctrl.sampling.adapt_t0
+        algorithm = sampling_algo_t(args.ctrl.sampling.algorithm)
+        if algorithm == sampling_algo_t.NUTS:
+            metric = sampling_metric_t(args.ctrl.sampling.metric)
+            if metric == sampling_metric_t.UNIT_E:
+                ctrl_d["metric"] = "unit_e"
+                d["sampler_t"] = "NUTS(unit_e)"
+            elif metric == sampling_metric_t.DIAG_E:
+                ctrl_d["metric"] = "diag_e"
+                d["sampler_t"] = "NUTS(diag_e)"
+            elif metric == sampling_metric_t.DENSE_E:
+                ctrl_d["metric"] = "dense_e"
+                d["sampler_t"] = "NUTS(dense_e)"
+            ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
+            ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
+            ctrl_d["max_treedepth"] = args.ctrl.sampling.max_treedepth
+        elif algorithm == sampling_algo_t.HMC:
+            ctrl_d["int_time"] = args.ctrl.sampling.int_time
+            d["sampler_t"] = "HMC"
+        elif algorithm == sampling_algo_t.Metropolis:
+            d["sampler_t"] = "Metropolis"
+
+        d["control"] = ctrl_d
+    elif method == stan_args_method_t.OPTIM:
+        d["method"] = "optim"
+        d["iter"] = args.ctrl.optim.iter
+        d["refresh"] = args.ctrl.optim.refresh
+        d["save_iterations"] = args.ctrl.optim.save_iterations
+        algorithm = optim_algo_t(args.ctrl.optim.algorithm)
+        if algorithm == optim_algo_t.Newton:
+            d["algorithm"] = "Newton"
+            pass
+        elif algorithm == optim_algo_t.Nesterov:
+            d["algorithm"] = "Nesterov"
+            d["stepsize"] = args.ctrl.optim.stepsize
+        elif algorithm == optim_algo_t.BFGS:
+            d["algorithm"] = "BFGS"
+            d["init_alpha"] = args.ctrl.optim.init_alpha
+            d["tol_obj"] = args.ctrl.optim.tol_obj
+            d["tol_grad"] = args.ctrl.optim.tol_grad
+            d["tol_param"] = args.ctrl.optim.tol_param
+    elif method == stan_args_method_t.TEST_GRADIENT:
+        d["method"] = "test_grad"
+        d["test_grad"] = True
     return d
 
 
@@ -111,32 +153,47 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     # intended for the c++ function sampler_command(...) in stan_fit.hpp
     # If the dictionary doesn't contain the correct keys (arguments),
     # the function will raise a KeyError exception (as it should!).
-    p.save_warmup = args['save_warmup']
-    p.sample_file_flag = args['sample_file_flag']
-    p.sample_file = args['sample_file']
-    p.diagnostic_file_flag = args['diagnostic_file_flag']
-    p.iter = args['iter']
-    p.warmup = args['warmup']
-    p.thin = args['thin']
-    p.iter_save_wo_warmup = args['iter_save_wo_warmup']
-    p.iter_save = args['iter_save']
-    p.leapfrog_steps = args['leapfrog_steps']
-    p.epsilon = args['epsilon']
-    p.epsilon_pm = args['epsilon_pm']
-    p.max_treedepth = args['max_treedepth']
-    p.equal_step_sizes = args['equal_step_sizes']
-    p.delta = args['delta']
-    p.gamma = args['gamma']
-    p.refresh = args['refresh']
     p.random_seed = <unsigned int> args['random_seed']
-    p.random_seed_src = args['random_seed_src']
     p.chain_id = <unsigned int> args['chain_id']
-    p.chain_id_src = args['chain_id_src']
     p.init = args['init']
+    # TODO: p.init_vars_r = ...
+    # TODO: p.init_vars_i = ...
+    p.init_radius = args['init_radius']
+    p.sample_file = args['sample_file']
     p.append_samples = args['append_samples']
-    p.test_grad = args['test_grad']
-    p.point_estimate = args['point_estimate']
-    p.nondiag_mass = args['nondiag_mass']
+    p.sample_file_flag = args['sample_file_flag']
+    p.method = args['method']
+    p.sample_file = args['diagnostic_file']
+    p.diagnostic_file_flag = args['diagnostic_file_flag']
+    if args['method'] == stan_args_method_t.SAMPLING:
+        p.ctrl.sampling.iter = args['ctrl']['sampling']['iter']
+        p.ctrl.sampling.refresh = args['ctrl']['sampling']['refresh']
+        p.ctrl.sampling.algorithm = args['ctrl']['sampling']['algorithm']
+        p.ctrl.sampling.warmup = args['ctrl']['sampling']['warmup']
+        p.ctrl.sampling.thin = args['ctrl']['sampling']['thin']
+        p.ctrl.sampling.save_warmup = args['save_warmup']  # NOTE: breaks pattern
+        p.ctrl.sampling.iter_save = args['ctrl']['sampling']['iter_save']
+        p.ctrl.sampling.iter_save_wo_warmup = args['ctrl']['sampling']['iter_save_wo_warmup']
+        p.ctrl.sampling.adapt_engaged = args['ctrl']['sampling']['adapt_engaged']
+        p.ctrl.sampling.adapt_gamma = args['ctrl']['sampling']['adapt_gamma']
+        p.ctrl.sampling.adapt_delta = args['ctrl']['sampling']['adapt_delta']
+        p.ctrl.sampling.adapt_kappa = args['ctrl']['sampling']['adapt_kappa']
+        p.ctrl.sampling.adapt_t0 = args['ctrl']['sampling']['adapt_t0']
+        p.ctrl.sampling.metric = args['ctrl']['sampling']['metric']
+        p.ctrl.sampling.stepsize = args['ctrl']['sampling']['stepsize']
+        p.ctrl.sampling.stepsize_jitter = args['ctrl']['sampling']['stepsize_jitter']
+        p.ctrl.sampling.max_treedepth = args['ctrl']['sampling']['max_treedepth']
+        p.ctrl.sampling.int_time = args['ctrl']['sampling']['int_time']
+    elif args['method'] == stan_args_method_t.OPTIM:
+        p.ctrl.optim.iter = args['ctrl']['optim']['iter']
+        p.ctrl.optim.refresh = args['ctrl']['optim']['refresh']
+        p.ctrl.optim.algorithm = args['ctrl']['optim']['algorithm']
+        p.ctrl.optim.save_iterations = args['save_iterations']
+        p.ctrl.optim.stepsize = args['ctrl']['optim']['stepsize']
+        p.ctrl.optim.init_alpha = args['ctrl']['optim']['init_alpha']
+        p.ctrl.optim.tol_obj = args['ctrl']['optim']['tol_obj']
+        p.ctrl.optim.tol_grad = args['ctrl']['optim']['tol_grad']
+        p.ctrl.optim.tol_param = args['ctrl']['optim']['tol_param']
 
 
 cdef class StanFit4$model_cppname:
@@ -232,8 +289,10 @@ cdef class StanFit4$model_cppname:
         If `permuted` is True, return dictionary with samples for each
         parameter (or other quantity) named in `pars`.
 
-        If `permuted` is False, return an array with the following dimensions:
-        (# of iter (with or w.o. warmup), # of chains, # of flat parameters).
+        If `permuted` is False, an array is returned. The first dimension of
+        the array is for the iterations; the second for the number of chains;
+        the third for the parameters. Vectors and arrays are expanded to one
+        parameter (a scalar) per cell, with names indicating the third dimension.
 
         """
         if self.mode == 1:
@@ -302,7 +361,7 @@ cdef class StanFit4$model_cppname:
     def summary(self):
         return pystan.misc._summary(self)
 
-    def log_prob(self, upars, jacobian_adjust_transform=True, gradient=False):
+    def log_prob(self, upars, adjust_transform=True, gradient=False):
         """
         Expose the log_prob of the model to stan_fit so user can call
         this function.
@@ -310,19 +369,37 @@ cdef class StanFit4$model_cppname:
         Parameters
         ----------
         upar :
-            The real parameters on the unconstrained space. 
-        jacobian_adjust_transform : bool
+            The real parameters on the unconstrained space.
+        adjust_transform : bool
             Whether we add the term due to the transform from constrained
             space to unconstrained space implicitly done in Stan.
+
+        Note
+        ----
+        In Stan, the parameters need be defined with their supports. For
+        example, for a variance parameter, we must define it on the positive
+        real line. But inside Stan's sampler, all parameters defined on the
+        constrained space are transformed to unconstrained space, so the log
+        density function need be adjusted (i.e., adding the log of the absolute
+        value of the Jacobian determinant).  With the transformation, Stan's
+        samplers work on the unconstrained space and once a new iteration is
+        drawn, Stan transforms the parameters back to their supports. All the
+        transformation are done inside Stan without interference from the users.
+        However, when using the log density function for a model exposed to
+        Python, we need to be careful.  For example, if we are interested in
+        finding the mode of parameters on the constrained space, we then do not
+        need the adjustment.  For this reason, there is an argument named
+        `adjust_transform` for functions `log_prob` and `grad_log_prob`.
+
         """
         # gradient is ignored for now. Call grad_log_prob to get the gradient.
         cdef vector[double] par_r = np.asarray(upars).flat
-        return self.thisptr.log_prob(par_r, jacobian_adjust_transform, gradient)
+        return self.thisptr.log_prob(par_r, adjust_transform, gradient)
 
     # FIXME: adding this creates a strange Cython error
     # redefinition of ‘PyObject* __pyx_convert_vector_to_py_double(const std::vector<double>&)
     #
-    # def grad_log_prob(self, upars, jacobian_adjust_transform=True):
+    # def grad_log_prob(self, upars, adjust_transform=True):
     #     """
     #     Expose the grad_log_prob of the model to stan_fit so user
     #     can call this function.
@@ -330,14 +407,14 @@ cdef class StanFit4$model_cppname:
     #     Parameters
     #     ----------
     #     upar :
-    #         The real parameters on the unconstrained space. 
-    #     jacobian_adjust_transform : bool
+    #         The real parameters on the unconstrained space.
+    #     adjust_transform : bool
     #         Whether we add the term due to the transform from constrained
     #         space to unconstrained space implicitly done in Stan.
     #     """
     #     cdef vector[double] par_r = upars
-    #     return self.thisptr.grad_log_prob(par_r, jacobian_adjust_transform)
-    def grad_log_prob(self, upars, jacobian_adjust_transform=True):
+    #     return self.thisptr.grad_log_prob(par_r, adjust_transform)
+    def grad_log_prob(self, upars, adjust_transform=True):
         raise NotImplementedError("grad_log_prob is not yet implemented")
 
     # "private" Python methods
