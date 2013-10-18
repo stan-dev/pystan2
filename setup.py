@@ -52,11 +52,12 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Information Analysis'
 ]
-MAJOR = 0
-MINOR = 2
-MICRO = 3
+MAJOR = 2
+MINOR = 0
+MICRO = 0
+NANO = 0
 ISRELEASED = False
-VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 
 FULLVERSION = VERSION
 if not ISRELEASED:
