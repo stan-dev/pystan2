@@ -160,7 +160,7 @@ if __name__ == '__main__':
         version=FULLVERSION,
         maintainer=AUTHOR,
         maintainer_email=AUTHOR_EMAIL,
-        packages=['pystan', 'pystan.tests', 'pystan.external'],
+        packages=['pystan', 'pystan.tests', 'pystan.external', 'pystan.external.enum'],
         ext_modules=cythonize(extensions),
         libraries=[libstan],
         package_data={'pystan': package_data_pats},
