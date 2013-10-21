@@ -462,6 +462,7 @@ class StanModel:
         if kwargs.get('method'):
             raise ValueError('`method` is no longer used. Specify `algorithm` instead.')
         stan_args.update(kwargs)
+        stan_args = pystan.misc._get_valid_stan_args(stan_args)
 
         ret, sample = fit._call_sampler(stan_args)
         pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
