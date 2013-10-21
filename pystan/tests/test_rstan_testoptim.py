@@ -19,11 +19,14 @@ class TestOptim(unittest.TestCase):
     }
 
     model {
+    mu ~ normal(0, 5);
+    sigma ~ normal(0, 5);
     y ~ normal(mu, sigma);
     }
     """
 
     N = 30
+    np.random.seed(1)
     y = np.random.normal(size=N)
     dat = {'N': N, 'y': y}
     logging.info("mean(y)={} and sd(y)={}".format(np.mean(y),
@@ -49,5 +52,5 @@ class TestOptim(unittest.TestCase):
 
     def test_optim_stdnorm_nesterov(self):
         optim = self.sm.optimizing(data=self.dat, algorithm='Nesterov')
-        self.assertTrue(-1 < optim['par']['mu'] < 1)
-        self.assertTrue(0 < optim['par']['sigma'] < 2)
+        self.assertTrue(-3 < optim['par']['mu'] < 3)
+        self.assertTrue(0 < optim['par']['sigma'] < 5)
