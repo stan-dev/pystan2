@@ -454,7 +454,7 @@ class StanModel:
         stan_args = dict(init=init,
                          seed=seed,
                          method="optim",
-                         algorithm=algorithms.index(algorithm) + 1)
+                         algorithm=algorithm)
 
         # FIXME: add sample_file handling here
 
@@ -643,7 +643,7 @@ class StanModel:
                                               warmup=warmup, thin=thin,
                                               init=init, seed=seed, sample_file=sample_file,
                                               diagnostic_file=diagnostic_file,
-                                              algorithm=algorithms.index(algorithm) + 1,
+                                              algorithm=algorithm,
                                               control=control, **kwargs)
 
         # number of samples saved after thinning

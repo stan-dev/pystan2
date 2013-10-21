@@ -319,6 +319,7 @@ def _split_data(data):
             raise ValueError(msg.format(k, v.dtype))
     return data_r, data_i
 
+
 def _config_argss(chains, iter, warmup, thin,
                   init, seed, sample_file, diagnostic_file, algorithm,
                   control, **kwargs):
@@ -391,7 +392,7 @@ def _config_argss(chains, iter, warmup, thin,
         else:
             chain_ids = chain_id + [max(chain_id) + 1 + i
                                     for i in range(chains - chain_id_len)]
-        kwargs['chain_id'] = None  # NOTE: NULL in rstan, not sure why
+        del kwargs['chain_id']
 
     kwargs['method'] = "test_grad" if kwargs.get('test_grad') else 'sampling'
 
@@ -399,17 +400,19 @@ def _config_argss(chains, iter, warmup, thin,
     if control is not None:
         if not isinstance(control, dict):
             raise ValueError("control must be a dictionary")
-        metric = control['metric']
+        metric = control.get('metric')
         if metric is not None:
-            control['metric'] = all_metrics.index(metric)
+            if metric not in all_metrics:
+                raise ValueError("Metric must be one of {}".format(all_metrics))
+            control['metric'] = metric
         kwargs['control'] = control
 
     argss = [dict() for _ in range(chains)]
     for i in range(chains):
-        argss[i] = {'chain_id': chain_ids[i], 'iter': iters[i],
-                    'thin': thins[i], 'seed': seed,
-                    'warmup': warmups[i], 'init': inits[i],
-                    'algorithm': algorithm}
+        argss[i] = dict(chain_id=chain_ids[i],
+                        iter=iters[i], thin=thins[i], seed=seed,
+                        warmup=warmups[i], init=inits[i],
+                        algorithm=algorithm)
 
     if sample_file is not None:
         sample_file = _writable_sample_file(sample_file)
@@ -455,17 +458,18 @@ def _get_valid_stan_args(base_args=None):
     args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
     args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
 
-
     if args['method'] == stan_args_method_t.SAMPLING:
+        args['ctrl'] = dict(sampling=dict())
         args['ctrl']['sampling']['iter'] = iter = args.get('iter', 2000)
         args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', args['iter'] // 2)
         calculated_thin = iter - warmup // 1000
         if calculated_thin < 1:
             calculated_thin = 1
         args['ctrl']['sampling']['thin'] = thin = args.get('thin', calculated_thin)
+        args['ctrl']['sampling']['save_warmup'] = True  # always True now
         args['ctrl']['sampling']['iter_save_wo_warmup'] = iter_save_wo_warmup = 1 + (iter - warmup - 1) // thin
         args['ctrl']['sampling']['iter_save'] = iter_save_wo_warmup + 1 + (warmup - 1) // thin
-        refresh = iter / 10 if iter >= 20 else 1
+        refresh = iter // 10 if iter >= 20 else 1
         args['ctrl']['sampling']['refresh'] = args.get('refresh', refresh)
         # NB: argument named "seed" not "random_seed"
         args['random_seed'] = args.get('seed', int(time.time()))
@@ -484,6 +488,7 @@ def _get_valid_stan_args(base_args=None):
 
         ctrl_lst = args.get('control')
         if ctrl_lst is not None:
+            args['ctrl'] = dict(sampling=dict())
             args['ctrl']['sampling']['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
             args['ctrl']['sampling']['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
             args['ctrl']['sampling']['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.65)
@@ -512,7 +517,7 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['adapt_gamma'] = 0.05
             args['ctrl']['sampling']['adapt_delta'] = 0.65
             args['ctrl']['sampling']['adapt_kappa'] = 0.75
-            args['ctrl']['sampling']['adapt_t0 '] = 10
+            args['ctrl']['sampling']['adapt_t0'] = 10
             args['ctrl']['sampling']['max_treedepth'] = 10
             args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
             args['ctrl']['sampling']['stepsize'] = 1
@@ -520,6 +525,7 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['int_time'] = 6.283185307179586476925286766559005768e+00
 
     elif args['method'] == stan_args_method_t.OPTIM:
+        args['ctrl'] = dict(optim=dict())
         args['ctrl']['optim']['iter'] = iter = args.get('iter', 2000)
         algorithm = args.get('algorithm', 'BFGS')
         if algorithm == "BFGS":
@@ -545,7 +551,7 @@ def _get_valid_stan_args(base_args=None):
     elif args['method'] == stan_args_method_t.TEST_GRADIENT:
         pass
 
-    init = args.get('init', b"random")
+    init = args.get('init', "random")
     if isinstance(init, string_types):
         args['init'] = init.encode('ascii')
     elif isinstance(init, Sequence):
@@ -553,18 +559,11 @@ def _get_valid_stan_args(base_args=None):
         args['init_list'] = init
     else:
         args['init'] = "random".encode('ascii')
-    
+
     args['init_radius'] = args.get('init_r', 2.0)
     if (args['init_radius'] <= 0):
         args['init'] = "0".encode('ascii')
     # RStan calls validate_args() here
-
-    args['save_warmup'] = True  # always True now
-    args['max_treedepth'] = args.get('max_treedepth', 10)
-    args['refresh'] = args.get('refresh',
-                               args['iter'] // 10 if args['iter'] >= 20 else 1)
-    # NB: argument named "seed" not "random_seed"
-    args['init'] = args.get('init', "random").encode('utf-8')
     return args
 
 

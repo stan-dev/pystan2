@@ -734,6 +734,14 @@ namespace pystan {
       outputter.init_sampler_params(sampler_params, args.get_ctrl_sampling_iter_save());
       outputter.init_iter_params(iter_params, args.get_ctrl_sampling_iter_save());
 
+      // NOTE: In PyStan we have to allocate space for chains. Anything that
+      // is a Rcpp::NumericVector in RStan but appears here as std::vector<double>
+      // likely needs special handling.
+      int iter_save = args.get_ctrl_sampling_iter_save();
+      for (size_t i = 0; i < qoi_idx.size(); i++) 
+        chains.push_back(std::vector<double>(iter_save, 0)); 
+
+
       if (!args.get_append_samples()) {
         outputter.print_sample_names();
         outputter.output_diagnostic_names(s, sampler_ptr, model);

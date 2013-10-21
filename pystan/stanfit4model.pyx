@@ -88,7 +88,7 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     if args.diagnostic_file_flag:
         d['diagnostic_file'] = args.diagnostic_file
 
-    method = stan_args_method_t(args.method)  # implicit cast to int, I think
+    method = stan_args_method_t(args.method)
     if method == stan_args_method_t.SAMPLING:
         d["method"] = "sampling"
         d["iter"] = args.ctrl.sampling.iter
@@ -153,7 +153,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     # intended for the c++ function sampler_command(...) in stan_fit.hpp
     # If the dictionary doesn't contain the correct keys (arguments),
     # the function will raise a KeyError exception (as it should!).
-    p.random_seed = <unsigned int> args['random_seed']
+    p.random_seed = <unsigned int> args.get('random_seed', 0)
     p.chain_id = <unsigned int> args['chain_id']
     p.init = args['init']
     # TODO: p.init_vars_r = ...
@@ -162,16 +162,16 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     p.sample_file = args['sample_file']
     p.append_samples = args['append_samples']
     p.sample_file_flag = args['sample_file_flag']
-    p.method = args['method']
+    p.method = args['method'].value
     p.sample_file = args['diagnostic_file']
     p.diagnostic_file_flag = args['diagnostic_file_flag']
     if args['method'] == stan_args_method_t.SAMPLING:
         p.ctrl.sampling.iter = args['ctrl']['sampling']['iter']
         p.ctrl.sampling.refresh = args['ctrl']['sampling']['refresh']
-        p.ctrl.sampling.algorithm = args['ctrl']['sampling']['algorithm']
+        p.ctrl.sampling.algorithm = args['ctrl']['sampling']['algorithm'].value
         p.ctrl.sampling.warmup = args['ctrl']['sampling']['warmup']
         p.ctrl.sampling.thin = args['ctrl']['sampling']['thin']
-        p.ctrl.sampling.save_warmup = args['save_warmup']  # NOTE: breaks pattern
+        p.ctrl.sampling.save_warmup = args['ctrl']['sampling']['save_warmup'] 
         p.ctrl.sampling.iter_save = args['ctrl']['sampling']['iter_save']
         p.ctrl.sampling.iter_save_wo_warmup = args['ctrl']['sampling']['iter_save_wo_warmup']
         p.ctrl.sampling.adapt_engaged = args['ctrl']['sampling']['adapt_engaged']
@@ -179,7 +179,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.sampling.adapt_delta = args['ctrl']['sampling']['adapt_delta']
         p.ctrl.sampling.adapt_kappa = args['ctrl']['sampling']['adapt_kappa']
         p.ctrl.sampling.adapt_t0 = args['ctrl']['sampling']['adapt_t0']
-        p.ctrl.sampling.metric = args['ctrl']['sampling']['metric']
+        p.ctrl.sampling.metric = args['ctrl']['sampling']['metric'].value
         p.ctrl.sampling.stepsize = args['ctrl']['sampling']['stepsize']
         p.ctrl.sampling.stepsize_jitter = args['ctrl']['sampling']['stepsize_jitter']
         p.ctrl.sampling.max_treedepth = args['ctrl']['sampling']['max_treedepth']
@@ -187,7 +187,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     elif args['method'] == stan_args_method_t.OPTIM:
         p.ctrl.optim.iter = args['ctrl']['optim']['iter']
         p.ctrl.optim.refresh = args['ctrl']['optim']['refresh']
-        p.ctrl.optim.algorithm = args['ctrl']['optim']['algorithm']
+        p.ctrl.optim.algorithm = args['ctrl']['optim']['algorithm'].value
         p.ctrl.optim.save_iterations = args['save_iterations']
         p.ctrl.optim.stepsize = args['ctrl']['optim']['stepsize']
         p.ctrl.optim.init_alpha = args['ctrl']['optim']['init_alpha']
