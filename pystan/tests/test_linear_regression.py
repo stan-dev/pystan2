@@ -1,6 +1,7 @@
 import numpy as np
 from pystan import stan
 
+
 def test_linear_regression():
     np.random.seed(1)
 

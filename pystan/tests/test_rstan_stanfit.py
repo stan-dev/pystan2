@@ -1,9 +1,7 @@
-import time
 import unittest
 
-import numpy as np
-
 from pystan import StanModel
+
 
 class TestStanfit(unittest.TestCase):
 

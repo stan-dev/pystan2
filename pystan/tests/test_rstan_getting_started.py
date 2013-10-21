@@ -1,34 +1,9 @@
 import tempfile
+import unittest
 
 import numpy as np
 
 import pystan
-
-schools_code = """
-data {
-    int<lower=0> J; // number of schools
-    real y[J]; // estimated treatment effects
-    real<lower=0> sigma[J]; // s.e. of effect estimates
-}
-parameters {
-    real mu;
-    real<lower=0> tau;
-    real eta[J];
-}
-transformed parameters {
-    real theta[J];
-    for (j in 1:J)
-    theta[j] <- mu + tau * eta[j];
-}
-model {
-    eta ~ normal(0, 1);
-    y ~ normal(theta, sigma);
-}
-"""
-
-schools_dat = {'J': 8,
-               'y': [28,  8, -3,  7, -1,  1, 18, 12],
-               'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
 
 def validate_data(fit):
@@ -50,21 +25,50 @@ def validate_data(fit):
     assert a.shape == (500, 4, 19)
 
 
-def test_stan():
-    fit = pystan.stan(model_code=schools_code, data=schools_dat,
-                      iter=1000, chains=4)
-    validate_data(fit)
+class TestRStanGettingStarted(unittest.TestCase):
 
+    schools_code = """
+    data {
+        int<lower=0> J; // number of schools
+        real y[J]; // estimated treatment effects
+        real<lower=0> sigma[J]; // s.e. of effect estimates
+    }
+    parameters {
+        real mu;
+        real<lower=0> tau;
+        real eta[J];
+    }
+    transformed parameters {
+        real theta[J];
+        for (j in 1:J)
+        theta[j] <- mu + tau * eta[j];
+    }
+    model {
+        eta ~ normal(0, 1);
+        y ~ normal(theta, sigma);
+    }
+    """
 
-def test_stan_file():
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        f.write(schools_code.encode('utf-8'))
-    fit = pystan.stan(file=f.name, data=schools_dat, iter=1000, chains=4)
-    validate_data(fit)
+    schools_dat = {'J': 8,
+                   'y': [28,  8, -3,  7, -1,  1, 18, 12],
+                   'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
+    fit = pystan.stan(model_code=schools_code, data=schools_dat, iter=1000, chains=4)
 
-def test_stan_reuse_fit():
-    fit1 = pystan.stan(model_code=schools_code, data=schools_dat,
-                       iter=1000, chains=4)
-    fit = pystan.stan(fit=fit1, data=schools_dat, iter=1000, chains=4)
-    validate_data(fit)
+    def test_stan(self):
+        fit = self.fit
+        validate_data(fit)
+
+    def test_stan_file(self):
+        schools_code = self.schools_code
+        schools_dat = self.schools_dat
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            f.write(schools_code.encode('utf-8'))
+        fit = pystan.stan(file=f.name, data=schools_dat, iter=1000, chains=4)
+        validate_data(fit)
+
+    def test_stan_reuse_fit(self):
+        fit1 = self.fit
+        schools_dat = self.schools_dat
+        fit = pystan.stan(fit=fit1, data=schools_dat, iter=1000, chains=4)
+        validate_data(fit)

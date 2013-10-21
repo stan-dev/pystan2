@@ -1,4 +1,3 @@
-
 import logging
 import os
 import tempfile
@@ -51,14 +50,6 @@ class TestBernoulli(unittest.TestCase):
         model = self.model
         self.assertEqual(model.model_name, "bernoulli")
         self.assertTrue(model.model_cppname.endswith("bernoulli"))
-
-    def test_bernoulli_compile_time(self):
-        model_code = self.bernoulli_model_code
-        t0 = time.time()
-        model = StanModel(model_code=model_code)
-        self.assertIsNotNone(model)
-        msg = "Compile time: {}s (vs. RStan 28s)\n".format(int(time.time()-t0))
-        logging.info(msg)
 
     def test_bernoulli_sampling(self):
         fit = self.fit

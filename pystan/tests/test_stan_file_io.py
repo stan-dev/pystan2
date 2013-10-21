@@ -1,12 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import io
-import logging
 import os
-import sys
 import tempfile
-import time
-import unittest
 
 import numpy as np
 
@@ -56,7 +52,6 @@ def test_stan_model_from_file():
     extr = fit.extract('theta', permuted=False)
     assert extr.shape == (1000, 4, 2)
     assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
-
 
     fit = stan(file=temp_fn, data=bernoulli_data)
     extr = fit.extract(permuted=True)
