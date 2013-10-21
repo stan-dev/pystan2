@@ -6,6 +6,14 @@
  What's New 
 ============
 
+v.2.0.0.0 (21. October 2013)
+============================
+
+- Stan source updated to to 2.0.0.
+- PyStan version now mirrors Stan version.
+- Rudimentary plot and traceplot methods have been added to fit instances.
+- Warmup and sampling progress now visible.
+
 v.0.2.2 (28. September 2013)
 ============================
 
