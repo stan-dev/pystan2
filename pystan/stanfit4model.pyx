@@ -101,27 +101,28 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
         ctrl_d["adapt_delta"] = args.ctrl.sampling.adapt_delta
         ctrl_d["adapt_kappa"] = args.ctrl.sampling.adapt_kappa
         ctrl_d["adapt_t0"] = args.ctrl.sampling.adapt_t0
+        ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
+        ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
         algorithm = sampling_algo_t(args.ctrl.sampling.algorithm)
         if algorithm == sampling_algo_t.NUTS:
-            metric = sampling_metric_t(args.ctrl.sampling.metric)
-            if metric == sampling_metric_t.UNIT_E:
-                ctrl_d["metric"] = "unit_e"
-                d["sampler_t"] = "NUTS(unit_e)"
-            elif metric == sampling_metric_t.DIAG_E:
-                ctrl_d["metric"] = "diag_e"
-                d["sampler_t"] = "NUTS(diag_e)"
-            elif metric == sampling_metric_t.DENSE_E:
-                ctrl_d["metric"] = "dense_e"
-                d["sampler_t"] = "NUTS(dense_e)"
-            ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
-            ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
             ctrl_d["max_treedepth"] = args.ctrl.sampling.max_treedepth
+            d["sampler_t"] = "NUTS"
         elif algorithm == sampling_algo_t.HMC:
             ctrl_d["int_time"] = args.ctrl.sampling.int_time
             d["sampler_t"] = "HMC"
         elif algorithm == sampling_algo_t.Metropolis:
             d["sampler_t"] = "Metropolis"
-
+        if algorithm != sampling_algo_t.Metropolis:
+            metric = sampling_metric_t(args.ctrl.sampling.metric)
+            if metric == sampling_metric_t.UNIT_E:
+                ctrl_d["metric"] = "unit_e"
+                d["sampler_t"] = d["sampler_t"] + "(unit_e)"
+            elif metric == sampling_metric_t.DIAG_E:
+                ctrl_d["metric"] = "diag_e"
+                d["sampler_t"] = d["sampler_t"] + "(diag_e)"
+            elif metric == sampling_metric_t.DENSE_E:
+                ctrl_d["metric"] = "dense_e"
+                d["sampler_t"] = d["sampler_t"] + "(dense_e)"
         d["control"] = ctrl_d
     elif method == stan_args_method_t.OPTIM:
         d["method"] = "optim"

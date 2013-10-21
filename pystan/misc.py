@@ -497,17 +497,18 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['stepsize'] = ctrl_lst.get("stepsize", 1.0)
             args['ctrl']['sampling']['stepsize_jitter'] = ctrl_lst.get("stepsize_jitter", 0.0)
 
+            metric = ctrl_lst.get('metric')
+            if metric == "unit_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.UNIT_E
+            elif metric == "diag_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+            elif metric == "dense_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DENSE_E
+            elif metric is None:
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+
             if args['ctrl']['sampling']['algorithm'] == sampling_algo_t.NUTS:
                 args['ctrl']['sampling']['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
-                metric = ctrl_lst.get('metric')
-                if metric == "unit_e":
-                    args['ctrl']['sampling']['metric'] = sampling_metric_t.UNIT_E
-                elif metric == "diag_e":
-                    args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
-                elif metric == "dense_e":
-                    args['ctrl']['sampling']['metric'] = sampling_metric_t.DENSE_E
-                elif metric is None:
-                    args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
             elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.HMC:
                 args['ctrl']['sampling']['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
             elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.Metropolis:
@@ -543,7 +544,7 @@ def _get_valid_stan_args(base_args=None):
         if args['ctrl']['optim']['refresh'] < 1:
             args['ctrl']['optim']['refresh'] = 1
         args['ctrl']['optim']['stepsize'] = args.get("stepsize", 1.0)
-        args['ctrl']['optim']['init_alpha'] = args.get("init_alpha", 0.0001)
+        args['ctrl']['optim']['init_alpha'] = args.get("init_alpha", 0.001)
         args['ctrl']['optim']['tol_obj'] = args.get("tol_obj", 1e-8)
         args['ctrl']['optim']['tol_grad'] = args.get("tol_grad", 1e-8)
         args['ctrl']['optim']['tol_param'] = args.get("tol_param", 1e-8)

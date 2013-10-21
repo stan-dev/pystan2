@@ -206,10 +206,9 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         dependency among random number streams. By default, seed is
         ``random.randint(0, MAX_UINT)``.
 
-    algorithm : {"NUTS", "HMC", "Metropolis"}, optional
+    algorithm : {"NUTS", "HMC"}, optional
         One of algorithms that are implemented in Stan such as the No-U-Turn
-        sampler (NUTS, Hoffman and Gelman 2011), static HMC, and Metropolis
-        based on random walk.
+        sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
 
     sample_file : string, optional
         File name specifying where samples for *all* parameters and other
@@ -253,20 +252,21 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         - `adapt_kappa` : float, between default 0.75
         - `adapt_t0`    : float, positive, default 10
 
-        In addition, Depending on which algorithm is specified, different
-        parameters can be set as in Stan for sampling.  For algorithm HMC (called
-        'static HMC' in Stan), we can set
+        In addition, the algorithm HMC (called 'static HMC' in Stan) and NUTS
+        share the following parameters:
 
-        - `int_time`: float, positive
         - `stepsize`: float, positive
         - `stepsize_jitter`: float, between 0 and 1
+        - `metric` : str, {"unit_e", "diag_e", "dense_e"}
+
+        In addition, depending on which algorithm is used, different parameters
+        can be set as in Stan for sampling. For the algorithm HMC we can set
+
+        - `int_time`: float, positive
 
         For algorithm NUTS, we can set
 
-        - `metric` : str, {"unit_e", "diag_e", "dense_e"}
         - `max_treedepth` : int, positive
-        - `stepsize` : float, positive
-        - `stepsize_jitter` : float, between 0 and 1
 
     Returns
     -------

@@ -109,7 +109,7 @@ libstan_sources = [
 
 libstan = ('stan', {'sources': libstan_sources,
                     'include_dirs': stan_include_dirs,
-                    'extra_compile_args': ['-O3'],
+                    'extra_compile_args': ['-O3', '-ftemplate-depth-256'],
                     'macros': stan_macros})
 
 ## extensions
