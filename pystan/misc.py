@@ -14,9 +14,9 @@ by the Cython file `stan_fit.pxd`.
 
 # REF: rstan/rstan/R/misc.R
 
-from __future__ import unicode_literals
-
+from __future__ import unicode_literals, division
 from pystan._compat import PY2, string_types
+
 from collections import OrderedDict
 if PY2:
     from collections import Callable, Sequence
@@ -41,7 +41,9 @@ except ImportError:
     from pystan.external.mstats import mquantiles
 
 import pystan.chains as chains
-from pystan.constants import MAX_UINT
+from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
+                              sampling_metric_t, stan_args_method_t)
+
 
 logger = logging.getLogger('pystan')
 logger.setLevel(logging.INFO)
@@ -73,7 +75,7 @@ def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
             "For each parameter, n_eff is a crude measure of effective sample size,\n"\
             "and Rhat is the potential scale reduction factor on split chains (at \n"\
             "convergence, Rhat=1)."
-        sampler = fit.sim['samples'][0]['args']['sampler']
+        sampler = fit.sim['samples'][0]['args']['sampler_t']
         date = fit.date.strftime('%c')  # %c is locale's representation
         footer = footer.format(sampler, date)
         s = _summary(fit, pars, probs)
@@ -318,8 +320,9 @@ def _split_data(data):
     return data_r, data_i
 
 
-def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
-                  diagnostic_file, **kwargs):
+def _config_argss(chains, iter, warmup, thin,
+                  init, seed, sample_file, diagnostic_file, algorithm,
+                  control, **kwargs):
     iter = int(iter)
     if iter < 1:
         raise ValueError("`iter` should be a positive integer.")
@@ -376,8 +379,6 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
     else:
         seed = _check_seed(seed)
 
-    kwargs['point_estimate'] = -1
-
     # use chain_id argument if specified
     if kwargs.get('chain_id') is None:
         chain_ids = list(range(1, chains + 1))
@@ -391,13 +392,27 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
         else:
             chain_ids = chain_id + [max(chain_id) + 1 + i
                                     for i in range(chains - chain_id_len)]
-        kwargs['chain_id'] = None  # NOTE: in rstan, not sure why
+        del kwargs['chain_id']
+
+    kwargs['method'] = "test_grad" if kwargs.get('test_grad') else 'sampling'
+
+    all_metrics = ("unit_e", "diag_e", "dense_e")
+    if control is not None:
+        if not isinstance(control, dict):
+            raise ValueError("control must be a dictionary")
+        metric = control.get('metric')
+        if metric is not None:
+            if metric not in all_metrics:
+                raise ValueError("Metric must be one of {}".format(all_metrics))
+            control['metric'] = metric
+        kwargs['control'] = control
 
     argss = [dict() for _ in range(chains)]
     for i in range(chains):
-        argss[i] = {'chain_id': chain_ids[i], 'iter': iters[i],
-                    'thin': thins[i], 'seed': seed,
-                    'warmup': warmups[i], 'init': inits[i]}
+        argss[i] = dict(chain_id=chain_ids[i],
+                        iter=iters[i], thin=thins[i], seed=seed,
+                        warmup=warmups[i], init=inits[i],
+                        algorithm=algorithm)
 
     if sample_file is not None:
         sample_file = _writable_sample_file(sample_file)
@@ -420,51 +435,136 @@ def _config_argss(chains, iter, warmup, thin, init, seed, sample_file,
 def _get_valid_stan_args(base_args=None):
     """Fill in default values for arguments not provided in `base_args`.
 
-    RStan does this in cpp in stan_args.hpp. It seems easier to deal
-    with here in Python.
+    RStan does this in C++ in stan_args.hpp in the stan_args constructor.
+    It seems easier to deal with here in Python.
 
     """
     args = base_args.copy() if base_args is not None else {}
     # Default arguments, c.f. rstan/rstan/inst/include/rstan/stan_args.hpp
     # values in args are going to be converted into C++ objects so
-    # prepare them accordingly---e.g., bytes -> std::string
-    args['save_warmup'] = args.get('save_warmup', True)
-    args['sample_file_flag'] = True if args.get('sample_file') else False
-    args['sample_file'] = args.get('sample_file', '').encode('utf-8')
-    args['diagnostic_file'] = args.get('diagnostic_file', '')
-    if args['diagnostic_file']:
-        args['diagnostic_file_flag'] = True
-    else:
-        args['diagnostic_file_flag'] = False
-    args['iter'] = args.get('iter', 2000)
-    args['warmup'] = args.get('warmup', args['iter'] // 2)
-    args['thin'] = args.get('thin', (args['iter'] - args['warmup']) // 2)
-    args['iter_save_wo_warmup'] = args.get('iter_save_wo_warmup',
-                        1 + (args['iter']-args['warmup']-1) // args['thin'])
-    args['iter_save'] = args.get('iter_save',
-                                 args['iter_save_wo_warmup'] + 1 +
-                                 (args['warmup'] - 1) // args['thin'])
-    args['leapfrog_steps'] = args.get('leapfrog_steps', -1)
-    args['epsilon'] = args.get('epsilon', -1)
-    args['epsilon_pm'] = args.get('epsilon_pm', 0.0)
-    args['max_treedepth'] = args.get('max_treedepth', 10)
-    args['equal_step_sizes'] = args.get('equal_step_sizes', False)
-    args['delta'] = args.get('delta', 0.5)
-    args['gamma'] = args.get('gamma', 0.05)
-    args['refresh'] = args.get('refresh',
-                               args['iter'] // 10 if args['iter'] >= 20 else 1)
-    # NB: argument named "seed" not "random_seed"
-    args['random_seed'] = args.get('seed', int(time.time()))
-    args['random_seed_src'] = args.get('random_seed_src',
-                                       "random").encode('utf-8')
+    # prepare them accordingly---e.g., unicode -> bytes -> std::string
     args['chain_id'] = args.get('chain_id', 1)
-    args['chain_id_src'] = args.get('chain_id_src',
-                                    "default").encode('utf-8')
-    args['init'] = args.get('init', "random").encode('utf-8')
     args['append_samples'] = args.get('append_samples', False)
-    args['test_grad'] = args.get('test_grad', False)
-    args['nondiag_mass'] = args.get('nondiag_mass', False)
-    args['point_estimate'] = args.get('point_estimate', -1)
+    if args.get('method') is None or args['method'] == "sampling":
+        args['method'] = stan_args_method_t.SAMPLING
+    elif args['method'] == "optim":
+        args['method'] = stan_args_method_t.OPTIM
+    elif args['method'] == 'test_grad':
+        args['method'] = stan_args_method_t.TEST_GRADIENT
+    else:
+        args['method'] = stan_args_method_t.SAMPLING
+    args['sample_file_flag'] = True if args.get('sample_file') else False
+    args['sample_file'] = args.get('sample_file', '').encode('ascii')
+    args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
+    args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
+
+    if args['method'] == stan_args_method_t.SAMPLING:
+        args['ctrl'] = dict(sampling=dict())
+        args['ctrl']['sampling']['iter'] = iter = args.get('iter', 2000)
+        args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', args['iter'] // 2)
+        calculated_thin = iter - warmup // 1000
+        if calculated_thin < 1:
+            calculated_thin = 1
+        args['ctrl']['sampling']['thin'] = thin = args.get('thin', calculated_thin)
+        args['ctrl']['sampling']['save_warmup'] = True  # always True now
+        args['ctrl']['sampling']['iter_save_wo_warmup'] = iter_save_wo_warmup = 1 + (iter - warmup - 1) // thin
+        args['ctrl']['sampling']['iter_save'] = iter_save_wo_warmup + 1 + (warmup - 1) // thin
+        refresh = iter // 10 if iter >= 20 else 1
+        args['ctrl']['sampling']['refresh'] = args.get('refresh', refresh)
+        # NB: argument named "seed" not "random_seed"
+        args['random_seed'] = args.get('seed', int(time.time()))
+
+        algorithm = args.get('algorithm', 'NUTS')
+        if algorithm == 'HMC':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.HMC
+        elif algorithm == 'Metropolis':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Metropolis
+        elif algorithm == 'NUTS':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.NUTS
+        else:
+            msg = "Invalid value for parameter algorithm (found {}; " \
+                "require HMC, Metropolis, or NUTS).".format(algorithm)
+            raise ValueError(msg)
+
+        ctrl_lst = args.get('control')
+        if ctrl_lst is not None:
+            args['ctrl'] = dict(sampling=dict())
+            args['ctrl']['sampling']['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
+            args['ctrl']['sampling']['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
+            args['ctrl']['sampling']['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.65)
+            args['ctrl']['sampling']['adapt_kappa'] = ctrl_lst.get("adapt_kappa", 0.75)
+            args['ctrl']['sampling']['adapt_t0'] = ctrl_lst.get("adapt_t0", 10.0)
+            args['ctrl']['sampling']['stepsize'] = ctrl_lst.get("stepsize", 1.0)
+            args['ctrl']['sampling']['stepsize_jitter'] = ctrl_lst.get("stepsize_jitter", 0.0)
+
+            metric = ctrl_lst.get('metric')
+            if metric == "unit_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.UNIT_E
+            elif metric == "diag_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+            elif metric == "dense_e":
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DENSE_E
+            elif metric is None:
+                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+
+            if args['ctrl']['sampling']['algorithm'] == sampling_algo_t.NUTS:
+                args['ctrl']['sampling']['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
+            elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.HMC:
+                args['ctrl']['sampling']['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
+            elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.Metropolis:
+                pass
+        else:
+            args['ctrl']['sampling']['adapt_engaged'] = True
+            args['ctrl']['sampling']['adapt_gamma'] = 0.05
+            args['ctrl']['sampling']['adapt_delta'] = 0.65
+            args['ctrl']['sampling']['adapt_kappa'] = 0.75
+            args['ctrl']['sampling']['adapt_t0'] = 10
+            args['ctrl']['sampling']['max_treedepth'] = 10
+            args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+            args['ctrl']['sampling']['stepsize'] = 1
+            args['ctrl']['sampling']['stepsize_jitter'] = 0
+            args['ctrl']['sampling']['int_time'] = 6.283185307179586476925286766559005768e+00
+
+    elif args['method'] == stan_args_method_t.OPTIM:
+        args['ctrl'] = dict(optim=dict())
+        args['ctrl']['optim']['iter'] = iter = args.get('iter', 2000)
+        algorithm = args.get('algorithm', 'BFGS')
+        if algorithm == "BFGS":
+            args['ctrl']['optim']['algorithm'] = optim_algo_t.BFGS
+        elif algorithm == "Newton":
+            args['ctrl']['optim']['algorithm'] = optim_algo_t.Newton
+        elif algorithm == "Nesterov":
+            args['ctrl']['optim']['algorithm'] = optim_algo_t.Nesterov
+        else:
+            msg = "Invalid value for parameter algorithm (found {}; " \
+                  "require BFGS, Newton, or Nesterov).".format(algorithm)
+            raise ValueError(msg)
+        refresh = args['ctrl']['optim']['iter'] // 100
+        args['ctrl']['optim']['refresh'] = args.get('refresh', refresh)
+        if args['ctrl']['optim']['refresh'] < 1:
+            args['ctrl']['optim']['refresh'] = 1
+        args['ctrl']['optim']['stepsize'] = args.get("stepsize", 1.0)
+        args['ctrl']['optim']['init_alpha'] = args.get("init_alpha", 0.001)
+        args['ctrl']['optim']['tol_obj'] = args.get("tol_obj", 1e-8)
+        args['ctrl']['optim']['tol_grad'] = args.get("tol_grad", 1e-8)
+        args['ctrl']['optim']['tol_param'] = args.get("tol_param", 1e-8)
+        args['ctrl']['optim']['save_iterations'] = args.get("save_iterations", True)
+    elif args['method'] == stan_args_method_t.TEST_GRADIENT:
+        pass
+
+    init = args.get('init', "random")
+    if isinstance(init, string_types):
+        args['init'] = init.encode('ascii')
+    elif isinstance(init, Sequence):
+        args['init'] = "user".encode('ascii')
+        args['init_list'] = init
+    else:
+        args['init'] = "random".encode('ascii')
+
+    args['init_radius'] = args.get('init_r', 2.0)
+    if (args['init_radius'] <= 0):
+        args['init'] = "0".encode('ascii')
+    # RStan calls validate_args() here
     return args
 
 

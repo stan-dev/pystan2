@@ -8,6 +8,12 @@ PyStan has an interface similar to that of RStan. For an introduction to Stan
 and RStan see `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
 Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
 
+PyStan aims to reproduce the functionality present in RStan. There are a number
+of features present in RStan that have yet to be implemented in PyStan.  If you
+find a feature missing that you use frequently please `file a bug report
+<https://github.com/ariddell/pystan/issues>`_ so developers can better direct
+their efforts.
+
 Important links
 ---------------
 

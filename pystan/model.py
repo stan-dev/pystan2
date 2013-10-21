@@ -338,7 +338,7 @@ class StanModel:
                                "the StanModel. Consider recompiling.")
 
     def optimizing(self, data=None, seed=None,
-                   init='random', sample_file=None, method="Newton",
+                   init='random', sample_file=None, algorithm=None,
                    verbose=False, **kwargs):
         """Obtain a point estimate by maximizing the joint posterior.
 
@@ -373,8 +373,8 @@ class StanModel:
             underscore and chain number are appended to the file name.
             By default do not write samples to file.
 
-        method : {"BFGS", "Nesterov", "Newton"}, optional
-            Name of optimization method to be used. Default is Newton's method.
+        algorithm : {"BFGS", "Nesterov", "Newton"}, optional
+            Name of optimization algorithm to be used. Default is BFGS.
 
         verbose : boolean, optional
             Indicates whether intermediate output should be piped to the console.
@@ -392,9 +392,19 @@ class StanModel:
         Other parameters
         ----------------
         iter : int, optional
-        epsilon : float, optional
-        save_warmup : bool, optional
+            The maximum number of iterations.
+        save_iterations : bool, optional
         refresh : int, optional
+        stepsize : float, optional
+            For Nesterov, see Stan manual.
+        init_alpha : float, optional
+            For BFGS, see Stan manual.
+        tol_obj : float, optional
+            For BFGS, see Stan manual. Default is 1e-8.
+        tol_grad : float, optional
+            For BFGS, see Stan manual. Default is 1e-8.
+        tol_param : float, optional
+            For BFGS, see Stan manual. Default is 1e-8.
 
         Examples
         --------
@@ -403,9 +413,11 @@ class StanModel:
         >>> f = m.optimizing()
 
         """
-        methods = ("BFGS", "Nesterov", "Newton")
-        if method not in methods:
-            raise ValueError("Method must be one of {}".format(methods))
+        algorithms = ("BFGS", "Nesterov", "Newton")
+        if algorithm is None:
+            algorithm = "BFGS"
+        if algorithm not in algorithms:
+            raise ValueError("Algorithm must be one of {}".format(algorithms))
         if data is None:
             data = {}
 
@@ -413,7 +425,7 @@ class StanModel:
         fit = self.fit_class(data_r, data_i)
         # store a copy of the data passed to fit in the class. The reason for
         # assigning data here rather than in StanFit4model's __cinit__
-        # is that when __cinit__ is called there is no guarantee that the 
+        # is that when __cinit__ is called there is no guarantee that the
         # instance is ready for use as a normal Python instance. See the Cython
         # documentation on __cinit__.
         fit.data = {}
@@ -439,23 +451,28 @@ class StanModel:
             seed = random.randint(0, MAX_UINT)
         seed = int(seed)
 
-        stan_args = {'init': init, 'seed': seed}
-        # methods: 1: newton; 2: nesterov; 3: bfgs
-        stan_args['point_estimate'] = methods.index(method) + 1
-        # set test gradient flag to false explicitly
-        stan_args['test_grad'] = False
-        stan_args.update(kwargs)
+        stan_args = dict(init=init,
+                         seed=seed,
+                         method="optim",
+                         algorithm=algorithm)
 
+        # FIXME: add sample_file handling here
+
+        # I believe this check is for backward compatibility
+        if kwargs.get('method'):
+            raise ValueError('`method` is no longer used. Specify `algorithm` instead.')
+        stan_args.update(kwargs)
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
+
         ret, sample = fit._call_sampler(stan_args)
         pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
         return OrderedDict([('par', pars),
                             ('value', sample['value'])])
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
-                 warmup=None, thin=1, seed=None,
-                 init='random', sample_file=None, diagnostic_file=None,
-                 verbose=False, **kwargs):
+                 warmup=None, thin=1, seed=None, init='random',
+                 sample_file=None, diagnostic_file=None, verbose=False,
+                 algorithm=None, control=None, **kwargs):
         """Draw samples from the model.
 
         Parameters
@@ -492,6 +509,10 @@ class StanModel:
             dependency among random number streams. By default, seed is
             ``random.randint(0, MAX_UINT)``.
 
+        algorithm : {"NUTS", "HMC"}, optional
+            One of algorithms that are implemented in Stan such as the No-U-Turn
+            sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
+
         init : {0, '0', 'random', function returning dict, list of dict}, optional
             Specifies how initial parameter values are chosen: 0 or '0'
             initializes all to be zero on the unconstrained support; 'random'
@@ -516,6 +537,35 @@ class StanModel:
             Indicates whether intermediate output should be piped to the
             console. This output may be useful for debugging.
 
+        control : dict, optional
+            A dictionary of parameters to control the sampler's behavior. Default
+            values are used if control is not specified.  The following are
+            adaptation parameters for sampling algorithms.
+
+            These are parameters used in Stan with similar names:
+
+            - `adapt_engaged` : bool
+            - `adapt_gamma` : float, positive, default 0.05
+            - `adapt_delta` : float, between 0 and 1, default 0.65
+            - `adapt_kappa` : float, between default 0.75
+            - `adapt_t0`    : float, positive, default 10
+
+            In addition, the algorithm HMC (called 'static HMC' in Stan) and NUTS
+            share the following parameters:
+
+            - `stepsize`: float, positive
+            - `stepsize_jitter`: float, between 0 and 1
+            - `metric` : str, {"unit_e", "diag_e", "dense_e"}
+
+            In addition, depending on which algorithm is used, different parameters
+            can be set as in Stan for sampling. For the algorithm HMC we can set
+
+            - `int_time`: float, positive
+
+            For algorithm NUTS, we can set
+
+            - `max_treedepth` : int, positive
+
         Returns
         -------
         fit : StanFit4<model_name>
@@ -523,29 +573,26 @@ class StanModel:
 
         Other parameters
         ----------------
+
         chain_id : int, optional
-            Iterable of unique ints naming chains or int with which to start.
-        leapfrog_steps : int, optional
-        epsilon : float, optional
-        gamma : float, optional
-        delta : float, optional
-        equal_step_sizes : bool, optional
-        max_treedepth : int, optional
-        nondiag_mass : bool, optional
-        test_grad : bool
-            If True, Stan will not perform any sampling. Instead the gradient
-            calculation is tested and printed out and the fitted stanfit4model
-            object will be in test gradient mode. False is the default.
-        refresh : int, optional
-            Controls how to indicate progress during sampling. By default,
-            `refresh` = max(iter//10, 1).
+            `chain_id` can be a vector to specify the chain_id for all chains or
+            an integer. For the former case, they should be unique. For the latter,
+            the sequence of integers starting from the given `chain_id` are used
+            for all chains.
 
-        Notes
-        -----
+        init_r : float, optional
+            `init_r` is only valid if `init` == "random". In this case, the intial
+            values are simulated from [-`init_r`, `init_r`] rather than using the
+            default interval (see the manual of Stan).
 
-        More details can be found in Stan's manual. The default sampler is
-        NUTS2, where `leapfrog_steps` is ``-1`` and `equal_step_sizes` is
-        False. To use NUTS with full mass matrix, set `nondiag_mass` to True.
+        test_grad: bool, optional
+
+        append_samples`: bool, optional
+
+        refresh`: int, optional
+            Argument `refresh` can be used to control how to indicate the progress
+            during sampling (i.e. show the progress every \code{refresh} iterations).
+            By default, `refresh` is `max(iter/10, 1)`.
 
         Examples
         --------
@@ -564,6 +611,10 @@ class StanModel:
             data = {}
         if warmup is None:
             warmup = int(iter // 2)
+        algorithms = ("NUTS", "HMC")  # , "Metropolis")
+        algorithm = "NUTS" if algorithm is None else algorithm
+        if algorithm not in algorithms:
+            raise ValueError("Algorithm must be one of {}".format(algorithms))
 
         data_r, data_i = pystan.misc._split_data(data)
         fit = self.fit_class(data_r, data_i)
@@ -591,10 +642,10 @@ class StanModel:
 
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
-                                              init=init, seed=seed,
-                                              sample_file=sample_file,
+                                              init=init, seed=seed, sample_file=sample_file,
                                               diagnostic_file=diagnostic_file,
-                                              **kwargs)
+                                              algorithm=algorithm,
+                                              control=control, **kwargs)
 
         # number of samples saved after thinning
         warmup2 = 1 + (warmup - 1) // thin

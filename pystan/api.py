@@ -129,7 +129,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
 def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
-         init="random", seed=random.randint(0, MAX_UINT), sample_file=None,
+         init="random", seed=None, algorithm=None, control=None, sample_file=None,
          diagnostic_file=None, save_dso=True, verbose=False, boost_lib=None,
          eigen_lib=None, **kwargs):
     """Fit a model using Stan.
@@ -184,7 +184,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
 
     warmup : int, iter//2 by default
         Positive integer specifying number of warmup (aka burin) iterations.
-        As `warmup` also specifies the number of iterations used for step-size
+        As `warmup` also specifies the number of iterations used for stepsize
         adaption, warmup samples should not be used for inference.
 
     thin : int, optional
@@ -205,6 +205,10 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         chain's seeds are generated from the first chain's to prevent
         dependency among random number streams. By default, seed is
         ``random.randint(0, MAX_UINT)``.
+
+    algorithm : {"NUTS", "HMC"}, optional
+        One of algorithms that are implemented in Stan such as the No-U-Turn
+        sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
 
     sample_file : string, optional
         File name specifying where samples for *all* parameters and other
@@ -235,6 +239,62 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging. False by default.
 
+    control : dict, optional
+        A dictionary of parameters to control the sampler's behavior. Default
+        values are used if control is not specified.  The following are
+        adaptation parameters for sampling algorithms.
+
+        These are parameters used in Stan with similar names:
+
+        - `adapt_engaged` : bool
+        - `adapt_gamma` : float, positive, default 0.05
+        - `adapt_delta` : float, between 0 and 1, default 0.65
+        - `adapt_kappa` : float, between default 0.75
+        - `adapt_t0`    : float, positive, default 10
+
+        In addition, the algorithm HMC (called 'static HMC' in Stan) and NUTS
+        share the following parameters:
+
+        - `stepsize`: float, positive
+        - `stepsize_jitter`: float, between 0 and 1
+        - `metric` : str, {"unit_e", "diag_e", "dense_e"}
+
+        In addition, depending on which algorithm is used, different parameters
+        can be set as in Stan for sampling. For the algorithm HMC we can set
+
+        - `int_time`: float, positive
+
+        For algorithm NUTS, we can set
+
+        - `max_treedepth` : int, positive
+
+    Returns
+    -------
+
+    fit : StanFit instance
+
+    Other parameters
+    ----------------
+
+    chain_id : int, optional
+        `chain_id` can be a vector to specify the chain_id for all chains or
+        an integer. For the former case, they should be unique. For the latter,
+        the sequence of integers starting from the given `chain_id` are used
+        for all chains.
+
+    init_r : float, optional
+        `init_r` is only valid if `init` == "random". In this case, the intial
+        values are simulated from [-`init_r`, `init_r`] rather than using the
+        default interval (see the manual of Stan).
+
+    test_grad: bool, optional
+
+    append_samples`: bool, optional
+
+    refresh`: int, optional
+        Argument `refresh` can be used to control how to indicate the progress
+        during sampling (i.e. show the progress every \code{refresh} iterations).
+        By default, `refresh` is `max(iter/10, 1)`.
 
     """
     # NOTE: this is a thin wrapper for other functions. Error handling occurs
@@ -243,6 +303,9 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         data = {}
     if warmup is None:
         warmup = int(iter // 2)
+    if seed is None:
+        seed = random.randint(0, MAX_UINT)
+    seed = int(seed)
     if fit is not None:
         m = fit.stanmodel
     else:
@@ -253,5 +316,5 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         raise NotImplementedError
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
                      sample_file=sample_file, diagnostic_file=diagnostic_file,
-                     verbose=verbose, **kwargs)
+                     verbose=verbose, algorithm=algorithm, control=control, **kwargs)
     return fit

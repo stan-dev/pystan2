@@ -41,43 +41,189 @@ typedef std::map<std::string, std::pair<std::vector<int>, std::vector<size_t> > 
 
 namespace pystan {
 
-  /* simple class to store arguments provided by Python */
+  enum sampling_algo_t { NUTS = 1, HMC = 2, Metropolis = 3};
+  enum optim_algo_t { Newton = 1, Nesterov = 2, BFGS = 3};
+  enum sampling_metric_t { UNIT_E = 1, DIAG_E = 2, DENSE_E = 3};
+  enum stan_args_method_t { SAMPLING = 1, OPTIM = 2, TEST_GRADIENT = 3};
+
+  /* Simple class to store arguments provided by Python. Mirrors RStan's stan_args.
+   *
+   * Apart from the PyStanArgs class all the functionality found in RStan's
+   * stan_args.hpp such as validate_args() and the constructor is handled in
+   * Python for easier debugging.
+   *
+   */
   class PyStanArgs {
-      
-    public:
-      bool sample_file_flag;
-      bool diagnostic_file_flag;
-      std::string sample_file;  /* file for outputting the samples */
-      std::string diagnostic_file;
-      int iter;  /* number of iterations */
-      int warmup;  /* number of warmup */
-      int thin;
-      int iter_save;  /* number of iterations saved */
-      int iter_save_wo_warmup;  /* number of iterations saved without warmup */
-      bool save_warmup;  /* weather to save warmup samples (always true now) */
-      int refresh;
-      int leapfrog_steps;
-      double epsilon;
-      int max_treedepth;
-      double epsilon_pm;
-      bool equal_step_sizes;
-      double delta;
-      double gamma;
-      unsigned int random_seed;
-      std::string random_seed_src;  /* "user" or "default" */
-      unsigned int chain_id;
-      std::string chain_id_src;  /* "user" or "default" */
-      bool append_samples;
-      bool test_grad;
-      int point_estimate;
-      std::string init;
-      /* FIXME: size_t may be for R's benefit, unnecessary here? */
-      vars_r_t init_vars_r;
-      vars_i_t init_vars_i;
-      std::string sampler; /* HMC, NUTS1, NUTS2 */
-      bool nondiag_mass;
+  public:
+    unsigned int random_seed; 
+    unsigned int chain_id; 
+    std::string init; 
+    /* init_vars_r and init_vars_i == RStan's init_list */
+    vars_r_t init_vars_r;
+    vars_i_t init_vars_i;
+    double init_radius;
+    std::string sample_file; // the file for outputting the samples
+    bool append_samples; 
+    bool sample_file_flag; // true: write out to a file; false, do not 
+    stan_args_method_t method; 
+    std::string diagnostic_file; 
+    bool diagnostic_file_flag;
+    union {
+      struct {
+        int iter;   // number of iterations
+        int refresh;  // 
+        sampling_algo_t algorithm;
+        int warmup; // number of warmup
+        int thin; 
+        bool save_warmup; // weather to save warmup samples (always true now)
+        int iter_save; // number of iterations saved 
+        int iter_save_wo_warmup; // number of iterations saved wo warmup
+        bool adapt_engaged; 
+        double adapt_gamma;
+        double adapt_delta;
+        double adapt_kappa;
+        double adapt_t0;
+        sampling_metric_t metric; // UNIT_E, DIAG_E, DENSE_E;
+        double stepsize; // defaut to 1;
+        double stepsize_jitter; 
+        int max_treedepth; // for NUTS, default to 10.  
+        double int_time; // for HMC, default to 2 * pi
+      } sampling;
+      struct {
+        int iter; // default to 2000
+        int refresh; // default to 100
+        optim_algo_t algorithm; // Newton, Nesterov, BFGS
+        bool save_iterations; // default to false
+        double stepsize; // default to 1, for Nesterov
+        double init_alpha; // default to 0.0001, for BFGS
+        double tol_obj; // default to 1e-8, for BFGS
+        double tol_grad; // default to 1e-8, for BFGS
+        double tol_param; // default to 1e-8, for BFGS
+      } optim; 
+    } ctrl; 
+
+    inline const std::string& get_sample_file() const {
+      return sample_file;
+    } 
+    inline bool get_sample_file_flag() const { 
+      return sample_file_flag; 
+    }
+    inline bool get_diagnostic_file_flag() const {
+      return diagnostic_file_flag;
+    } 
+    inline const std::string& get_diagnostic_file() const {
+      return diagnostic_file;
+    } 
+
+    void set_random_seed(unsigned int seed) {
+      random_seed = seed;
+    } 
+
+    inline unsigned int get_random_seed() const {
+      return random_seed; 
+    } 
+
+    inline int get_ctrl_sampling_refresh() const { 
+      return ctrl.sampling.refresh; 
+    } 
+    const inline sampling_metric_t get_ctrl_sampling_metric() const { 
+      return ctrl.sampling.metric;
+    } 
+    const inline sampling_algo_t get_ctrl_sampling_algorithm() const {
+      return ctrl.sampling.algorithm;
+    }
+    inline int get_ctrl_sampling_warmup() const { 
+      return ctrl.sampling.warmup;
+    } 
+    inline int get_ctrl_sampling_thin() const { 
+      return ctrl.sampling.thin; 
+    } 
+    inline double get_ctrl_sampling_int_time() const {
+      return ctrl.sampling.int_time;
+    }
+    inline bool get_append_samples() const {
+      return append_samples;
+    } 
+    inline stan_args_method_t get_method() const {
+      return method;
+    } 
+    inline int get_iter() const {
+      switch (method) {
+        case SAMPLING: return ctrl.sampling.iter;
+        case OPTIM: return ctrl.optim.iter;
+        case TEST_GRADIENT: return 0;
+      } 
+      return 0;
+    } 
+    inline bool get_ctrl_sampling_adapt_engaged() const {
+       return ctrl.sampling.adapt_engaged;
+    }
+    inline double get_ctrl_sampling_adapt_gamma() const {
+       return ctrl.sampling.adapt_gamma;
+    }
+    inline double get_ctrl_sampling_adapt_delta() const {
+       return ctrl.sampling.adapt_delta;
+    }
+    inline double get_ctrl_sampling_adapt_kappa() const {
+       return ctrl.sampling.adapt_kappa;
+    }
+    inline double get_ctrl_sampling_adapt_t0() const {
+       return ctrl.sampling.adapt_t0;
+    }
+    inline double get_ctrl_sampling_stepsize() const {
+       return ctrl.sampling.stepsize;
+    } 
+    inline double get_ctrl_sampling_stepsize_jitter() const {
+       return ctrl.sampling.stepsize_jitter;
+    } 
+    inline int get_ctrl_sampling_max_treedepth() const {
+       return ctrl.sampling.max_treedepth;
+    } 
+    inline int get_ctrl_sampling_iter_save_wo_warmup() const {
+       return ctrl.sampling.iter_save_wo_warmup; 
+    } 
+    inline int get_ctrl_sampling_iter_save() const {
+       return ctrl.sampling.iter_save; 
+    } 
+    inline bool get_ctrl_sampling_save_warmup() const {
+       return true;
+    }
+    inline optim_algo_t get_ctrl_optim_algorithm() const {
+      return ctrl.optim.algorithm;
+    } 
+    inline int get_ctrl_optim_refresh() const {
+      return ctrl.optim.refresh;
+    } 
+    inline bool get_ctrl_optim_save_iterations() const {
+      return ctrl.optim.save_iterations;
+    }
+    inline double get_ctrl_optim_stepsize() const { 
+      return ctrl.optim.stepsize;
+    }
+    inline double get_ctrl_optim_init_alpha() const { 
+      return ctrl.optim.init_alpha;
+    }
+    inline double get_ctrl_optim_tol_obj() const { 
+      return ctrl.optim.tol_obj;
+    }
+    inline double get_ctrl_optim_tol_grad() const { 
+      return ctrl.optim.tol_grad;
+    }
+    inline double get_ctrl_optim_tol_param() const { 
+      return ctrl.optim.tol_param;
+    }
+    inline unsigned int get_chain_id() const {
+      return chain_id;
+    } 
+    inline double get_init_radius() const {
+      return init_radius;
+    } 
+    const std::string& get_init() const {
+      return init;
+    } 
+
   };
-  
+
   /* simple class to store data for Python */
   class PyStanHolder {
   
@@ -98,22 +244,19 @@ namespace pystan {
   };
 
 
-    /* extra functions from RStan's stan_args.hpp */
+    /* functions from RStan's stan_args.hpp */
 
     void write_comment(std::ostream& o) {
       o << "#" << std::endl;
     }
   
     template <typename M>
-    void write_comment(std::ostream& o,
-                       const M& msg) {
+    void write_comment(std::ostream& o, const M& msg) {
       o << "# " << msg << std::endl;
     }
   
     template <typename K, typename V>
-    void write_comment_property(std::ostream& o,
-                                const K& key,
-                                const V& val) {
+    void write_comment_property(std::ostream& o, const K& key, const V& val) {
       o << "# " << key << "=" << val << std::endl;
     }
 
@@ -124,11 +267,13 @@ namespace pystan {
      * @return If e is in v, return the index (0 to size - 1);
      *  otherwise, return the size. 
      */
-   
-    template <class T>
-    size_t find_index(const std::vector<T>& v, const T& e) {
-      return std::distance(v.begin(), std::find(v.begin(), v.end(), e));  
+
+    template <class T, class T2>
+    size_t find_index(const std::vector<T>& v, const T2& e) {
+      return std::distance(v.begin(), std::find(v.begin(), v.end(), T(e)));  
     } 
+
+    /* the following mirrors RStan's stan_fit.hpp */
 
     /**
      *@tparam T The type by which we use for dimensions. T could be say size_t
@@ -372,6 +517,7 @@ namespace pystan {
                          << static_cast<int>((100.0 * (m + 1)) / finish)
                          << "%] ";
         std::cout << (warmup ? " (Warmup)" : " (Sampling)");
+        std::cout.flush(); // NOTE: flushing appears to update the display in Python
       }
     }
 
@@ -404,14 +550,11 @@ namespace pystan {
       o << std::endl;
     }
 
-    template <class Sampler, class Model, class RNG>
-    void run_markov_chain(Sampler& sampler,
-                          int num_warmup, int num_iterations,
-                          int num_thin,
-                          int refresh,
-                          bool save,
-                          bool warmup,
-                          mcmc_output<Model> outputer, 
+    template <class Model, class RNG_t>
+    void run_markov_chain(stan::mcmc::base_mcmc* sampler_ptr,
+                          const PyStanArgs& args, 
+                          bool is_warmup,
+                          mcmc_output<Model>& outputter, 
                           stan::mcmc::sample& init_s,
                           Model& model,
                           std::vector<std::vector<double> >& chains, 
@@ -422,37 +565,33 @@ namespace pystan {
                           std::vector<std::vector<double> >& sampler_params, 
                           std::vector<std::vector<double> >& iter_params,
                           std::string& adaptation_info, 
-                          RNG& base_rng) {
+                          RNG_t& base_rng) {
       int start = 0;
-      int end = num_warmup; 
-      if (!warmup) { 
-        start = num_warmup;
-        end = num_iterations;
+      int end = args.get_ctrl_sampling_warmup();
+      if (!is_warmup) { 
+        start = end;
+        end = args.get_iter();
       } 
       for (int m = start; m < end; ++m) {
-        print_progress(m, num_iterations, refresh, warmup);
-        // FIXME: Python equivalent? R_CheckUserInterrupt(); 
-        init_s = sampler.transition(init_s);
-        if (save && (((m - start) % num_thin) == 0)) {
-          outputer.output_sample_params(base_rng, init_s, sampler, model,
-                                        chains, warmup,
+        print_progress(m, args.get_iter(), args.get_ctrl_sampling_refresh(), is_warmup);
+        // FIXME: PyStan equivalent? R_CheckUserInterrupt();
+        init_s = sampler_ptr -> transition(init_s);
+        if (args.get_ctrl_sampling_save_warmup() && (((m - start) % args.get_ctrl_sampling_thin()) == 0)) {
+          outputter.output_sample_params(base_rng, init_s, sampler_ptr, model,
+                                        chains, is_warmup,
                                         sampler_params, iter_params,
                                         sum_pars, sum_lp, qoi_idx,
                                         iter_save_i, &std::cout);
           iter_save_i++;
-          outputer.output_diagnostic_params(init_s, sampler);
+          outputter.output_diagnostic_params(init_s, sampler_ptr);
         }
       }
     }
 
-    template <class Sampler, class Model, class RNG>
-    void warmup_phase(Sampler& sampler,
-                      int num_warmup,
-                      int num_iterations,
-                      int num_thin,
-                      int refresh,
-                      bool save,
-                      mcmc_output<Model> outputer,
+    template <class Model, class RNG_t>
+    void warmup_phase(stan::mcmc::base_mcmc* sampler_ptr,
+                      PyStanArgs& args, 
+                      mcmc_output<Model>& outputter,
                       stan::mcmc::sample& init_s,
                       Model& model,
                       std::vector<std::vector<double> >& chains, 
@@ -463,42 +602,33 @@ namespace pystan {
                       std::vector<std::vector<double> >& sampler_params,
                       std::vector<std::vector<double> >& iter_params,
                       std::string& adaptation_info, 
-                      RNG& base_rng) {
-      run_markov_chain<Sampler, Model, RNG>(sampler, num_warmup, num_iterations, 
-                                            num_thin,
-                                            refresh, save, true,
-                                            outputer,
-                                            init_s, model, chains, iter_save_i, qoi_idx,
-                                            sum_pars, sum_lp, sampler_params, iter_params,
-                                            adaptation_info, base_rng);
+                      RNG_t& base_rng) {
+      run_markov_chain<Model, RNG_t>(sampler_ptr, args, true, outputter,
+                                     init_s, model, chains, iter_save_i, qoi_idx,
+                                     sum_pars, sum_lp, sampler_params, iter_params,
+                                     adaptation_info, base_rng);
     }
 
-    template <class Sampler, class Model, class RNG>
-    void sample_phase(Sampler& sampler,
-                      int num_warmup,
-                      int num_iterations,
-                      int num_thin,
-                      int refresh,
-                      bool save,
-                      mcmc_output<Model> outputer,
-                      stan::mcmc::sample& init_s,
-                      Model& model,
-                      std::vector<std::vector<double> >& chains, 
-                      int& iter_save_i,
-                      const std::vector<size_t>& qoi_idx,
-                      std::vector<double>& sum_pars,
-                      double& sum_lp,
-                      std::vector<std::vector<double> >& sampler_params,
-                      std::vector<std::vector<double> >& iter_params,
-                      std::string& adaptation_info, 
-                      RNG& base_rng) {
-      run_markov_chain<Sampler, Model, RNG>(sampler, num_warmup, num_iterations, num_thin,
-                                            refresh, save, false,
-                                            outputer,
-                                            init_s, model, chains, iter_save_i, qoi_idx,
-                                            sum_pars, sum_lp, sampler_params, iter_params,
-                                            adaptation_info,
-                                            base_rng);
+    template <class Model, class RNG_t>
+    void sampling_phase(stan::mcmc::base_mcmc* sampler_ptr,
+                        const PyStanArgs& args,
+                        mcmc_output<Model>& outputter,
+                        stan::mcmc::sample& init_s,
+                        Model& model,
+                        std::vector<std::vector<double> >& chains, 
+                        int& iter_save_i,
+                        const std::vector<size_t>& qoi_idx,
+                        std::vector<double>& sum_pars,
+                        double& sum_lp,
+                        std::vector<std::vector<double> >& sampler_params,
+                        std::vector<std::vector<double> >& iter_params,
+                        std::string& adaptation_info, 
+                        RNG_t& base_rng) {
+      run_markov_chain<Model, RNG_t>(sampler_ptr, args, false, outputter,
+                                     init_s, model, chains, iter_save_i, qoi_idx,
+                                     sum_pars, sum_lp, sampler_params, iter_params,
+                                     adaptation_info,
+                                     base_rng);
     }
     
 
@@ -533,6 +663,152 @@ namespace pystan {
       return uintdims; 
     } 
 
+    template<class Sampler>
+    void init_static_hmc(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args) {
+      double epsilon = args.get_ctrl_sampling_stepsize();
+      double epsilon_jitter = args.get_ctrl_sampling_stepsize_jitter();
+      double int_time = args.get_ctrl_sampling_int_time();
+
+      Sampler* sampler_ptr2 = dynamic_cast<Sampler*>(sampler_ptr); 
+      sampler_ptr2->set_nominal_stepsize_and_T(epsilon, int_time);
+      sampler_ptr2->set_stepsize_jitter(epsilon_jitter);
+    } 
+
+    template<class Sampler>
+    void init_nuts(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args) {
+      double epsilon = args.get_ctrl_sampling_stepsize();
+      double epsilon_jitter = args.get_ctrl_sampling_stepsize_jitter();
+      int max_depth = args.get_ctrl_sampling_max_treedepth();
+
+      Sampler* sampler_ptr2 = dynamic_cast<Sampler*>(sampler_ptr); 
+      sampler_ptr2->set_nominal_stepsize(epsilon);
+      sampler_ptr2->set_stepsize_jitter(epsilon_jitter);
+      sampler_ptr2->set_max_depth(max_depth);
+    }
+    
+    template<class Sampler>
+    void init_adapt(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args) {
+
+      if (!args.get_ctrl_sampling_adapt_engaged()) return;
+
+      double delta = args.get_ctrl_sampling_adapt_delta();
+      double gamma = args.get_ctrl_sampling_adapt_gamma();
+      double kappa = args.get_ctrl_sampling_adapt_kappa();
+      double t0 = args.get_ctrl_sampling_adapt_t0();
+      double epsilon = args.get_ctrl_sampling_stepsize();
+
+      Sampler* sampler_ptr2 = dynamic_cast<Sampler*>(sampler_ptr); 
+      sampler_ptr2->get_stepsize_adaptation().set_mu(log(10 * epsilon));
+      sampler_ptr2->get_stepsize_adaptation().set_delta(delta);
+      sampler_ptr2->get_stepsize_adaptation().set_gamma(gamma);
+      sampler_ptr2->get_stepsize_adaptation().set_kappa(kappa);
+      sampler_ptr2->get_stepsize_adaptation().set_t0(t0);
+      sampler_ptr2->engage_adaptation();
+      sampler_ptr2->init_stepsize();
+    }
+    
+    template <class Model, class RNG_t> 
+    void execute_sampling(PyStanArgs& args, Model& model, PyStanHolder& holder,
+                          stan::mcmc::base_mcmc* sampler_ptr, 
+                          stan::mcmc::sample& s,
+                          const std::vector<size_t>& qoi_idx, 
+                          std::vector<double>& initv, 
+                          std::fstream& sample_stream,
+                          std::fstream& diagnostic_stream,
+                          const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {  
+      int iter_save_i = 0;
+      double mean_lp(0);
+      std::string adaptation_info;
+      
+      std::vector<std::vector<double> > chains; 
+      std::vector<double> mean_pars;
+      mean_pars.resize(initv.size(), 0);
+      std::vector<std::vector<double> > sampler_params;
+      std::vector<std::vector<double> > iter_params;
+      std::vector<std::string> sampler_param_names;
+      std::vector<std::string> iter_param_names;
+
+
+      mcmc_output<Model> outputter(&sample_stream, &diagnostic_stream);
+      outputter.set_output_names(s, sampler_ptr, model, iter_param_names, sampler_param_names);
+      outputter.init_sampler_params(sampler_params, args.get_ctrl_sampling_iter_save());
+      outputter.init_iter_params(iter_params, args.get_ctrl_sampling_iter_save());
+
+      // NOTE: In PyStan we have to allocate space for chains. Anything that
+      // is a Rcpp::NumericVector in RStan but appears here as std::vector<double>
+      // likely needs special handling.
+      int iter_save = args.get_ctrl_sampling_iter_save();
+      for (size_t i = 0; i < qoi_idx.size(); i++) 
+        chains.push_back(std::vector<double>(iter_save, 0)); 
+
+
+      if (!args.get_append_samples()) {
+        outputter.print_sample_names();
+        outputter.output_diagnostic_names(s, sampler_ptr, model);
+      } 
+      // Warm-Up
+      clock_t start = clock();
+      warmup_phase<Model, RNG_t>(sampler_ptr, args, outputter,
+                                 s, model, chains, iter_save_i,
+                                 qoi_idx, mean_pars, mean_lp,
+                                 sampler_params, iter_params, adaptation_info,
+                                 base_rng); 
+      clock_t end = clock();
+      double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
+      if (args.get_ctrl_sampling_adapt_engaged()) { 
+        dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
+        outputter.output_adapt_finish(sampler_ptr, adaptation_info);
+      }
+      // Sampling
+      start = clock();
+      sampling_phase<Model, RNG_t>(sampler_ptr, args, outputter,
+                                   s, model, chains, iter_save_i,
+                                   qoi_idx, mean_pars, mean_lp, 
+                                   sampler_params, iter_params, adaptation_info,  
+                                   base_rng); 
+      end = clock();
+      double sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
+
+      std::cout << std::endl;
+      if (args.get_ctrl_sampling_iter_save_wo_warmup() > 0) {
+        mean_lp /= args.get_ctrl_sampling_iter_save_wo_warmup();
+        for (std::vector<double>::iterator it = mean_pars.begin();
+             it != mean_pars.end(); 
+             ++it) 
+          (*it) /= args.get_ctrl_sampling_iter_save_wo_warmup();
+      } 
+      if (args.get_ctrl_sampling_refresh() > 0) { 
+        outputter.print_timing(warmDeltaT, sampleDeltaT, &std::cout);
+      }
+      
+      outputter.output_timing(warmDeltaT, sampleDeltaT);
+      if (args.get_sample_file_flag()) {
+        std::cout << "Sample of chain " 
+                         << args.get_chain_id() 
+                         << " is written to file " << args.get_sample_file() << "."
+                         << std::endl;
+        sample_stream.close();
+      }
+      if (args.get_diagnostic_file_flag()) 
+        diagnostic_stream.close();
+     
+      holder.chains = chains;
+      holder.test_grad = false;
+      holder.args = args;
+      holder.inits = initv;
+      holder.mean_pars = mean_pars; 
+      holder.mean_lp__ = mean_lp;
+      holder.adaptation_info = adaptation_info;
+      // put sampler parameters such as treedepth together with iter_params 
+      iter_params.insert(iter_params.end(), sampler_params.begin(), sampler_params.end());
+      iter_param_names.insert(iter_param_names.end(),
+                              sampler_param_names.begin(),
+                              sampler_param_names.end());
+      holder.sampler_params = iter_params;
+      holder.sampler_param_names = iter_param_names;
+      holder.chain_names = fnames_oi;
+    } 
+
 
     /**
      * @tparam Model 
@@ -540,51 +816,26 @@ namespace pystan {
      *
      * @param args: the instance that wraps the arguments passed for sampling.
      * @param model: the model instance.
-     * @param holder[out] the object to hold all the information returned to Python.
+     * @param holder[out]: the object to hold all the information returned to Python.
      * @param qoi_idx: the indexes for all parameters of interest.  
      * @param fnames_oi: the parameter names of interest.  
      * @param base_rng: the boost RNG instance. 
      */
-    template <class Model, class RNG> 
-    int sampler_command(PyStanArgs& args, Model& model,
-                        PyStanHolder& holder,
+    template <class Model, class RNG_t> 
+    int sampler_command(PyStanArgs& args, Model& model, PyStanHolder& holder,
                         const std::vector<size_t>& qoi_idx, 
-                        const std::vector<std::string>& fnames_oi, RNG& base_rng) {
-      bool sample_file_flag = args.sample_file_flag;
-      bool diagnostic_file_flag = args.diagnostic_file_flag;
-      std::string sample_file = args.sample_file;
-      std::string diagnostic_file = args.diagnostic_file;
-      int num_iterations = args.iter;
-      int num_warmup = args.warmup;
-      int num_thin = args.thin; 
-      int iter_save = args.iter_save;
-      int iter_save_wo_warmup = args.iter_save_wo_warmup;
-      int leapfrog_steps = args.leapfrog_steps;
-      unsigned int random_seed = args.random_seed;
-      double epsilon = args.epsilon;
-      // bool epsilon_adapt = (epsilon <= 0.0);
-      bool equal_step_sizes = args.equal_step_sizes;
-      int max_treedepth = args.max_treedepth;
-      double epsilon_pm = args.epsilon_pm;
-      double delta = args.delta;
-      double gamma = args.gamma;
-      int refresh = args.refresh;
-      unsigned int chain_id = args.chain_id;
-      bool test_grad = args.test_grad;
-      int point_estimate = args.point_estimate;
-      bool nondiag_mass = args.nondiag_mass;
-      bool save_warmup = args.save_warmup;
+                        const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
 
-      base_rng.seed(random_seed);
+      base_rng.seed(args.get_random_seed());
       // (2**50 = 1T samples, 1000 chains)
       static boost::uintmax_t DISCARD_STRIDE = 
         static_cast<boost::uintmax_t>(1) << 50;
       // std::cout << "DISCARD_STRIDE=" << DISCARD_STRIDE << std::endl;
-      base_rng.discard(DISCARD_STRIDE * (chain_id - 1));
+      base_rng.discard(DISCARD_STRIDE * (args.get_chain_id() - 1));
       
       std::vector<double> cont_params;
       std::vector<int> disc_params;
-      std::string init_val = args.init;
+      std::string init_val = args.get_init();
       int num_init_tries = 0;
       // parameter initialization
       if (init_val == "0") {
@@ -621,10 +872,10 @@ namespace pystan {
         } 
       } else {
         init_val = "random"; 
-        // init_rng generates uniformly from -2 to 2
+        double r = args.get_init_radius();
         boost::random::uniform_real_distribution<double> 
-          init_range_distribution(-2.0,2.0);
-        boost::variate_generator<RNG&, boost::random::uniform_real_distribution<double> >
+          init_range_distribution(-r, r);
+        boost::variate_generator<RNG_t&, boost::random::uniform_real_distribution<double> >
           init_rng(base_rng,init_range_distribution);
 
         disc_params = std::vector<int>(model.num_params_i(),0);
@@ -667,7 +918,7 @@ namespace pystan {
       std::vector<double> initv; 
       model.write_array(base_rng, cont_params,disc_params,initv); 
 
-      if (test_grad) {
+      if (TEST_GRADIENT == args.get_method()) {
         std::cout << std::endl << "TEST GRADIENT MODE" << std::endl;
         std::stringstream ss; 
         int num_failed = stan::model::test_gradients<true,true>(model,cont_params,disc_params,1e-6,1e-6,ss);
@@ -680,476 +931,380 @@ namespace pystan {
 
       std::fstream sample_stream; 
       std::fstream diagnostic_stream;
-      bool append_samples(args.append_samples);
-      if (sample_file_flag) {
+      bool append_samples(args.get_append_samples());
+      if (args.get_sample_file_flag()) {
         std::ios_base::openmode samples_append_mode
           = append_samples ? (std::fstream::out | std::fstream::app)
                            : std::fstream::out;
-        sample_stream.open(sample_file.c_str(), samples_append_mode);
+        sample_stream.open(args.get_sample_file().c_str(), samples_append_mode);
       }
 
-      if (point_estimate == 3) { // bfgs
-        std::cout << "STAN OPTIMIZATION COMMAND" << std::endl;
-        std::cout << "init = " << init_val << std::endl;
-        if (num_init_tries > 0)
-          std::cout << "init tries = " << num_init_tries << std::endl;
-        if (sample_file_flag) 
-          std::cout << "output = " << sample_file << std::endl;
-        std::cout << "save_warmup = " << save_warmup << std::endl;
-        std::cout << "epsilon = " << epsilon << std::endl;
-        std::cout << "seed = " << random_seed << std::endl;
-        
-        if (sample_file_flag) { 
-          write_comment(sample_stream,"Point Estimate Generated by Stan");
-          write_comment(sample_stream);
-          write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
-          write_comment_property(sample_stream,"init",init_val);
-          write_comment_property(sample_stream,"save_warmup",save_warmup);
-          write_comment_property(sample_stream,"seed",random_seed);
-          write_comment_property(sample_stream,"epsilon",epsilon);
-          write_comment(sample_stream);
+      if (OPTIM == args.get_method()) { // point estimation
+        if (BFGS == args.get_ctrl_optim_algorithm()) {
+          std::cout << "STAN OPTIMIZATION COMMAND (BFGS)" << std::endl;
+          std::cout << "init = " << init_val << std::endl;
+          if (num_init_tries > 0)
+            std::cout << "init tries = " << num_init_tries << std::endl;
+          if (args.get_sample_file_flag()) 
+            std::cout << "output = " << args.get_sample_file() << std::endl;
+          std::cout << "save_iterations = " << args.get_ctrl_optim_save_iterations() << std::endl;
+          std::cout << "init_alpha = " << args.get_ctrl_optim_init_alpha() << std::endl;
+          std::cout << "tol_obj = " << args.get_ctrl_optim_tol_obj() << std::endl;
+          std::cout << "tol_grad = " << args.get_ctrl_optim_tol_grad() << std::endl;
+          std::cout << "tol_param = " << args.get_ctrl_optim_tol_param() << std::endl;
+          std::cout << "seed = " << args.get_random_seed() << std::endl;
           
-          sample_stream << "lp__,"; // log probability first
-          model.write_csv_header(sample_stream);
-        } 
-        
-        stan::optimization::BFGSLineSearch<Model> ng(model, cont_params, disc_params,
-                                                     &std::cout);
-        if (epsilon > 0)
-          ng._opts.alpha0 = epsilon;
-        
-        double lp = ng.logp();
-        
-        std::cout << "initial log joint probability = " << lp << std::endl;
-        int m = 0;
-        int ret = 0;
-        for (int i = 0; i < num_iterations && ret == 0; i++) {
-          ret = ng.step();
-          lp = ng.logp();
-          ng.params_r(cont_params);
-          if (do_print(i, 50*refresh)) {
-            std::cout << "    Iter ";
-            std::cout << "     log prob ";
-            std::cout << "       ||dx|| ";
-            std::cout << "     ||grad|| ";
-            std::cout << "      alpha ";
-            std::cout << "     alpha0 ";
-            std::cout << " # evals ";
-            std::cout << " Notes " << std::endl;
+          if (args.get_sample_file_flag()) { 
+            write_comment(sample_stream,"Point Estimate Generated by Stan (BFGS)");
+            write_comment(sample_stream);
+            write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
+            write_comment_property(sample_stream,"init",init_val);
+            write_comment_property(sample_stream,"save_iterations",args.get_ctrl_optim_save_iterations());
+            write_comment_property(sample_stream,"init_alpha",args.get_ctrl_optim_init_alpha());
+            write_comment_property(sample_stream,"tol_obj",args.get_ctrl_optim_tol_obj());
+            write_comment_property(sample_stream,"tol_grad",args.get_ctrl_optim_tol_grad());
+            write_comment_property(sample_stream,"tol_param",args.get_ctrl_optim_tol_param());
+            write_comment_property(sample_stream,"seed",args.get_random_seed());
+            write_comment(sample_stream);
+            
+            sample_stream << "lp__,"; // log probability first
+            model.write_csv_header(sample_stream);
+          } 
+          
+          stan::optimization::BFGSLineSearch<Model> bfgs(model, cont_params, disc_params,
+                                                         &std::cout);
+          bfgs._opts.alpha0 = args.get_ctrl_optim_init_alpha();
+          bfgs._opts.tolF = args.get_ctrl_optim_tol_obj();
+          bfgs._opts.tolGrad = args.get_ctrl_optim_tol_grad();
+          bfgs._opts.tolX = args.get_ctrl_optim_tol_param();
+          bfgs._opts.maxIts = args.get_iter();
+          
+          double lp = bfgs.logp();
+          
+          std::cout << "initial log joint probability = " << lp << std::endl;
+          int ret = 0;
+          while (0 == ret) {
+            int i = bfgs.iter_num();
+            if (do_print(i, 50 * args.get_ctrl_optim_refresh())) {
+              std::cout << "    Iter ";
+              std::cout << "     log prob ";
+              std::cout << "       ||dx|| ";
+              std::cout << "     ||grad|| ";
+              std::cout << "      alpha ";
+              std::cout << " # evals ";
+              std::cout << " Notes " << std::endl;
+            }
+            ret = bfgs.step();
+            lp = bfgs.logp();
+            bfgs.params_r(cont_params);
+
+            if (do_print(i, args.get_ctrl_optim_refresh()) || ret != 0 || !bfgs.note().empty()) {
+              std::cout << " " << std::setw(7) << i << " ";
+              std::cout << " " << std::setw(12) << std::setprecision(6) << lp << " ";
+              std::cout << " " << std::setw(12) << std::setprecision(6) << bfgs.prev_step_size() << " ";
+              std::cout << " " << std::setw(12) << std::setprecision(6) << bfgs.curr_g().norm() << " ";
+              std::cout << " " << std::setw(10) << std::setprecision(4) << bfgs.alpha() << " ";
+              std::cout << " " << std::setw(7) << bfgs.grad_evals() << " ";
+              std::cout << " " << bfgs.note() << " ";
+              std::cout << std::endl;
+              std::cout.flush();
+            }
+
+            if (args.get_ctrl_optim_save_iterations()) {
+              sample_stream << lp << ',';
+              model.write_csv(base_rng,cont_params,disc_params,sample_stream);
+              sample_stream.flush();
+            }
           }
-          if (do_print(i, refresh) || ret != 0 || !ng.note().empty()) {
-            std::cout << " " << std::setw(7) << (m + 1) << " ";
-            std::cout << " " << std::setw(12) << std::setprecision(6) << lp << " ";
-            std::cout << " " << std::setw(12) << std::setprecision(6) << ng.prev_step_size() << " ";
-            std::cout << " " << std::setw(12) << std::setprecision(6) << ng.curr_g().norm() << " ";
-            std::cout << " " << std::setw(10) << std::setprecision(4) << ng.alpha() << " ";
-            std::cout << " " << std::setw(10) << std::setprecision(4) << ng.alpha0() << " ";
-            std::cout << " " << std::setw(7) << ng.grad_evals() << " ";
-            std::cout << " " << ng.note() << " ";
-            std::cout << std::endl;
-            std::cout.flush();
+          if (ret >= 0) {
+            std::cout << "Optimization terminated normally: ";
+          } else {
+            std::cout << "Optimization terminated with error: ";
           }
-          m++;
-          if (save_warmup) {
+          std::cout << bfgs.get_code_string(ret) << std::endl;
+          
+          std::vector<double> params_inr_etc; // cont, disc, and others
+          model.write_array(base_rng,cont_params,disc_params,params_inr_etc);
+          holder.par = params_inr_etc; 
+          holder.value = lp; 
+          if (args.get_sample_file_flag()) { 
             sample_stream << lp << ',';
-            model.write_csv(base_rng,cont_params,disc_params,sample_stream);
-            sample_stream.flush();
+            print_vector(params_inr_etc, sample_stream);
+            sample_stream.close();
           }
-        }
-        if (ret != 0)
-          std::cout << "Optimization terminated with code " << ret << std::endl;
-        else 
-          std::cout << "Maximum number of iterations hit, optimization terminated." 
-                           << std::endl;
-        
-        std::vector<double> params_inr_etc; // cont, disc, and others
-        model.write_array(base_rng,cont_params,disc_params,params_inr_etc);
-        holder.par = params_inr_etc; 
-        holder.value = lp;
-        if (sample_file_flag) { 
-          sample_stream << lp << ',';
-          print_vector(params_inr_etc, sample_stream);
-          sample_stream.close();
-        }
-        return 0;
-      }
-
-      if (point_estimate == 1) { //Newton's method 
-        std::cout << "STAN OPTIMIZATION COMMAND" << std::endl;
-        if (sample_file_flag) {
-          write_comment(sample_stream,"Point Estimate Generated by Stan");
-          write_comment(sample_stream);
-          write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
-          write_comment_property(sample_stream,"init",init_val);
-          write_comment_property(sample_stream,"seed",random_seed);
-          write_comment(sample_stream);
-
-          sample_stream << "lp__,"; // log probability first
-          model.write_csv_header(sample_stream);
-        }
-        std::vector<double> gradient;
-        double lp = stan::model::log_prob_grad<true,true>(model, cont_params, disc_params, gradient);
-        
-        double lastlp = lp - 1;
-        std::cout << "initial log joint probability = " << lp << std::endl;
-        int m = 0;
-        while ((lp - lastlp) / fabs(lp) > 1e-8) {
-          // FIXME: Python equivalent? R_CheckUserInterrupt(); 
-          lastlp = lp;
-          lp = stan::optimization::newton_step(model, cont_params, disc_params);
-          std::cout << "Iteration ";
-          std::cout << std::setw(2) << (m + 1) << ". ";
-          std::cout << "Log joint probability = " << std::setw(10) << lp;
-          std::cout << ". Improved by " << (lp - lastlp) << ".";
-          std::cout << std::endl;
-          std::cout.flush();
-          m++;
-          if (sample_file_flag) { 
-            sample_stream << lp << ',';
-            model.write_csv(base_rng,cont_params,disc_params,sample_stream);
+        } else if (Newton == args.get_ctrl_optim_algorithm()) {
+          std::cout << "STAN OPTIMIZATION COMMAND (Newton)" << std::endl;
+          if (args.get_sample_file_flag()) {
+            write_comment(sample_stream,"Point Estimate Generated by Stan (Newton)");
+            write_comment(sample_stream);
+            write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
+            write_comment_property(sample_stream,"init",init_val);
+            write_comment_property(sample_stream,"seed",args.get_random_seed());
+            write_comment(sample_stream);
+  
+            sample_stream << "lp__,"; // log probability first
+            model.write_csv_header(sample_stream);
           }
-        }
-        std::vector<double> params_inr_etc;
-        model.write_array(base_rng, cont_params, disc_params, params_inr_etc);
-        holder.par = params_inr_etc; 
-        holder.value = lp;
-        // holder.attr("point_estimate") = Rcpp::wrap(true); 
-
-        if (sample_file_flag) { 
-          sample_stream << lp << ',';
-          print_vector(params_inr_etc, sample_stream);
-          sample_stream.close();
-        }
-        return 0;
-      } 
-
-      if (point_estimate == 2) { // nesterov's accelerated gradient method 
-        if (sample_file_flag) {
-          write_comment(sample_stream,"Point Estimate Generated by Stan");
-          write_comment(sample_stream);
-          write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
-          write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
-          write_comment_property(sample_stream,"init",init_val);
-          write_comment_property(sample_stream,"seed",random_seed);
-          write_comment(sample_stream);
-
-          sample_stream << "lp__,"; // log probability first
-          model.write_csv_header(sample_stream);
-        }
-
-        stan::optimization::NesterovGradient<Model> ng(model, cont_params, disc_params,
-                                                       -1.0,&std::cout);
-
-        double lp = ng.logp();
-        double lastlp = lp - 1;
-        std::cout << "initial log joint probability = " << lp << std::endl;
-        int m = 0;
-        for (int i = 0; i < num_iterations; i++) {
-          // FIXME: Python equivalent? R_CheckUserInterrupt(); 
-          lastlp = lp;
-          lp = ng.step();
-          ng.params_r(cont_params);
-          if (do_print(i, refresh)) {
+          std::vector<double> gradient;
+          double lp = stan::model::log_prob_grad<true,true>(model, cont_params, disc_params, gradient);
+          
+          double lastlp = lp - 1;
+          std::cout << "initial log joint probability = " << lp << std::endl;
+          int m = 0;
+          while ((lp - lastlp) / fabs(lp) > 1e-8) {
+            // FIXME: PyStan equivalent? R_CheckUserInterrupt();
+            lastlp = lp;
+            lp = stan::optimization::newton_step(model, cont_params, disc_params);
             std::cout << "Iteration ";
             std::cout << std::setw(2) << (m + 1) << ". ";
             std::cout << "Log joint probability = " << std::setw(10) << lp;
             std::cout << ". Improved by " << (lp - lastlp) << ".";
             std::cout << std::endl;
             std::cout.flush();
+            m++;
+            if (args.get_sample_file_flag()) { 
+              sample_stream << lp << ',';
+              model.write_csv(base_rng,cont_params,disc_params,sample_stream);
+            }
           }
-          // FIXME: not working -- seems to fail at iteration 20
-          m++;
-          if (sample_file_flag) {
+          std::vector<double> params_inr_etc;
+          model.write_array(base_rng, cont_params, disc_params, params_inr_etc);
+          holder.par = params_inr_etc; 
+          holder.value = lp;
+          // holder.attr("point_estimate") = Rcpp::wrap(true); 
+  
+          if (args.get_sample_file_flag()) { 
             sample_stream << lp << ',';
-            model.write_csv(base_rng,cont_params,disc_params,sample_stream);
+            print_vector(params_inr_etc, sample_stream);
+            sample_stream.close();
           }
-        }
-
-        std::vector<double> params_inr_etc; // continuous, discrete, and others 
-        sample_stream << lp << ',';
-        model.write_array(base_rng,cont_params,disc_params,params_inr_etc);
-        holder.par = params_inr_etc; 
-        holder.value = lp;
-        if (sample_file_flag) { 
+        } else if (Nesterov == args.get_ctrl_optim_algorithm()) {
+          std::cout << "STAN OPTIMIZATION COMMAND (Nesterov)" << std::endl;
+          std::cout << "stepsize = " << args.get_ctrl_optim_stepsize() << std::endl;
+          if (args.get_sample_file_flag()) {
+            write_comment(sample_stream,"Point Estimate Generated by Stan (Nesterov)");
+            write_comment(sample_stream);
+            write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
+            write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
+            write_comment_property(sample_stream,"init",init_val);
+            write_comment_property(sample_stream,"seed",args.get_random_seed());
+            write_comment_property(sample_stream,"stepsize",args.get_ctrl_optim_stepsize());
+            write_comment(sample_stream);
+  
+            sample_stream << "lp__,"; // log probability first
+            model.write_csv_header(sample_stream);
+          }
+  
+          stan::optimization::NesterovGradient<Model> ng(model, cont_params, disc_params,
+                                                         args.get_ctrl_optim_stepsize(),
+                                                         &std::cout);
+          double lp = ng.logp();
+          double lastlp = lp - 1;
+          std::cout << "initial log joint probability = " << lp << std::endl;
+          int m = 0;
+          for (int i = 0; i < args.get_iter(); i++) {
+            // FIXME: PyStan equivalent? R_CheckUserInterrupt();
+            lastlp = lp;
+            lp = ng.step();
+            ng.params_r(cont_params);
+            if (do_print(i, args.get_ctrl_optim_refresh())) {
+              std::cout << "Iteration ";
+              std::cout << std::setw(2) << (m + 1) << ". ";
+              std::cout << "Log joint probability = " << std::setw(10) << lp;
+              std::cout << ". Improved by " << (lp - lastlp) << ".";
+              std::cout << std::endl;
+              std::cout.flush();
+            }
+            m++;
+            if (args.get_sample_file_flag()) {
+              sample_stream << lp << ',';
+              model.write_csv(base_rng,cont_params,disc_params,sample_stream);
+            }
+          }
+  
+          std::vector<double> params_inr_etc; // continuous, discrete, and others 
           sample_stream << lp << ',';
-          print_vector(params_inr_etc, sample_stream);
-          sample_stream.close();
-        }
+          model.write_array(base_rng,cont_params,disc_params,params_inr_etc);
+          holder.par = params_inr_etc; 
+          holder.value = lp;
+          if (args.get_sample_file_flag()) { 
+            sample_stream << lp << ',';
+            print_vector(params_inr_etc, sample_stream);
+            sample_stream.close();
+          }
+        } 
         return 0;
       } 
+      // method = 3 //sampling 
+      if (args.get_diagnostic_file_flag())
+        diagnostic_stream.open(args.get_diagnostic_file().c_str(), std::fstream::out);
 
-      if (diagnostic_file_flag)
-        diagnostic_stream.open(diagnostic_file.c_str(), std::fstream::out);
-
-      mcmc_output<Model> outputer(&sample_stream, &diagnostic_stream);
-      
-      std::vector<std::vector<double> > chains; 
-      std::vector<double> mean_pars;
-      mean_pars.resize(initv.size(), 0);
-      double mean_lp(0);
-      std::vector<std::vector<double> > sampler_params;
-      std::vector<std::vector<double> > iter_params;
-      std::vector<std::string> sampler_param_names;
-      std::vector<std::string> iter_param_names;
-      std::string adaptation_info;
-
-      for (unsigned int i = 0; i < qoi_idx.size(); i++) 
-        chains.push_back(std::vector<double>(iter_save, 0)); 
-      if (sample_file_flag) {
+      if (args.get_sample_file_flag()) {
         write_comment(sample_stream,"Samples Generated by Stan");
         write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
         write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
         write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
-        // FIXME: to implement
-        //args.write_args_as_comment(sample_stream); 
+        // FIXME PyStan: to implement args.write_args_as_comment(sample_stream); 
       } 
-      if (diagnostic_file_flag) {
+      if (args.get_diagnostic_file_flag()) {
         write_comment(diagnostic_stream,"Samples Generated by Stan");
         write_comment_property(diagnostic_stream,"stan_version_major",stan::MAJOR_VERSION);
         write_comment_property(diagnostic_stream,"stan_version_minor",stan::MINOR_VERSION);
         write_comment_property(diagnostic_stream,"stan_version_patch",stan::PATCH_VERSION);
-        //args.write_args_as_comment(diagnostic_stream);
+        // FIXME PyStan: to implement args.write_args_as_comment(diagnostic_stream);
       } 
      
-      double warmDeltaT;
-      double sampleDeltaT;
-      int iter_save_i = 0;
-      if (nondiag_mass) { 
-        args.sampler = "NUTS(nondiag)";
-        stan::mcmc::sample s(cont_params, disc_params, 0, 0);
-        typedef stan::mcmc::adapt_dense_e_nuts<Model, RNG> a_Dm_nuts;
-        a_Dm_nuts sampler(model, base_rng, num_warmup);
-        outputer.set_output_names(s, sampler, model, iter_param_names, sampler_param_names);
-        outputer.init_sampler_params(sampler_params, iter_save);
-        outputer.init_iter_params(iter_params, iter_save);
+      int engine_index = 0;
+       
+      sampling_metric_t metric = args.get_ctrl_sampling_metric(); // unit_e, diag_e, dense_e;
+      int metric_index = 0;
+      if (UNIT_E == metric) metric_index = 0;
+      else if (DIAG_E == metric) metric_index = 1;
+      else if(DENSE_E == metric) metric_index = 2;
+      sampling_algo_t algorithm = args.get_ctrl_sampling_algorithm();
+      switch (algorithm) {
+         case Metropolis: engine_index = 3; break;
+         case HMC: engine_index = 0; break;
+         case NUTS: engine_index = 1; break;
+      } 
 
-        if (!append_samples) {
-          outputer.print_sample_names();
-          outputer.output_diagnostic_names(s, sampler, model);
-        } 
-        // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else sampler.set_nominal_stepsize(epsilon);
-        sampler.set_stepsize_jitter(epsilon_pm);
-        sampler.set_max_depth(max_treedepth);
-        sampler.get_stepsize_adaptation().set_delta(delta);
-        sampler.get_stepsize_adaptation().set_gamma(gamma);
-        sampler.get_stepsize_adaptation().set_mu(log(10 * sampler.get_nominal_stepsize()));
-        sampler.engage_adaptation();
-        clock_t start = clock();
-        warmup_phase<a_Dm_nuts, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                            refresh, save_warmup, 
-                                            outputer, 
-                                            s, model, chains, iter_save_i,
-                                            qoi_idx, mean_pars, mean_lp,
-                                            sampler_params, iter_params, adaptation_info,
-                                            base_rng); 
-        clock_t end = clock();
-        warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-        sampler.disengage_adaptation();
-        outputer.output_adapt_finish(sampler, adaptation_info);
-        // Sampling
-        start = clock();
-        sample_phase<a_Dm_nuts, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                            refresh, true, 
-                                            outputer,
-                                            s, model, chains, iter_save_i,
-                                            qoi_idx, mean_pars, mean_lp, 
-                                            sampler_params, iter_params, adaptation_info,  
-                                            base_rng); 
-        end = clock();
-        sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-      } else if (leapfrog_steps < 0 && !equal_step_sizes) { 
-        // Euclidean NUTS with Diagonal Metric
-        args.sampler = "NUTS2";
-        stan::mcmc::sample s(cont_params, disc_params, 0, 0);
-        typedef stan::mcmc::adapt_diag_e_nuts<Model, RNG> a_dm_nuts;
-        a_dm_nuts sampler(model, base_rng, num_warmup);
-        outputer.set_output_names(s, sampler, model, iter_param_names, sampler_param_names);
-        outputer.init_sampler_params(sampler_params, iter_save);
-        outputer.init_iter_params(iter_params, iter_save);
-        if (!append_samples) {
-          outputer.print_sample_names();
-          outputer.output_diagnostic_names(s, sampler, model);
-        } 
-        // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else sampler.set_nominal_stepsize(epsilon);
-        sampler.set_stepsize_jitter(epsilon_pm);
-        sampler.set_max_depth(max_treedepth);
-        sampler.get_stepsize_adaptation().set_delta(delta);
-        sampler.get_stepsize_adaptation().set_gamma(gamma);
-        sampler.get_stepsize_adaptation().set_mu(log(10 * sampler.get_nominal_stepsize()));
-        sampler.engage_adaptation();
-        clock_t start = clock();
-        warmup_phase<a_dm_nuts, Model, RNG>(sampler, num_warmup, num_iterations, num_thin,
-                                            refresh, save_warmup, 
-                                            outputer,
-                                            s, model, chains, iter_save_i, 
-                                            qoi_idx, mean_pars, mean_lp, 
-                                            sampler_params, iter_params, adaptation_info,  
-                                            base_rng); 
-        clock_t end = clock();
-        warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-        sampler.disengage_adaptation();
-        outputer.output_adapt_finish(sampler, adaptation_info); 
-        
-        // Sampling
-        start = clock();
-        sample_phase<a_dm_nuts, Model, RNG>(sampler, num_warmup, num_iterations,
-                                            num_thin, refresh, true, 
-                                            outputer,
-                                            s, model, chains, iter_save_i, 
-                                            qoi_idx, mean_pars, mean_lp, 
-                                            sampler_params, iter_params, adaptation_info,
-                                            base_rng); 
-        end = clock();
-        sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-      } else if (leapfrog_steps < 0 && equal_step_sizes) {
-        // Euclidean NUTS with Unit Metric
-        args.sampler = "NUTS1";
-        stan::mcmc::sample s(cont_params, disc_params, 0, 0);
-        typedef stan::mcmc::adapt_unit_e_nuts<Model, RNG> a_um_nuts;
-        a_um_nuts sampler(model, base_rng);
-        outputer.set_output_names(s, sampler, model, iter_param_names, sampler_param_names);
-        outputer.init_sampler_params(sampler_params, iter_save);
-        outputer.init_iter_params(iter_params, iter_save);
-        if (!append_samples) {
-          outputer.print_sample_names();
-          outputer.output_diagnostic_names(s, sampler, model);
-        } 
-        // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else sampler.set_nominal_stepsize(epsilon);
-        sampler.set_stepsize_jitter(epsilon_pm);
-        sampler.set_max_depth(max_treedepth);
-        sampler.get_stepsize_adaptation().set_delta(delta);
-        sampler.get_stepsize_adaptation().set_gamma(gamma);
-        sampler.get_stepsize_adaptation().set_mu(log(10 * sampler.get_nominal_stepsize()));
-        sampler.engage_adaptation();
-        clock_t start = clock();
-        warmup_phase<a_um_nuts, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                            refresh, save_warmup, 
-                                            outputer,
-                                            s, model, chains, iter_save_i, 
-                                            qoi_idx, mean_pars, mean_lp, 
-                                            sampler_params, iter_params, adaptation_info,
-                                            base_rng); 
-        clock_t end = clock();
-        warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-        sampler.disengage_adaptation();
-        outputer.output_adapt_finish(sampler, adaptation_info);
-        // Sampling
-        start = clock();
-        sample_phase<a_um_nuts, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                            refresh, true, 
-                                            outputer,
-                                            s, model, chains, iter_save_i, 
-                                            qoi_idx, mean_pars, mean_lp, 
-                                            sampler_params, iter_params, adaptation_info,
-                                            base_rng); 
-        end = clock();
-        sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-      } else {
-        // Unit Metric HMC with Static Integration Time
-        args.sampler = "HMC";
-        stan::mcmc::sample s(cont_params, disc_params, 0, 0);
-        typedef stan::mcmc::adapt_unit_e_static_hmc<Model, RNG> a_um_hmc;
-        a_um_hmc sampler(model, base_rng);
-        outputer.set_output_names(s, sampler, model, iter_param_names, sampler_param_names);
-        outputer.init_sampler_params(sampler_params, iter_save);
-        outputer.init_iter_params(iter_params, iter_save);
-        if (!append_samples) {
-          outputer.print_sample_names();
-          outputer.output_diagnostic_names(s, sampler, model);
-        } 
-        // Warm-Up
-        if (epsilon <= 0) sampler.init_stepsize();
-        else sampler.set_nominal_stepsize(epsilon);
-        sampler.set_stepsize_jitter(epsilon_pm);
-        sampler.set_nominal_stepsize_and_L(epsilon, leapfrog_steps);
-        sampler.get_stepsize_adaptation().set_delta(delta);
-        sampler.get_stepsize_adaptation().set_gamma(gamma);
-        sampler.get_stepsize_adaptation().set_mu(log(10 * sampler.get_nominal_stepsize()));
-        sampler.engage_adaptation();
-        clock_t start = clock();
-        warmup_phase<a_um_hmc, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                           refresh, save_warmup, 
-                                           outputer,
-                                           s, model, chains, iter_save_i, 
-                                           qoi_idx, mean_pars, mean_lp, 
-                                           sampler_params, iter_params, adaptation_info,
-                                           base_rng); 
-        clock_t end = clock();
-        warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-        sampler.disengage_adaptation();
-        outputer.output_adapt_finish(sampler, adaptation_info);
-        // Sampling
-        start = clock();
-        sample_phase<a_um_hmc, Model, RNG>(sampler, num_warmup, num_iterations, num_thin, 
-                                           refresh, true, 
-                                           outputer,
-                                           s, model, chains, iter_save_i, 
-                                           qoi_idx, mean_pars, mean_lp, 
-                                           sampler_params, iter_params, adaptation_info,
-                                           base_rng); 
-        end = clock();
-        sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
+      stan::mcmc::sample s(cont_params, disc_params, 0, 0);
+
+      int sampler_select = engine_index + 10 * metric_index;
+      if (args.get_ctrl_sampling_adapt_engaged())  sampler_select += 100;
+      switch (sampler_select) {
+        case 0: {
+          typedef stan::mcmc::unit_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_static_hmc<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 1: {
+          typedef stan::mcmc::unit_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_nuts<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 10: {
+          typedef stan::mcmc::diag_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_static_hmc<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 11: {
+          typedef stan::mcmc::diag_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_nuts<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 20: {
+          typedef stan::mcmc::dense_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_static_hmc<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 21: {
+          typedef stan::mcmc::dense_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_nuts<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 100: {
+          typedef stan::mcmc::adapt_unit_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_static_hmc<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 101: {
+          typedef stan::mcmc::adapt_unit_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng);
+          init_nuts<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 110: {
+          typedef stan::mcmc::adapt_diag_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng, args.get_ctrl_sampling_warmup());
+          init_static_hmc<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 111: {
+          typedef stan::mcmc::adapt_diag_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng, args.get_ctrl_sampling_warmup());
+          init_nuts<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 120: {
+          typedef stan::mcmc::adapt_dense_e_static_hmc<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng, args.get_ctrl_sampling_warmup());
+          init_static_hmc<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        case 121: {
+          typedef stan::mcmc::adapt_dense_e_nuts<Model, RNG_t> sampler_t;
+          sampler_t sampler(model, base_rng, args.get_ctrl_sampling_warmup());
+          init_nuts<sampler_t>(&sampler, args);
+          init_adapt<sampler_t>(&sampler, args);
+          execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                           sample_stream, diagnostic_stream, fnames_oi,
+                           base_rng);
+          break;
+        }
+        default: 
+          throw std::invalid_argument("No sampler matching HMC specification!");
       } 
-      std::cout << std::endl;
-      if (iter_save_wo_warmup > 0) {
-        mean_lp /= iter_save_wo_warmup;
-        for (std::vector<double>::iterator it = mean_pars.begin();
-             it != mean_pars.end(); 
-             ++it) 
-          (*it) /= iter_save_wo_warmup;
-      } 
-      if (refresh > 0) { 
-        outputer.print_timing(warmDeltaT, sampleDeltaT, &std::cout);
-      }
-      
-      outputer.output_timing(warmDeltaT, sampleDeltaT);
-      if (sample_file_flag) {
-        std::cout << "Sample of chain " 
-                         << chain_id 
-                         << " is written to file " << sample_file << "."
-                         << std::endl;
-        sample_stream.close();
-      }
-      if (diagnostic_file_flag) 
-        diagnostic_stream.close();
-     
-      holder.chains = chains;
-      holder.test_grad = false;
-      holder.args = args;
-      holder.inits = initv;
-      holder.mean_pars = mean_pars; 
-      holder.mean_lp__ = mean_lp;
-      holder.adaptation_info = adaptation_info;
-      // put sampler parameters such as treedepth together with iter_params 
-      iter_params.insert(iter_params.end(), sampler_params.begin(), sampler_params.end());
-      iter_param_names.insert(iter_param_names.end(),
-                              sampler_param_names.begin(),
-                              sampler_param_names.end());
-      holder.sampler_params = iter_params;
-      holder.sampler_param_names = iter_param_names;
-      holder.chain_names = fnames_oi;
       return 0;
     }
 
-  /* stan_fit proper */
-  template <class Model, class RNG> 
+  template <class Model, class RNG_t> 
   class stan_fit {
 
   private:
     pystan::io::py_var_context data_;
     Model model_;
-    RNG base_rng; 
+    RNG_t base_rng; 
     const std::vector<std::string> names_;
     const std::vector<std::vector<unsigned int> > dims_; 
     const unsigned int num_params_; 

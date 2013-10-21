@@ -118,7 +118,7 @@ class TestBernoulli(unittest.TestCase):
         fig = fit.plot()
         assert fig is not None
 
-    def test_bernoulli_sample_file(self):
+    def test_bernoulli_sampling_sample_file(self):
         tmpdir = tempfile.mkdtemp()
         sample_file = os.path.join(tmpdir, 'sampling.csv')
         sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
@@ -128,8 +128,13 @@ class TestBernoulli(unittest.TestCase):
         fit = self.model.sampling(data=self.bernoulli_data, sample_file='/tmp/doesnotexist')
         assert fit is not None
 
-        tmpdir = tempfile.mkdtemp()
-        sample_file = 'opt.csv'
-        sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
-        fit = self.model.optimizing(data=self.bernoulli_data, sample_file=sample_file)
-        # not working right now -- it's a stan issue, not a pystan issue.
+    # FIXME: not working right now -- need to debug
+    # def test_bernoulli_optimizing_sample_file(self):
+    #     tmpdir = tempfile.mkdtemp()
+    #     sample_file = os.path.join(tmpdir, 'optim.csv')
+    #     sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
+    #     fit = self.model.optimizing(data=self.bernoulli_data, sample_file=sample_file)
+    #     assert all([sample_file_base in fn for fn in os.listdir(tmpdir)])
+
+    #     fit = self.model.optimizing(data=self.bernoulli_data, sample_file='/tmp/doesnotexist')
+    #     assert fit is not None

@@ -11,6 +11,14 @@ Introduction
 
 PyStan is the `Python <http://python.org>`_ interface for Stan.
 
+.. beta software notice, remove this eventually
+
+PyStan aims to reproduce the functionality present in RStan. There are a number
+of features present in RStan that have yet to be implemented in PyStan.  If you
+find a feature missing that you use frequently please `file a bug report
+<https://github.com/ariddell/pystan/issues>`_ so developers can better direct
+their efforts.
+
 Prerequisites
 =============
 
