@@ -517,7 +517,7 @@ namespace pystan {
                          << static_cast<int>((100.0 * (m + 1)) / finish)
                          << "%] ";
         std::cout << (warmup ? " (Warmup)" : " (Sampling)");
-        std::cout.flush(); // FIXME: Does flushing update the display in Python?
+        std::cout.flush(); // NOTE: flushing appears to update the display in Python
       }
     }
 

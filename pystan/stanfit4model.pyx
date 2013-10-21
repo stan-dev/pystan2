@@ -63,10 +63,9 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     chains = [np.asarray(ch) for ch in holder.chains]
     chain_names = [n.decode('utf-8') for n in holder.chain_names]
     r['chains'] = OrderedDict(zip(chain_names, chains))
-    # when _dict_from_pystanholder is called we also have args available as a
-    # Python dictionary so we will just assign it directly to avoid trip to C++
-    # and back.
-    # DEPRECATED: r['args'] = _dict_from_pystanargs(holder.args)
+    # NOTE: when _dict_from_pystanholder is called we also have a pointer
+    # to holder.args available so we will use it directly
+    # r['args'] = _dict_from_pystanargs(holder.args)
     r['mean_pars'] = holder.mean_pars
     r['mean_lp__'] = holder.mean_lp__
     cdef bytes adaptation_info_bytes = holder.adaptation_info
@@ -75,6 +74,80 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     r['sampler_param_names'] = [n.decode('utf-8') \
                                 for n in holder.sampler_param_names]
     return r
+
+cdef dict _dict_from_pystanargs(PyStanArgs* args):
+    d = dict()
+    ctrl_d = dict()
+    d['random_seed'] = str(args.random_seed)
+    d['chain_id'] = args.chain_id
+    d['init'] = args.init
+    # FIXME: yet to be implemented: d['init_list'] = args.init_list
+    d['init_radius'] = args.init_radius
+    d['append_samples'] = args.append_samples
+    if args.sample_file_flag:
+        d['sample_file'] = args.sample_file
+    if args.diagnostic_file_flag:
+        d['diagnostic_file'] = args.diagnostic_file
+
+    method = stan_args_method_t(args.method)
+    if method == stan_args_method_t.SAMPLING:
+        d["method"] = "sampling"
+        d["iter"] = args.ctrl.sampling.iter
+        d["warmup"] = args.ctrl.sampling.warmup
+        d["thin"] = args.ctrl.sampling.thin
+        d["refresh"] = args.ctrl.sampling.refresh
+        d["test_grad"] = False
+        ctrl_d["adapt_engaged"] = args.ctrl.sampling.adapt_engaged
+        ctrl_d["adapt_gamma"] = args.ctrl.sampling.adapt_gamma
+        ctrl_d["adapt_delta"] = args.ctrl.sampling.adapt_delta
+        ctrl_d["adapt_kappa"] = args.ctrl.sampling.adapt_kappa
+        ctrl_d["adapt_t0"] = args.ctrl.sampling.adapt_t0
+        ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
+        ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
+        algorithm = sampling_algo_t(args.ctrl.sampling.algorithm)
+        if algorithm == sampling_algo_t.NUTS:
+            ctrl_d["max_treedepth"] = args.ctrl.sampling.max_treedepth
+            d["sampler_t"] = "NUTS"
+        elif algorithm == sampling_algo_t.HMC:
+            ctrl_d["int_time"] = args.ctrl.sampling.int_time
+            d["sampler_t"] = "HMC"
+        elif algorithm == sampling_algo_t.Metropolis:
+            d["sampler_t"] = "Metropolis"
+        if algorithm != sampling_algo_t.Metropolis:
+            metric = sampling_metric_t(args.ctrl.sampling.metric)
+            if metric == sampling_metric_t.UNIT_E:
+                ctrl_d["metric"] = "unit_e"
+                d["sampler_t"] = d["sampler_t"] + "(unit_e)"
+            elif metric == sampling_metric_t.DIAG_E:
+                ctrl_d["metric"] = "diag_e"
+                d["sampler_t"] = d["sampler_t"] + "(diag_e)"
+            elif metric == sampling_metric_t.DENSE_E:
+                ctrl_d["metric"] = "dense_e"
+                d["sampler_t"] = d["sampler_t"] + "(dense_e)"
+        d["control"] = ctrl_d
+    elif method == stan_args_method_t.OPTIM:
+        d["method"] = "optim"
+        d["iter"] = args.ctrl.optim.iter
+        d["refresh"] = args.ctrl.optim.refresh
+        d["save_iterations"] = args.ctrl.optim.save_iterations
+        algorithm = optim_algo_t(args.ctrl.optim.algorithm)
+        if algorithm == optim_algo_t.Newton:
+            d["algorithm"] = "Newton"
+            pass
+        elif algorithm == optim_algo_t.Nesterov:
+            d["algorithm"] = "Nesterov"
+            d["stepsize"] = args.ctrl.optim.stepsize
+        elif algorithm == optim_algo_t.BFGS:
+            d["algorithm"] = "BFGS"
+            d["init_alpha"] = args.ctrl.optim.init_alpha
+            d["tol_obj"] = args.ctrl.optim.tol_obj
+            d["tol_grad"] = args.ctrl.optim.tol_grad
+            d["tol_param"] = args.ctrl.optim.tol_param
+    elif method == stan_args_method_t.TEST_GRADIENT:
+        d["method"] = "test_grad"
+        d["test_grad"] = True
+    return d
+
 
 cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     """Insert values in dictionary `args` into `p`"""
@@ -385,7 +458,10 @@ cdef class StanFit4$model_cppname:
         _set_pystanargs_from_dict(argsptr, args)
         ret = self.thisptr.call_sampler(deref(argsptr), deref(holderptr))
         holder_dict = _dict_from_pystanholder(holderptr)
-        holder_dict['args'] = args
+        # FIXME: rather than fetching the args from the holderptr, we just use
+        # the argsptr we passed directly. This is a hack to solve a problem
+        # that holder.args gets dropped somewhere in C++.
+        holder_dict['args'] = _dict_from_pystanargs(argsptr)
         del holderptr
         del argsptr
         return ret, holder_dict

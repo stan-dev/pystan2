@@ -39,15 +39,15 @@ class TestOptim(unittest.TestCase):
     # FIXME: to implement
     # def test_optim_stdnorm_from_file(self):
     #     dump(c("N", "y"), file = 'optim.data.R')
-    #     optim = sm.optimizing(file='optim.data.R', method='BFGS')
+    #     optim = sm.optimizing(file='optim.data.R', algorithm='BFGS')
 
     def test_optim_stdnorm_bfgs(self):
-        optim = self.sm.optimizing(data=self.dat, method='BFGS')
+        optim = self.sm.optimizing(data=self.dat, algorithm='BFGS')
         print(optim)
         self.assertTrue(-1 < optim['par']['mu'] < 1)
         self.assertTrue(0 < optim['par']['sigma'] < 2)
 
     def test_optim_stdnorm_nesterov(self):
-        optim = self.sm.optimizing(data=self.dat, method='Nesterov')
+        optim = self.sm.optimizing(data=self.dat, algorithm='Nesterov')
         self.assertTrue(-1 < optim['par']['mu'] < 1)
         self.assertTrue(0 < optim['par']['sigma'] < 2)
