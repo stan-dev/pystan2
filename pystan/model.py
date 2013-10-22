@@ -233,7 +233,7 @@ class StanModel:
             os.makedirs(lib_dir)
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
-        with io.open(model_cpp_file, 'w') as outfile:
+        with io.open(model_cpp_file, 'w', encoding='utf-8') as outfile:
             outfile.write(self.model_cppcode)
 
         pyx_file = os.path.join(lib_dir, module_name + '.pyx')
@@ -241,7 +241,7 @@ class StanModel:
         with io.open(pyx_template_file, 'r', encoding='utf-8') as infile:
             s = infile.read()
             template = string.Template(s)
-        with io.open(pyx_file, 'w') as outfile:
+        with io.open(pyx_file, 'w', encoding='utf-8') as outfile:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
