@@ -296,6 +296,7 @@ cdef class StanFit4$model_cppname:
         the array is for the iterations; the second for the number of chains;
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
+        Parameters are listed in the same order as `model_pars` and `flatnames`.
 
         """
         self._verify_has_samples()
@@ -331,8 +332,9 @@ cdef class StanFit4$model_cppname:
                 newdim = [sum(n_kept)] + par_dim
                 # order='F' means column-major order
                 extracted[par] = extracted[par].reshape(newdim, order='F')
-                # squeeze dim, e.g., (4000,1) into (4000,)
-                extracted[par] = np.squeeze(extracted[par])
+                # squeeze dim for scalar params, e.g., (4000,1) into (4000,)
+                if len(newdim) == 2 and newdim[1] == 1:
+                   extracted[par] = np.squeeze(extracted[par])
         else:
             extracted = None
             for n in range(len(self.sim['fnames_oi'])):
