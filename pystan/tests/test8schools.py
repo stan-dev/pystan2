@@ -72,9 +72,8 @@ def test8schools():
     print(ss2)
     print(ss3)
 
-    # FIXME: plotting not yet finished
-    # ss1.plot()
-    # ss1.traceplot()
+    ss1.plot()
+    ss1.traceplot()
 
     ss9 = m.sampling(data=dat, iter=iter, chains=4, refresh=10)
 
