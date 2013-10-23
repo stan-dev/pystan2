@@ -6,6 +6,13 @@
  What's New 
 ============
 
+v.2.0.0.1 (23. October 2013)
+============================
+
+- Stan ``array`` parameters are now handled correctly.
+- Ancillary methods added to fit instances.
+- Fixed bug that caused parameters in ``control`` dict to be ignored.
+
 v.2.0.0.0 (21. October 2013)
 ============================
 

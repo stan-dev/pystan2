@@ -112,7 +112,7 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     return '\n'.join(lines)
 
 
-def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
+def _summary(fit, pars=None, probs=None, **kwargs):
     """Summarize samples (compute mean, SD, quantiles) in all chains.
 
     REF: stanfit-class.R summary method
@@ -120,10 +120,10 @@ def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
     Parameters
     ----------
     fit : stanfit4model object
-    pars : sequence of str
-        Parameter names
-    probs : sequence of float
-        quantiles
+    pars : str or sequence of str, optional
+        Parameter names. By default use all parameters
+    probs : sequence of float, optional
+        Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
 
     Returns
     -------
@@ -153,7 +153,10 @@ def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
 
     if pars is None:
         pars = fit.sim['pars_oi']
-
+    elif isinstance(pars, string_types):
+        pars = [pars]
+    if probs is None:
+        probs = (0.025, 0.25, 0.5, 0.75, 0.975)
     ss = _summary_sim(fit.sim, pars, probs)
     # TODO: include sem, ess and rhat: ss['ess'], ss['rhat']
     s1 = np.column_stack([ss['msd'][:, 0], ss['sem'], ss['msd'][:, 1], ss['quan'], ss['ess'], ss['rhat']])
@@ -459,7 +462,7 @@ def _get_valid_stan_args(base_args=None):
     args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
 
     if args['method'] == stan_args_method_t.SAMPLING:
-        args['ctrl'] = dict(sampling=dict())
+        args['ctrl'] = args.get('ctrl', dict(sampling=dict()))
         args['ctrl']['sampling']['iter'] = iter = args.get('iter', 2000)
         args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', args['iter'] // 2)
         calculated_thin = iter - warmup // 1000
@@ -488,7 +491,6 @@ def _get_valid_stan_args(base_args=None):
 
         ctrl_lst = args.get('control')
         if ctrl_lst is not None:
-            args['ctrl'] = dict(sampling=dict())
             args['ctrl']['sampling']['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
             args['ctrl']['sampling']['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
             args['ctrl']['sampling']['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.65)
@@ -526,7 +528,7 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['int_time'] = 6.283185307179586476925286766559005768e+00
 
     elif args['method'] == stan_args_method_t.OPTIM:
-        args['ctrl'] = dict(optim=dict())
+        args['ctrl'] = args.get('ctrl', dict(optim=dict()))
         args['ctrl']['optim']['iter'] = iter = args.get('iter', 2000)
         algorithm = args.get('algorithm', 'BFGS')
         if algorithm == "BFGS":

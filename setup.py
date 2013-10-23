@@ -54,9 +54,9 @@ CLASSIFIERS = [
 ]
 MAJOR = 2
 MINOR = 0
-MICRO = 1
-NANO = 0
-ISRELEASED = False
+MICRO = 0
+NANO = 1
+ISRELEASED = True
 VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 
 FULLVERSION = VERSION
@@ -68,15 +68,15 @@ try:
     import Cython
     import numpy
 except ImportError:
-    raise SystemExit("Cython>=0.19.1 and NumPy are required.")
+    raise SystemExit("Cython>=0.19 and NumPy are required.")
 
 ## if setuptools is available, check the version of Cython
 try:
     import pkg_resources
     try:
-        pkg_resources.require("Cython>=0.19.1")
+        pkg_resources.require("Cython>=0.19")
     except pkg_resources.VersionConflict:
-        raise SystemExit("Cython>=0.19.1 is required.")
+        raise SystemExit("Cython>=0.19 is required.")
 except ImportError:
     # no setuptools
     pass

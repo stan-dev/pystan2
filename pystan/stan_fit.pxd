@@ -112,3 +112,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         string adaptation_info
         vector[vector[double] ] sampler_params
         vector[string] sampler_param_names
+    
+    # free standing functions
+    void get_all_flatnames(vector[string] names, vector[vector[uint]]& dims, vector[string] fnames, bool col_major)
+

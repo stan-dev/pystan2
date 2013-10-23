@@ -27,7 +27,7 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref
 
 from pystan.io cimport py_var_context, var_context
-from pystan.stan_fit cimport stan_fit, PyStanArgs, PyStanHolder
+from pystan.stan_fit cimport stan_fit, PyStanArgs, PyStanHolder, get_all_flatnames
 
 # python imports
 from collections import OrderedDict
@@ -69,7 +69,7 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     r['mean_pars'] = holder.mean_pars
     r['mean_lp__'] = holder.mean_lp__
     cdef bytes adaptation_info_bytes = holder.adaptation_info
-    r['adapation_info'] = adaptation_info_bytes.decode('utf-8')
+    r['adaptation_info'] = adaptation_info_bytes.decode('utf-8')
     r['sampler_params'] = holder.sampler_params
     r['sampler_param_names'] = [n.decode('utf-8') \
                                 for n in holder.sampler_param_names]
@@ -185,7 +185,8 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.sampling.stepsize = args['ctrl']['sampling']['stepsize']
         p.ctrl.sampling.stepsize_jitter = args['ctrl']['sampling']['stepsize_jitter']
         p.ctrl.sampling.max_treedepth = args['ctrl']['sampling']['max_treedepth']
-        p.ctrl.sampling.int_time = args['ctrl']['sampling']['int_time']
+        if args['ctrl']['sampling']['algorithm'] == sampling_algo_t.HMC:
+            p.ctrl.sampling.int_time = args['ctrl']['sampling']['int_time']
     elif args['method'] == stan_args_method_t.OPTIM:
         p.ctrl.optim.iter = args['ctrl']['optim']['iter']
         p.ctrl.optim.refresh = args['ctrl']['optim']['refresh']
@@ -295,15 +296,10 @@ cdef class StanFit4$model_cppname:
         the array is for the iterations; the second for the number of chains;
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
+        Parameters are listed in the same order as `model_pars` and `flatnames`.
 
         """
-        if self.mode == 1:
-            msg = "Stan model {} is of mode 'test_grad';\n" \
-                "sampling is not conducted."
-            raise AttributeError(msg.format(self.model_name))
-        elif self.mode == 2 or self.sim.get('samples') is None:
-            msg = "Stan model {} does not contain samples."
-            raise AttributeError(msg.format(self.model_name))
+        self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logging.warn("`inc_warmup` ignored when `permuted` is True.")
 
@@ -336,12 +332,14 @@ cdef class StanFit4$model_cppname:
                 newdim = [sum(n_kept)] + par_dim
                 # order='F' means column-major order
                 extracted[par] = extracted[par].reshape(newdim, order='F')
-                # squeeze dim, e.g., (4000,1) into (4000,)
-                extracted[par] = np.squeeze(extracted[par])
+                # squeeze dim for scalar params, e.g., (4000,1) into (4000,)
+                if len(newdim) == 2 and newdim[1] == 1:
+                   extracted[par] = np.squeeze(extracted[par])
         else:
             extracted = None
             for n in range(len(self.sim['fnames_oi'])):
                 chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
+                # FIXME: n_save doesn't appear to be used?
                 n_save = self.sim['n_save'][0]
                 if not inc_warmup:
                     n_save = n_save - self.sim['warmup2'][0]
@@ -360,8 +358,8 @@ cdef class StanFit4$model_cppname:
         s = pystan.misc._print_stanfit(self)
         return s.encode('utf-8') if PY2 else s
 
-    def summary(self):
-        return pystan.misc._summary(self)
+    def summary(self, pars=None, probs=None):
+        return pystan.misc._summary(self, pars, probs)
 
     def log_prob(self, upars, adjust_transform=True, gradient=False):
         """
@@ -419,7 +417,84 @@ cdef class StanFit4$model_cppname:
     def grad_log_prob(self, upars, adjust_transform=True):
         raise NotImplementedError("grad_log_prob is not yet implemented")
 
+    def get_adaptation_info(self):
+        """Obtain adaptation information for sampler, which now only NUTS2 has.
+
+        The results are returned as a list, each element of which is a character
+        string for a chain."""
+        self._verify_has_samples()
+        lai =  [ch['adaptation_info'] for ch in self.sim['samples']]
+        return lai
+
+    def get_logposterior(self, inc_warmup=True):
+        """Get the log-posterior (up to an additive constant) for all chains.
+
+        Each element of the returned array is the log-posterior for
+        a chain. Optional parameter `inc_warmup` indicates whether to
+        include the warmup period.
+        """
+        self._verify_has_samples()
+        llp =  [ch['chains']['lp__'] for ch in self.sim['samples']]
+        return llp if inc_warmup else [x[warmup2:] for x, warmup2 in zip(llp, self.sim['warmup2'])]
+
+    def get_sampler_params(self, inc_warmup=True):
+        """Obtain the parameters used for the sampler such as `stepsize` and
+        `treedepth`. The results are returned as a list, each element of which
+        is an OrderedDict a chain. The dictionary has number of elements
+        corresponding to the number of parameters used in the sampler. Optional
+        parameter `inc_warmup` indicates whether to include the warmup period.
+        """
+        self._verify_has_samples()
+        ldf = [OrderedDict(zip(ch['sampler_param_names'], np.array(ch['sampler_params']))) for ch in self.sim['samples']]
+        if inc_warmup:
+            return ldf
+        else:
+            for d, warmup2 in zip(ldf, self.sim['warmup2']):
+                for key in d:
+                    d[key] = d[key][warmup2:]
+            return ldf
+
+    def get_posterior_mean(self):
+        """Get the posterior mean for all parameters
+
+        Returns
+        -------
+        means : array of shape (num_parameters, num_chains)
+            Order of parameters is given by self.model_pars or self.flatnames
+            if parameters of interest include non-scalar parameters. An additional
+            column for mean_lp__ is also included.
+        """
+        self._verify_has_samples()
+        fnames = self.flatnames
+        mean_pars = np.array([ch['mean_pars'] for ch in self.sim['samples']])
+        mean_lp__ = np.array([ch['mean_lp__'] for ch in self.sim['samples']])
+        mean_pars = np.column_stack(mean_pars)
+        assert len(fnames) == len(mean_pars)
+        m = np.row_stack([mean_pars, mean_lp__])
+        return m
+
+    # FIXME: when this is a normal Python class one can use @property instead
+    # of this special Cython syntax.
+    property flatnames:
+
+        def __get__(self):
+            # NOTE: RStan rewrites the C++ function get_all_flatnames in R (in misc.R).
+            # PyStan exposes and calls the C++ function directly.
+            cdef vector[string] fnames
+            names = [n.encode('ascii') for n in self.model_pars]
+            get_all_flatnames(names, self.par_dims, fnames, col_major=True)
+            return [n.decode('ascii') for n in fnames]
+
     # "private" Python methods
+
+    def _verify_has_samples(self):
+        if self.mode == 1:
+            msg = "Stan model {} is of mode 'test_grad';\n" \
+                "sampling is not conducted."
+            raise AttributeError(msg.format(self.model_name))
+        elif self.mode == 2 or self.sim.get('samples') is None:
+            msg = "Stan model {} does not contain samples."
+            raise AttributeError(msg.format(self.model_name))
 
     def _update_param_oi(self, pars):
         cdef vector[string] pars_ = pars
