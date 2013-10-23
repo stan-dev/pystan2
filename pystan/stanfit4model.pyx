@@ -355,8 +355,8 @@ cdef class StanFit4$model_cppname:
         s = pystan.misc._print_stanfit(self)
         return s.encode('utf-8') if PY2 else s
 
-    def summary(self):
-        return pystan.misc._summary(self)
+    def summary(self, pars=None, probs=None):
+        return pystan.misc._summary(self, pars, probs)
 
     def log_prob(self, upars, adjust_transform=True, gradient=False):
         """

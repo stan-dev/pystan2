@@ -79,18 +79,21 @@ def test8schools():
 
     iter = 52012
 
-    ss = stan(sfile, data=dat, iter=iter, chains=4, sample_file='8schools.csv')
+    # FIXME:sample_file not yet implemented
+    # ss = stan(sfile, data=dat, iter=iter, chains=4, sample_file='8schools.csv')
+    ss = stan(sfile, data=dat, iter=iter, chains=4)
 
     print(ss)
 
-    ss_inits = ss['inits']
+    ss_inits = ss.inits
     ss_same = stan(sfile, data=dat, iter=iter, chains=4,
-                   seed=ss['stan_args'][0]['seed'], init=ss_inits,
-                   sample_file='ya8schools.csv')
+                   seed=ss.stan_args[0]['seed'], init=ss_inits)
+    # FIXME:sample_file not yet implemented
+    #               sample_file='ya8schools.csv')
 
-    b = np.allclose(ss['sim']['samples'], ss_same['sim']['samples'])
+    b = np.allclose(ss.extract(permuted=False), ss_same.extract(permuted=False))
     # b is not true as ss is initialized randomly while ss.same is not.
 
     s = ss_same.summary(pars="mu", probs=(.3, .8))
     # not in python: print(ss.same, pars='theta', probs=c(.4, .8))
-    print(ss.same)
+    print(ss_same)

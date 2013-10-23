@@ -112,7 +112,7 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     return '\n'.join(lines)
 
 
-def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
+def _summary(fit, pars=None, probs=None, **kwargs):
     """Summarize samples (compute mean, SD, quantiles) in all chains.
 
     REF: stanfit-class.R summary method
@@ -120,10 +120,10 @@ def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
     Parameters
     ----------
     fit : stanfit4model object
-    pars : sequence of str
-        Parameter names
-    probs : sequence of float
-        quantiles
+    pars : str or sequence of str, optional
+        Parameter names. By default use all parameters
+    probs : sequence of float, optional
+        Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
 
     Returns
     -------
@@ -153,7 +153,10 @@ def _summary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), **kwargs):
 
     if pars is None:
         pars = fit.sim['pars_oi']
-
+    elif isinstance(pars, string_types):
+        pars = [pars]
+    if probs is None:
+        probs = (0.025, 0.25, 0.5, 0.75, 0.975)
     ss = _summary_sim(fit.sim, pars, probs)
     # TODO: include sem, ess and rhat: ss['ess'], ss['rhat']
     s1 = np.column_stack([ss['msd'][:, 0], ss['sem'], ss['msd'][:, 1], ss['quan'], ss['ess'], ss['rhat']])
