@@ -185,7 +185,8 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.sampling.stepsize = args['ctrl']['sampling']['stepsize']
         p.ctrl.sampling.stepsize_jitter = args['ctrl']['sampling']['stepsize_jitter']
         p.ctrl.sampling.max_treedepth = args['ctrl']['sampling']['max_treedepth']
-        p.ctrl.sampling.int_time = args['ctrl']['sampling']['int_time']
+        if args['ctrl']['sampling']['algorithm'] == sampling_algo_t.HMC:
+            p.ctrl.sampling.int_time = args['ctrl']['sampling']['int_time']
     elif args['method'] == stan_args_method_t.OPTIM:
         p.ctrl.optim.iter = args['ctrl']['optim']['iter']
         p.ctrl.optim.refresh = args['ctrl']['optim']['refresh']
