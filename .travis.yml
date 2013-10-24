@@ -12,4 +12,4 @@ install:
   - "pip install matplotlib --use-mirrors"
   - "pip install . --use-mirrors"
 # command to run tests
-script: nosetests -w /tmp --process-timeout=600 --processes=4 pystan.tests
+script: nosetests -w /tmp --process-timeout=1200 --processes=4 pystan.tests
