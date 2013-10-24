@@ -6,6 +6,12 @@
  What's New 
 ============
 
+v.2.0.1.0 (24. October 2013)
+============================
+
+- Updated to Stan 2.0.1.
+- Specifying ``sample_file`` now works as expected.
+
 v.2.0.0.1 (23. October 2013)
 ============================
 

@@ -6,18 +6,7 @@
  Getting Started
 =================
 
-Introduction
-============
-
-PyStan is the `Python <http://python.org>`_ interface for Stan.
-
-.. beta software notice, remove this eventually
-
-PyStan aims to reproduce the functionality present in RStan. There are a number
-of features present in RStan that have yet to be implemented in PyStan.  If you
-find a feature missing that you use frequently please `file a bug report
-<https://github.com/ariddell/pystan/issues>`_ so developers can better direct
-their efforts.
+PyStan is the `Python <http://python.org>`_ interface for `Stan <http://mc-stan.org/>`_.
 
 Prerequisites
 =============
@@ -25,7 +14,7 @@ Prerequisites
 PyStan has the following dependencies:
 
 - `Python <http://python.org>`_: 2.7 or 3.3
-- `Cython <http://cython.org>`_: 0.19.1 or greater
+- `Cython <http://cython.org>`_: 0.19 or greater
 - `NumPy <http://numpy.org>`_: 1.6.2 or greater
 
 PyStan also requires that a C++ compiler be available to Python during
@@ -53,22 +42,18 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://github.com/ariddell/pystan/archive/2.0.0.1.zip
-   # alternatively, instead of wget, use curl, or a web browser
-   unzip 2.0.0.1.zip
-   cd pystan-2.0.0.1
+   wget https://github.com/ariddell/pystan/archive/2.0.1.0.zip
+   # alternatively, use curl, or a web browser
+   unzip 2.0.1.0.zip
+   cd pystan-2.0.1.0
    python setup.py install
    cd ..  # change out of the source directory before using pystan
 
 Windows
 -------
 
-Installation under Windows it not well tested. `Python(x,y)
-<https://code.google.com/p/pythonxy/>`_ provides a distribution of Python that
-includes NumPy, Cython, and the GNU Compiler `MinGW
-<http://docs.cython.org/src/tutorial/appendix.html>`_. (Note that Cython should
-be selected during installation of Python(x,y), as it is not installed by
-default).
+Installation under Windows is not well tested. Success installing PyStan under
+32-bit Windows has been reported.
 
 .. note:: Installing PyStan involves compiling Stan. This may take
     a considerable amount of time.
