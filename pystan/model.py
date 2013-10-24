@@ -455,10 +455,10 @@ class StanModel:
                          seed=seed,
                          method="optim",
                          algorithm=algorithm)
+        if sample_file is not None:
+            stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
 
-        # FIXME: add sample_file handling here
-
-        # I believe this check is for backward compatibility
+        # This check is is to warn users of older versions of PyStan
         if kwargs.get('method'):
             raise ValueError('`method` is no longer used. Specify `algorithm` instead.')
         stan_args.update(kwargs)

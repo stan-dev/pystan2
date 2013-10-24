@@ -101,6 +101,7 @@ class TestBernoulli(unittest.TestCase):
         fit = self.fit
         s = fit.summary()
         assert s is not None
+        # printing to make sure no exception raised
         repr(fit)
         print(fit)
 
@@ -112,20 +113,21 @@ class TestBernoulli(unittest.TestCase):
     def test_bernoulli_sampling_sample_file(self):
         tmpdir = tempfile.mkdtemp()
         sample_file = os.path.join(tmpdir, 'sampling.csv')
-        sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
         fit = self.model.sampling(data=self.bernoulli_data, sample_file=sample_file)
-        assert all([sample_file_base in fn for fn in os.listdir(tmpdir)])
 
-        fit = self.model.sampling(data=self.bernoulli_data, sample_file='/tmp/doesnotexist')
+        num_chains = len(fit.sim['samples'])
+        for i in range(num_chains):
+            fn = os.path.splitext(os.path.join(tmpdir, 'sampling.csv'))[0] + "_{}.csv".format(i)
+            assert os.path.exists(fn)
+
+        fit = self.model.sampling(data=self.bernoulli_data, sample_file='/tmp/pathdoesnotexist/sampling.csv')
         assert fit is not None
 
-    # FIXME: not working right now -- need to debug
-    # def test_bernoulli_optimizing_sample_file(self):
-    #     tmpdir = tempfile.mkdtemp()
-    #     sample_file = os.path.join(tmpdir, 'optim.csv')
-    #     sample_file_base = os.path.splitext(os.path.basename(sample_file))[0]
-    #     fit = self.model.optimizing(data=self.bernoulli_data, sample_file=sample_file)
-    #     assert all([sample_file_base in fn for fn in os.listdir(tmpdir)])
+    def test_bernoulli_optimizing_sample_file(self):
+        tmpdir = tempfile.mkdtemp()
+        sample_file = os.path.join(tmpdir, 'optim.csv')
+        self.model.optimizing(data=self.bernoulli_data, sample_file=sample_file)
+        assert os.path.exists(sample_file)
 
-    #     fit = self.model.optimizing(data=self.bernoulli_data, sample_file='/tmp/doesnotexist')
-    #     assert fit is not None
+        fit = self.model.optimizing(data=self.bernoulli_data, sample_file='/tmp/pathdoesnotexist/optim.csv')
+        assert fit is not None

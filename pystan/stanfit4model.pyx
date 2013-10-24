@@ -165,7 +165,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     p.append_samples = args['append_samples']
     p.sample_file_flag = args['sample_file_flag']
     p.method = args['method'].value
-    p.sample_file = args['diagnostic_file']
+    p.diagnostic_file = args['diagnostic_file']
     p.diagnostic_file_flag = args['diagnostic_file_flag']
     if args['method'] == stan_args_method_t.SAMPLING:
         p.ctrl.sampling.iter = args['ctrl']['sampling']['iter']

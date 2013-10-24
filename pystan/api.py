@@ -312,8 +312,6 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
                       save_dso=save_dso, verbose=verbose, **kwargs)
-    if sample_file is not None:
-        raise NotImplementedError
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
                      sample_file=sample_file, diagnostic_file=diagnostic_file,
                      verbose=verbose, algorithm=algorithm, control=control, **kwargs)
