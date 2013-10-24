@@ -79,17 +79,14 @@ def test8schools():
 
     iter = 52012
 
-    # FIXME:sample_file not yet implemented
-    # ss = stan(sfile, data=dat, iter=iter, chains=4, sample_file='8schools.csv')
-    ss = stan(sfile, data=dat, iter=iter, chains=4)
+    ss = stan(sfile, data=dat, iter=iter, chains=4, sample_file='8schools.csv')
 
     print(ss)
 
     ss_inits = ss.inits
     ss_same = stan(sfile, data=dat, iter=iter, chains=4,
-                   seed=ss.stan_args[0]['seed'], init=ss_inits)
-    # FIXME:sample_file not yet implemented
-    #               sample_file='ya8schools.csv')
+                   seed=ss.stan_args[0]['seed'], init=ss_inits,
+                   sample_file='ya8schools.csv')
 
     b = np.allclose(ss.extract(permuted=False), ss_same.extract(permuted=False))
     # b is not true as ss is initialized randomly while ss.same is not.
