@@ -1,4 +1,7 @@
 language: python
+env:
+  - TEST_SUITE_REGEX='^test_rstan'
+  - TEST_SUITE_REGEX='^(?!test_rstan).*'
 python:
   - "2.7"
   - "3.3"
@@ -12,4 +15,4 @@ install:
   - "pip install matplotlib --use-mirrors"
   - "pip install . --use-mirrors"
 # command to run tests
-script: nosetests -w /tmp --process-timeout=1200 --processes=2 pystan.tests
+script: nosetests -w /tmp --process-timeout=1200 --processes=2 --exclude=$TEST_SUITE_REGEX pystan.tests
