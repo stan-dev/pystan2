@@ -42,7 +42,7 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://github.com/ariddell/pystan/archive/2.0.1.0.zip
+   wget https://github.com/stan-dev/pystan/archive/2.0.1.0.zip
    # alternatively, use curl, or a web browser
    unzip 2.0.1.0.zip
    cd pystan-2.0.1.0

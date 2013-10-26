@@ -1,8 +1,8 @@
 PyStan: The Python Interface to Stan
 ====================================
 
-.. image:: https://travis-ci.org/ariddell/pystan.png
-        :target: https://travis-ci.org/ariddell/pystan
+.. image:: https://travis-ci.org/stan-dev/pystan.png
+        :target: https://travis-ci.org/stan-dev/pystan
 
 PyStan has an interface similar to that of RStan. For an introduction to Stan
 and RStan see `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
@@ -13,15 +13,15 @@ Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
 PyStan aims to reproduce the functionality present in RStan. There are a few
 features present in RStan that have yet to be implemented in PyStan.  If you
 find a feature missing that you use frequently please `file a bug report
-<https://github.com/ariddell/pystan/issues>`_ so developers can better direct
+<https://github.com/stan-dev/pystan/issues>`_ so developers can better direct
 their efforts.
 
 Important links
 ---------------
 
-- Source code repo: https://github.com/ariddell/pystan
+- Source code repo: https://github.com/stan-dev/pystan
 - HTML documentation: https://pystan.readthedocs.org
-- Issue tracker: https://github.com/ariddell/pystan/issues
+- Issue tracker: https://github.com/stan-dev/pystan/issues
 - Stan: http://mc-stan.org/
 
 Similar projects
@@ -49,7 +49,7 @@ available, PyStan may be installed from source with the following commands
 
 ::
 
-   git clone https://github.com/ariddell/pystan.git
+   git clone https://github.com/stan-dev/pystan.git
    cd pystan
    python setup.py install
 

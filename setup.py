@@ -36,7 +36,7 @@ NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
 AUTHOR       = 'Allen B. Riddell'
 AUTHOR_EMAIL = 'abr@ariddell.org'
-URL          = 'https://github.com/ariddell/pystan'
+URL          = 'https://github.com/stan-dev/pystan'
 LICENSE      = 'GPLv3'
 CLASSIFIERS = [
     'Programming Language :: Python',
