@@ -34,9 +34,9 @@ Stan documentation
 Important links
 ---------------
 
-- Source code repo: https://github.com/ariddell/pystan
+- Source code repo: https://github.com/stan-dev/pystan
 - HTML documentation: http://pystan.readthedocs.org
-- Issue tracker: https://github.com/ariddell/pystan/issues
+- Issue tracker: https://github.com/stan-dev/pystan/issues
 
 Similar projects
 ----------------
