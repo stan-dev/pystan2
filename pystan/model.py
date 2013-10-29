@@ -245,13 +245,14 @@ class StanModel:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
+        extra_compile_args = ['-O3', '-ftemplate-depth-256']
         extension = Extension(name=module_name,
                               language="c++",
                               sources=[pyx_file],
                               include_dirs=include_dirs,
                               library_dirs=library_dirs,
                               libraries=libraries,
-                              extra_compile_args=['-O3'])
+                              extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
         build_extension = _get_build_extension()
