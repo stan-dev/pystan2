@@ -201,7 +201,7 @@ def split_potential_scale_reduction(dict sim, uint n):
     cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
     cdef double var_within = stan_mean(split_chain_var)
 
-    cdef double srhat = sqrt((var_between/var_within + n_samples/2 -1)/(n_samples/2))
+    cdef double srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
     return srhat
 
 def stan_prob_autocovariance(vector[double] dv):

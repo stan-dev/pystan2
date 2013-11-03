@@ -1,4 +1,4 @@
-MAX_UINT = 2**32 - 1  # simpler than ctypes.uint(-1).value, I think
+MAX_UINT = 2**32 - 2  # simpler than ctypes.uint(-1).value, I think
 
 try:
     from enum import Enum  # Python 3.4

@@ -675,11 +675,6 @@ class StanModel:
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
                                                  m_pars, p_dims)
 
-        # test_gradient mode: don't sample
-        if samples[0]['test_grad']:
-            fit.sim = {'num_failed': [s['num_failed'] for s in samples]}
-            return fit
-
         perm_lst = [np.random.permutation(n_kept) for _ in range(chains)]
         fnames_oi = fit._get_param_fnames_oi()
         n_flatnames = len(fnames_oi)
@@ -699,7 +694,7 @@ class StanModel:
         fit.model_name = self.model_name
         fit.model_pars = m_pars
         fit.par_dims = p_dims
-        fit.mode = 0
+        fit.mode = 0 if not kwargs.get('test_grad') else 1
         fit.inits = inits_used
         fit.stan_args = args_list
         fit.stanmodel = self

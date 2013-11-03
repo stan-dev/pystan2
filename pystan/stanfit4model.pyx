@@ -473,6 +473,18 @@ cdef class StanFit4$model_cppname:
         m = np.row_stack([mean_pars, mean_lp__])
         return m
 
+    def get_seed(self):
+        return self.stan_args[0]['seed']
+
+    def get_inits(self):
+        return self.inits
+
+    def get_stancode(self):
+        return self.stanmodel.model_code
+
+    def get_stanmodel(self):
+        return self.stanmodel
+
     # FIXME: when this is a normal Python class one can use @property instead
     # of this special Cython syntax.
     property flatnames:

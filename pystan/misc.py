@@ -384,7 +384,7 @@ def _config_argss(chains, iter, warmup, thin,
 
     # use chain_id argument if specified
     if kwargs.get('chain_id') is None:
-        chain_ids = list(range(1, chains + 1))
+        chain_ids = list(range(chains))
     else:
         chain_id = [int(id) for id in kwargs['chain_id']]
         if len(set(chain_id)) != len(chain_id):
@@ -587,7 +587,14 @@ def _check_seed(seed, raise_exception=True):
     else:
         logger.warn('`seed` did not have expected characteristics.')
 
-    return seed
+    if seed < 0:
+        logger.warn("`seed` may not be negative")
+        seed = None
+    elif seed > MAX_UINT:
+        logger.warn("`seed` is too large; max is {}".format(MAX_UINT))
+        seed = None
+
+    return random.randint(0, MAX_UINT) if seed is None else seed
 
 
 def _organize_inits(inits, pars, dims):
