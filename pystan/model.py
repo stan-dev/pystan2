@@ -54,6 +54,21 @@ def load_module(module_name, module_path):
         return imp.load_module(module_name, *module_info)
 
 
+def check_seed(seed):
+    """Converts a seed or np.random.RandomState instance into an integer
+    suitable for passing as the seed to Stan
+    """
+    if seed is None:
+        seed = random.randint(0, MAX_UINT)
+    elif isinstance(seed, np.random.RandomState):
+        seed = seed.randint(0, MAX_UINT)
+    seed = int(seed)
+    if seed < 0 or seed > MAX_UINT:
+        raise ValueError(("The seed must be between 0 and {} "
+                          "(inclusive)").format(MAX_UINT))
+    return seed
+
+
 # NOTE: StanModel instance stores references to a compiled, uninstantiated
 # C++ model.
 @implements_to_string
@@ -351,7 +366,7 @@ class StanModel:
             names are the keys and the values are their associated values.
             Stan only accepts certain kinds of values; see Notes.
 
-        seed : int, optional
+        seed : int or np.random.RandomState, optional
             The seed, a positive integer for random number generation. Only
             one seed is needed when multiple chains are used, as the other
             chain's seeds are generated from the first chain's to prevent
@@ -448,9 +463,7 @@ class StanModel:
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
 
-        if seed is None:
-            seed = random.randint(0, MAX_UINT)
-        seed = int(seed)
+        seed = check_seed(seed)
 
         stan_args = dict(init=init,
                          seed=seed,
@@ -503,7 +516,7 @@ class StanModel:
         thin : int, 1 by default
             Positive integer specifying the period for saving samples.
 
-        seed : int, optional
+        seed : int or np.random.RandomState, optional
             The seed, a positive integer for random number generation. Only
             one seed is needed when multiple chains are used, as the other
             chain's seeds are generated from the first chain's to prevent
@@ -637,12 +650,7 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
 
-        if seed is None:
-            seed = random.randint(0, MAX_UINT)
-        seed = int(seed)
-        if seed < 0 or seed > MAX_UINT:
-            raise ValueError(("The seed must be between 0 and {} "
-                              "(inclusive)").format(MAX_UINT))
+        seed = check_seed(seed)
 
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
