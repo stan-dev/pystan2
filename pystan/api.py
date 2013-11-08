@@ -199,7 +199,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         parameter values; function returning a dict with initial parameter
         values. The function may take an optional argument `chain_id`.
 
-    seed : int, optional
+    seed : int or np.random.RandomState, optional
         The seed, a positive integer for random number generation. Only
         one seed is needed when multiple chains are used, as the other
         chain's seeds are generated from the first chain's to prevent
@@ -303,9 +303,6 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         data = {}
     if warmup is None:
         warmup = int(iter // 2)
-    if seed is None:
-        seed = random.randint(0, MAX_UINT)
-    seed = int(seed)
     if fit is not None:
         m = fit.stanmodel
     else:
