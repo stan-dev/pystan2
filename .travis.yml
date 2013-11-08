@@ -5,6 +5,13 @@ env:
 python:
   - "2.7"
   - "3.3"
+# notifications
+notifications:
+  email:
+    recipients:
+      - stan-buildbot@googlegroups.com
+    on_success: change
+    on_failure: always
 # command to install dependencies
 before_install:
   - sudo apt-get install liblapack-dev gfortran libblas-dev
