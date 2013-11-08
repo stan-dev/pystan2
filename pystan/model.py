@@ -640,6 +640,9 @@ class StanModel:
         if seed is None:
             seed = random.randint(0, MAX_UINT)
         seed = int(seed)
+        if seed < 0 or seed > MAX_UINT:
+            raise ValueError(("The seed must be between 0 and {} "
+                              "(inclusive)").format(MAX_UINT))
 
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
