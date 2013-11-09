@@ -9,11 +9,10 @@ from pystan._compat import PY2, string_types, implements_to_string
 from collections import OrderedDict
 if PY2:
     from collections import Callable, Iterable
-    import md5 as hashlib
 else:
     from collections.abc import Callable, Iterable
-    import hashlib
 import datetime
+import hashlib
 import importlib
 import imp
 import io
