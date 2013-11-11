@@ -1,6 +1,7 @@
 import numpy as np
 
-from pystan.misc import _pars_total_indexes, _par_vector2dict
+from pystan.constants import MAX_UINT
+from pystan.misc import _pars_total_indexes, _par_vector2dict, _check_seed
 
 
 def test_pars_total_indexes():
@@ -26,3 +27,16 @@ def test_par_vector2dict():
     rslt = _par_vector2dict(v, pars, dims)
     rslt['alpha'] = np.array([0,  1, -1, -1, 0,  1]).reshape(dims[0])
     rslt['beta'] = np.array([-1, -2])
+
+
+def is_valid_seed(seed):
+    return isinstance(seed, int) and seed >= 0 and seed <= MAX_UINT
+
+
+def test_check_seed():
+    assert _check_seed('10') == 10
+    assert _check_seed(10) == 10
+    assert _check_seed(10.5) == 10
+    assert is_valid_seed(_check_seed(np.random.RandomState()))
+    assert is_valid_seed(_check_seed(-1))
+    assert is_valid_seed(_check_seed(MAX_UINT + 1))

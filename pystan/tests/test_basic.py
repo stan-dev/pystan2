@@ -97,6 +97,22 @@ class TestBernoulli(unittest.TestCase):
         assert extr.shape == (1000, 4, 2)
         assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
 
+    def test_bernoulli_random_seed_consistency(self):
+        thetas = []
+        for _ in range(2):
+            fit = self.model.sampling(data=self.bernoulli_data, seed=42)
+            thetas.append(fit.extract('theta', permuted=True)['theta'])
+        np.testing.assert_equal(*thetas)
+
+    def test_bernoulli_random_seed_inconsistency(self):
+        thetas = []
+        for seed in range(2):
+            # seeds will be 0, 1
+            fit = self.model.sampling(data=self.bernoulli_data,
+                                      seed=np.random.RandomState(seed))
+            thetas.append(fit.extract('theta', permuted=True)['theta'])
+        self.assertFalse(np.allclose(*thetas))
+
     def test_bernoulli_summary(self):
         fit = self.fit
         s = fit.summary()

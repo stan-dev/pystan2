@@ -33,6 +33,7 @@ import re
 import sys
 import tempfile
 import time
+import warnings
 
 import numpy as np
 try:
@@ -377,10 +378,7 @@ def _config_argss(chains, iter, warmup, thin,
         raise ValueError("Invalid specification of initial values.")
 
     ## only one seed is needed by virtue of the RNG
-    if seed is None:
-        seed = random.randint(0, MAX_UINT)
-    else:
-        seed = _check_seed(seed)
+    seed = _check_seed(seed)
 
     # use chain_id argument if specified
     if kwargs.get('chain_id') is None:
@@ -570,31 +568,34 @@ def _get_valid_stan_args(base_args=None):
     return args
 
 
-def _check_seed(seed, raise_exception=True):
-    if isinstance(seed, string_types):
+def _check_seed(seed):
+    """If possible, convert `seed` into a valid form for Stan (an integer
+    between 0 and MAX_UINT, inclusive). If not possible, use a random seed
+    instead and raise a warning if `seed` was not provided as `None`.
+    """
+    if isinstance(seed, (Number, string_types)):
         try:
             seed = int(seed)
         except ValueError:
-            if raise_exception is True:
-                raise ValueError("`seed` must be a string of digits.")
-            else:
-                logger.warn("`seed` needs to be a string of digits.")
-                return None
-    elif isinstance(seed, Number):
-        seed = int(seed)
-    elif seed is None:
+            warnings.warn("`seed` must be castable to an integer")
+            seed = None
+        else:
+            if seed < 0:
+                warnings.warn("`seed` may not be negative")
+                seed = None
+            elif seed > MAX_UINT:
+                warnings.warn("`seed` is too large; max is {}".format(MAX_UINT))
+                seed = None
+    elif isinstance(seed, np.random.RandomState):
+        seed = seed.randint(0, MAX_UINT)
+    elif seed is not None:
+        warnings.warn('`seed` has unexpected type')
+        seed = None
+
+    if seed is None:
         seed = random.randint(0, MAX_UINT)
-    else:
-        logger.warn('`seed` did not have expected characteristics.')
 
-    if seed < 0:
-        logger.warn("`seed` may not be negative")
-        seed = None
-    elif seed > MAX_UINT:
-        logger.warn("`seed` is too large; max is {}".format(MAX_UINT))
-        seed = None
-
-    return random.randint(0, MAX_UINT) if seed is None else seed
+    return seed
 
 
 def _organize_inits(inits, pars, dims):

@@ -350,7 +350,7 @@ class StanModel:
             names are the keys and the values are their associated values.
             Stan only accepts certain kinds of values; see Notes.
 
-        seed : int, optional
+        seed : int or np.random.RandomState, optional
             The seed, a positive integer for random number generation. Only
             one seed is needed when multiple chains are used, as the other
             chain's seeds are generated from the first chain's to prevent
@@ -447,9 +447,7 @@ class StanModel:
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
 
-        if seed is None:
-            seed = random.randint(0, MAX_UINT)
-        seed = int(seed)
+        seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(init=init,
                          seed=seed,
@@ -502,7 +500,7 @@ class StanModel:
         thin : int, 1 by default
             Positive integer specifying the period for saving samples.
 
-        seed : int, optional
+        seed : int or np.random.RandomState, optional
             The seed, a positive integer for random number generation. Only
             one seed is needed when multiple chains are used, as the other
             chain's seeds are generated from the first chain's to prevent
@@ -636,10 +634,6 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
 
-        if seed is None:
-            seed = random.randint(0, MAX_UINT)
-        seed = int(seed)
-
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
                                               init=init, seed=seed, sample_file=sample_file,
@@ -674,7 +668,8 @@ class StanModel:
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
                                                  m_pars, p_dims)
 
-        perm_lst = [np.random.permutation(n_kept) for _ in range(chains)]
+        random_state = np.random.RandomState(args_list[0]['seed'])
+        perm_lst = [random_state.permutation(n_kept) for _ in range(chains)]
         fnames_oi = fit._get_param_fnames_oi()
         n_flatnames = len(fnames_oi)
         fit.sim = {'samples': samples,
