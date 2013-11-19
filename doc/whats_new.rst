@@ -6,25 +6,25 @@
  What's New 
 ============
 
-v.2.0.1.1 (18. November 2013)
+v2.0.1.1 (18. November 2013)
 ============================
 - Clean up random_seed handling (Stephan Hoyer).
 - Add fit methods get_seed, get_inits, and get_stancode.
 
-v.2.0.1.0 (24. October 2013)
+v2.0.1.0 (24. October 2013)
 ============================
 
 - Updated to Stan 2.0.1.
 - Specifying ``sample_file`` now works as expected.
 
-v.2.0.0.1 (23. October 2013)
+v2.0.0.1 (23. October 2013)
 ============================
 
 - Stan ``array`` parameters are now handled correctly.
 - Ancillary methods added to fit instances.
 - Fixed bug that caused parameters in ``control`` dict to be ignored.
 
-v.2.0.0.0 (21. October 2013)
+v2.0.0.0 (21. October 2013)
 ============================
 
 - Stan source updated to to 2.0.0.
