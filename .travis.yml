@@ -16,9 +16,12 @@ notifications:
 before_install:
   - sudo apt-get install -qq liblapack-dev gfortran libblas-dev
 install:
+
   - "pip install -q --use-mirrors Cython"
   - "pip install -q --use-mirrors numpy"
-  - "pip install -q --use-mirrors scipy"
+  # do not quiet scipy since compiling takes so long; travis-ci assumes there
+  # has been an error if no output received in 10m
+  - "pip install --use-mirrors scipy"
   - "pip install -q --use-mirrors matplotlib "
   - "pip install ."
 # command to run tests

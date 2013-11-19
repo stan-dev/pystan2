@@ -6,6 +6,11 @@
  What's New 
 ============
 
+v.2.0.1.1 (18. November 2013)
+============================
+- Clean up random_seed handling (Stephan Hoyer).
+- Add fit methods get_seed, get_inits, and get_stancode.
+
 v.2.0.1.0 (24. October 2013)
 ============================
 

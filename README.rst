@@ -1,12 +1,18 @@
 PyStan: The Python Interface to Stan
 ====================================
 
-.. image:: https://travis-ci.org/stan-dev/pystan.png
-        :target: https://travis-ci.org/stan-dev/pystan
+.. image:: https://github.com/stan-dev/stan/blob/master/logos/stanlogo-main.png?raw=true
+    :alt: Stan logo
 
-PyStan has an interface similar to that of RStan. For an introduction to Stan
-and RStan see `http://mc-stan.org/ <http://mc-stan.org/>`_ and `RStan Getting
-Started <https://code.google.com/p/stan/wiki/RStanGettingStarted>`_.
+|pypi| |travis| |crate|
+
+**PyStan** provides a Python interface to Stan, a package for Bayesian inference
+using the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
+
+For more information on `Stan <http://mc-stan.org>`_ and its modeling language,
+see the Stan User's Guide and Reference Manual. PyStan has an interface similar
+to that of RStan. For an introduction to Stan visit `http://mc-stan.org/
+<http://mc-stan.org/>`_.
 
 .. beta notice, remove eventually
 
@@ -19,9 +25,9 @@ their efforts.
 Important links
 ---------------
 
-- Source code repo: https://github.com/stan-dev/pystan
 - HTML documentation: https://pystan.readthedocs.org
 - Issue tracker: https://github.com/stan-dev/pystan/issues
+- Source code repository: https://github.com/stan-dev/pystan
 - Stan: http://mc-stan.org/
 
 Similar projects
@@ -103,3 +109,14 @@ Example
     # traceplot are available
     fit.plot()
 
+.. |pypi| image:: https://badge.fury.io/py/pystan.png
+    :target: http://badge.fury.io/py/pystan
+    :alt: pypi version
+
+.. |travis| image:: https://travis-ci.org/stan-dev/pystan.png?branch=develop
+    :target: https://travis-ci.org/stan-dev/pystan
+    :alt: travis-ci build status
+
+.. |crate| image:: https://pypip.in/d/pystan/badge.png
+    :target: https://crate.io/packages/pystan?version=latest
+    :alt: crate.io

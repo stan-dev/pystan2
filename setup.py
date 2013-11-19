@@ -23,15 +23,7 @@
 # along with PyStan.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
 
-LONG_DESCRIPTION    = \
-"""
-**PyStan**: Python Interface to Stan, a package for Bayesian inference using
-the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
-
-For more information on `Stan <http://mc-stan.org>`_ and its modeling language, see the
-Stan User's Guide and Reference Manual.
-"""
-
+LONG_DESCRIPTION = open('README.rst').read()
 NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
 AUTHOR       = 'Allen B. Riddell'
@@ -56,7 +48,7 @@ MAJOR = 2
 MINOR = 0
 MICRO = 1
 NANO = 1
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 
 FULLVERSION = VERSION
