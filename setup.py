@@ -99,14 +99,16 @@ libstan_sources = [
     "pystan/stan/src/stan/agrad/matrix.cpp"
 ]
 
-extra_compile_args = ['-O3', '-ftemplate-depth-256']
+libstan_extra_compile_args = ['-O3', '-ftemplate-depth-256']
 
 libstan = ('stan', {'sources': libstan_sources,
                     'include_dirs': stan_include_dirs,
-                    'extra_compile_args': extra_compile_args,
+                    'extra_compile_args': libstan_extra_compile_args,
                     'macros': stan_macros})
 
 ## extensions
+extensions_extra_compile_args = ['-O0', '-ftemplate-depth-256']
+
 stanc_sources = [
     "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
@@ -123,13 +125,13 @@ extensions = [Extension("pystan._api",
                         language='c++',
                         define_macros=stan_macros,
                         include_dirs=stan_include_dirs,
-                        extra_compile_args=extra_compile_args),
+                        extra_compile_args=extensions_extra_compile_args),
               Extension("pystan._chains",
                         ["pystan/_chains.pyx"],
                         language='c++',
                         define_macros=stan_macros,
                         include_dirs=stan_include_dirs,
-                        extra_compile_args=extra_compile_args)]
+                        extra_compile_args=extensions_extra_compile_args)]
 
 ## package data
 package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv']
