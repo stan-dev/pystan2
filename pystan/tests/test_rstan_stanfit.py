@@ -1,6 +1,7 @@
 import unittest
 
 from pystan import StanModel
+from pystan._compat import PY2
 
 
 class TestStanfit(unittest.TestCase):
@@ -15,9 +16,6 @@ class TestStanfit(unittest.TestCase):
         }
         """
         sm = StanModel(model_code=code)
-        try:
-            assertRaisesRegex = self.assertRaisesRegex
-        except AttributeError:
-            assertRaisesRegex = self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
         with assertRaisesRegex(RuntimeError, 'divergent gradient'):
             sm.sampling(init='0', iter=1)

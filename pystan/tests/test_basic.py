@@ -7,6 +7,7 @@ import unittest
 import numpy as np
 
 from pystan import StanModel
+from pystan._compat import PY2
 
 
 class TestNormal(unittest.TestCase):
@@ -68,10 +69,7 @@ class TestBernoulli(unittest.TestCase):
     def test_bernoulli_sampling_error(self):
         bad_data = self.bernoulli_data.copy()
         del bad_data['N']
-        try:
-            assertRaisesRegex = self.assertRaisesRegex
-        except AttributeError:
-            assertRaisesRegex = self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
         with assertRaisesRegex(RuntimeError, 'variable does not exist'):
             fit = self.model.sampling(data=bad_data)
 

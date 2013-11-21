@@ -66,23 +66,16 @@ yss = stan(model_code=schools_code, data=dat, iter=iter, chains=4,
 print("stan with init=0")
 ss4 = stan(fit=ss, data=dat, init=0)
 
+
 def initfun(chain_id=0):
     return dict(mu=np.random.random(),
                 theta=np.random.random(size=J),
                 tau=np.random.exponential(chain_id + 1))
 
-print("stan with init=initfun")
-ss5 = stan(fit=ss, data=dat, init=initfun)
-
-# NOTE: does PyStan 0-index the chain ids?
-inits = [initfun(i) for i in range(4)]
-print("stan with init=inits")
-ss6 = stan(fit=ss, data=dat, init=inits)
-m6 = ss6.get_posterior_mean()
-print(m6)
-print(ss6)
-
-ss7 = stan(fit=ss, data=dat, init=inits, chains=4, thin=7)
+try:
+    ss5 = stan(fit=ss, data=dat, init=initfun)
+except RuntimeError as e:
+    assert 'eta missing' in str(e)
 
 #mode = ss.get_cppo_mode()
 ss.get_stancode()
