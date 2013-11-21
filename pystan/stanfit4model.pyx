@@ -53,6 +53,9 @@ cdef extern from "$model_cppname.hpp" namespace "${model_cppname}_namespace":
 # example, _update_param_names_oi probably shouldn't be called unless you know
 # something about the state of the C++ class instance wrapped by the class.
 
+ctypedef map[string, pair[vector[double], vector[size_t]]] vars_r_t
+ctypedef map[string, pair[vector[int], vector[size_t]]] vars_i_t
+
 cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     r = {}
     r['num_failed'] = holder.num_failed
@@ -81,7 +84,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     d['random_seed'] = str(args.random_seed)
     d['chain_id'] = args.chain_id
     d['init'] = args.init
-    # FIXME: yet to be implemented: d['init_list'] = args.init_list
+    # FIXME: reconstructing d['init_list'] from args.init_vars_r and
+    # args.init_vars_i requires additional work. The initial values for each
+    # chain are accessible with the method get_inits()
     d['init_radius'] = args.init_radius
     d['append_samples'] = args.append_samples
     if args.sample_file_flag:
@@ -155,11 +160,17 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
     # intended for the c++ function sampler_command(...) in stan_fit.hpp
     # If the dictionary doesn't contain the correct keys (arguments),
     # the function will raise a KeyError exception (as it should!).
+    cdef vars_r_t init_vars_r
+    cdef vars_i_t init_vars_i
     p.random_seed = <unsigned int> args.get('random_seed', 0)
     p.chain_id = <unsigned int> args['chain_id']
     p.init = args['init']
-    # TODO: p.init_vars_r = ...
-    # TODO: p.init_vars_i = ...
+    if args['init'] == b'user':
+        init_r, init_i = pystan.misc._split_data(args['init_list'])
+        init_vars_r = _dict_to_vars_r(init_r)
+        init_vars_i = _dict_to_vars_i(init_i)
+        p.init_vars_r = init_vars_r
+        p.init_vars_i = init_vars_i
     p.init_radius = args['init_radius']
     p.sample_file = args['sample_file']
     p.append_samples = args['append_samples']
@@ -199,6 +210,42 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.optim.tol_param = args['ctrl']['optim']['tol_param']
 
 
+cdef vars_r_t _dict_to_vars_r(dict data_r):
+    """Converts a dict to a C++ map of string, double pairs"""
+    cdef vars_r_t vars_r
+
+    # The dimension for a single value is an empty vector. A list of
+    # values is indicated by an entry with the number of values.
+    # The dimensions of an array are indicated as one would expect.
+    #
+    # note, array.flat yields values in C-contiguous style, with the
+    # last index varying the fastest. So the transpose is taken
+    # so that the ordering matches that used by stan.
+    for key in data_r:
+        assert isinstance(key, bytes), "Variable name must be bytes."
+        val = (data_r[key].T.flat, data_r[key].shape)
+        vars_r[key] = val
+    return vars_r
+
+
+cdef vars_i_t _dict_to_vars_i(dict data_i):
+    """Converts a dict to a C++ map of string, int pairs"""
+    cdef vars_i_t vars_i
+
+    # The dimension for a single value is an empty vector. A list of
+    # values is indicated by an entry with the number of values.
+    # The dimensions of an array are indicated as one would expect.
+    #
+    # note, array.flat yields values in C-contiguous style, with the
+    # last index varying the fastest. So the transpose is taken
+    # so that the ordering matches that used by stan.
+    for key in data_i:
+        assert isinstance(key, bytes), "Variable name must be bytes."
+        val = (data_i[key].T.flat, data_i[key].shape)
+        vars_i[key] = val
+    return vars_i
+
+
 cdef class StanFit4$model_cppname:
     """Holder for results obtained from running a Stan model with data
 
@@ -236,26 +283,8 @@ cdef class StanFit4$model_cppname:
 
     def __cinit__(self, dict data_r, dict data_i):
         # NB: dictionary keys must be byte strings
-
-        cdef map[string, pair[vector[double], vector[size_t]]] vars_r
-        cdef map[string, pair[vector[int], vector[size_t]]] vars_i
-
-        # The dimension for a single value is an empty vector. A list of
-        # values is indicated by an entry with the number of values.
-        # The dimensions of an array are indicated as one would expect.
-        #
-        # note, array.flat yields values in C-contiguous style, with the
-        # last index varying the fastest. So the transpose is taken
-        # so that the ordering matches that used by stan.
-        for key in data_i:
-            assert isinstance(key, bytes), "Variable name must be bytes."
-            val = (data_i[key].T.flat, data_i[key].shape)
-            vars_i[key] = val
-        for key in data_r:
-            assert isinstance(key, bytes), "Variable name must be bytes."
-            val = (data_r[key].T.flat, data_r[key].shape)
-            vars_r[key] = val
-
+        cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
+        cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
         self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
         if not self.thisptr:
             raise MemoryError("Couldn't allocate space for stan_fit.")

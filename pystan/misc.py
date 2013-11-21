@@ -555,8 +555,10 @@ def _get_valid_stan_args(base_args=None):
     init = args.get('init', "random")
     if isinstance(init, string_types):
         args['init'] = init.encode('ascii')
-    elif isinstance(init, Sequence):
+    elif isinstance(init, dict):
         args['init'] = "user".encode('ascii')
+        # while the name is 'init_list', it is a dict; the name comes from rstan,
+        # where list elements can have names
         args['init_list'] = init
     else:
         args['init'] = "random".encode('ascii')
