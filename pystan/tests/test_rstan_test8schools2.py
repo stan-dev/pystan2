@@ -108,9 +108,9 @@ sm8 = ss8.get_stanmodel()
 #
 ss9 = stan(fit=ss, data=dat,  seed=-1, chains=1)
 # seed is too big, so in config_argss, it will be turned to NA
-ss10 = stan(fit=ss, data=dat, seed=4294967295, chains=1, iter=10)
+ss10 = stan(fit=ss, data=dat, seed=4294967295, chains=1, iter=1000)
 ss10.get_seed()
-ss11 = stan(fit=ss, data=dat, seed="4294967295", chains=1, iter=10)
+ss11 = stan(fit=ss, data=dat, seed="4294967295", chains=1, iter=1000)
 
 m11 = ss11.get_posterior_mean()
 print(m11)

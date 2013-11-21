@@ -5,7 +5,7 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
-from pystan._compat import PY2, string_types, implements_to_string
+from pystan._compat import PY2, string_types, implements_to_string, izip
 from collections import OrderedDict
 if PY2:
     from collections import Callable, Iterable
@@ -16,7 +16,9 @@ import hashlib
 import importlib
 import imp
 import io
+import itertools
 import logging
+import multiprocessing
 from numbers import Number
 import os
 import tempfile
@@ -419,16 +421,7 @@ class StanModel:
         if data is None:
             data = {}
 
-        data_r, data_i = pystan.misc._split_data(data)
-        fit = self.fit_class(data_r, data_i)
-        # store a copy of the data passed to fit in the class. The reason for
-        # assigning data here rather than in StanFit4model's __cinit__
-        # is that when __cinit__ is called there is no guarantee that the
-        # instance is ready for use as a normal Python instance. See the Cython
-        # documentation on __cinit__.
-        fit.data = {}
-        fit.data.update(data_i)
-        fit.data.update(data_r)
+        fit = self.fit_class(data)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -468,7 +461,7 @@ class StanModel:
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=None, init='random',
                  sample_file=None, diagnostic_file=None, verbose=False,
-                 algorithm=None, control=None, **kwargs):
+                 algorithm=None, control=None, n_jobs=1, **kwargs):
         """Draw samples from the model.
 
         Parameters
@@ -562,6 +555,11 @@ class StanModel:
 
             - `max_treedepth` : int, positive
 
+        n_jobs : int, 1 by default
+            Sample in parallel. If -1 all CPUs are used. If 1 is given, no
+            parallel computing code is used at all, which is useful for
+            debugging.
+
         Returns
         -------
         fit : StanFit4<model_name>
@@ -612,12 +610,7 @@ class StanModel:
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
 
-        data_r, data_i = pystan.misc._split_data(data)
-        fit = self.fit_class(data_r, data_i)
-        # store a copy of the data passed to fit in the class
-        fit.data = {}
-        fit.data.update(data_i)
-        fit.data.update(data_r)
+        fit = self.fit_class(data)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -644,24 +637,19 @@ class StanModel:
         n_kept = 1 + (iter - warmup - 1) // thin
         n_save = n_kept + warmup2
 
-        samples, rets = [], []  # samples and return values
-        if kwargs.get('test_grad') is None:
-            mode = "SAMPLING"
+        if n_jobs == -1:
+            n_jobs = None
+
+        assert len(args_list) == chains
+        call_sampler_args = izip(itertools.repeat(data), args_list)
+        call_sampler_star = self.module._call_sampler_star
+        if n_jobs is None or n_jobs > 1:
+            pool = multiprocessing.Pool(processes=n_jobs)
+            # in Python 3.3 and higher one could use pool.starmap
+            ret_and_samples = pool.map(call_sampler_star, call_sampler_args)
         else:
-            mode = "TESTING GRADIENT"
-        # FIXME: use concurrent.futures to parallelize this
-        for i in range(chains):
-            if kwargs.get('refresh') is None or kwargs.get('refresh') > 0:
-                chain_num = i + 1
-                msg = "{} FOR MODEL {} NOW (CHAIN {})."
-                logger.info(msg.format(mode, self.model_name, chain_num))
-            ret, samples_i = fit._call_sampler(args_list[i])
-            samples.append(samples_i)
-            # call_sampler in stan_fit.hpp will raise a std::runtime_error
-            # if the return value is non-zero. Cython will generate a
-            # RuntimeError from this.
-            # FIXME: should one mimic rstan and "return" an empty StanFit?
-            # That is, should I wipe fit's attributes and return that?
+            ret_and_samples = [call_sampler_star(a) for a in call_sampler_args]
+        samples = [smpl for _, smpl in ret_and_samples]
 
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
                                                  m_pars, p_dims)
