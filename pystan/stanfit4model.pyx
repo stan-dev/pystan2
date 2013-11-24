@@ -40,6 +40,9 @@ import pystan.plots
 from pystan._compat import PY2, string_types
 from pystan.constants import sampling_algo_t, optim_algo_t, sampling_metric_t, stan_args_method_t
 
+logger = logging.getLogger('pystan')
+logger.setLevel(logging.INFO)
+
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
     cdef cppclass additive_combine_engine[T, U]:
         pass
@@ -245,6 +248,43 @@ cdef vars_i_t _dict_to_vars_i(dict data_i):
         vars_i[key] = val
     return vars_i
 
+def _call_sampler_star(data_args):
+    return _call_sampler(*data_args)
+
+def _call_sampler(data, args):
+    """Wrapper for call_sampler in stan_fit
+
+    This function is self-contained and suitable for parallel invocation.
+
+    """
+    data_r, data_i = pystan.misc._split_data(data)
+    cdef PyStanHolder *holderptr = new PyStanHolder()
+    cdef PyStanArgs *argsptr = new PyStanArgs()
+    if not holderptr:
+        raise MemoryError("Couldn't allocate space for PyStanHolder.")
+    if not argsptr:
+        raise MemoryError("Couldn't allocate space for PyStanArgs.")
+    chain_id = args['chain_id']
+    logger.info("NOW ON CHAIN {}".format(chain_id))
+    _set_pystanargs_from_dict(argsptr, args)
+
+    cdef stan_fit[$model_cppname, ecuyer1988] *fitptr
+    cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
+    cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
+    fitptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
+    if not fitptr:
+        raise MemoryError("Couldn't allocate space for stan_fit.")
+    ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
+    holder_dict = _dict_from_pystanholder(holderptr)
+    # FIXME: rather than fetching the args from the holderptr, we just use
+    # the argsptr we passed directly. This is a hack to solve a problem
+    # that holder.args gets dropped somewhere in C++.
+    holder_dict['args'] = _dict_from_pystanargs(argsptr)
+    del holderptr
+    del argsptr
+    del fitptr
+    return ret, holder_dict
+
 
 cdef class StanFit4$model_cppname:
     """Holder for results obtained from running a Stan model with data
@@ -281,13 +321,17 @@ cdef class StanFit4$model_cppname:
     cdef public stanmodel
     cdef public date
 
-    def __cinit__(self, dict data_r, dict data_i):
+    def __cinit__(self, dict data):
+        data_r, data_i = pystan.misc._split_data(data)
         # NB: dictionary keys must be byte strings
         cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
         cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
         self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
         if not self.thisptr:
             raise MemoryError("Couldn't allocate space for stan_fit.")
+
+    def __init__(self, dict data):
+        self.data = data
 
     def __dealloc__(self):
         del self.thisptr
@@ -563,21 +607,4 @@ cdef class StanFit4$model_cppname:
         return dims_
 
     def _call_sampler(self, dict args):
-        # For parallel processing args and return values need to be picklable
-        cdef PyStanHolder *holderptr = new PyStanHolder()
-        cdef PyStanArgs *argsptr = new PyStanArgs()
-        if not holderptr:
-            raise MemoryError("Couldn't allocate space for PyStanHolder.")
-        if not argsptr:
-            raise MemoryError("Couldn't allocate space for PyStanArgs.")
-
-        _set_pystanargs_from_dict(argsptr, args)
-        ret = self.thisptr.call_sampler(deref(argsptr), deref(holderptr))
-        holder_dict = _dict_from_pystanholder(holderptr)
-        # FIXME: rather than fetching the args from the holderptr, we just use
-        # the argsptr we passed directly. This is a hack to solve a problem
-        # that holder.args gets dropped somewhere in C++.
-        holder_dict['args'] = _dict_from_pystanargs(argsptr)
-        del holderptr
-        del argsptr
-        return ret, holder_dict
+        return _call_sampler(self.data, args)

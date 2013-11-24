@@ -19,6 +19,10 @@ if not PY2:
 
     implements_to_string = _identity
 
+    ifilter = filter
+    imap = map
+    izip = zip
+
 else:
     unichr = unichr
     text_type = unicode
@@ -29,3 +33,5 @@ else:
         cls.__unicode__ = cls.__str__
         cls.__str__ = lambda x: x.__unicode__().encode('utf-8')
         return cls
+
+    from itertools import imap, izip, ifilter

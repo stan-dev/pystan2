@@ -131,7 +131,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=None, algorithm=None, control=None, sample_file=None,
          diagnostic_file=None, save_dso=True, verbose=False, boost_lib=None,
-         eigen_lib=None, **kwargs):
+         eigen_lib=None, n_jobs=1, **kwargs):
     """Fit a model using Stan.
 
     Parameters
@@ -267,6 +267,11 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         For algorithm NUTS, we can set
 
         - `max_treedepth` : int, positive
+
+    n_jobs : int, 1 by default
+        Sample in parallel. If -1 all CPUs are used. If 1 is given, no
+        parallel computing code is used at all, which is useful for
+        debugging.
 
     Returns
     -------
