@@ -184,7 +184,7 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.sampling.algorithm = args['ctrl']['sampling']['algorithm'].value
         p.ctrl.sampling.warmup = args['ctrl']['sampling']['warmup']
         p.ctrl.sampling.thin = args['ctrl']['sampling']['thin']
-        p.ctrl.sampling.save_warmup = args['ctrl']['sampling']['save_warmup'] 
+        p.ctrl.sampling.save_warmup = args['ctrl']['sampling']['save_warmup']
         p.ctrl.sampling.iter_save = args['ctrl']['sampling']['iter_save']
         p.ctrl.sampling.iter_save_wo_warmup = args['ctrl']['sampling']['iter_save_wo_warmup']
         p.ctrl.sampling.adapt_engaged = args['ctrl']['sampling']['adapt_engaged']

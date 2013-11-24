@@ -19,7 +19,6 @@ import io
 import logging
 from numbers import Number
 import os
-import random
 import tempfile
 import string
 import sys
@@ -33,7 +32,6 @@ from Cython.Build.Dependencies import cythonize
 import numpy as np
 
 import pystan.api
-from pystan.constants import MAX_UINT
 import pystan.misc
 
 logger = logging.getLogger('pystan')
@@ -256,8 +254,8 @@ class StanModel:
         cython_include_dirs = ['.', pystan_dir]
         build_extension = _get_build_extension()
         build_extension.extensions = cythonize([extension],
-                                            include_path=cython_include_dirs,
-                                            quiet=not verbose)
+                                               include_path=cython_include_dirs,
+                                               quiet=not verbose)
         build_extension.build_temp = os.path.dirname(pyx_file)
         build_extension.build_lib = lib_dir
 
@@ -673,7 +671,7 @@ class StanModel:
         fnames_oi = fit._get_param_fnames_oi()
         n_flatnames = len(fnames_oi)
         fit.sim = {'samples': samples,
-                    # rstan has this; name clashes with 'chains' in samples[0]['chains']
+                   # rstan has this; name clashes with 'chains' in samples[0]['chains']
                    'chains': len(samples),
                    'iter': iter,
                    'warmup': warmup,
