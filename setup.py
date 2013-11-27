@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU General Public License
 # along with PyStan.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
+import os
+import sys
 
 LONG_DESCRIPTION = open('README.rst').read()
 NAME         = 'pystan'
@@ -55,28 +57,39 @@ FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
 
-## exit if attempting to install without Cython or numpy
-try:
-    import Cython
-    import numpy
-except ImportError:
-    raise SystemExit("Cython>=0.19 and NumPy are required.")
-
-## if setuptools is available, check the version of Cython
+# try bootstrapping setuptools if it doesn't exist
 try:
     import pkg_resources
     try:
-        pkg_resources.require("Cython>=0.19")
+        pkg_resources.require("setuptools>=0.6.37")
     except pkg_resources.VersionConflict:
-        raise SystemExit("Cython>=0.19 is required.")
+        from ez_setup import use_setuptools
+        use_setuptools(version="0.6.37")
+    from setuptools import setup
+    _have_setuptools = True
 except ImportError:
-    # no setuptools
-    pass
+    # no setuptools installed and bootstrap failed
+    from distutils.core import setup
+    _have_setuptools = False
 
-import os
+min_numpy_ver = '1.7.1' if sys.version_info[0] >= 3 else '1.6'
+setuptools_kwargs = {
+    'install_requires': ['Cython >= 0.19',
+                         'numpy >= %s' % min_numpy_ver],
+    'zip_safe': False,
+}
+
+if not _have_setuptools:
+    ## exit if attempting to install without Cython or numpy
+    try:
+        import Cython
+        import numpy
+        setuptools_kwargs = {}
+    except ImportError:
+        raise SystemExit("Cython>=0.19 and NumPy are required.")
+
 import distutils.core
 from distutils.errors import CCompilerError, DistutilsError
-from distutils.core import setup
 from distutils.extension import Extension
 
 from Cython.Build import cythonize
@@ -148,6 +161,9 @@ lib_files_all = sum(
 package_data_pats += stan_files_all
 package_data_pats += lib_files_all
 
+if _have_setuptools:
+    setuptools_kwargs["test_suite"] = "nose.collector"
+
 ## setup
 if __name__ == '__main__':
     distutils.core._setup_stop_after = 'commandline'
@@ -168,6 +184,7 @@ if __name__ == '__main__':
         # use numpy.distutils machinery to install libstan.a
         cmdclass={'install': install.install,
                   'install_clib': install_clib.install_clib},
+        **setuptools_kwargs
     )
     # use numpy.distutils machinery to install libstan.a
     dist.installed_libraries = [InstallableLib(libstan[0],
