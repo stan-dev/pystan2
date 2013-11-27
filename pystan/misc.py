@@ -39,7 +39,7 @@ import numpy as np
 try:
     from scipy.stats.mstats import mquantiles
 except ImportError:
-    from pystan.external.mstats import mquantiles
+    from pystan.external.scipy.stats.mstats import mquantiles
 
 import pystan.chains as chains
 from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,

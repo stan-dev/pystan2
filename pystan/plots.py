@@ -1,5 +1,7 @@
 import logging
 
+logger = logging.getLogger('pystan')
+
 
 def traceplot(fit, vars=None):
     """Use pymc's traceplot to display parameters"""
@@ -9,8 +11,8 @@ def traceplot(fit, vars=None):
     if vars is None:
         vars = [v for v in samples.keys() if v != 'lp__']
     try:
-        from pystan.external import plots
+        from pystan.external.pymc import plots
     except ImportError:
-        logging.critical("matplotlib required for plotting.")
+        logger.critical("matplotlib required for plotting.")
         raise
     return plots.traceplot(fit.extract(), vars)
