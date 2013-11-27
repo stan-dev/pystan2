@@ -10,17 +10,8 @@ PyStan: The Python Interface to Stan
 using the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
 
 For more information on `Stan <http://mc-stan.org>`_ and its modeling language,
-see the Stan User's Guide and Reference Manual. PyStan has an interface similar
-to that of RStan. For an introduction to Stan visit `http://mc-stan.org/
+see the Stan User's Guide and Reference Manual at `http://mc-stan.org/
 <http://mc-stan.org/>`_.
-
-.. beta notice, remove eventually
-
-PyStan aims to reproduce the functionality present in RStan. There are a few
-features present in RStan that have yet to be implemented in PyStan.  If you
-find a feature missing that you use frequently please `file a bug report
-<https://github.com/stan-dev/pystan/issues>`_ so developers can better direct
-their efforts.
 
 Important links
 ---------------
@@ -29,6 +20,7 @@ Important links
 - Issue tracker: https://github.com/stan-dev/pystan/issues
 - Source code repository: https://github.com/stan-dev/pystan
 - Stan: http://mc-stan.org/
+- Stan User's Guide and Reference Manual (pdf) available at http://mc-stan.org
 
 Similar projects
 ----------------
@@ -39,7 +31,7 @@ Installation
 ------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
-(version 0.19.1 or greater) are required. `matplotlib <http://matplotlib.org/>`_
+(version 0.19 or greater) are required. `matplotlib <http://matplotlib.org/>`_
 is optional.
 
 PyStan and the required packages may be installed from the `Python Package Index
