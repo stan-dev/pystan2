@@ -6,6 +6,13 @@
  What's New 
 ============
 
+v2.0.1.2 (1. December 2013)
+============================
+- Improves setuptools support.
+- Allows sampling chains in parallel using multiprocessing. See the ``n_jobs``
+  parameter for ``stan()`` and the ``sampling`` method.
+- Allows users to specify initial values for chains.
+
 v2.0.1.1 (18. November 2013)
 ============================
 - Clean up random_seed handling (Stephan Hoyer).
