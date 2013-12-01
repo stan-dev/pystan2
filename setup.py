@@ -72,9 +72,7 @@ except ImportError:
     from distutils.core import setup
     _have_setuptools = False
 
-min_numpy_ver = '1.7.1' if sys.version_info[0] >= 3 else '1.6'
-setuptools_kwargs = {'install_requires': ['Cython >= 0.19',
-                                          'numpy >= %s' % min_numpy_ver],
+setuptools_kwargs = {'install_requires': ['Cython >= 0.19', 'numpy >= 1.7.1'],
                      'zip_safe': False}
 
 if not _have_setuptools:
