@@ -73,28 +73,22 @@ except ImportError:
     _have_setuptools = False
 
 min_numpy_ver = '1.7.1' if sys.version_info[0] >= 3 else '1.6'
-setuptools_kwargs = {
-    'install_requires': ['Cython >= 0.19',
-                         'numpy >= %s' % min_numpy_ver],
-    'zip_safe': False,
-}
+setuptools_kwargs = {'install_requires': ['Cython >= 0.19',
+                                          'numpy >= %s' % min_numpy_ver],
+                     'zip_safe': False}
 
 if not _have_setuptools:
     ## exit if attempting to install without Cython or numpy
     try:
         import Cython
         import numpy
-        setuptools_kwargs = {}
     except ImportError:
         raise SystemExit("Cython>=0.19 and NumPy are required.")
+    setuptools_kwargs = {}
 
 import distutils.core
 from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
-
-from Cython.Build import cythonize
-from numpy.distutils.command import install, install_clib
-from numpy.distutils.misc_util import InstallableLib
 
 
 ## static libraries
@@ -146,6 +140,7 @@ extensions = [Extension("pystan._api",
                         include_dirs=stan_include_dirs,
                         extra_compile_args=extensions_extra_compile_args)]
 
+
 ## package data
 package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv']
 
@@ -167,7 +162,7 @@ if _have_setuptools:
 ## setup
 if __name__ == '__main__':
     distutils.core._setup_stop_after = 'commandline'
-    dist = setup(
+    metadata = dict(
         name=NAME,
         version=FULLVERSION,
         maintainer=AUTHOR,
@@ -177,8 +172,8 @@ if __name__ == '__main__':
                   'pystan.external',
                   'pystan.external.pymc',
                   'pystan.external.enum',
-                  'pystan.external.scipy.stats'],
-        ext_modules=cythonize(extensions),
+                  'pystan.external.scipy'],
+        ext_modules=extensions,
         libraries=[libstan],
         package_data={'pystan': package_data_pats},
         description=DESCRIPTION,
@@ -186,22 +181,35 @@ if __name__ == '__main__':
         url=URL,
         long_description=LONG_DESCRIPTION,
         classifiers=CLASSIFIERS,
-        # use numpy.distutils machinery to install libstan.a
-        cmdclass={'install': install.install,
-                  'install_clib': install_clib.install_clib},
         **setuptools_kwargs
     )
-    # use numpy.distutils machinery to install libstan.a
-    dist.installed_libraries = [InstallableLib(libstan[0],
-                                               libstan[1],
-                                               'pystan/bin/')]
+    if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
+                               in ('--help-commands', 'egg_info', '--version', 'clean')):
+        # For these actions, neither Numpy nor Cython is required.
+        #
+        # They are required to succeed when pip is used to install PyStan
+        # when, for example, Numpy is not yet present.
+        dist = setup(**metadata)
+    else:
+        from Cython.Build import cythonize
+        from numpy.distutils.command import install, install_clib
+        from numpy.distutils.misc_util import InstallableLib
+
+        metadata['ext_modules'] = cythonize(extensions)
+
+        # use numpy.distutils machinery to install libstan.a
+        metadata['cmdclass'] = {'install': install.install,
+                                'install_clib': install_clib.install_clib}
+        dist = setup(**metadata)
+        dist.installed_libraries = [InstallableLib(libstan[0],
+                                                   libstan[1],
+                                                   'pystan/bin/')]
     try:
         dist.run_commands()
     except KeyboardInterrupt:
-        raise SystemExit("interrupted")
+        raise SystemExit("Interrupted")
     except (IOError, os.error) as exc:
         from distutils.util import grok_environment_error
         error = grok_environment_error(exc)
-    except (DistutilsError,
-            CCompilerError) as msg:
+    except (DistutilsError, CCompilerError) as msg:
             raise SystemExit("error: " + str(msg))

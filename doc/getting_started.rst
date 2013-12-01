@@ -28,13 +28,10 @@ Unix-based Systems including Mac OS X
 -------------------------------------
 
 PyStan and the required packages may be installed from the `Python Package Index
-<https://pypi.python.org/pypi>`_ using ``pip``. (A recent version of
-``setuptools`` is required under Python 2.7; installation from source may prove
-easier.)
+<https://pypi.python.org/pypi>`_ using ``pip``.
 
 ::
 
-   pip install numpy Cython
    pip install pystan
 
 To install PyStan from source, first make sure you have installed the

@@ -39,7 +39,6 @@ PyStan and the required packages may be installed from the `Python Package Index
 
 ::
 
-   pip install numpy Cython
    pip install pystan
 
 Alternatively, if Cython (version 0.19 or greater) and NumPy are already
