@@ -9,13 +9,15 @@ Release checklist
 - Set version in pystan/__init__.py
 - Set ISRELEASED = True in setup.py
 - ``git tag``
-- Sign tag (TODO)
 - Push tag to github ``git push --tags``
-- Upload to PyPI:
+- Git branch ``master`` should be fast-forwarded to ``develop``
+- Assemble source distribution, sign it, upload to PyPI:
 
-    - python setup.py sdist
-    - python setup.py register
-    - twine upload dist/*
+::
+
+    python setup.py sdist
+    gpg --detach-sign -a dist/pystan-2.0.1.2.tar.gz
+    twine upload dist/*
 
 - Update docs in readthedocs
 
