@@ -1,5 +1,4 @@
-include MANIFEST.in LICENSE README.rst Makefile
-include setup.py
+include MANIFEST.in LICENSE README.rst setup.py ez_setup.py
 
 graft doc
 prune doc/_build
