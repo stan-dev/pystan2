@@ -10,7 +10,11 @@ def ess(sim, n):
     n : int
         Chain index starting from 0
     """
-    return _chains.effective_sample_size(sim, n)
+    if n>=0 and n<len(sim['fnames_oi']):
+      return _chains.effective_sample_size(sim, n)
+    else:
+      raise RuntimeError("Effective sample size calculation failed" 
+		      "\n- was the parameter index (n) in range?")
 
 
 def splitrhat(sim, n):
