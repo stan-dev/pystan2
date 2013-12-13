@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obsfucate_model_name=False, **kwargs):
+          verbose=False, obsfucate_model_name=False):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -313,7 +313,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     else:
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
-                      save_dso=save_dso, verbose=verbose, **kwargs)
+                      save_dso=save_dso, verbose=verbose)
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
                      sample_file=sample_file, diagnostic_file=diagnostic_file,
                      verbose=verbose, algorithm=algorithm, control=control,
