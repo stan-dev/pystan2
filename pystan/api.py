@@ -316,5 +316,6 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
                       save_dso=save_dso, verbose=verbose, **kwargs)
     fit = m.sampling(data, pars, chains, iter, warmup, thin, seed, init,
                      sample_file=sample_file, diagnostic_file=diagnostic_file,
-                     verbose=verbose, algorithm=algorithm, control=control, **kwargs)
+                     verbose=verbose, algorithm=algorithm, control=control,
+                     n_jobs=n_jobs, **kwargs)
     return fit
