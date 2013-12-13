@@ -18,7 +18,6 @@ import imp
 import io
 import itertools
 import logging
-import multiprocessing
 from numbers import Number
 import os
 import tempfile
@@ -34,6 +33,7 @@ from Cython.Build.Dependencies import cythonize
 import numpy as np
 
 import pystan.api
+from pystan.external.joblib import Parallel, delayed
 import pystan.misc
 
 logger = logging.getLogger('pystan')
@@ -461,7 +461,7 @@ class StanModel:
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=None, init='random',
                  sample_file=None, diagnostic_file=None, verbose=False,
-                 algorithm=None, control=None, n_jobs=1, **kwargs):
+                 algorithm=None, control=None, n_jobs=-1, **kwargs):
         """Draw samples from the model.
 
         Parameters
@@ -637,18 +637,13 @@ class StanModel:
         n_kept = 1 + (iter - warmup - 1) // thin
         n_save = n_kept + warmup2
 
-        if n_jobs == -1:
-            n_jobs = None
+        if n_jobs is None:
+            n_jobs = -1
 
         assert len(args_list) == chains
         call_sampler_args = izip(itertools.repeat(data), args_list)
         call_sampler_star = self.module._call_sampler_star
-        if n_jobs is None or n_jobs > 1:
-            pool = multiprocessing.Pool(processes=n_jobs)
-            # in Python 3.3 and higher one could use pool.starmap
-            ret_and_samples = pool.map(call_sampler_star, call_sampler_args)
-        else:
-            ret_and_samples = [call_sampler_star(a) for a in call_sampler_args]
+        ret_and_samples = Parallel(n_jobs)(delayed(call_sampler_star)(args) for args in call_sampler_args)
         samples = [smpl for _, smpl in ret_and_samples]
 
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
