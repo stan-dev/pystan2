@@ -568,7 +568,7 @@ class StanModel:
         Other parameters
         ----------------
 
-        chain_id : int, optional
+        chain_id : int or iterable of int, optional
             `chain_id` can be a vector to specify the chain_id for all chains or
             an integer. For the former case, they should be unique. For the latter,
             the sequence of integers starting from the given `chain_id` are used

@@ -327,6 +327,7 @@ def _split_data(data):
 def _config_argss(chains, iter, warmup, thin,
                   init, seed, sample_file, diagnostic_file, algorithm,
                   control, **kwargs):
+    # After rstan/rstan/R/misc.R (config_argss)
     iter = int(iter)
     if iter < 1:
         raise ValueError("`iter` should be a positive integer.")
@@ -345,6 +346,21 @@ def _config_argss(chains, iter, warmup, thin,
     thins = [thin] * chains
     warmups = [warmup] * chains
 
+    # use chain_id argument if specified
+    if kwargs.get('chain_id') is None:
+        chain_id = list(range(chains))
+    else:
+        chain_id = [int(id) for id in kwargs['chain_id']]
+        if len(set(chain_id)) != len(chain_id):
+            raise ValueError("`chain_id` has duplicated elements.")
+        chain_id_len = len(chain_id)
+        if chain_id_len >= chains:
+            chain_id = chain_id
+        else:
+            chain_id = chain_id + [max(chain_id) + 1 + i
+                                    for i in range(chains - chain_id_len)]
+        del kwargs['chain_id']
+
     inits_specified = False
     # slight difference here from rstan; Python's lists are not typed.
     if isinstance(init, Number):
@@ -358,7 +374,7 @@ def _config_argss(chains, iter, warmup, thin,
     if not inits_specified and isinstance(init, Callable):
         ## test if function takes argument named "chain_id"
         if "chain_id" in inspect.getargspec(init).args:
-            inits = [init(chain_id=id) for id in range(chains)]
+            inits = [init(chain_id=id) for id in chain_id]
         else:
             inits = [init()] * chains
         if not isinstance(inits[0], dict):
@@ -380,21 +396,6 @@ def _config_argss(chains, iter, warmup, thin,
     ## only one seed is needed by virtue of the RNG
     seed = _check_seed(seed)
 
-    # use chain_id argument if specified
-    if kwargs.get('chain_id') is None:
-        chain_ids = list(range(chains))
-    else:
-        chain_id = [int(id) for id in kwargs['chain_id']]
-        if len(set(chain_id)) != len(chain_id):
-            raise ValueError("`chain_id` has duplicated elements.")
-        chain_id_len = len(chain_id)
-        if chain_id_len >= chains:
-            chain_ids = chain_id
-        else:
-            chain_ids = chain_id + [max(chain_id) + 1 + i
-                                    for i in range(chains - chain_id_len)]
-        del kwargs['chain_id']
-
     kwargs['method'] = "test_grad" if kwargs.get('test_grad') else 'sampling'
 
     all_metrics = ("unit_e", "diag_e", "dense_e")
@@ -410,7 +411,7 @@ def _config_argss(chains, iter, warmup, thin,
 
     argss = [dict() for _ in range(chains)]
     for i in range(chains):
-        argss[i] = dict(chain_id=chain_ids[i],
+        argss[i] = dict(chain_id=chain_id[i],
                         iter=iters[i], thin=thins[i], seed=seed,
                         warmup=warmups[i], init=inits[i],
                         algorithm=algorithm)

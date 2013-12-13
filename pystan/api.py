@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obsfucate_model_name=False):
+          verbose=False, obsfucate_model_name=False, **kwargs):
     """Translate Stan model specification into C++ code.
 
     Parameters

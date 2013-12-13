@@ -45,6 +45,19 @@ class TestUserInits(unittest.TestCase):
         for i, inits in enumerate(fit1.get_inits()):
             self.assertEqual(inits['mu'], i)
 
+    def test_user_initfun_chainid(self):
+        model_code = self.model_code
+        data = self.data
+
+        def make_inits(chain_id):
+            return dict(mu=chain_id)
+
+        chain_id = [9, 10, 11, 12]
+        fit1 = pystan.stan(model_code=model_code, iter=10, chains=4, seed=2,
+                           data=data, init=make_inits, warmup=0, chain_id=chain_id)
+        for i, inits in zip(chain_id, fit1.get_inits()):
+            self.assertEqual(inits['mu'], i)
+
     def test_user_init_unspecified(self):
         model_code = """
         data {
