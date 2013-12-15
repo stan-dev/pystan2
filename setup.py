@@ -154,8 +154,6 @@ lib_files_all = sum(
 package_data_pats += stan_files_all
 package_data_pats += lib_files_all
 
-if _have_setuptools:
-    setuptools_kwargs["test_suite"] = "nose.collector"
 
 ## setup
 if __name__ == '__main__':
