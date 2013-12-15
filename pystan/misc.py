@@ -47,6 +47,7 @@ from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
 
 
 logger = logging.getLogger('pystan')
+logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
 

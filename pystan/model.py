@@ -37,6 +37,7 @@ from pystan.external.joblib import Parallel, delayed
 import pystan.misc
 
 logger = logging.getLogger('pystan')
+logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
 

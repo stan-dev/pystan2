@@ -15,6 +15,7 @@ from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
 logger = logging.getLogger('pystan')
+logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
 
