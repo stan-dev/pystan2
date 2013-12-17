@@ -682,7 +682,7 @@ class StanModel:
                                                  m_pars, p_dims)
 
         random_state = np.random.RandomState(args_list[0]['seed'])
-        perm_lst = [random_state.permutation(n_kept) for _ in range(chains)]
+        perm_lst = [random_state.permutation(int(n_kept)) for _ in range(chains)]
         fnames_oi = fit._get_param_fnames_oi()
         n_flatnames = len(fnames_oi)
         fit.sim = {'samples': samples,
