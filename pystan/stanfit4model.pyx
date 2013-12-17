@@ -469,26 +469,23 @@ cdef class StanFit4$model_cppname:
         cdef vector[double] par_r = np.asarray(upars).flat
         return self.thisptr.log_prob(par_r, adjust_transform, gradient)
 
-    # FIXME: adding this creates a strange Cython error
-    # redefinition of ‘PyObject* __pyx_convert_vector_to_py_double(const std::vector<double>&)
-    #
-    # def grad_log_prob(self, upars, adjust_transform=True):
-    #     """
-    #     Expose the grad_log_prob of the model to stan_fit so user
-    #     can call this function.
-
-    #     Parameters
-    #     ----------
-    #     upar :
-    #         The real parameters on the unconstrained space.
-    #     adjust_transform : bool
-    #         Whether we add the term due to the transform from constrained
-    #         space to unconstrained space implicitly done in Stan.
-    #     """
-    #     cdef vector[double] par_r = upars
-    #     return self.thisptr.grad_log_prob(par_r, adjust_transform)
     def grad_log_prob(self, upars, adjust_transform=True):
-        raise NotImplementedError("grad_log_prob is not yet implemented")
+        """
+        Expose the grad_log_prob of the model to stan_fit so user
+        can call this function.
+
+        Parameters
+        ----------
+        upar :
+            The real parameters on the unconstrained space.
+        adjust_transform : bool
+            Whether we add the term due to the transform from constrained
+            space to unconstrained space implicitly done in Stan.
+        """
+        cdef vector[double] par_r, grad
+        par_r = np.asarray(upars).flat
+        grad = self.thisptr.grad_log_prob(par_r, adjust_transform)
+        return np.asarray(grad)
 
     def get_adaptation_info(self):
         """Obtain adaptation information for sampler, which now only NUTS2 has.
@@ -545,6 +542,15 @@ cdef class StanFit4$model_cppname:
         assert len(fnames) == len(mean_pars)
         m = np.row_stack([mean_pars, mean_lp__])
         return m
+
+    def unconstrain_pars(self, par):
+        """Transform parameters from defined support to unconstrained space"""
+        cdef vector[double] unconstrained
+        data_r, data_i = pystan.misc._split_data(par)
+        cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
+        cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
+        unconstrained = self.thisptr.unconstrain_pars(vars_r, vars_i)
+        return np.asarray(unconstrained)
 
     def get_seed(self):
         return self.stan_args[0]['seed']
