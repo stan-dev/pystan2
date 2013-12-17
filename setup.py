@@ -65,11 +65,9 @@ try:
     except pkg_resources.VersionConflict:
         from ez_setup import use_setuptools
         use_setuptools(version="0.6.37")
-    from setuptools import setup
     _have_setuptools = True
 except ImportError:
     # no setuptools installed and bootstrap failed
-    from distutils.core import setup
     _have_setuptools = False
 
 setuptools_kwargs = {'install_requires': ['Cython >= 0.19', 'numpy >= 1.7.1'],
@@ -177,7 +175,6 @@ if __name__ == '__main__':
         url=URL,
         long_description=LONG_DESCRIPTION,
         classifiers=CLASSIFIERS,
-        **setuptools_kwargs
     )
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
                                in ('--help-commands', 'egg_info', '--version', 'clean')):
@@ -185,17 +182,25 @@ if __name__ == '__main__':
         #
         # They are required to succeed when pip is used to install PyStan
         # when, for example, Numpy is not yet present.
+        try:
+            from setuptools import setup
+        except ImportError:
+            from distutils.core import setup
+        else:
+            metadata.update(**setuptools_kwargs)
         dist = setup(**metadata)
     else:
         from Cython.Build import cythonize
-        from numpy.distutils.command import install, install_clib
+        from numpy.distutils.command import install, install_clib, install_data
         from numpy.distutils.misc_util import InstallableLib
+        from numpy.distutils.core import setup
 
         metadata['ext_modules'] = cythonize(extensions)
 
         # use numpy.distutils machinery to install libstan.a
         metadata['cmdclass'] = {'install': install.install,
-                                'install_clib': install_clib.install_clib}
+                                'install_clib': install_clib.install_clib,
+                                'install_data': install_data.install_data}
         dist = setup(**metadata)
         dist.installed_libraries = [InstallableLib(libstan[0],
                                                    libstan[1],
