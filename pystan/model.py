@@ -23,6 +23,7 @@ import os
 import tempfile
 import string
 import sys
+import warnings
 
 from distutils.core import Extension
 
@@ -33,7 +34,6 @@ from Cython.Build.Dependencies import cythonize
 import numpy as np
 
 import pystan.api
-from pystan.external.joblib import Parallel, delayed
 import pystan.misc
 
 logger = logging.getLogger('pystan')
@@ -52,6 +52,34 @@ def load_module(module_name, module_path):
         # Python 2.7
         module_info = imp.find_module(module_name, [module_path])
         return imp.load_module(module_name, *module_info)
+
+
+def _map_parallel(function, args, n_jobs=1):
+    if n_jobs is None:
+        n_jobs = -1
+    multiprocessing = int(n_jobs) not in (0, 1)
+    if multiprocessing:
+        try:
+            import multiprocessing
+            import multiprocessing.pool
+        except ImportError:
+            multiprocessing = None
+    # 2nd stage: validate that locking is available on the system and
+    #            issue a warning if not
+    if multiprocessing:
+        try:
+            _sem = multiprocessing.Semaphore()
+            del _sem  # cleanup
+        except (ImportError, OSError) as e:
+            multiprocessing = None
+            warnings.warn('%s. _map_parallel will operate in serial mode' % (e,))
+    if multiprocessing:
+        if n_jobs == -1:
+            n_jobs = None
+        mymap = multiprocessing.Pool(processes=n_jobs).map
+    else:
+        mymap = map
+    return list(mymap(function, args))
 
 
 # NOTE: StanModel instance stores references to a compiled, uninstantiated
@@ -647,7 +675,7 @@ class StanModel:
         assert len(args_list) == chains
         call_sampler_args = izip(itertools.repeat(data), args_list)
         call_sampler_star = self.module._call_sampler_star
-        ret_and_samples = Parallel(n_jobs)(delayed(call_sampler_star)(args) for args in call_sampler_args)
+        ret_and_samples = _map_parallel(call_sampler_star, call_sampler_args, n_jobs)
         samples = [smpl for _, smpl in ret_and_samples]
 
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],

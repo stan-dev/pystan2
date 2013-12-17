@@ -168,7 +168,6 @@ if __name__ == '__main__':
                   'pystan.external',
                   'pystan.external.pymc',
                   'pystan.external.enum',
-                  'pystan.external.joblib',
                   'pystan.external.scipy'],
         ext_modules=extensions,
         libraries=[libstan],

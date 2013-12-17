@@ -55,21 +55,13 @@ class Test8SchoolsParallel(unittest.TestCase):
     def test_stan_parallel(self):
         schools_code = self.schools_code
         schools_dat = self.schools_dat
-        try:
-            fit = pystan.stan(model_code=schools_code, data=schools_dat,
-                              iter=1000, chains=4, n_jobs=-1)
-            validate_data(fit)
-        except OSError:
-            # hosted testing environments may not allow querying of # of CPUs
-            pass
+        fit = pystan.stan(model_code=schools_code, data=schools_dat,
+                          iter=1000, chains=4, n_jobs=-1)
+        validate_data(fit)
 
     def test_sampling_parallel(self):
         schools_code = self.schools_code
         schools_dat = self.schools_dat
         sm = pystan.StanModel(model_code=schools_code)
-        try:
-            fit = sm.sampling(data=schools_dat, iter=1000, chains=4, n_jobs=4)
-            validate_data(fit)
-        except OSError:
-            # hosted testing environments may not allow querying of # of CPUs
-            pass
+        fit = sm.sampling(data=schools_dat, iter=1000, chains=4, n_jobs=4)
+        validate_data(fit)
