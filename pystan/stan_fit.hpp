@@ -1501,12 +1501,11 @@ namespace pystan {
       } 
       std::vector<int> par_i(model_.num_params_i(), 0);
       std::vector<double> gradient; 
-      double lp;
-      if (jacobian_adjust_transform)
-        lp = stan::model::log_prob_grad<true,true>(model_, par_r, par_i, gradient, &std::cout);
-      else 
-        lp = stan::model::log_prob_grad<true,false>(model_, par_r, par_i, gradient, &std::cout);
       // RStan returns the lp as an attribute. Python numbers don't have attributes.
+      if (jacobian_adjust_transform)
+        stan::model::log_prob_grad<true,true>(model_, par_r, par_i, gradient, &std::cout);
+      else 
+        stan::model::log_prob_grad<true,false>(model_, par_r, par_i, gradient, &std::cout);
       return gradient;
     } 
 
