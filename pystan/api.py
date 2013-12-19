@@ -268,10 +268,9 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
 
         - `max_treedepth` : int, positive
 
-    n_jobs : int, 1 by default
-        Sample in parallel. If -1 all CPUs are used. If 1 is given, no
-        parallel computing code is used at all, which is useful for
-        debugging.
+    n_jobs : int, optional
+        Sample in parallel. If -1 all CPUs are used. If 1, no parallel
+        computing code is used at all, which is useful for debugging.
 
     Returns
     -------

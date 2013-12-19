@@ -53,11 +53,9 @@ def load_module(module_name, module_path):
         return imp.load_module(module_name, *module_info)
 
 
-def _map_parallel(function, args, n_jobs=1):
+def _map_parallel(function, args, n_jobs):
     """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
     # Following the error checking found in joblib
-    if n_jobs is None:
-        n_jobs = -1
     multiprocessing = int(n_jobs) not in (0, 1)
     if multiprocessing:
         try:
@@ -588,10 +586,9 @@ class StanModel:
 
             - `max_treedepth` : int, positive
 
-        n_jobs : int, 1 by default
-            Sample in parallel. If -1 all CPUs are used. If 1 is given, no
-            parallel computing code is used at all, which is useful for
-            debugging.
+        n_jobs : int, optional
+            Sample in parallel. If -1 all CPUs are used. If 1, no parallel
+            computing code is used at all, which is useful for debugging.
 
         Returns
         -------
