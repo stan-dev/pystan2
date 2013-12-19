@@ -39,10 +39,10 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://github.com/stan-dev/pystan/archive/2.0.1.2.zip
+   wget https://github.com/stan-dev/pystan/archive/2.0.1.3.zip
    # alternatively, use curl, or a web browser
-   unzip 2.0.1.2.zip
-   cd pystan-2.0.1.2
+   unzip 2.0.1.3.zip
+   cd pystan-2.0.1.3
    python setup.py install
    cd ..  # change out of the source directory before using pystan
 

@@ -37,7 +37,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Programming Language :: Cython',
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Environment :: Console',
     'Operating System :: OS Independent',
     'Intended Audience :: Developers',
@@ -50,7 +50,7 @@ MAJOR = 2
 MINOR = 0
 MICRO = 1
 NANO = 3
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 
 FULLVERSION = VERSION
