@@ -587,8 +587,9 @@ class StanModel:
             - `max_treedepth` : int, positive
 
         n_jobs : int, optional
-            Sample in parallel. If -1 all CPUs are used. If 1, no parallel
-            computing code is used at all, which is useful for debugging.
+            Sample multiple chains in parallel. If -1 all CPUs are used. If 1, no parallel
+            computing code is used at all, which is useful for debugging.  Note that if 
+            `n_jobs` > `chains`, only `chains` number of CPUs can be used.
 
         Returns
         -------
@@ -669,6 +670,10 @@ class StanModel:
 
         if n_jobs is None:
             n_jobs = -1
+        elif n_jobs > chains:
+            warnings.warn('`n_jobs` > `chains`, but only `chains` number of processes'
+                          'can be launched.  Increase `chains` to take full advantage'
+                          'of the specified number of CPUs.')
 
         assert len(args_list) == chains
         call_sampler_args = izip(itertools.repeat(data), args_list)
