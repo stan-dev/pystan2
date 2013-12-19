@@ -266,6 +266,8 @@ def _call_sampler(data, args):
         raise MemoryError("Couldn't allocate space for PyStanArgs.")
     chain_id = args['chain_id']
     logger.info("NOW ON CHAIN {}".format(chain_id))
+    for handler in logger.handlers:
+        handler.flush()
     _set_pystanargs_from_dict(argsptr, args)
 
     cdef stan_fit[$model_cppname, ecuyer1988] *fitptr

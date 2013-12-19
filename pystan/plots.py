@@ -1,8 +1,7 @@
 import logging
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
-logger.addHandler(logging.NullHandler())
-logger.setLevel(logging.INFO)
 
 
 def traceplot(fit, vars=None):

@@ -36,9 +36,8 @@ import numpy as np
 import pystan.api
 import pystan.misc
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
-logger.addHandler(logging.NullHandler())
-logger.setLevel(logging.INFO)
 
 
 def load_module(module_name, module_path):
@@ -55,6 +54,8 @@ def load_module(module_name, module_path):
 
 
 def _map_parallel(function, args, n_jobs=1):
+    """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
+    # Following the error checking found in joblib
     if n_jobs is None:
         n_jobs = -1
     multiprocessing = int(n_jobs) not in (0, 1)
@@ -232,7 +233,7 @@ class StanModel:
         self.save_dso = save_dso
 
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
-        logger.warning(msg.format(self.model_name))
+        logger.info(msg.format(self.model_name))
         if verbose:
             msg = "OS: {}, Python: {}, Cython {}".format(sys.platform,
                                                          sys.version,

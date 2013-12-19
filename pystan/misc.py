@@ -45,10 +45,8 @@ import pystan.chains as chains
 from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
                               sampling_metric_t, stan_args_method_t)
 
-
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
-logger.addHandler(logging.NullHandler())
-logger.setLevel(logging.INFO)
 
 
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
