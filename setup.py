@@ -57,34 +57,28 @@ FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
 
-# try bootstrapping setuptools if it doesn't exist
-try:
-    import pkg_resources
-    try:
-        pkg_resources.require("setuptools>=0.6.37")
-    except pkg_resources.VersionConflict:
-        from ez_setup import use_setuptools
-        use_setuptools(version="0.6.37")
-    from setuptools import setup
-    _have_setuptools = True
-except ImportError:
-    # no setuptools installed and bootstrap failed
-    from distutils.core import setup
-    _have_setuptools = False
+###############################################################################
+# Optional setuptools features
+# We need to import setuptools early, if we want setuptools features,
+# as it monkey-patches the 'setup' function
 
-setuptools_kwargs = {'install_requires': ['Cython >= 0.19', 'numpy >= 1.7.1'],
-                     'zip_safe': False}
+# For some commands, use setuptools
+if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
+           'bdist_wininst', 'install_egg_info', 'build_sphinx',
+           'egg_info', 'easy_install', 'upload',
+           '--single-version-externally-managed',
+            )).intersection(sys.argv)) > 0:
+    import setuptools
+    extra_setuptools_args = dict(
+        install_requires=['Cython >= 0.19', 'numpy >= 1.7.1'],
+        zip_safe=False, # the package can run out of an .egg file
+        include_package_data=True,
+    )
+else:
+    extra_setuptools_args = dict()
 
-if not _have_setuptools:
-    ## exit if attempting to install without Cython or numpy
-    try:
-        import Cython
-        import numpy
-    except ImportError:
-        raise SystemExit("Cython>=0.19 and NumPy are required.")
-    setuptools_kwargs = {}
+###############################################################################
 
-import distutils.core
 from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
@@ -155,41 +149,47 @@ package_data_pats += stan_files_all
 package_data_pats += lib_files_all
 
 
-## setup
-if __name__ == '__main__':
-    distutils.core._setup_stop_after = 'commandline'
-    metadata = dict(
-        name=NAME,
-        version=FULLVERSION,
-        maintainer=AUTHOR,
-        maintainer_email=AUTHOR_EMAIL,
-        packages=['pystan',
-                  'pystan.tests',
-                  'pystan.external',
-                  'pystan.external.pymc',
-                  'pystan.external.enum',
-                  'pystan.external.scipy'],
-        ext_modules=extensions,
-        libraries=[libstan],
-        package_data={'pystan': package_data_pats},
-        description=DESCRIPTION,
-        license=LICENSE,
-        url=URL,
-        long_description=LONG_DESCRIPTION,
-        classifiers=CLASSIFIERS,
-        **setuptools_kwargs
-    )
+def setup_package():
+    metadata = dict(name=NAME,
+                    version=FULLVERSION,
+                    maintainer=AUTHOR,
+                    maintainer_email=AUTHOR_EMAIL,
+                    packages=['pystan',
+                              'pystan.tests',
+                              'pystan.external',
+                              'pystan.external.pymc',
+                              'pystan.external.enum',
+                              'pystan.external.scipy'],
+                    ext_modules=extensions,
+                    libraries=[libstan],
+                    package_data={'pystan': package_data_pats},
+                    description=DESCRIPTION,
+                    license=LICENSE,
+                    url=URL,
+                    long_description=LONG_DESCRIPTION,
+                    classifiers=CLASSIFIERS,
+                    **extra_setuptools_args)
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
                                in ('--help-commands', 'egg_info', '--version', 'clean')):
         # For these actions, neither Numpy nor Cython is required.
         #
         # They are required to succeed when pip is used to install PyStan
         # when, for example, Numpy is not yet present.
+        try:
+            from setuptools import setup
+        except ImportError:
+            from distutils.core import setup
         dist = setup(**metadata)
     else:
-        from Cython.Build import cythonize
-        from numpy.distutils.command import install, install_clib
-        from numpy.distutils.misc_util import InstallableLib
+        import distutils.core
+        distutils.core._setup_stop_after = 'commandline'
+        from distutils.core import setup
+        try:
+            from Cython.Build import cythonize
+            from numpy.distutils.command import install, install_clib
+            from numpy.distutils.misc_util import InstallableLib
+        except ImportError:
+            raise SystemExit("Cython>=0.19 and NumPy are required.")
 
         metadata['ext_modules'] = cythonize(extensions)
 
@@ -209,3 +209,7 @@ if __name__ == '__main__':
         error = grok_environment_error(exc)
     except (DistutilsError, CCompilerError) as msg:
             raise SystemExit("error: " + str(msg))
+
+
+if __name__ == '__main__':
+    setup_package()
