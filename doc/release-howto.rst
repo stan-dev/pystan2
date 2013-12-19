@@ -11,18 +11,14 @@ Release checklist
 - ``git tag``
 - Push tag to github ``git push --tags``
 - Git branch ``master`` should be fast-forwarded to ``develop``
+- Git branch ``readthedocs`` force pushed after rebasing on new ``master``
 - Assemble source distribution, sign it, upload to PyPI:
 
 ::
 
     python setup.py sdist
-    gpg --detach-sign -a dist/pystan-2.0.1.2.tar.gz
+    gpg --detach-sign -a dist/pystan-x.x.x.x.tar.gz
     twine upload dist/*
-
-- Update docs in readthedocs
-
-    make html
-    cp _build/html /tmp/html
 
 After release
 =============
