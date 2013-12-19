@@ -20,9 +20,10 @@ Documentation
 
    getting_started
    optimizing
+   avoiding_recompilation
    differences_pystan_and_rstan
-   whats_new
    api
+   whats_new
 
 Stan documentation
 ------------------

@@ -35,8 +35,10 @@ R:
 
     extract(fit)$theta
 
-Saving objects
-==============
+Reusing models and saving objects
+=================================
+
+*See also `avoiding-recompilation`*
 
 PyStan uses ``pickle`` to save objects for future use.
 
@@ -47,7 +49,23 @@ Python:
     import pickle
     import pystan
 
+    # bernoulli model
+    model_code = """
+        data {
+          int<lower=0> N;
+          int<lower=0,upper=1> y[N];
+        }
+        parameters {
+          real<lower=0,upper=1> theta;
+        }
+        model {
+          for (n in 1:N)
+              y[n] ~ bernoulli(theta);
+        }
+        """
+    data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
     model = pystan.StanModel(model_code=model_code)
+    fit = model.sampling(data=data)
 
     with open('model.pkl', 'wb') as f:
         pickle.dump(model, f)
@@ -56,6 +74,9 @@ Python:
 
     with open('model.pkl', 'rb') as f:
         model = pickle.load(f)
+
+    # run with different data
+    fit = model.sampling(data=dict(N=5, y=[1, 1, 0, 1, 0]))
 
 R:
 
