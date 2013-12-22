@@ -56,7 +56,7 @@ def load_module(module_name, module_path):
 def _map_parallel(function, args, n_jobs):
     """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
     # Following the error checking found in joblib
-    multiprocessing = int(n_jobs) not in (0, 1)
+    multiprocessing = int(os.environ.get('JOBLIB_MULTIPROCESSING', 1)) or None
     if multiprocessing:
         try:
             import multiprocessing
@@ -72,7 +72,7 @@ def _map_parallel(function, args, n_jobs):
         except (ImportError, OSError) as e:
             multiprocessing = None
             warnings.warn('%s. _map_parallel will operate in serial mode' % (e,))
-    if multiprocessing:
+    if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
         mymap = multiprocessing.Pool(processes=n_jobs).map
