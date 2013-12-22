@@ -109,6 +109,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
         ctrl_d["adapt_gamma"] = args.ctrl.sampling.adapt_gamma
         ctrl_d["adapt_delta"] = args.ctrl.sampling.adapt_delta
         ctrl_d["adapt_kappa"] = args.ctrl.sampling.adapt_kappa
+        ctrl_d["adapt_init_buffer"] = args.ctrl.sampling.adapt_init_buffer
+        ctrl_d["adapt_term_buffer"] = args.ctrl.sampling.adapt_term_buffer
+        ctrl_d["adapt_window"] = args.ctrl.sampling.adapt_window
         ctrl_d["adapt_t0"] = args.ctrl.sampling.adapt_t0
         ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
         ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
@@ -154,6 +157,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     elif method == stan_args_method_t.TEST_GRADIENT:
         d["method"] = "test_grad"
         d["test_grad"] = True
+        ctrl_list = dict(epsilon=args.ctrl.test_grad.epsilon,
+                         error=args.ctrl.test_grad.error)
+        d["control"] = ctrl_list
     return d
 
 
@@ -194,6 +200,9 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.sampling.adapt_gamma = args['ctrl']['sampling']['adapt_gamma']
         p.ctrl.sampling.adapt_delta = args['ctrl']['sampling']['adapt_delta']
         p.ctrl.sampling.adapt_kappa = args['ctrl']['sampling']['adapt_kappa']
+        p.ctrl.sampling.adapt_init_buffer = args['ctrl']['sampling']['adapt_init_buffer']
+        p.ctrl.sampling.adapt_term_buffer = args['ctrl']['sampling']['adapt_term_buffer']
+        p.ctrl.sampling.adapt_window = args['ctrl']['sampling']['adapt_window']
         p.ctrl.sampling.adapt_t0 = args['ctrl']['sampling']['adapt_t0']
         p.ctrl.sampling.metric = args['ctrl']['sampling']['metric'].value
         p.ctrl.sampling.stepsize = args['ctrl']['sampling']['stepsize']

@@ -61,6 +61,9 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         double adapt_gamma
         double adapt_delta
         double adapt_kappa
+        uint adapt_init_buffer
+        uint adapt_term_buffer
+        uint adapt_window
         double adapt_t0
         sampling_metric_t metric  # UNIT_E, DIAG_E, DENSE_E
         double stepsize  # default to 1
@@ -79,9 +82,14 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         double tol_grad  # default to 1e-8, for BFGS
         double tol_param  # default to 1e-8, for BFGS
 
+    cdef struct test_grad_t:
+        double epsilon # default to 1e-6, for test_grad
+        double error # default to 1e-6, for test_grad
+
     cdef union ctrl_t:
         sampling_t sampling
         optim_t optim
+        test_grad_t test_grad
 
     cdef cppclass PyStanArgs:
         uint random_seed

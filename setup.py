@@ -94,8 +94,6 @@ stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
 
 libstan_sources = [
     "pystan/stan/src/stan/agrad/rev/var_stack.cpp",
-    "pystan/stan/src/stan/math/matrix.cpp",
-    "pystan/stan/src/stan/agrad/matrix.cpp"
 ]
 
 libstan_extra_compile_args = ['-O3', '-ftemplate-depth-256']

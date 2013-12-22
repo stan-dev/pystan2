@@ -487,43 +487,35 @@ def _get_valid_stan_args(base_args=None):
                 "require HMC, Metropolis, or NUTS).".format(algorithm)
             raise ValueError(msg)
 
-        ctrl_lst = args.get('control')
-        if ctrl_lst is not None:
-            args['ctrl']['sampling']['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
-            args['ctrl']['sampling']['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
-            args['ctrl']['sampling']['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.65)
-            args['ctrl']['sampling']['adapt_kappa'] = ctrl_lst.get("adapt_kappa", 0.75)
-            args['ctrl']['sampling']['adapt_t0'] = ctrl_lst.get("adapt_t0", 10.0)
-            args['ctrl']['sampling']['stepsize'] = ctrl_lst.get("stepsize", 1.0)
-            args['ctrl']['sampling']['stepsize_jitter'] = ctrl_lst.get("stepsize_jitter", 0.0)
+        ctrl_lst = args.get('control', dict())
+        ctrl_sampling = args['ctrl']['sampling']
+        ctrl_sampling['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
+        ctrl_sampling['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
+        ctrl_sampling['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.8)
+        ctrl_sampling['adapt_kappa'] = ctrl_lst.get("adapt_kappa", 0.75)
+        ctrl_sampling['adapt_t0'] = ctrl_lst.get("adapt_t0", 10.0)
+        ctrl_sampling['adapt_init_buffer'] = ctrl_lst.get("adapt_init_buffer", 75)
+        ctrl_sampling['adapt_term_buffer'] = ctrl_lst.get("adapt_term_buffer", 50)
+        ctrl_sampling['adapt_window'] = ctrl_lst.get("adapt_window", 25)
+        ctrl_sampling['stepsize'] = ctrl_lst.get("stepsize", 1.0)
+        ctrl_sampling['stepsize_jitter'] = ctrl_lst.get("stepsize_jitter", 0.0)
 
-            metric = ctrl_lst.get('metric')
-            if metric == "unit_e":
-                args['ctrl']['sampling']['metric'] = sampling_metric_t.UNIT_E
-            elif metric == "diag_e":
-                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
-            elif metric == "dense_e":
-                args['ctrl']['sampling']['metric'] = sampling_metric_t.DENSE_E
-            elif metric is None:
-                args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
+        metric = ctrl_lst.get('metric')
+        if metric == "unit_e":
+            ctrl_sampling['metric'] = sampling_metric_t.UNIT_E
+        elif metric == "diag_e":
+            ctrl_sampling['metric'] = sampling_metric_t.DIAG_E
+        elif metric == "dense_e":
+            ctrl_sampling['metric'] = sampling_metric_t.DENSE_E
+        elif metric is None:
+            ctrl_sampling['metric'] = sampling_metric_t.DIAG_E
 
-            if args['ctrl']['sampling']['algorithm'] == sampling_algo_t.NUTS:
-                args['ctrl']['sampling']['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
-            elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.HMC:
-                args['ctrl']['sampling']['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
-            elif args['ctrl']['sampling']['algorithm'] == sampling_algo_t.Metropolis:
+            if ctrl_sampling['algorithm'] == sampling_algo_t.NUTS:
+                ctrl_sampling['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
+            elif ctrl_sampling['algorithm'] == sampling_algo_t.HMC:
+                ctrl_sampling['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
+            elif ctrl_sampling['algorithm'] == sampling_algo_t.Metropolis:
                 pass
-        else:
-            args['ctrl']['sampling']['adapt_engaged'] = True
-            args['ctrl']['sampling']['adapt_gamma'] = 0.05
-            args['ctrl']['sampling']['adapt_delta'] = 0.65
-            args['ctrl']['sampling']['adapt_kappa'] = 0.75
-            args['ctrl']['sampling']['adapt_t0'] = 10
-            args['ctrl']['sampling']['max_treedepth'] = 10
-            args['ctrl']['sampling']['metric'] = sampling_metric_t.DIAG_E
-            args['ctrl']['sampling']['stepsize'] = 1
-            args['ctrl']['sampling']['stepsize_jitter'] = 0
-            args['ctrl']['sampling']['int_time'] = 6.283185307179586476925286766559005768e+00
 
     elif args['method'] == stan_args_method_t.OPTIM:
         args['ctrl'] = args.get('ctrl', dict(optim=dict()))
@@ -550,7 +542,9 @@ def _get_valid_stan_args(base_args=None):
         args['ctrl']['optim']['tol_param'] = args.get("tol_param", 1e-8)
         args['ctrl']['optim']['save_iterations'] = args.get("save_iterations", True)
     elif args['method'] == stan_args_method_t.TEST_GRADIENT:
-        pass
+        args['ctrl'] = args.get('ctrl', dict(test_grad=dict()))
+        args['ctrl']['test_grad']['epsilon'] = args.get("epsilon", 1e-6)
+        args['ctrl']['test_grad']['error'] = args.get("error", 1e-6)
 
     init = args.get('init', "random")
     if isinstance(init, string_types):

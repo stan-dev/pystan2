@@ -2,9 +2,8 @@ build/
 dist/
 doc/_build
 
-pystan/bin
-
 __pycache__
+*.a
 *.so
 *.cpp
 *.pyc
