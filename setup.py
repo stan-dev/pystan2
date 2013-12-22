@@ -199,7 +199,7 @@ def setup_package():
         dist = setup(**metadata)
         dist.installed_libraries = [InstallableLib(libstan[0],
                                                    libstan[1],
-                                                   'pystan/bin/')]
+                                                   'pystan/')]
     try:
         dist.run_commands()
     except KeyboardInterrupt:
