@@ -192,12 +192,15 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Default is 1.
 
     init : {0, '0', 'random', function returning dict, list of dict}, optional
-        Specifies how initial parameter values are chosen: 0 or '0'
-        initializes all to be zero on the unconstrained support; 'random'
-        generates random initial values; list of size equal to the number
-        of chains (`chains`), where the list contains a dict with initial
-        parameter values; function returning a dict with initial parameter
-        values. The function may take an optional argument `chain_id`.
+        Specifies how initial parameter values are chosen:
+        - 0 or '0' initializes all to be zero on the unconstrained support.
+        - 'random' generates random initial values. An optional parameter
+            `init_r` controls the range of randomly generated initial values
+            for parameters in terms of their unconstrained support;
+        - list of size equal to the number of chains (`chains`), where the
+            list contains a dict with initial parameter values;
+        - function returning a dict with initial parameter values. The
+            function may take an optional argument `chain_id`.
 
     seed : int or np.random.RandomState, optional
         The seed, a positive integer for random number generation. Only
@@ -300,6 +303,50 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         during sampling (i.e. show the progress every \code{refresh} iterations).
         By default, `refresh` is `max(iter/10, 1)`.
 
+    Examples
+    --------
+    >>> from pystan import stan
+    >>> import numpy as np
+    >>> model_code = '''
+    ... parameters {
+    ...   real y[2];
+    ... }
+    ... model {
+    ...   y[1] ~ normal(0, 1);
+    ...   y[2] ~ double_exponential(0, 2);
+    ... }'''
+    >>> fit1 = stan(model_code=model_code, iter=10)
+    >>> print(fit1)
+    >>> excode = '''
+    ... transformed data {
+    ...     real y[20];
+    ...     y[1] <- 0.5796;  y[2]  <- 0.2276;   y[3] <- -0.2959;
+    ...     y[4] <- -0.3742; y[5]  <- 0.3885;   y[6] <- -2.1585;
+    ...     y[7] <- 0.7111;  y[8]  <- 1.4424;   y[9] <- 2.5430;
+    ...     y[10] <- 0.3746; y[11] <- 0.4773;   y[12] <- 0.1803;
+    ...     y[13] <- 0.5215; y[14] <- -1.6044;  y[15] <- -0.6703;
+    ...     y[16] <- 0.9459; y[17] <- -0.382;   y[18] <- 0.7619;
+    ...     y[19] <- 0.1006; y[20] <- -1.7461;
+    ... }
+    ... parameters {
+    ...     real mu;
+    ...     real<lower=0, upper=10> sigma;
+    ...     vector[2] z[3];
+    ...     real<lower=0> alpha;
+    ... }
+    ... model {
+    ...     y ~ normal(mu, sigma);
+    ...     for (i in 1:3)
+    ...     z[i] ~ normal(0, 1);
+    ...     alpha ~ exponential(2);
+    ... }'''
+    >>>
+    >>> def initfun1():
+    ...     return dict(mu=1, sigma=4, z=np.random.normal(size=(3, 2)), alpha=1)
+    >>> exfit0 = stan(model_code=excode, init=initfun1)
+    >>> def initfun2(chain_id=1):
+    ...     return dict(mu=1, sigma=4, z=np.random.normal(size=(3, 2)), alpha=1 + chain_id)
+    >>> exfit1 = stan(model_code=excode, init=initfun2)
     """
     # NOTE: this is a thin wrapper for other functions. Error handling occurs
     # elsewhere.

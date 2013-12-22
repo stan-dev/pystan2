@@ -389,12 +389,15 @@ class StanModel:
             ``random.randint(0, MAX_UINT)``.
 
         init : {0, '0', 'random', function returning dict, list of dict}, optional
-            Specifies how initial parameter values are chosen: 0 or '0'
-            initializes all to be zero on the unconstrained support; 'random'
-            generates random initial values; list of size equal to the number
-            of chains (`chains`), where the list contains a dict with initial
-            parameter values; function returning a dict with initial parameter
-            values. The function may take an optional argument `chain_id`.
+            Specifies how initial parameter values are chosen:
+            - 0 or '0' initializes all to be zero on the unconstrained support.
+            - 'random' generates random initial values. An optional parameter
+                `init_r` controls the range of randomly generated initial values
+                for parameters in terms of their unconstrained support;
+            - list of size equal to the number of chains (`chains`), where the
+                list contains a dict with initial parameter values;
+            - function returning a dict with initial parameter values. The
+                function may take an optional argument `chain_id`.
 
         sample_file : string, optional
             File name specifying where samples for *all* parameters and other
