@@ -65,3 +65,29 @@ class TestStanfit(unittest.TestCase):
                          log_prob_fun(mu, np.log(sigma), adjust=False))
         g1 = sf.grad_log_prob(sf.unconstrain_pars(dict(mu=mu, sigma=sigma)), False)
         np.testing.assert_equal(g1, log_prob_grad_fun(mu, np.log(sigma), adjust=False))
+
+        def test_specify_args(self):
+            y = (0.70,  -0.16,  0.77, -1.37, -1.99,  1.35, 0.08,
+                 0.02,  -1.48, -0.08,  0.34,  0.03, -0.42, 0.87,
+                 -1.36,  1.43,  0.80, -0.48, -1.61, -1.27)
+            code = """
+                data {
+                    real y[20];
+                }
+                parameters {
+                    real mu;
+                    real<lower=0> sigma;
+                }
+                model {
+                    y ~ normal(mu, sigma);
+                }"""
+            stepsize0 = 0.15
+            sf = stan(model_code=code, data=dict(y=y), iter=200,
+                      control=dict(adapt_engaged=False, stepsize=stepsize0))
+            self.assertEqual(sf.get_sampler_params()[0]['stepsize__'][0], stepsize0)
+            sf2 = stan(fit=sf, iter=20, algorithm='HMC', data=dict(y=y),
+                       control=dict(adapt_engaged=False, stepsize=stepsize0))
+            self.assertEqual(sf2.get_sampler_params()[0]['stepsize__'][0], stepsize0)
+            sf3 = stan(fit=sf, iter=1, data=list(y=y), init=0, chains=1)
+            i_u = sf3.unconstrain_pars(sf3.get_inits[0])
+            self.assertEqual(i_u, [0, 0])
