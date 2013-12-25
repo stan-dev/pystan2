@@ -4,7 +4,7 @@ PyStan: The Python Interface to Stan
 .. image:: https://github.com/stan-dev/stan/blob/master/logos/stanlogo-main.png?raw=true
     :alt: Stan logo
 
-|pypi| |travis|
+|pypi| |travis| |crate|
 
 **PyStan** provides a Python interface to Stan, a package for Bayesian inference
 using the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
@@ -107,3 +107,7 @@ Example
 .. |travis| image:: https://travis-ci.org/stan-dev/pystan.png?branch=develop
     :target: https://travis-ci.org/stan-dev/pystan
     :alt: travis-ci build status
+
+.. |crate| image:: https://pypip.in/d/pystan/badge.png
+    :target: https://pypi.python.org/pypi/pystan
+    :alt: pypi download statistics
