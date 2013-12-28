@@ -161,6 +161,7 @@ def setup_package():
                     ext_modules=extensions,
                     libraries=[libstan],
                     package_data={'pystan': package_data_pats},
+                    platforms='any',
                     description=DESCRIPTION,
                     license=LICENSE,
                     url=URL,
