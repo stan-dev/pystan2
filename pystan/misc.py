@@ -489,6 +489,7 @@ def _get_valid_stan_args(base_args=None):
 
         ctrl_lst = args.get('control', dict())
         ctrl_sampling = args['ctrl']['sampling']
+        # NB: if these defaults change, remember to update docstrings
         ctrl_sampling['adapt_engaged'] = ctrl_lst.get("adapt_engaged", True)
         ctrl_sampling['adapt_gamma'] = ctrl_lst.get("adapt_gamma", 0.05)
         ctrl_sampling['adapt_delta'] = ctrl_lst.get("adapt_delta", 0.8)

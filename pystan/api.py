@@ -251,7 +251,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
 
         - `adapt_engaged` : bool
         - `adapt_gamma` : float, positive, default 0.05
-        - `adapt_delta` : float, between 0 and 1, default 0.65
+        - `adapt_delta` : float, between 0 and 1, default 0.8
         - `adapt_kappa` : float, between default 0.75
         - `adapt_t0`    : float, positive, default 10
 
