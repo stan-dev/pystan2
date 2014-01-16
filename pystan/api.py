@@ -8,6 +8,7 @@
 import io
 import logging
 import random
+import hashlib
 
 import pystan._api  # stanc wrapper
 from pystan._compat import string_types
@@ -115,8 +116,15 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
             model_code = file.read()
 
     # bytes, going into C++ code
-    model_name_bytes = model_name.encode('ascii')
     model_code_bytes = model_code.encode('ascii')
+
+    if obfuscate_model_name:
+        # Make the model name depend on the code.
+        model_name = (
+            model_name + '_' +
+            hashlib.md5(model_code_bytes).hexdigest())
+
+    model_name_bytes = model_name.encode('ascii')
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
     if result['status'] == -1:  # EXCEPTION_RC = -1
