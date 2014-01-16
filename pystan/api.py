@@ -19,7 +19,7 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obfuscate_model_name=False):
+          verbose=False, obfuscate_model_name=True):
     """Translate Stan model specification into C++ code.
 
     Parameters
