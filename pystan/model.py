@@ -75,10 +75,13 @@ def _map_parallel(function, args, n_jobs):
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
-        mymap = multiprocessing.Pool(processes=n_jobs).map
+        pool = multiprocessing.Pool(processes=n_jobs)
+        map_result = pool.map(function, args)
+        pool.close()
+        pool.join()
     else:
-        mymap = map
-    return list(mymap(function, args))
+        map_result = list(map(function, args))
+    return map_result
 
 
 # NOTE: StanModel instance stores references to a compiled, uninstantiated
