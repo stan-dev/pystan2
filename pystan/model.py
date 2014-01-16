@@ -207,7 +207,7 @@ class StanModel:
     """
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
-                 eigen_lib=None, save_dso=True, verbose=False, obsfucate_model_name=False):
+                 eigen_lib=None, save_dso=True, verbose=False, obfuscate_model_name=False):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -215,7 +215,7 @@ class StanModel:
                                          model_code=model_code,
                                          model_name=model_name,
                                          verbose=verbose,
-                                         obsfucate_model_name=obsfucate_model_name)
+                                         obfuscate_model_name=obfuscate_model_name)
 
         if not isinstance(stanc_ret, dict):
             raise ValueError("stanc_ret must be an object returned by stanc.")

@@ -19,7 +19,7 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obsfucate_model_name=False):
+          verbose=False, obfuscate_model_name=False):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -47,7 +47,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         Indicates whether intermediate output should be piped to the
         console. This output may be useful for debugging.
 
-    obsfucate_model_name : boolean, True by default
+    obfuscate_model_name : boolean, True by default
         If False the model name in the generated C++ code will not be made
         unique by the insertion of randomly generated characters.
         Generally it is recommended that this parameter be left as True.
