@@ -229,7 +229,7 @@ class StanModel:
                              "dictionary from stanc.")
         self.model_cppname = stanc_ret['model_cppname']
         self.model_name = stanc_ret['model_name']
-        self.model_code = model_code
+        self.model_code = stanc_ret['model_code']
         self.model_cppcode = stanc_ret['cppcode']
         self.save_dso = save_dso
 
