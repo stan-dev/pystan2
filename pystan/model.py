@@ -80,7 +80,7 @@ def _map_parallel(function, args, n_jobs):
         pool.close()
         pool.join()
     else:
-        map_result = map(function, args)
+        map_result = list(map(function, args))
     return map_result
 
 
