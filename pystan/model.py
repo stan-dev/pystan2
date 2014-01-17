@@ -25,6 +25,7 @@ import string
 import sys
 import warnings
 
+import distutils
 from distutils.core import Extension
 
 import Cython
@@ -279,6 +280,7 @@ class StanModel:
             outfile.write(s)
 
         extra_compile_args = ['-O3', '-ftemplate-depth-256']
+        distutils.log.set_verbosity(verbose)
         extension = Extension(name=module_name,
                               language="c++",
                               sources=[pyx_file],
