@@ -21,7 +21,7 @@ Documentation
    getting_started
    optimizing
    avoiding_recompilation
-   differences_pystan_and_rstan
+   differences_pystan_rstan
    api
    whats_new
 

@@ -350,9 +350,27 @@ cdef class StanFit4$model_cppname:
     # public methods
 
     def plot(self, pars=None):
+        """Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : sequence of str
+            names of parameters
+
+        Note
+        ----
+        This is currently an alias for the `traceplot` method.
+        """
         return pystan.plots.traceplot(self, pars)
 
     def traceplot(self, pars=None):
+        """Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : sequence of str
+            names of parameters
+        """
         # FIXME: for now plot and traceplot do the same thing
         return pystan.plots.traceplot(self, pars)
 
@@ -445,14 +463,14 @@ cdef class StanFit4$model_cppname:
     def summary(self, pars=None, probs=None):
         return pystan.misc._summary(self, pars, probs)
 
-    def log_prob(self, upars, adjust_transform=True, gradient=False):
+    def log_prob(self, upar, adjust_transform=True, gradient=False):
         """
         Expose the log_prob of the model to stan_fit so user can call
         this function.
 
         Parameters
         ----------
-        upar :
+        upar : array
             The real parameters on the unconstrained space.
         adjust_transform : bool
             Whether we add the term due to the transform from constrained
@@ -477,24 +495,24 @@ cdef class StanFit4$model_cppname:
 
         """
         # gradient is ignored for now. Call grad_log_prob to get the gradient.
-        cdef vector[double] par_r = np.asarray(upars).flat
+        cdef vector[double] par_r = np.asarray(upar).flat
         return self.thisptr.log_prob(par_r, adjust_transform, gradient)
 
-    def grad_log_prob(self, upars, adjust_transform=True):
+    def grad_log_prob(self, upar, adjust_transform=True):
         """
         Expose the grad_log_prob of the model to stan_fit so user
         can call this function.
 
         Parameters
         ----------
-        upar :
+        upar : array
             The real parameters on the unconstrained space.
         adjust_transform : bool
             Whether we add the term due to the transform from constrained
             space to unconstrained space implicitly done in Stan.
         """
         cdef vector[double] par_r, grad
-        par_r = np.asarray(upars).flat
+        par_r = np.asarray(upar).flat
         grad = self.thisptr.grad_log_prob(par_r, adjust_transform)
         return np.asarray(grad)
 

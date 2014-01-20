@@ -193,8 +193,8 @@ class StanModel:
     References
     ----------
 
-    The Stan Development Team (2013) _Stan Modeling Language User's
-    Guide and Reference Manual_.  <URL: http://mc-stan.org/>.
+    The Stan Development Team (2013) *Stan Modeling Language User's
+    Guide and Reference Manual*.  <URL: http://mc-stan.org/>.
 
     Examples
     --------
@@ -397,12 +397,12 @@ class StanModel:
             Specifies how initial parameter values are chosen:
             - 0 or '0' initializes all to be zero on the unconstrained support.
             - 'random' generates random initial values. An optional parameter
-                `init_r` controls the range of randomly generated initial values
-                for parameters in terms of their unconstrained support;
+              `init_r` controls the range of randomly generated initial values
+              for parameters in terms of their unconstrained support;
             - list of size equal to the number of chains (`chains`), where the
-                list contains a dict with initial parameter values;
+              list contains a dict with initial parameter values;
             - function returning a dict with initial parameter values. The
-                function may take an optional argument `chain_id`.
+              function may take an optional argument `chain_id`.
 
         sample_file : string, optional
             File name specifying where samples for *all* parameters and other
@@ -423,8 +423,8 @@ class StanModel:
         -------
         optim : dict or None
             Dictionary with components 'par' and 'value' if the optimization is
-            successful. `optim`['par'] is a dictionary of point estimates,
-            indexed by the parameter name. `optim`['value'] stores the value
+            successful. ``optim['par']`` is a dictionary of point estimates,
+            indexed by the parameter name. ``optim['value']`` stores the value
             of the log-posterior (up to an additive constant, the ``lp__`` in
             Stan) corresponding to the point identified by `optim`['par'].
 
