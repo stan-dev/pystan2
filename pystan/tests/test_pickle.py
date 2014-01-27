@@ -19,7 +19,7 @@ def test_pickle_model():
 
     with open(pickle_file, 'rb') as f:
         m = pickle.load(f)
-    assert m.model_name == "normal1"
+    assert m.model_name.startswith("normal1")
 
     m = pystan.StanModel(model_code=model_code, model_name="normal2")
     module_name = m.module.__name__
@@ -31,7 +31,7 @@ def test_pickle_model():
 
     with open(pickle_file, 'rb') as f:
         m = pickle.load(f)
-    assert m.model_name == "normal2"
+    assert m.model_name.startswith("normal2")
     assert m.module is not None
     assert module_filename != m.module.__file__
     fit = m.sampling()

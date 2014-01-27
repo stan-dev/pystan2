@@ -14,10 +14,11 @@ class TestNormal(unittest.TestCase):
 
     model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
     model = StanModel(model_code=model_code, model_name="normal1",
-                      verbose=True)
+                      verbose=True, obfuscate_model_name=False)
 
     def test_constructor(self):
         self.assertEqual(self.model.model_name, "normal1")
+        self.assertEqual(self.model.model_cppname, "normal1")
 
     def test_log_prob(self):
         fit = self.model.sampling()
@@ -49,8 +50,10 @@ class TestBernoulli(unittest.TestCase):
 
     def test_bernoulli_constructor(self):
         model = self.model
-        self.assertEqual(model.model_name, "bernoulli")
-        self.assertTrue(model.model_cppname.endswith("bernoulli"))
+        # obfuscate_model_name is True
+        self.assertNotEqual(model.model_name, "bernoulli")
+        self.assertTrue(model.model_name.startswith("bernoulli"))
+        self.assertTrue(model.model_cppname.startswith("bernoulli"))
 
     def test_bernoulli_sampling(self):
         fit = self.fit
