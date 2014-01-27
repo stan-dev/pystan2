@@ -4,9 +4,6 @@ Release checklist
 =================
 
 - Update doc/whats_new.rst
-- Update snippet in doc/getting_started.rst, i.e., "wget https://github.com/stan-dev/pystan/archive/0.2.0.zip"
-- Set version in setup.py
-- Set version in pystan/__init__.py
 - Set ISRELEASED = True in setup.py
 - ``git tag``
 - Push tag to github ``git push --tags``
@@ -22,10 +19,12 @@ Release checklist
 
 After release
 =============
+
 - Add placeholder for changes in doc/whats_new.rst
 - Set ISRELEASED = False in setup.py
 - Bump version in setup.py
 - Bump version in pystan/__init__.py
+- Bump version in snippet in doc/getting_started.rst, i.e., "wget https://github.com/stan-dev/pystan/archive/0.2.0.zip"
 
 See also
 ========

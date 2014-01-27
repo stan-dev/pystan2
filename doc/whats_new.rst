@@ -6,9 +6,10 @@
  What's New 
 ============
 
-v2.1.0.1 (Under development)
-============================
-- ...
+v2.1.0.1 (27. January 2014)
+===========================
+- Implement model name obfuscation. Thanks to @karnold
+- Improve documentation of StanFit objects
 
 v2.1.0.0 (26. December 2013)
 ============================
