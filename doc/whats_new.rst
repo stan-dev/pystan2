@@ -3,8 +3,12 @@
 .. currentmodule:: pystan
 
 ============
- What's New 
+ What's New
 ============
+
+Next version (TBA)
+==================
+- ...
 
 v2.1.0.1 (27. January 2014)
 ===========================

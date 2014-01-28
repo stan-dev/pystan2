@@ -24,7 +24,9 @@ After release
 - Set ISRELEASED = False in setup.py
 - Bump version in setup.py
 - Bump version in pystan/__init__.py
-- Bump version in snippet in doc/getting_started.rst, i.e., "wget https://github.com/stan-dev/pystan/archive/0.2.0.zip"
+- Bump version in snippet in doc/getting_started.rst, i.e., "wget
+  https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
+  references to the version number.)
 
 See also
 ========
