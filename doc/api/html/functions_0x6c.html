@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -131,10 +131,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>L_
 : <a class="el" href="classstan_1_1mcmc_1_1base__static__hmc.html#a90fa0670ef5e51de2534f25c0a34a2c7">stan::mcmc::base_static_hmc&lt; M, P, H, I, BaseRNG &gt;</a>
 </li>
+<li>LDLT_alloc()
+: <a class="el" href="classstan_1_1agrad_1_1_l_d_l_t__alloc.html#ad2c1bbcc10381b09fe034ef93b16e390">stan::agrad::LDLT_alloc&lt; R, C &gt;</a>
+</li>
 <li>LDLT_factor()
 : <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html#abdc7a01f87ac33c781d58a2d5ed2fd26">stan::math::LDLT_factor&lt; stan::agrad::var, R, C &gt;</a>
 , <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#ab710d201cf60112e05283a2b57c3547c">stan::math::LDLT_factor&lt; double, R, C &gt;</a>
-, <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html#a86525804bc537ac3a74297484626d45a">stan::math::LDLT_factor&lt; stan::agrad::var, R, C &gt;</a>
 </li>
 <li>learn_covariance()
 : <a class="el" href="classstan_1_1mcmc_1_1covar__adaptation.html#a6c50cab9f1bebe465e8c28db2a9581f4">stan::mcmc::covar_adaptation</a>
@@ -154,8 +156,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="struct_eigen_1_1internal_1_1general__matrix__matrix__product_3_01_index_00_01stan_1_1agrad_1_1va9b485de9571b6e46d7a64aff43a6d9d3.html#a4b77e4f22ba05c8daaa850af323db4c5">Eigen::internal::general_matrix_matrix_product&lt; Index, stan::agrad::var, LhsStorageOrder, ConjugateLhs, stan::agrad::var, RhsStorageOrder, ConjugateRhs, ColMajor &gt;</a>
 </li>
 <li>LhsStorageOrder
-: <a class="el" href="struct_eigen_1_1internal_1_1general__matrix__vector__product_3_01_index_00_01stan_1_1agrad_1_1va44da5f98e1caea9523bacbd5bdc025fe.html#a1a45ecc02e193d7a8d978fc11b7bf753a4568cff436d678b2cb8e936b209fced9">Eigen::internal::general_matrix_vector_product&lt; Index, stan::agrad::var, ColMajor, ConjugateLhs, stan::agrad::var, ConjugateRhs &gt;</a>
-, <a class="el" href="struct_eigen_1_1internal_1_1general__matrix__vector__product_3_01_index_00_01stan_1_1agrad_1_1vacd54cabc78c49ca719650381b68b105e.html#a2b766d523420f3934c8e5bd00078d9f4a2a6d617ef050b14291315944cee7c382">Eigen::internal::general_matrix_vector_product&lt; Index, stan::agrad::var, RowMajor, ConjugateLhs, stan::agrad::var, ConjugateRhs &gt;</a>
+: <a class="el" href="struct_eigen_1_1internal_1_1general__matrix__vector__product_3_01_index_00_01stan_1_1agrad_1_1vacd54cabc78c49ca719650381b68b105e.html#a2b766d523420f3934c8e5bd00078d9f4a2a6d617ef050b14291315944cee7c382">Eigen::internal::general_matrix_vector_product&lt; Index, stan::agrad::var, RowMajor, ConjugateLhs, stan::agrad::var, ConjugateRhs &gt;</a>
+, <a class="el" href="struct_eigen_1_1internal_1_1general__matrix__vector__product_3_01_index_00_01stan_1_1agrad_1_1va44da5f98e1caea9523bacbd5bdc025fe.html#a1a45ecc02e193d7a8d978fc11b7bf753a4568cff436d678b2cb8e936b209fced9">Eigen::internal::general_matrix_vector_product&lt; Index, stan::agrad::var, ColMajor, ConjugateLhs, stan::agrad::var, ConjugateRhs &gt;</a>
 </li>
 <li>list_argument()
 : <a class="el" href="classstan_1_1gm_1_1list__argument.html#ac0e9e2d2392255d5d6576390c7560b89">stan::gm::list_argument</a>
@@ -171,6 +173,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>log_abs_det()
 : <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#a8c2f622cdd10422db6d9470c7799a189">stan::math::LDLT_factor&lt; double, R, C &gt;</a>
+, <a class="el" href="classstan_1_1agrad_1_1_l_d_l_t__alloc.html#a063ff0e0e58cc5ad14a3c4a34d614bc3">stan::agrad::LDLT_alloc&lt; R, C &gt;</a>
 </li>
 <li>log_prob()
 : <a class="el" href="classstan_1_1mcmc_1_1sample.html#a42aa100b16656e4904586f80ec028425">stan::mcmc::sample</a>
@@ -200,7 +203,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

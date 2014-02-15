@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -121,8 +121,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        </div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      }</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="code" href="classstan_1_1gm_1_1list__argument.html#a55f86d294e39ee6a422bdf1308fb3e5b">   31</a></span>&#160;      <span class="keywordtype">void</span> <a class="code" href="classstan_1_1gm_1_1list__argument.html#a55f86d294e39ee6a422bdf1308fb3e5b">print</a>(std::ostream* s, <span class="keywordtype">int</span> depth, <span class="keyword">const</span> <span class="keywordtype">char</span> prefix) {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <a class="code" href="classstan_1_1gm_1_1valued__argument.html#a4b22c1fa6c57037233201ba7f800cf1a">valued_argument::print</a>(s, depth, prefix);</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="code" href="classstan_1_1gm_1_1list__argument.html#aeb216deba3fff79b8be0bbb45a5303bb">   31</a></span>&#160;      <span class="keywordtype">void</span> <a class="code" href="classstan_1_1gm_1_1list__argument.html#aeb216deba3fff79b8be0bbb45a5303bb">print</a>(std::ostream* s, <span class="keywordtype">int</span> depth, <span class="keyword">const</span> std::string prefix) {</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <a class="code" href="classstan_1_1gm_1_1valued__argument.html#aac8d5773b84682e2776f232e5f7bc199">valued_argument::print</a>(s, depth, prefix);</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <a class="code" href="classstan_1_1gm_1_1list__argument.html#a784a4d1f183a4404936d25136e27b0f7">_values</a>.at(<a class="code" href="classstan_1_1gm_1_1list__argument.html#ad55e26c7c3dad56b1755e7ff48ad105a">_cursor</a>)-&gt;print(s, depth + 1, prefix);</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;      }</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;      </div>
@@ -199,7 +199,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;          <a class="code" href="classstan_1_1gm_1_1list__argument.html#ad55e26c7c3dad56b1755e7ff48ad105a">_cursor</a> = i;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;          </div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;          s &lt;&lt; <span class="stringliteral">&quot;good&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;          base_arg-&gt;<a class="code" href="classstan_1_1gm_1_1argument.html#a00e74796257dff5e01e40a771a6bdc93">print</a>(&amp;s, 0, <span class="charliteral">&#39;\0&#39;</span>);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;          base_arg-&gt;<a class="code" href="classstan_1_1gm_1_1argument.html#a11317e60b39f5d6bc5b58d8631ee2f11">print</a>(&amp;s, 0, <span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;          s &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;          <a class="code" href="classstan_1_1gm_1_1list__argument.html#a784a4d1f183a4404936d25136e27b0f7">_values</a>.at(i)-&gt;probe_args(base_arg, s);</div>
@@ -208,7 +208,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <a class="code" href="classstan_1_1gm_1_1list__argument.html#a784a4d1f183a4404936d25136e27b0f7">_values</a>.push_back(<span class="keyword">new</span> <a class="code" href="classstan_1_1gm_1_1arg__fail.html">arg_fail</a>);</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <a class="code" href="classstan_1_1gm_1_1list__argument.html#ad55e26c7c3dad56b1755e7ff48ad105a">_cursor</a> = <a class="code" href="classstan_1_1gm_1_1list__argument.html#a784a4d1f183a4404936d25136e27b0f7">_values</a>.size() - 1;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        s &lt;&lt; <span class="stringliteral">&quot;bad&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        base_arg-&gt;<a class="code" href="classstan_1_1gm_1_1argument.html#a00e74796257dff5e01e40a771a6bdc93">print</a>(&amp;s, 0, <span class="charliteral">&#39;\0&#39;</span>);</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        base_arg-&gt;<a class="code" href="classstan_1_1gm_1_1argument.html#a11317e60b39f5d6bc5b58d8631ee2f11">print</a>(&amp;s, 0, <span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        s &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        </div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <a class="code" href="classstan_1_1gm_1_1list__argument.html#a784a4d1f183a4404936d25136e27b0f7">_values</a>.pop_back();</div>
@@ -292,7 +292,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

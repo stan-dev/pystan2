@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -588,74 +588,75 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;</div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;</div>
 <div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a9d446cacd531a1f58fbd26edf3465065">factor_r</a>.name(<span class="stringliteral">&quot;factor&quot;</span>);</div>
-<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a9d446cacd531a1f58fbd26edf3465065">factor_r</a></div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;        =  <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a>     [_val = _1]</div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a>    [_val = _1]</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a>(_r1)          [_val = <a class="code" href="namespacestan_1_1gm.html#a7c2b54c2a8ea3233bb4e6b6984a5e2c7">set_fun_type_named_f</a>(_1,_r1,_pass,boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>))]</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a>          [_val = <a class="code" href="namespacestan_1_1gm.html#a4e0139a9c5cc5c02221aabee7b75d5aa">set_var_type_f</a>(_1,boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8a79bec27b23f79504c768be5942c958">var_map_</a>),</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;                                                     boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>),</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;                                                     _pass)]</div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;        | ( lit(<span class="charliteral">&#39;(&#39;</span>) </div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;            &gt; <a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1)    [_val = _1]</div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;            &gt; lit(<span class="charliteral">&#39;)&#39;</span>) )</div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;        ;</div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;</div>
-<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a>.name(<span class="stringliteral">&quot;integer literal&quot;</span>);</div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a></div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;        %= int_ </div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;        &gt;&gt; !( lit(<span class="charliteral">&#39;.&#39;</span>)</div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;              | lit(<span class="charliteral">&#39;e&#39;</span>)</div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;              | lit(<span class="charliteral">&#39;E&#39;</span>) );</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;</div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a9d446cacd531a1f58fbd26edf3465065">factor_r</a> =</div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;          <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a>(_r1)          [_val = <a class="code" href="namespacestan_1_1gm.html#a7c2b54c2a8ea3233bb4e6b6984a5e2c7">set_fun_type_named_f</a>(_1,_r1,_pass,</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;                                                           boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>))]</div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a>          [_val = <a class="code" href="namespacestan_1_1gm.html#a4e0139a9c5cc5c02221aabee7b75d5aa">set_var_type_f</a>(_1,boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8a79bec27b23f79504c768be5942c958">var_map_</a>),</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;                                                     boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>),</div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;                                                     _pass)]</div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a>       [_val = _1]</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;        | <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a>    [_val = _1]</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;        | ( lit(<span class="charliteral">&#39;(&#39;</span>) </div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;            &gt; <a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1)    [_val = _1]</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;            &gt; lit(<span class="charliteral">&#39;)&#39;</span>) )</div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;        ;</div>
+<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;</div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a>.name(<span class="stringliteral">&quot;integer literal&quot;</span>);</div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a74cece98c11632b9d78665d719908735">int_literal_r</a></div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;        %= int_ </div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;        &gt;&gt; !( lit(<span class="charliteral">&#39;.&#39;</span>)</div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;              | lit(<span class="charliteral">&#39;e&#39;</span>)</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;              | lit(<span class="charliteral">&#39;E&#39;</span>) );</div>
 <div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;</div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a>.name(<span class="stringliteral">&quot;real literal&quot;</span>);</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a></div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;        %= double_;</div>
-<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a>.name(<span class="stringliteral">&quot;real literal&quot;</span>);</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3">double_literal_r</a></div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;        %= double_;</div>
 <div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;</div>
-<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a>.name(<span class="stringliteral">&quot;function and argument expressions&quot;</span>);</div>
-<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a> </div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;        %= <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a> <span class="comment">// no test yet on valid naming</span></div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;        &gt;&gt; <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a6e06cb76720538efdb14c0c2ada2d370">args_r</a>(_r1);</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;</div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;</div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a>.name(<span class="stringliteral">&quot;function and argument expressions&quot;</span>);</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a8b08e0616ee62cfba37e6db5e22fa63f">fun_r</a> </div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;        %= <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a> <span class="comment">// no test yet on valid naming</span></div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;        &gt;&gt; <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a6e06cb76720538efdb14c0c2ada2d370">args_r</a>(_r1);</div>
 <div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;</div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a>.name(<span class="stringliteral">&quot;identifier (expression grammar)&quot;</span>);</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a></div>
-<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;        %= lexeme[char_(<span class="stringliteral">&quot;a-zA-Z&quot;</span>) </div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;                  &gt;&gt; *char_(<span class="stringliteral">&quot;a-zA-Z0-9_.&quot;</span>)];</div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;</div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a>.name(<span class="stringliteral">&quot;identifier (expression grammar)&quot;</span>);</div>
+<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a></div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;        %= lexeme[char_(<span class="stringliteral">&quot;a-zA-Z&quot;</span>) </div>
+<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;                  &gt;&gt; *char_(<span class="stringliteral">&quot;a-zA-Z0-9_.&quot;</span>)];</div>
 <div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;</div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;      args_r.name(<span class="stringliteral">&quot;function argument expressions&quot;</span>);</div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;      args_r </div>
-<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;        %= (lit(<span class="charliteral">&#39;(&#39;</span>) &gt;&gt; lit(<span class="charliteral">&#39;)&#39;</span>))</div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;        | ( ( lit(<span class="charliteral">&#39;(&#39;</span>)</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;              &gt;&gt; (<a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1) % <span class="charliteral">&#39;,&#39;</span>) )</div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;            &gt; lit(<span class="charliteral">&#39;)&#39;</span>) )</div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;        ;</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;</div>
-<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;      </div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a572196c88493b512a11e7995fe201505">dims_r</a>.name(<span class="stringliteral">&quot;array dimensions&quot;</span>);</div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a572196c88493b512a11e7995fe201505">dims_r</a> </div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;        %= lit(<span class="charliteral">&#39;[&#39;</span>) </div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;        &gt; (<a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1)</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;           [_pass = <a class="code" href="namespacestan_1_1gm.html#a275f5389777c95f7178c6bc23f1e6441">validate_int_expr3_f</a>(_1,boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>))]</div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;           % <span class="charliteral">&#39;,&#39;</span>)</div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;        &gt; lit(<span class="charliteral">&#39;]&#39;</span>)</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;        ;</div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;</div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160; </div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a>.name(<span class="stringliteral">&quot;variable expression&quot;</span>);</div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a></div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;        %= <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a> </div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;        &gt; !lit(<span class="charliteral">&#39;(&#39;</span>);    <span class="comment">// negative lookahead to prevent failure in</span></div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;                        <span class="comment">// fun to try to evaluate as variable [cleaner</span></div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;                        <span class="comment">// error msgs]</span></div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;</div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    }</div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;  }</div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;}</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;</div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;</div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;      args_r.name(<span class="stringliteral">&quot;function argument expressions&quot;</span>);</div>
+<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;      args_r </div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;        %= (lit(<span class="charliteral">&#39;(&#39;</span>) &gt;&gt; lit(<span class="charliteral">&#39;)&#39;</span>))</div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;        | ( ( lit(<span class="charliteral">&#39;(&#39;</span>)</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;              &gt;&gt; (<a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1) % <span class="charliteral">&#39;,&#39;</span>) )</div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;            &gt; lit(<span class="charliteral">&#39;)&#39;</span>) )</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;        ;</div>
+<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;</div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;      </div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a572196c88493b512a11e7995fe201505">dims_r</a>.name(<span class="stringliteral">&quot;array dimensions&quot;</span>);</div>
+<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a572196c88493b512a11e7995fe201505">dims_r</a> </div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;        %= lit(<span class="charliteral">&#39;[&#39;</span>) </div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;        &gt; (<a class="code" href="structstan_1_1gm_1_1term__grammar.html#adc0324028be557cb8d639c30ffb4fe6d">expression_g</a>(_r1)</div>
+<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;           [_pass = <a class="code" href="namespacestan_1_1gm.html#a275f5389777c95f7178c6bc23f1e6441">validate_int_expr3_f</a>(_1,boost::phoenix::ref(<a class="code" href="structstan_1_1gm_1_1term__grammar.html#af0c016d0b7ee4d1a637697956fb1903b">error_msgs_</a>))]</div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;           % <span class="charliteral">&#39;,&#39;</span>)</div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;        &gt; lit(<span class="charliteral">&#39;]&#39;</span>)</div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;        ;</div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;</div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160; </div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a>.name(<span class="stringliteral">&quot;variable expression&quot;</span>);</div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;      <a class="code" href="structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6">variable_r</a></div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;        %= <a class="code" href="structstan_1_1gm_1_1term__grammar.html#a58df34f539d1aa793e3cc607350bd9f3">identifier_r</a> </div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;        &gt; !lit(<span class="charliteral">&#39;(&#39;</span>);    <span class="comment">// negative lookahead to prevent failure in</span></div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;                        <span class="comment">// fun to try to evaluate as variable [cleaner</span></div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;                        <span class="comment">// error msgs]</span></div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    }</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;  }</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;}</div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <hr/>
 <div class="conents" style="font-size:80%;">
@@ -664,7 +665,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

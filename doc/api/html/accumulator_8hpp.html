@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -95,6 +95,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;vector&gt;</code><br/>
+<code>#include &lt;boost/utility/enable_if.hpp&gt;</code><br/>
+<code>#include &lt;boost/type_traits/is_arithmetic.hpp&gt;</code><br/>
+<code>#include &lt;boost/type_traits/is_same.hpp&gt;</code><br/>
+<code>#include &lt;<a class="el" href="_eigen_8hpp_source.html">stan/math/matrix/Eigen.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="math_2matrix_2sum_8hpp_source.html">stan/math/matrix/sum.hpp</a>&gt;</code><br/>
 </div>
 <p><a href="accumulator_8hpp_source.html">Go to the source code of this file.</a></p>
@@ -122,7 +126,7 @@ Namespaces</h2></td></tr>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

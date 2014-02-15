@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -110,6 +110,7 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html">LDLT_factor&lt; stan::agrad::var, R, C &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A template specialization of <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp.html">src/stan/math/matrix/LDLT_factor.hpp</a> for <a class="el" href="classstan_1_1agrad_1_1var.html" title="Independent (input) and dependent (output) variables for gradients.">stan::agrad::var</a> which can be used with all the *_ldlt functions.  <a href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1accumulator.html">accumulator</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class to accumulate values and eventually return their sum.  <a href="classstan_1_1math_1_1accumulator.html#details">More...</a><br/></td></tr>
@@ -124,6 +125,7 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstan_1_1math_1_1common__type_3_01_eigen_1_1_matrix_3_01_t1_00_01_r_00_01_c_01_4_00_01_eiged8accfa00e73f240c58ad02ac582ba93.html">common_type&lt; Eigen::Matrix&lt; T1, R, C &gt;, Eigen::Matrix&lt; T2, R, C &gt; &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html">LDLT_factor&lt; double, R, C &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> is a thin wrapper on Eigen::LDLT to allow for reusing factorizations and efficient autodiff of things like log determinants and solutions to linear systems.  <a href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstan_1_1math_1_1promoter.html">promoter</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,6 +322,13 @@ Functions</h2></td></tr>
 <tr class="memitem:ac60a94eb57a3b80ccdb54d75a38d5aa4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ac60a94eb57a3b80ccdb54d75a38d5aa4"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#ac60a94eb57a3b80ccdb54d75a38d5aa4">check_cov_matrix</a> (const char *function, const Eigen::Matrix&lt; T, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;Sigma, T *result=0)</td></tr>
 <tr class="separator:ac60a94eb57a3b80ccdb54d75a38d5aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9067bd3252ec66389f27fb9147a765f"><td class="memTemplParams" colspan="2">template&lt;typename T , int R, int C, typename T_result &gt; </td></tr>
+<tr class="memitem:ac9067bd3252ec66389f27fb9147a765f"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#ac9067bd3252ec66389f27fb9147a765f">check_ldlt_factor</a> (const char *function, stan::math::LDLT_factor&lt; T, R, C &gt; &amp;A, const char *name, T_result *result)</td></tr>
+<tr class="memdesc:ac9067bd3252ec66389f27fb9147a765f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return <code>true</code> if the underlying matrix is positive definite.  <a href="#ac9067bd3252ec66389f27fb9147a765f"></a><br/></td></tr>
+<tr class="separator:ac9067bd3252ec66389f27fb9147a765f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1333847e7f49a3e4ddf504e0508a2503"><td class="memTemplParams" colspan="2">template&lt;typename T , int R, int C&gt; </td></tr>
+<tr class="memitem:a1333847e7f49a3e4ddf504e0508a2503"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a1333847e7f49a3e4ddf504e0508a2503">check_ldlt_factor</a> (const char *function, stan::math::LDLT_factor&lt; T, R, C &gt; &amp;A, const char *name, T *result=0)</td></tr>
+<tr class="separator:a1333847e7f49a3e4ddf504e0508a2503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54f45f5cee19ad65fdd516e1b855d0fe"><td class="memTemplParams" colspan="2">template&lt;typename T_y , typename T_result &gt; </td></tr>
 <tr class="memitem:a54f45f5cee19ad65fdd516e1b855d0fe"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a54f45f5cee19ad65fdd516e1b855d0fe">check_lower_triangular</a> (const char *function, const Eigen::Matrix&lt; T_y, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;y, const char *name, T_result *result)</td></tr>
 <tr class="memdesc:a54f45f5cee19ad65fdd516e1b855d0fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return <code>true</code> if the specified matrix is lower triangular.  <a href="#a54f45f5cee19ad65fdd516e1b855d0fe"></a><br/></td></tr>
@@ -783,11 +792,11 @@ Eigen::Dynamic, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><
 <tr class="memitem:a33777ee768c7032331ca8b92e5323384"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a33777ee768c7032331ca8b92e5323384"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a33777ee768c7032331ca8b92e5323384">dims</a> (const T &amp;x)</td></tr>
 <tr class="separator:a33777ee768c7032331ca8b92e5323384"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b7a051fb294f63774525cb76bfb3fb9"><td class="memTemplParams" colspan="2">template&lt;typename T1 , int R1, int C1, typename T2 , int R2, int C2&gt; </td></tr>
-<tr class="memitem:a5b7a051fb294f63774525cb76bfb3fb9"><td class="memTemplItemLeft" align="right" valign="top">boost::math::tools::promote_args<br class="typebreak"/>
-&lt; T1, T1 &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a5b7a051fb294f63774525cb76bfb3fb9">dist</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;v1, const Eigen::Matrix&lt; T2, R2, C2 &gt; &amp;v2)</td></tr>
-<tr class="memdesc:a5b7a051fb294f63774525cb76bfb3fb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the distance between the specified vectors.  <a href="#a5b7a051fb294f63774525cb76bfb3fb9"></a><br/></td></tr>
-<tr class="separator:a5b7a051fb294f63774525cb76bfb3fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a354d9d6e7465ec8a49116f276d971db1"><td class="memTemplParams" colspan="2">template&lt;typename T1 , int R1, int C1, typename T2 , int R2, int C2&gt; </td></tr>
+<tr class="memitem:a354d9d6e7465ec8a49116f276d971db1"><td class="memTemplItemLeft" align="right" valign="top">boost::math::tools::promote_args<br class="typebreak"/>
+&lt; T1, T2 &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a354d9d6e7465ec8a49116f276d971db1">distance</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;v1, const Eigen::Matrix&lt; T2, R2, C2 &gt; &amp;v2)</td></tr>
+<tr class="memdesc:a354d9d6e7465ec8a49116f276d971db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the distance between the specified vectors.  <a href="#a354d9d6e7465ec8a49116f276d971db1"></a><br/></td></tr>
+<tr class="separator:a354d9d6e7465ec8a49116f276d971db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a082ee76b34a2ea656d2c8ab9186c1a2b"><td class="memTemplParams" colspan="2">template&lt;int R, int C, typename T &gt; </td></tr>
 <tr class="memitem:a082ee76b34a2ea656d2c8ab9186c1a2b"><td class="memTemplItemLeft" align="right" valign="top">boost::enable_if_c<br class="typebreak"/>
 &lt; boost::is_arithmetic&lt; T &gt;<br class="typebreak"/>
@@ -982,26 +991,6 @@ Eigen::Dynamic, Eigen::Dynamic &gt;&#160;</td><td class="memTemplItemRight" vali
 Eigen::Dynamic, Eigen::Dynamic &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a989989548db02c34cd6134790bd93478">inverse_spd</a> (const Eigen::Matrix&lt; T, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;m)</td></tr>
 <tr class="memdesc:a989989548db02c34cd6134790bd93478"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the inverse of the specified symmetric, pos/neg-definite matrix.  <a href="#a989989548db02c34cd6134790bd93478"></a><br/></td></tr>
 <tr class="separator:a989989548db02c34cd6134790bd93478"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
-<tr class="memitem:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; double, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a978022fb9cb20fd35f6e9e89ab3bc871">mdivide_left_ldlt</a> (const stan::math::LDLT_factor&lt; double, R1, C1 &gt; &amp;A, const Eigen::Matrix&lt; double, R2, C2 &gt; &amp;b)</td></tr>
-<tr class="separator:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68c862e90d97ea5d5552101b65978813"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , int R1, int C1, int R2, int C2&gt; </td></tr>
-<tr class="memitem:a68c862e90d97ea5d5552101b65978813"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; typename <br class="typebreak"/>
-boost::math::tools::promote_args<br class="typebreak"/>
-&lt; T1, T2 &gt;::type, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a68c862e90d97ea5d5552101b65978813">mdivide_right_ldlt</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;b, const stan::math::LDLT_factor&lt; T2, R2, C2 &gt; &amp;A)</td></tr>
-<tr class="separator:a68c862e90d97ea5d5552101b65978813"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01d77bf4121d56b8491092164d1523ce"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
-<tr class="memitem:a01d77bf4121d56b8491092164d1523ce"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; double, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a01d77bf4121d56b8491092164d1523ce">mdivide_right_ldlt</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;b, const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A)</td></tr>
-<tr class="separator:a01d77bf4121d56b8491092164d1523ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a306d737ee042b8f40e93713cd87fe48b"><td class="memTemplParams" colspan="2">template&lt;int R, int C&gt; </td></tr>
-<tr class="memitem:a306d737ee042b8f40e93713cd87fe48b"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a306d737ee042b8f40e93713cd87fe48b">log_determinant_ldlt</a> (stan::math::LDLT_factor&lt; double, R, C &gt; &amp;A)</td></tr>
-<tr class="separator:a306d737ee042b8f40e93713cd87fe48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab8b4d4ddbcb7df66d3baf8394318e1e"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2, int R3, int C3&gt; </td></tr>
-<tr class="memitem:aab8b4d4ddbcb7df66d3baf8394318e1e"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#aab8b4d4ddbcb7df66d3baf8394318e1e">trace_inv_quad_form_ldlt</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;D, const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A, const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;B)</td></tr>
-<tr class="separator:aab8b4d4ddbcb7df66d3baf8394318e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0261f49dc318d8ee553e378325ee3db"><td class="memTemplParams" colspan="2">template&lt;int R2, int C2, int R3, int C3&gt; </td></tr>
-<tr class="memitem:aa0261f49dc318d8ee553e378325ee3db"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#aa0261f49dc318d8ee553e378325ee3db">trace_inv_quad_form_ldlt</a> (const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A, const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;B)</td></tr>
-<tr class="separator:aa0261f49dc318d8ee553e378325ee3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3e7ce33064686ec2a2591fa5d4227cf"><td class="memTemplParams" colspan="2">template&lt;typename T , int Rows, int Cols&gt; </td></tr>
 <tr class="memitem:ae3e7ce33064686ec2a2591fa5d4227cf"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; T, Rows, Cols &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#ae3e7ce33064686ec2a2591fa5d4227cf">log</a> (const Eigen::Matrix&lt; T, Rows, Cols &gt; &amp;m)</td></tr>
 <tr class="memdesc:ae3e7ce33064686ec2a2591fa5d4227cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the element-wise logarithm of the matrix or vector.  <a href="#ae3e7ce33064686ec2a2591fa5d4227cf"></a><br/></td></tr>
@@ -1010,6 +999,9 @@ boost::math::tools::promote_args<br class="typebreak"/>
 <tr class="memitem:aca29dad18932e3ca17ac52fd0238b364"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#aca29dad18932e3ca17ac52fd0238b364">log_determinant</a> (const Eigen::Matrix&lt; T, R, C &gt; &amp;m)</td></tr>
 <tr class="memdesc:aca29dad18932e3ca17ac52fd0238b364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the log absolute determinant of the specified square matrix.  <a href="#aca29dad18932e3ca17ac52fd0238b364"></a><br/></td></tr>
 <tr class="separator:aca29dad18932e3ca17ac52fd0238b364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a306d737ee042b8f40e93713cd87fe48b"><td class="memTemplParams" colspan="2">template&lt;int R, int C&gt; </td></tr>
+<tr class="memitem:a306d737ee042b8f40e93713cd87fe48b"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a306d737ee042b8f40e93713cd87fe48b">log_determinant_ldlt</a> (stan::math::LDLT_factor&lt; double, R, C &gt; &amp;A)</td></tr>
+<tr class="separator:a306d737ee042b8f40e93713cd87fe48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9a296d4414d0193108c70b350a05cfc"><td class="memTemplParams" colspan="2">template&lt;typename T , int R, int C&gt; </td></tr>
 <tr class="memitem:ae9a296d4414d0193108c70b350a05cfc"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#ae9a296d4414d0193108c70b350a05cfc">log_determinant_spd</a> (const Eigen::Matrix&lt; T, R, C &gt; &amp;m)</td></tr>
 <tr class="memdesc:ae9a296d4414d0193108c70b350a05cfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the log absolute determinant of the specified square matrix.  <a href="#ae9a296d4414d0193108c70b350a05cfc"></a><br/></td></tr>
@@ -1040,6 +1032,10 @@ boost::math::tools::promote_args<br class="typebreak"/>
 &lt; T1, T2 &gt;::type, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a7266758367e8260b2afbfaeea7d5b418">mdivide_left</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;A, const Eigen::Matrix&lt; T2, R2, C2 &gt; &amp;b)</td></tr>
 <tr class="memdesc:a7266758367e8260b2afbfaeea7d5b418"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the solution of the system Ax=b.  <a href="#a7266758367e8260b2afbfaeea7d5b418"></a><br/></td></tr>
 <tr class="separator:a7266758367e8260b2afbfaeea7d5b418"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
+<tr class="memitem:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; double, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a978022fb9cb20fd35f6e9e89ab3bc871">mdivide_left_ldlt</a> (const stan::math::LDLT_factor&lt; double, R1, C1 &gt; &amp;A, const Eigen::Matrix&lt; double, R2, C2 &gt; &amp;b)</td></tr>
+<tr class="memdesc:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the solution of the system Ax=b given an <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> of A.  <a href="#a978022fb9cb20fd35f6e9e89ab3bc871"></a><br/></td></tr>
+<tr class="separator:a978022fb9cb20fd35f6e9e89ab3bc871"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c8c6e72f1cbf2b73008d4fc98de1abe"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , int R1, int C1, int R2, int C2&gt; </td></tr>
 <tr class="memitem:a0c8c6e72f1cbf2b73008d4fc98de1abe"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; typename <br class="typebreak"/>
 boost::math::tools::promote_args<br class="typebreak"/>
@@ -1070,6 +1066,15 @@ boost::math::tools::promote_args<br class="typebreak"/>
 &lt; T1, T2 &gt;::type, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a5efba9dddcf77889b66c1210ba55cf5f">mdivide_right</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;b, const Eigen::Matrix&lt; T2, R2, C2 &gt; &amp;A)</td></tr>
 <tr class="memdesc:a5efba9dddcf77889b66c1210ba55cf5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the solution of the system Ax=b.  <a href="#a5efba9dddcf77889b66c1210ba55cf5f"></a><br/></td></tr>
 <tr class="separator:a5efba9dddcf77889b66c1210ba55cf5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c862e90d97ea5d5552101b65978813"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , int R1, int C1, int R2, int C2&gt; </td></tr>
+<tr class="memitem:a68c862e90d97ea5d5552101b65978813"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; typename <br class="typebreak"/>
+boost::math::tools::promote_args<br class="typebreak"/>
+&lt; T1, T2 &gt;::type, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a68c862e90d97ea5d5552101b65978813">mdivide_right_ldlt</a> (const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;b, const stan::math::LDLT_factor&lt; T2, R2, C2 &gt; &amp;A)</td></tr>
+<tr class="memdesc:a68c862e90d97ea5d5552101b65978813"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the solution of the system xA=b given an <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> of A.  <a href="#a68c862e90d97ea5d5552101b65978813"></a><br/></td></tr>
+<tr class="separator:a68c862e90d97ea5d5552101b65978813"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01d77bf4121d56b8491092164d1523ce"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
+<tr class="memitem:a01d77bf4121d56b8491092164d1523ce"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; double, R1, C2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a01d77bf4121d56b8491092164d1523ce">mdivide_right_ldlt</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;b, const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A)</td></tr>
+<tr class="separator:a01d77bf4121d56b8491092164d1523ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d6f32dd8adc4a9ffa28d63b62d4c90f"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , int R1, int C1, int R2, int C2&gt; </td></tr>
 <tr class="memitem:a5d6f32dd8adc4a9ffa28d63b62d4c90f"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; typename <br class="typebreak"/>
 boost::math::tools::promote_args<br class="typebreak"/>
@@ -1241,10 +1246,10 @@ Eigen::Dynamic, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><
 <tr class="memitem:a13ae8cd1155e8c4c684efb4405a1e277"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; T, R, C &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a13ae8cd1155e8c4c684efb4405a1e277">sort_desc</a> (Eigen::Matrix&lt; T, R, C &gt; xs)</td></tr>
 <tr class="memdesc:a13ae8cd1155e8c4c684efb4405a1e277"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the specified eigen vector in descending order.  <a href="#a13ae8cd1155e8c4c684efb4405a1e277"></a><br/></td></tr>
 <tr class="separator:a13ae8cd1155e8c4c684efb4405a1e277"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa870be227ae57e703770592d7d5d3a22"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
-<tr class="memitem:aa870be227ae57e703770592d7d5d3a22"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#aa870be227ae57e703770592d7d5d3a22">squared_dist</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;v1, const Eigen::Matrix&lt; double, R2, C2 &gt; &amp;v2)</td></tr>
-<tr class="memdesc:aa870be227ae57e703770592d7d5d3a22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the squared distance between the specified vectors.  <a href="#aa870be227ae57e703770592d7d5d3a22"></a><br/></td></tr>
-<tr class="separator:aa870be227ae57e703770592d7d5d3a22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a472573d1349d235dcdb501576ef66d15"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2&gt; </td></tr>
+<tr class="memitem:a472573d1349d235dcdb501576ef66d15"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a472573d1349d235dcdb501576ef66d15">squared_distance</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;v1, const Eigen::Matrix&lt; double, R2, C2 &gt; &amp;v2)</td></tr>
+<tr class="memdesc:a472573d1349d235dcdb501576ef66d15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the squared distance between the specified vectors.  <a href="#a472573d1349d235dcdb501576ef66d15"></a><br/></td></tr>
+<tr class="separator:a472573d1349d235dcdb501576ef66d15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c14b7fd70050f03a07fdf73a1df06d2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a7c14b7fd70050f03a07fdf73a1df06d2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a7c14b7fd70050f03a07fdf73a1df06d2">stan_print</a> (std::ostream *o, const T &amp;x)</td></tr>
 <tr class="separator:a7c14b7fd70050f03a07fdf73a1df06d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1318,10 +1323,16 @@ Eigen::Dynamic, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><
 <tr class="memitem:a7001fd7e0296d5dae6ab0a88e1a28547"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a7001fd7e0296d5dae6ab0a88e1a28547">trace</a> (const Eigen::Matrix&lt; T, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;m)</td></tr>
 <tr class="memdesc:a7001fd7e0296d5dae6ab0a88e1a28547"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the trace of the specified matrix.  <a href="#a7001fd7e0296d5dae6ab0a88e1a28547"></a><br/></td></tr>
 <tr class="separator:a7001fd7e0296d5dae6ab0a88e1a28547"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fa96e90adc5b27eae970843471ded52"><td class="memTemplParams" colspan="2">template&lt;int R1, int C1, int R2, int C2, int R3, int C3&gt; </td></tr>
+<tr class="memitem:a6fa96e90adc5b27eae970843471ded52"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a6fa96e90adc5b27eae970843471ded52">trace_gen_inv_quad_form_ldlt</a> (const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;D, const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A, const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;B)</td></tr>
+<tr class="separator:a6fa96e90adc5b27eae970843471ded52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09d402800ee27ba77d03dc3ec365d22e"><td class="memTemplParams" colspan="2">template&lt;int RD, int CD, int RA, int CA, int RB, int CB&gt; </td></tr>
 <tr class="memitem:a09d402800ee27ba77d03dc3ec365d22e"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a09d402800ee27ba77d03dc3ec365d22e">trace_gen_quad_form</a> (const Eigen::Matrix&lt; double, RD, CD &gt; &amp;D, const Eigen::Matrix&lt; double, RA, CA &gt; &amp;A, const Eigen::Matrix&lt; double, RB, CB &gt; &amp;B)</td></tr>
 <tr class="memdesc:a09d402800ee27ba77d03dc3ec365d22e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute trace(D B^T A B).  <a href="#a09d402800ee27ba77d03dc3ec365d22e"></a><br/></td></tr>
 <tr class="separator:a09d402800ee27ba77d03dc3ec365d22e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0261f49dc318d8ee553e378325ee3db"><td class="memTemplParams" colspan="2">template&lt;int R2, int C2, int R3, int C3&gt; </td></tr>
+<tr class="memitem:aa0261f49dc318d8ee553e378325ee3db"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#aa0261f49dc318d8ee553e378325ee3db">trace_inv_quad_form_ldlt</a> (const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;A, const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;B)</td></tr>
+<tr class="separator:aa0261f49dc318d8ee553e378325ee3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a097af33142548fd565d1dab2233fa3e5"><td class="memTemplParams" colspan="2">template&lt;int RA, int CA, int RB, int CB&gt; </td></tr>
 <tr class="memitem:a097af33142548fd565d1dab2233fa3e5"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1math.html#a097af33142548fd565d1dab2233fa3e5">trace_quad_form</a> (const Eigen::Matrix&lt; double, RA, CA &gt; &amp;A, const Eigen::Matrix&lt; double, RB, CB &gt; &amp;B)</td></tr>
 <tr class="memdesc:a097af33142548fd565d1dab2233fa3e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute trace(B^T A B).  <a href="#a097af33142548fd565d1dab2233fa3e5"></a><br/></td></tr>
@@ -3656,6 +3667,124 @@ template&lt;typename T_y , typename T_low &gt; </div>
 </div><div class="memdoc">
 
 <p>Definition at line <a class="el" href="check__greater__or__equal_8hpp_source.html#l00065">65</a> of file <a class="el" href="check__greater__or__equal_8hpp_source.html">check_greater_or_equal.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ac9067bd3252ec66389f27fb9147a765f"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , int R, int C, typename T_result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool stan::math::check_ldlt_factor </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">stan::math::LDLT_factor&lt; T, R, C &gt; &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_result *&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return <code>true</code> if the underlying matrix is positive definite. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">function</td><td></td></tr>
+    <tr><td class="paramname">A</td><td></td></tr>
+    <tr><td class="paramname">name</td><td></td></tr>
+    <tr><td class="paramname">result</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the matrix is positive definite. </dd></dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Type of scalar. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="check__ldlt__factor_8hpp_source.html#l00023">23</a> of file <a class="el" href="check__ldlt__factor_8hpp_source.html">check_ldlt_factor.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1333847e7f49a3e4ddf504e0508a2503"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , int R, int C&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool stan::math::check_ldlt_factor </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">stan::math::LDLT_factor&lt; T, R, C &gt; &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T *&#160;</td>
+          <td class="paramname"><em>result</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="check__ldlt__factor_8hpp_source.html#l00040">40</a> of file <a class="el" href="check__ldlt__factor_8hpp_source.html">check_ldlt_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -6169,11 +6298,11 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="functions_2dist_8hpp_source.html#l00011">11</a> of file <a class="el" href="functions_2dist_8hpp_source.html">dist.hpp</a>.</p>
+<p>Definition at line <a class="el" href="dist_8hpp_source.html#l00011">11</a> of file <a class="el" href="dist_8hpp_source.html">dist.hpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a5b7a051fb294f63774525cb76bfb3fb9"></a>
+<a class="anchor" id="a354d9d6e7465ec8a49116f276d971db1"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -6183,7 +6312,7 @@ template&lt;typename T1 , int R1, int C1, typename T2 , int R2, int C2&gt; </div
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">boost::math::tools::promote_args&lt;T1,T1&gt;::type stan::math::dist </td>
+          <td class="memname">boost::math::tools::promote_args&lt;T1,T2&gt;::type stan::math::distance </td>
           <td>(</td>
           <td class="paramtype">const Eigen::Matrix&lt; T1, R1, C1 &gt; &amp;&#160;</td>
           <td class="paramname"><em>v1</em>, </td>
@@ -6223,7 +6352,7 @@ template&lt;typename T1 , int R1, int C1, typename T2 , int R2, int C2&gt; </div
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="matrix_2dist_8hpp_source.html#l00023">23</a> of file <a class="el" href="matrix_2dist_8hpp_source.html">dist.hpp</a>.</p>
+<p>Definition at line <a class="el" href="distance_8hpp_source.html#l00023">23</a> of file <a class="el" href="distance_8hpp_source.html">distance.hpp</a>.</p>
 
 </div>
 </div>
@@ -10999,7 +11128,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00100">100</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2log__determinant__ldlt_8hpp_source.html#l00012">12</a> of file <a class="el" href="math_2matrix_2log__determinant__ldlt_8hpp_source.html">log_determinant_ldlt.hpp</a>.</p>
 
 </div>
 </div>
@@ -12171,7 +12300,23 @@ template&lt;int R1, int C1, int R2, int C2&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00072">72</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Returns the solution of the system Ax=b given an <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> of A. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td><a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> </td></tr>
+    <tr><td class="paramname">b</td><td>Right hand side matrix or vector. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>x = b A^-1, solution of the linear system. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::domain_error</td><td>if rows of b don't match the size of A. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="math_2matrix_2mdivide__left__ldlt_8hpp_source.html#l00021">21</a> of file <a class="el" href="math_2matrix_2mdivide__left__ldlt_8hpp_source.html">mdivide_left_ldlt.hpp</a>.</p>
 
 </div>
 </div>
@@ -12480,7 +12625,23 @@ template&lt;typename T1 , typename T2 , int R1, int C1, int R2, int C2&gt; </div
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00082">82</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Returns the solution of the system xA=b given an <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> of A. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td><a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> </td></tr>
+    <tr><td class="paramname">b</td><td>Right hand side matrix or vector. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>x = A^-1 b, solution of the linear system. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::domain_error</td><td>if rows of b don't match the size of A. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="mdivide__right__ldlt_8hpp_source.html#l00025">25</a> of file <a class="el" href="mdivide__right__ldlt_8hpp_source.html">mdivide_right_ldlt.hpp</a>.</p>
 
 </div>
 </div>
@@ -12518,7 +12679,7 @@ template&lt;int R1, int C1, int R2, int C2&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00091">91</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="mdivide__right__ldlt_8hpp_source.html#l00035">35</a> of file <a class="el" href="mdivide__right__ldlt_8hpp_source.html">mdivide_right_ldlt.hpp</a>.</p>
 
 </div>
 </div>
@@ -15134,7 +15295,7 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="aa870be227ae57e703770592d7d5d3a22"></a>
+<a class="anchor" id="a472573d1349d235dcdb501576ef66d15"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -15144,7 +15305,7 @@ template&lt;int R1, int C1, int R2, int C2&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double stan::math::squared_dist </td>
+          <td class="memname">double stan::math::squared_distance </td>
           <td>(</td>
           <td class="paramtype">const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;&#160;</td>
           <td class="paramname"><em>v1</em>, </td>
@@ -15184,7 +15345,7 @@ template&lt;int R1, int C1, int R2, int C2&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="math_2matrix_2squared__dist_8hpp_source.html#l00021">21</a> of file <a class="el" href="math_2matrix_2squared__dist_8hpp_source.html">squared_dist.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2squared__distance_8hpp_source.html#l00021">21</a> of file <a class="el" href="math_2matrix_2squared__distance_8hpp_source.html">squared_distance.hpp</a>.</p>
 
 </div>
 </div>
@@ -15992,6 +16153,50 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a6fa96e90adc5b27eae970843471ded52"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int R1, int C1, int R2, int C2, int R3, int C3&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double stan::math::trace_gen_inv_quad_form_ldlt </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>D</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>B</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="math_2matrix_2trace__gen__inv__quad__form__ldlt_8hpp_source.html#l00019">19</a> of file <a class="el" href="math_2matrix_2trace__gen__inv__quad__form__ldlt_8hpp_source.html">trace_gen_inv_quad_form_ldlt.hpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a09d402800ee27ba77d03dc3ec365d22e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -16038,50 +16243,6 @@ template&lt;int RD, int CD, int RA, int CA, int RB, int CB&gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="aab8b4d4ddbcb7df66d3baf8394318e1e"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int R1, int C1, int R2, int C2, int R3, int C3&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">double stan::math::trace_inv_quad_form_ldlt </td>
-          <td>(</td>
-          <td class="paramtype">const Eigen::Matrix&lt; double, R1, C1 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>D</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const stan::math::LDLT_factor&lt; double, R2, C2 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>A</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Eigen::Matrix&lt; double, R3, C3 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>B</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00111">111</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="aa0261f49dc318d8ee553e378325ee3db"></a>
 <div class="memitem">
 <div class="memproto">
@@ -16116,7 +16277,7 @@ template&lt;int R2, int C2, int R3, int C3&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00129">129</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2trace__inv__quad__form__ldlt_8hpp_source.html#l00018">18</a> of file <a class="el" href="math_2matrix_2trace__inv__quad__form__ldlt_8hpp_source.html">trace_inv_quad_form_ldlt.hpp</a>.</p>
 
 </div>
 </div>
@@ -17490,7 +17651,7 @@ template&lt;typename T , int R, int C&gt; </div>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

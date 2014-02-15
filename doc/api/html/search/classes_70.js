@@ -6,6 +6,7 @@ var searchData=
   ['pass_5ftype_3c_20int_20_3e',['pass_type&lt; int &gt;',['../structstan_1_1math_1_1pass__type_3_01int_01_4.html',1,'stan::math']]],
   ['positive_5fordered_5fvar_5fdecl',['positive_ordered_var_decl',['../structstan_1_1gm_1_1positive__ordered__var__decl.html',1,'stan::gm']]],
   ['precomp_5fv_5fvari',['precomp_v_vari',['../classstan_1_1agrad_1_1precomp__v__vari.html',1,'stan::agrad']]],
+  ['precomputed_5fgradients_5fvari',['precomputed_gradients_vari',['../classstan_1_1agrad_1_1precomputed__gradients__vari.html',1,'stan::agrad']]],
   ['print_5fstatement',['print_statement',['../structstan_1_1gm_1_1print__statement.html',1,'stan::gm']]],
   ['printable',['printable',['../structstan_1_1gm_1_1printable.html',1,'stan::gm']]],
   ['printable_5fvisgen',['printable_visgen',['../structstan_1_1gm_1_1printable__visgen.html',1,'stan::gm']]],

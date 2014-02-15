@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -261,7 +261,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1mcmc_1_1stepsize__adaptation.html#abfa89219ff2a4b2895627b305fa9f83e">stan::mcmc::stepsize_adaptation</a>
 </li>
 <li>_ldlt
-: <a class="el" href="classstan_1_1optimization_1_1_b_f_g_s_minimizer.html#a8b5218fc992daacb2748f6ea34a437b6">stan::optimization::BFGSMinimizer&lt; FunctorType, Scalar, DimAtCompile, LineSearchMethod &gt;</a>
+: <a class="el" href="classstan_1_1agrad_1_1_l_d_l_t__alloc.html#ae09914c4457d949e9463ff514ddb3796">stan::agrad::LDLT_alloc&lt; R, C &gt;</a>
+, <a class="el" href="classstan_1_1optimization_1_1_b_f_g_s_minimizer.html#a8b5218fc992daacb2748f6ea34a437b6">stan::optimization::BFGSMinimizer&lt; FunctorType, Scalar, DimAtCompile, LineSearchMethod &gt;</a>
 </li>
 <li>_ldltP
 : <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#aa41484403512f2b107922d0d7fc5c63d">stan::math::LDLT_factor&lt; double, R, C &gt;</a>
@@ -292,6 +293,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>_n_divergent
 : <a class="el" href="classstan_1_1mcmc_1_1base__nuts.html#a103b33df985e433f37a56ee0626a7861">stan::mcmc::base_nuts&lt; M, P, H, I, BaseRNG &gt;</a>
 </li>
+<li>_n_leapfrog
+: <a class="el" href="classstan_1_1mcmc_1_1base__nuts.html#a37b2e2d56dd02f9840562a7b055d8644">stan::mcmc::base_nuts&lt; M, P, H, I, BaseRNG &gt;</a>
+</li>
 <li>_name
 : <a class="el" href="classstan_1_1gm_1_1argument.html#a23946e8de0291c9868b0e5430ff71cf0">stan::gm::argument</a>
 , <a class="el" href="classstan_1_1mcmc_1_1base__mcmc.html#ad2c7124c9b80002735c5db2b7aecf482">stan::mcmc::base_mcmc</a>
@@ -303,8 +307,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1optimization_1_1_b_f_g_s_minimizer.html#a85128ba7124ddd7e9e604df71a9c71c5">stan::optimization::BFGSMinimizer&lt; FunctorType, Scalar, DimAtCompile, LineSearchMethod &gt;</a>
 </li>
 <li>_num_samples
-: <a class="el" href="classstan_1_1prob_1_1welford__var__estimator.html#a8b378660396e184e69b5cd7152f4e094">stan::prob::welford_var_estimator</a>
-, <a class="el" href="classstan_1_1prob_1_1welford__covar__estimator.html#ac3239162bce3b35ff653b8072aa8e7e3">stan::prob::welford_covar_estimator</a>
+: <a class="el" href="classstan_1_1prob_1_1welford__covar__estimator.html#ac3239162bce3b35ff653b8072aa8e7e3">stan::prob::welford_covar_estimator</a>
+, <a class="el" href="classstan_1_1prob_1_1welford__var__estimator.html#a8b378660396e184e69b5cd7152f4e094">stan::prob::welford_var_estimator</a>
 </li>
 <li>_num_warmup
 : <a class="el" href="classstan_1_1mcmc_1_1windowed__adaptation.html#a49833a6e927a0e7dec9a82d756626e16">stan::mcmc::windowed_adaptation</a>
@@ -332,8 +336,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1optimization_1_1_b_f_g_s_minimizer.html#a972b1176a858cd4c3209c6d1629953af">stan::optimization::BFGSMinimizer&lt; FunctorType, Scalar, DimAtCompile, LineSearchMethod &gt;</a>
 </li>
 <li>_stepsize_adaptation
-: <a class="el" href="classstan_1_1mcmc_1_1stepsize__covar__adapter.html#a50045d3383df82e4c3dda971ed0ddf38">stan::mcmc::stepsize_covar_adapter</a>
-, <a class="el" href="classstan_1_1mcmc_1_1stepsize__var__adapter.html#aed1abeb55985ad65b435e7a7ced9d4d5">stan::mcmc::stepsize_var_adapter</a>
+: <a class="el" href="classstan_1_1mcmc_1_1stepsize__var__adapter.html#aed1abeb55985ad65b435e7a7ced9d4d5">stan::mcmc::stepsize_var_adapter</a>
+, <a class="el" href="classstan_1_1mcmc_1_1stepsize__covar__adapter.html#a50045d3383df82e4c3dda971ed0ddf38">stan::mcmc::stepsize_covar_adapter</a>
 , <a class="el" href="classstan_1_1mcmc_1_1stepsize__adapter.html#a560cd9f56401167b284e7eb36e58cbec">stan::mcmc::stepsize_adapter</a>
 </li>
 <li>_subarguments
@@ -360,8 +364,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>_var_adaptation
 : <a class="el" href="classstan_1_1mcmc_1_1stepsize__var__adapter.html#a4b0e0a10b281ecbc17a22731cabd5032">stan::mcmc::stepsize_var_adapter</a>
 </li>
+<li>_variA
+: <a class="el" href="classstan_1_1agrad_1_1_l_d_l_t__alloc.html#a6dce12eeba806f82e50fa553633ba33e">stan::agrad::LDLT_alloc&lt; R, C &gt;</a>
+</li>
 <li>_write_error_msg()
-: <a class="el" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a119fab9e5829911ccfb31a5f7ec1f30b">stan::mcmc::base_hamiltonian&lt; M, P, BaseRNG &gt;</a>
+: <a class="el" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a21467777d0c2768f9eb57e76c9fd1b85">stan::mcmc::base_hamiltonian&lt; M, P, BaseRNG &gt;</a>
 </li>
 <li>_x_bar
 : <a class="el" href="classstan_1_1mcmc_1_1stepsize__adaptation.html#a0091180522b7f03d801a6f8ec46c7f21">stan::mcmc::stepsize_adaptation</a>
@@ -384,7 +391,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

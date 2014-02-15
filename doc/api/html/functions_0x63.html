@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -147,6 +147,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="classstan_1_1agrad_1_1partials__vari.html#a0fa792b38fdadfd389dcffcea597deeb">stan::agrad::partials_vari</a>
 , <a class="el" href="classstan_1_1agrad_1_1chainable.html#a4d1b4d61c1b10d6da4ababce3d276592">stan::agrad::chainable</a>
 , <a class="el" href="classstan_1_1agrad_1_1precomp__v__vari.html#a009196476cbeca0b4721a2615e275d10">stan::agrad::precomp_v_vari</a>
+, <a class="el" href="classstan_1_1agrad_1_1precomputed__gradients__vari.html#a31b3e07fec41f84ae8948353a6fbff1d">stan::agrad::precomputed_gradients_vari</a>
 , <a class="el" href="classstan_1_1agrad_1_1stored__gradient__vari.html#ae97f9740598ac7be4c3af5769a54ac19">stan::agrad::stored_gradient_vari</a>
 </li>
 <li>chain_id
@@ -196,7 +197,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1mcmc_1_1stepsize__adaptation.html#a6a58fb8dd3f3b90c16ac9f86299c7da3">stan::mcmc::stepsize_adaptation</a>
 </li>
 <li>compute()
-: <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html#adea90c563014600ac9d7aa05056db56d">stan::math::LDLT_factor&lt; stan::agrad::var, R, C &gt;</a>
+: <a class="el" href="classstan_1_1agrad_1_1_l_d_l_t__alloc.html#a1379821d069685022c0e5ff0efe6cb0b">stan::agrad::LDLT_alloc&lt; R, C &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01stan_1_1agrad_1_1var_00_01_r_00_01_c_01_4.html#adea90c563014600ac9d7aa05056db56d">stan::math::LDLT_factor&lt; stan::agrad::var, R, C &gt;</a>
 , <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#add76e21a65bdd840ca67d24531612573">stan::math::LDLT_factor&lt; double, R, C &gt;</a>
 </li>
 <li>compute_criterion()
@@ -243,8 +245,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="structstan_1_1gm_1_1contains__nonparam__var.html#a6beb41e5c41785733e1cc6881eba82a9">stan::gm::contains_nonparam_var</a>
 </li>
 <li>contains_r()
-: <a class="el" href="classstan_1_1io_1_1dump.html#ac531d67fb8a74300ebbe014dfe367706">stan::io::dump</a>
-, <a class="el" href="classstan_1_1io_1_1var__context.html#abaa6a87ecb4d45c29386f0de57b330f4">stan::io::var_context</a>
+: <a class="el" href="classstan_1_1io_1_1var__context.html#abaa6a87ecb4d45c29386f0de57b330f4">stan::io::var_context</a>
+, <a class="el" href="classstan_1_1io_1_1dump.html#ac531d67fb8a74300ebbe014dfe367706">stan::io::dump</a>
 </li>
 <li>contains_var()
 : <a class="el" href="structstan_1_1gm_1_1contains__var.html#a8d00ba5b2f7fcecec2baca23d1ddb200">stan::gm::contains_var</a>
@@ -253,13 +255,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1io_1_1reader.html#af409911d7c4b3996291884fbebecfd85">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>corr_constrain()
-: <a class="el" href="classstan_1_1io_1_1reader.html#aeaafba520a6ad5ae7654e24d46ffbb39">stan::io::reader&lt; T &gt;</a>
+: <a class="el" href="classstan_1_1io_1_1reader.html#a83d52f9f5ffec50991cf3224f1caad9c">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>corr_matrix()
 : <a class="el" href="classstan_1_1io_1_1reader.html#aa410515341701109fb937c14b101e20d">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>corr_matrix_constrain()
-: <a class="el" href="classstan_1_1io_1_1reader.html#ab23e0b88e39d354121b66e6823e1cac9">stan::io::reader&lt; T &gt;</a>
+: <a class="el" href="classstan_1_1io_1_1reader.html#a75eb056f8f7b1032865feb97f506e3e6">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>corr_matrix_decl_r
 : <a class="el" href="structstan_1_1gm_1_1var__decls__grammar.html#a8a1a3bc0f32b4484648ba7ed1cc1e6ec">stan::gm::var_decls_grammar&lt; Iterator &gt;</a>
@@ -280,7 +282,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1io_1_1reader.html#a6b0b034457a37f2eb7c27cec9b8e600d">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>cov_matrix_constrain()
-: <a class="el" href="classstan_1_1io_1_1reader.html#a1ea7077509503ff9bf2777430cb70fcf">stan::io::reader&lt; T &gt;</a>
+: <a class="el" href="classstan_1_1io_1_1reader.html#ab8ada631ae87ef2de7978a33299e872e">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>cov_matrix_decl_r
 : <a class="el" href="structstan_1_1gm_1_1var__decls__grammar.html#af7029c6e49af878a50f5717713430798">stan::gm::var_decls_grammar&lt; Iterator &gt;</a>
@@ -295,7 +297,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1mcmc_1_1covar__adaptation.html#a32edd1badb6af5fad1348168ab4d5d91">stan::mcmc::covar_adaptation</a>
 </li>
 <li>covariance()
-: <a class="el" href="classstan_1_1mcmc_1_1chains.html#a99a0247f578644538745f03510f0f268">stan::mcmc::chains&lt; RNG &gt;</a>
+: <a class="el" href="classstan_1_1mcmc_1_1chains.html#a1611771bf5fa3c15e528d26836aa2ac5">stan::mcmc::chains&lt; RNG &gt;</a>
 </li>
 <li>criterion
 : <a class="el" href="structstan_1_1mcmc_1_1nuts__util.html#ad957f342afb9aa4d0e838486885f31d3">stan::mcmc::nuts_util</a>
@@ -316,9 +318,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classstan_1_1optimization_1_1_b_f_g_s_minimizer.html#a23c0ccc29dcf6eed8995300a8642f887">stan::optimization::BFGSMinimizer&lt; FunctorType, Scalar, DimAtCompile, LineSearchMethod &gt;</a>
 </li>
 <li>cvi_
-: <a class="el" href="classstan_1_1agrad_1_1op__dvv__vari.html#a7b45480bb231853d2849a225e98395b0">stan::agrad::op_dvv_vari</a>
+: <a class="el" href="classstan_1_1agrad_1_1op__vdv__vari.html#a35aaa74843a75c3e340eaa2be01428fb">stan::agrad::op_vdv_vari</a>
 , <a class="el" href="classstan_1_1agrad_1_1op__ddv__vari.html#a9fa975086d0c27cd1506fc76f0a826a1">stan::agrad::op_ddv_vari</a>
-, <a class="el" href="classstan_1_1agrad_1_1op__vdv__vari.html#a35aaa74843a75c3e340eaa2be01428fb">stan::agrad::op_vdv_vari</a>
+, <a class="el" href="classstan_1_1agrad_1_1op__dvv__vari.html#a7b45480bb231853d2849a225e98395b0">stan::agrad::op_dvv_vari</a>
 , <a class="el" href="classstan_1_1agrad_1_1op__vvv__vari.html#a9f790058e86519dd043af8799e5269ff">stan::agrad::op_vvv_vari</a>
 </li>
 </ul>
@@ -330,7 +332,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

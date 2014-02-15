@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -172,15 +172,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        trace_quad_form_vari(trace_quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt; *impl)</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        : vari(impl-&gt;compute()), <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>(impl) { }</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        : vari(impl-&gt;compute()), <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>(impl) { }</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        </div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> chain() {</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;          chainAB(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;A_, <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;B_,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                  <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;A_), <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;B_),</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;          chainAB(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;A_, <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;B_,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                  <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;A_), <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;B_),</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                  adj_);</div>
 <div class="line"><a name="l00088"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2trace__quad__form_8hpp.html#a0b5bde925768070ceaa12322cd5da836">   88</a></span>&#160;        };</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        trace_quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt; *<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        trace_quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt; *<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;      };</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    }</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    </div>
@@ -211,7 +211,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

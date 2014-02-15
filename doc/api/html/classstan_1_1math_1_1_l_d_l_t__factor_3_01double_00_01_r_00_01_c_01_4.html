@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -99,7 +99,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>&gt;</code></p>
+<p><a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> is a thin wrapper on Eigen::LDLT to allow for reusing factorizations and efficient autodiff of things like log determinants and solutions to linear systems.  
+ <a href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -128,6 +131,8 @@ Eigen::internal::solve_retval<br class="typebreak"/>
 <tr class="separator:a1974a3e67f6d9aa1d1cdfe803a7aaaef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed238516181016209dbe39a879146092"><td class="memItemLeft" align="right" valign="top">Eigen::Matrix&lt; double, R, C &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#aed238516181016209dbe39a879146092">solveRight</a> (const Eigen::Matrix&lt; double, R, C &gt; &amp;B) const </td></tr>
 <tr class="separator:aed238516181016209dbe39a879146092"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cb8d421e1c1578b6ce1885cffe73155"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#a6cb8d421e1c1578b6ce1885cffe73155">vectorD</a> () const </td></tr>
+<tr class="separator:a6cb8d421e1c1578b6ce1885cffe73155"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a481dd3025ce906d56ab57d6f33759426"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#a481dd3025ce906d56ab57d6f33759426">rows</a> () const </td></tr>
 <tr class="separator:a481dd3025ce906d56ab57d6f33759426"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf662c7112e7274e630e07d7ac14c78a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#adf662c7112e7274e630e07d7ac14c78a">cols</a> () const </td></tr>
@@ -145,8 +150,24 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><h3>template&lt;int R, int C&gt;<br/>
 class stan::math::LDLT_factor&lt; double, R, C &gt;</h3>
 
-
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00019">19</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p><a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> is a thin wrapper on Eigen::LDLT to allow for reusing factorizations and efficient autodiff of things like log determinants and solutions to linear systems. </p>
+<p>After the constructor and/or <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#add76e21a65bdd840ca67d24531612573">compute()</a> is called users of <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> are responsible for calling <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#a98215f2467d234354d398ec3e415dfce">success()</a> to check whether the factorization has succeeded. Use of an <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> object (e.g., in mdivide_left_ldlt) is undefined if <a class="el" href="classstan_1_1math_1_1_l_d_l_t__factor_3_01double_00_01_r_00_01_c_01_4.html#a98215f2467d234354d398ec3e415dfce">success()</a> is false.</p>
+<p>It's usage pattern is:</p>
+<div class="fragment"><div class="line">Eigen::Matrix&lt;T,R,C&gt; A1, A2;</div>
+<div class="line"></div>
+<div class="line"><a class="code" href="class_l_d_l_t__factor.html">LDLT_factor&lt;T,R,C&gt;</a> ldlt_A1(A1);</div>
+<div class="line"><a class="code" href="class_l_d_l_t__factor.html">LDLT_factor&lt;T,R,C&gt;</a> ldlt_A2;</div>
+<div class="line">ldlt_A2.compute(A2);</div>
+</div><!-- fragment --><p>Now, the caller should check that ldlt_A1.success() and ldlt_A2.success() are true or abort accordingly. Alternatively, call <a class="el" href="namespacestan_1_1math.html#ac9067bd3252ec66389f27fb9147a765f" title="Return true if the underlying matrix is positive definite.">check_ldlt_factor()</a>.</p>
+<p>Note that ldlt_A1 and ldlt_A2 are completely equivalent. They simply demonstrate two different ways to construct the factorization.</p>
+<p>Now, the caller can use the <a class="el" href="class_l_d_l_t__factor.html">LDLT_factor</a> objects as needed. For instance</p>
+<div class="fragment"><div class="line">x1 = <a class="code" href="namespacestan_1_1math.html#a978022fb9cb20fd35f6e9e89ab3bc871" title="Returns the solution of the system Ax=b given an LDLT_factor of A.">mdivide_left_ldlt</a>(ldlt_A1,b1);</div>
+<div class="line">x2 = <a class="code" href="namespacestan_1_1math.html#a68c862e90d97ea5d5552101b65978813" title="Returns the solution of the system xA=b given an LDLT_factor of A.">mdivide_right_ldlt</a>(b2,ldlt_A2);</div>
+<div class="line"></div>
+<div class="line">d1 = <a class="code" href="namespacestan_1_1math.html#a306d737ee042b8f40e93713cd87fe48b">log_determinant_ldlt</a>(ldlt_A1);</div>
+<div class="line">d2 = <a class="code" href="namespacestan_1_1math.html#a306d737ee042b8f40e93713cd87fe48b">log_determinant_ldlt</a>(ldlt_A2);</div>
+</div><!-- fragment --> 
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00056">56</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a226a632082480f5715a8ef2979719fa1"></a>
 <div class="memitem">
@@ -160,7 +181,7 @@ template&lt;int R, int C&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00064">64</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00107">107</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -188,7 +209,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00021">21</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00058">58</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -216,7 +237,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00022">22</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00061">61</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -244,7 +265,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00062">62</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00105">105</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -272,7 +293,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00028">28</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00067">67</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +321,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00046">46</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00085">85</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -327,7 +348,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00042">42</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00081">81</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -354,7 +375,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00061">61</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00104">104</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -384,7 +405,7 @@ template&lt;typename Rhs &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00053">53</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00092">92</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -412,7 +433,7 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00057">57</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00096">96</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -439,7 +460,34 @@ template&lt;int R, int C&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00034">34</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00073">73</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a6cb8d421e1c1578b6ce1885cffe73155"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int R, int C&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd stan::math::LDLT_factor&lt; double, R, C &gt;::vectorD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00100">100</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -456,7 +504,7 @@ template&lt;int R, int C&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00067">67</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00110">110</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
@@ -472,12 +520,12 @@ template&lt;int R, int C&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="math_2matrix_2ldlt_8hpp_source.html#l00066">66</a> of file <a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a>.</p>
+<p>Definition at line <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html#l00109">109</a> of file <a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>src/stan/math/matrix/<a class="el" href="math_2matrix_2ldlt_8hpp_source.html">ldlt.hpp</a></li>
+<li>src/stan/math/matrix/<a class="el" href="math_2matrix_2_l_d_l_t__factor_8hpp_source.html">LDLT_factor.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <hr/>
@@ -487,7 +535,7 @@ template&lt;int R, int C&gt; </div>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

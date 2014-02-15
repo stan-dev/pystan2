@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -110,6 +110,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <code>#include &lt;<a class="el" href="arg__init_8hpp_source.html">stan/gm/arguments/arg_init.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="arg__random_8hpp_source.html">stan/gm/arguments/arg_random.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="arg__output_8hpp_source.html">stan/gm/arguments/arg_output.hpp</a>&gt;</code><br/>
+<code>#include &lt;<a class="el" href="fixed__param__sampler_8hpp_source.html">stan/mcmc/fixed_param_sampler.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="adapt__unit__e__static__hmc_8hpp_source.html">stan/mcmc/hmc/static/adapt_unit_e_static_hmc.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="adapt__diag__e__static__hmc_8hpp_source.html">stan/mcmc/hmc/static/adapt_diag_e_static_hmc.hpp</a>&gt;</code><br/>
 <code>#include &lt;<a class="el" href="adapt__dense__e__static__hmc_8hpp_source.html">stan/mcmc/hmc/static/adapt_dense_e_static_hmc.hpp</a>&gt;</code><br/>
@@ -134,13 +135,22 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:afef5e532e54ab9d2a07c9b67dbc9f71d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#afef5e532e54ab9d2a07c9b67dbc9f71d">stan::gm::write_stan</a> (std::ostream *s, const char prefix= '\0')</td></tr>
-<tr class="separator:afef5e532e54ab9d2a07c9b67dbc9f71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae20aea4f2c25e3aa171c1c4740ee19d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ae20aea4f2c25e3aa171c1c4740ee19d7">stan::gm::write_model</a> (std::ostream *s, std::string model_name, const char prefix= '\0')</td></tr>
-<tr class="separator:ae20aea4f2c25e3aa171c1c4740ee19d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae76346e1327805d1a7f6a28da263ec5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ae76346e1327805d1a7f6a28da263ec5d">stan::gm::write_error_msg</a> (std::ostream *error_stream, const std::domain_error &amp;e)</td></tr>
-<tr class="separator:ae76346e1327805d1a7f6a28da263ec5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e8302dc8c5c3b044f0b5e357d5930b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a49e8302dc8c5c3b044f0b5e357d5930b">stan::gm::write_iteration_csv</a> (std::ostream &amp;output_stream, const double lp, const std::vector&lt; double &gt; &amp;model_values)</td></tr>
+<tr class="separator:a49e8302dc8c5c3b044f0b5e357d5930b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa107b76e763f640def08786dad8785ed"><td class="memTemplParams" colspan="2">template&lt;class Model , class RNG &gt; </td></tr>
+<tr class="memitem:aa107b76e763f640def08786dad8785ed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#aa107b76e763f640def08786dad8785ed">stan::gm::write_iteration</a> (std::ostream &amp;output_stream, Model &amp;model, RNG &amp;base_rng, double lp, std::vector&lt; double &gt; &amp;cont_vector, std::vector&lt; int &gt; &amp;disc_vector)</td></tr>
+<tr class="separator:aa107b76e763f640def08786dad8785ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8fc6564ecbcb13e8ae6fcc27dd59c58"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ab8fc6564ecbcb13e8ae6fcc27dd59c58">stan::gm::write_stan</a> (std::ostream *s, const std::string prefix=&quot;&quot;)</td></tr>
+<tr class="separator:ab8fc6564ecbcb13e8ae6fcc27dd59c58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62128a7ef9014d6fedf9a2f2358a8976"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a62128a7ef9014d6fedf9a2f2358a8976">stan::gm::write_model</a> (std::ostream *s, const std::string model_name, const std::string prefix=&quot;&quot;)</td></tr>
+<tr class="separator:a62128a7ef9014d6fedf9a2f2358a8976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3f3dcbd71428d79866f8329dc7a3457"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#aa3f3dcbd71428d79866f8329dc7a3457">stan::gm::write_error_msg</a> (std::ostream *error_stream, const std::exception &amp;e)</td></tr>
+<tr class="separator:aa3f3dcbd71428d79866f8329dc7a3457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a50d74ffa83dbb5b20d65ba75b1e5e066">stan::gm::do_print</a> (int n, bool special, int refresh)</td></tr>
+<tr class="memdesc:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether it should print on the current iteration.  <a href="#a50d74ffa83dbb5b20d65ba75b1e5e066"></a><br/></td></tr>
+<tr class="separator:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0505a5edd8692d9113977c9cd19bc778"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a0505a5edd8692d9113977c9cd19bc778">stan::gm::do_print</a> (int n, int refresh)</td></tr>
+<tr class="memdesc:a0505a5edd8692d9113977c9cd19bc778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether it should print on the current iteration.  <a href="#a0505a5edd8692d9113977c9cd19bc778"></a><br/></td></tr>
 <tr class="separator:a0505a5edd8692d9113977c9cd19bc778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36c90a4a1e6a4833c1e3a12a964f31dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a36c90a4a1e6a4833c1e3a12a964f31dc">stan::gm::print_progress</a> (int m, int start, int finish, int refresh, bool warmup)</td></tr>
 <tr class="separator:a36c90a4a1e6a4833c1e3a12a964f31dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +190,7 @@ Functions</h2></td></tr>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

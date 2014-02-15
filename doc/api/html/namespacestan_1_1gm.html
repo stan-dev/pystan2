@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -137,6 +137,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1gm_1_1arg__engine.html">arg_engine</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1gm_1_1arg__fail.html">arg_fail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1gm_1_1arg__fixed__param.html">arg_fixed_param</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1gm_1_1arg__hmc.html">arg_hmc</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -525,13 +527,22 @@ Functions</h2></td></tr>
 <tr class="separator:a2fd9d0472225916eae17d19fde00fe30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cd24fa3880414fae68b9f140341781c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a5cd24fa3880414fae68b9f140341781c">has_non_param_var</a> (const <a class="el" href="structstan_1_1gm_1_1expression.html">expression</a> &amp;e, const <a class="el" href="structstan_1_1gm_1_1variable__map.html">variable_map</a> &amp;var_map)</td></tr>
 <tr class="separator:a5cd24fa3880414fae68b9f140341781c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afef5e532e54ab9d2a07c9b67dbc9f71d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#afef5e532e54ab9d2a07c9b67dbc9f71d">write_stan</a> (std::ostream *s, const char prefix= '\0')</td></tr>
-<tr class="separator:afef5e532e54ab9d2a07c9b67dbc9f71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae20aea4f2c25e3aa171c1c4740ee19d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ae20aea4f2c25e3aa171c1c4740ee19d7">write_model</a> (std::ostream *s, std::string model_name, const char prefix= '\0')</td></tr>
-<tr class="separator:ae20aea4f2c25e3aa171c1c4740ee19d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae76346e1327805d1a7f6a28da263ec5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ae76346e1327805d1a7f6a28da263ec5d">write_error_msg</a> (std::ostream *error_stream, const std::domain_error &amp;e)</td></tr>
-<tr class="separator:ae76346e1327805d1a7f6a28da263ec5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e8302dc8c5c3b044f0b5e357d5930b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a49e8302dc8c5c3b044f0b5e357d5930b">write_iteration_csv</a> (std::ostream &amp;output_stream, const double lp, const std::vector&lt; double &gt; &amp;model_values)</td></tr>
+<tr class="separator:a49e8302dc8c5c3b044f0b5e357d5930b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa107b76e763f640def08786dad8785ed"><td class="memTemplParams" colspan="2">template&lt;class Model , class RNG &gt; </td></tr>
+<tr class="memitem:aa107b76e763f640def08786dad8785ed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#aa107b76e763f640def08786dad8785ed">write_iteration</a> (std::ostream &amp;output_stream, Model &amp;model, RNG &amp;base_rng, double lp, std::vector&lt; double &gt; &amp;cont_vector, std::vector&lt; int &gt; &amp;disc_vector)</td></tr>
+<tr class="separator:aa107b76e763f640def08786dad8785ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8fc6564ecbcb13e8ae6fcc27dd59c58"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#ab8fc6564ecbcb13e8ae6fcc27dd59c58">write_stan</a> (std::ostream *s, const std::string prefix=&quot;&quot;)</td></tr>
+<tr class="separator:ab8fc6564ecbcb13e8ae6fcc27dd59c58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62128a7ef9014d6fedf9a2f2358a8976"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a62128a7ef9014d6fedf9a2f2358a8976">write_model</a> (std::ostream *s, const std::string model_name, const std::string prefix=&quot;&quot;)</td></tr>
+<tr class="separator:a62128a7ef9014d6fedf9a2f2358a8976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3f3dcbd71428d79866f8329dc7a3457"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#aa3f3dcbd71428d79866f8329dc7a3457">write_error_msg</a> (std::ostream *error_stream, const std::exception &amp;e)</td></tr>
+<tr class="separator:aa3f3dcbd71428d79866f8329dc7a3457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a50d74ffa83dbb5b20d65ba75b1e5e066">do_print</a> (int n, bool special, int refresh)</td></tr>
+<tr class="memdesc:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether it should print on the current iteration.  <a href="#a50d74ffa83dbb5b20d65ba75b1e5e066"></a><br/></td></tr>
+<tr class="separator:a50d74ffa83dbb5b20d65ba75b1e5e066"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0505a5edd8692d9113977c9cd19bc778"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a0505a5edd8692d9113977c9cd19bc778">do_print</a> (int n, int refresh)</td></tr>
+<tr class="memdesc:a0505a5edd8692d9113977c9cd19bc778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether it should print on the current iteration.  <a href="#a0505a5edd8692d9113977c9cd19bc778"></a><br/></td></tr>
 <tr class="separator:a0505a5edd8692d9113977c9cd19bc778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36c90a4a1e6a4833c1e3a12a964f31dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestan_1_1gm.html#a36c90a4a1e6a4833c1e3a12a964f31dc">print_progress</a> (int m, int start, int finish, int refresh, bool <a class="el" href="namespacestan_1_1gm.html#a98eeb261d85ab5d16b98b8cfeaeb31cc">warmup</a>)</td></tr>
 <tr class="separator:a36c90a4a1e6a4833c1e3a12a964f31dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1031,7 +1042,7 @@ template&lt;class Model &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00269">269</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00335">335</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -1112,6 +1123,51 @@ template&lt;class Model &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a50d74ffa83dbb5b20d65ba75b1e5e066"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool stan::gm::do_print </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>special</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>refresh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Indicates whether it should print on the current iteration. </p>
+<p>The function returns: true if refresh &gt; 0 and (n == 0 or (n + 1) % refresh == 0 or special == true) false otherwise. Examples: if refresh = 0, always returns false. if refresh = 10 and special == false, returns true for n = {0, 9, 19, ...}, returns false for n = {1 - 8, 10 - 18, 20 - 28, ...}. if refresh = 10 and special == true, returns true for all n.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Iteration number </td></tr>
+    <tr><td class="paramname">special</td><td>When true, returns true </td></tr>
+    <tr><td class="paramname">refresh</td><td>Number of iterations to refresh </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00118">118</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a0505a5edd8692d9113977c9cd19bc778"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1136,7 +1192,17 @@ template&lt;class Model &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00076">76</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Indicates whether it should print on the current iteration. </p>
+<p>The function returns: true if refresh &gt; 0 and (n == 0 or (n + 1) % refresh == 0) false otherwise. Examples: if refresh = 0, always returns false. if refresh = 10, returns true for n = {0, 9, 19, ...}, returns false for n = {1 - 8, 10 - 18, 20 - 28, ...}.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Iteration number </td></tr>
+    <tr><td class="paramname">refresh</td><td>Number of iterations to refresh </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00136">136</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3118,7 +3184,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00211">211</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00273">273</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3154,7 +3220,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00239">239</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00302">302</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3184,7 +3250,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00190">190</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00251">251</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3214,7 +3280,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00169">169</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00229">229</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3256,7 +3322,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00253">253</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00316">316</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3438,7 +3504,7 @@ template&lt;class Sampler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00081">81</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00140">140</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3674,7 +3740,7 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00101">101</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00160">160</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3752,7 +3818,7 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00149">149</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00208">208</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3902,7 +3968,7 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00130">130</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00189">189</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -3934,7 +4000,7 @@ template&lt;class Model , class RNG &gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="ae76346e1327805d1a7f6a28da263ec5d"></a>
+<a class="anchor" id="aa3f3dcbd71428d79866f8329dc7a3457"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -3947,7 +4013,7 @@ template&lt;class Model , class RNG &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::domain_error &amp;&#160;</td>
+          <td class="paramtype">const std::exception &amp;&#160;</td>
           <td class="paramname"><em>e</em>&#160;</td>
         </tr>
         <tr>
@@ -3958,11 +4024,99 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00057">57</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00082">82</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ae20aea4f2c25e3aa171c1c4740ee19d7"></a>
+<a class="anchor" id="aa107b76e763f640def08786dad8785ed"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Model , class RNG &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::gm::write_iteration </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>output_stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Model &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">RNG &amp;&#160;</td>
+          <td class="paramname"><em>base_rng</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>cont_vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>disc_vector</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00053">53</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a49e8302dc8c5c3b044f0b5e357d5930b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::gm::write_iteration_csv </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>output_stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>model_values</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00042">42</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a62128a7ef9014d6fedf9a2f2358a8976"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -3975,14 +4129,14 @@ template&lt;class Model , class RNG &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::string&#160;</td>
+          <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>model_name</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>prefix</em> = <code>'\0'</code>&#160;</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>prefix</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3992,11 +4146,11 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00050">50</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00075">75</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="afef5e532e54ab9d2a07c9b67dbc9f71d"></a>
+<a class="anchor" id="ab8fc6564ecbcb13e8ae6fcc27dd59c58"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -4009,8 +4163,8 @@ template&lt;class Model , class RNG &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>prefix</em> = <code>'\0'</code>&#160;</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>prefix</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -4020,7 +4174,7 @@ template&lt;class Model , class RNG &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="command_8hpp_source.html#l00041">41</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
+<p>Definition at line <a class="el" href="command_8hpp_source.html#l00066">66</a> of file <a class="el" href="command_8hpp_source.html">command.hpp</a>.</p>
 
 </div>
 </div>
@@ -4649,7 +4803,7 @@ template&lt;class Model , class RNG &gt; </div>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>
