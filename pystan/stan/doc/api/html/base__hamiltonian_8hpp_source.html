@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -136,49 +136,50 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00043"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a72b6cc15dc1f074e871fbd77c3d49ed8">   43</a></span>&#160;      <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a72b6cc15dc1f074e871fbd77c3d49ed8">update</a>(P&amp; z) {</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        </div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;          z.V = - stan::model::log_prob_grad&lt;true,true&gt;(<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">_model</a>, z.q, z.g, <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        } <span class="keywordflow">catch</span> (std::domain_error <a class="code" href="namespacestan_1_1math.html#a3b650a0131d41167ef4837ecc7d02be5" title="Return the base of the natural logarithm.">e</a>) {</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;          this-&gt;<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a119fab9e5829911ccfb31a5f7ec1f30b">_write_error_msg</a>(<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>, e);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;          z.V = std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        }</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        z.g *= -1;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      }</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keyword">protected</span>: </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      </div>
-<div class="line"><a name="l00058"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">   58</a></span>&#160;        M&amp; <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">_model</a>;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      </div>
-<div class="line"><a name="l00060"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">   60</a></span>&#160;        std::ostream* <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      </div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a119fab9e5829911ccfb31a5f7ec1f30b">   62</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a119fab9e5829911ccfb31a5f7ec1f30b">_write_error_msg</a>(std::ostream* error_msgs,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                             <span class="keyword">const</span> std::domain_error&amp; <a class="code" href="namespacestan_1_1math.html#a3b650a0131d41167ef4837ecc7d02be5" title="Return the base of the natural logarithm.">e</a>) {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;          </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;          <span class="keywordflow">if</span> (!error_msgs) <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;          </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;          *error_msgs &lt;&lt; std::endl</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;Informational Message: The current Metropolis proposal is about to be &quot;</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;rejected becuase of the following issue:&quot;</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                      &lt;&lt; std::endl</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                      &lt;&lt; e.what() &lt;&lt; std::endl</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;If this warning occurs sporadically, such as for highly constrained &quot;</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;variable types like covariance matrices, then the sampler is fine,&quot;</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                      &lt;&lt; std::endl</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;but if this warning occurs often then your model may be either severely &quot;</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;ill-conditioned or misspecified.&quot;</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                      &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;          </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;      }</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    };</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  } <span class="comment">// mcmc</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;} <span class="comment">// stan</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;          <a class="code" href="namespacestan_1_1model.html#ab4e546deccf701b0255fc6ffee22848c">stan::model::gradient</a>(<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">_model</a>, z.q, z.V, z.g, <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;          z.V *= -1;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; <a class="code" href="namespacestan_1_1math.html#a3b650a0131d41167ef4837ecc7d02be5" title="Return the base of the natural logarithm.">e</a>) {</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;          this-&gt;<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a21467777d0c2768f9eb57e76c9fd1b85">_write_error_msg</a>(<a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>, e);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;          z.V = std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        }</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        z.g *= -1;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      }</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">protected</span>: </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      </div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">   59</a></span>&#160;        M&amp; <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7c187e854abd5b0aca8726cbfab86a21">_model</a>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      </div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">   61</a></span>&#160;        std::ostream* <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a7db84e905cea2560e6a223656594c393">_err_stream</a>;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      </div>
+<div class="line"><a name="l00063"></a><span class="lineno"><a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a21467777d0c2768f9eb57e76c9fd1b85">   63</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classstan_1_1mcmc_1_1base__hamiltonian.html#a21467777d0c2768f9eb57e76c9fd1b85">_write_error_msg</a>(std::ostream* error_msgs,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                             <span class="keyword">const</span> std::exception&amp; <a class="code" href="namespacestan_1_1math.html#a3b650a0131d41167ef4837ecc7d02be5" title="Return the base of the natural logarithm.">e</a>) {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;          </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;          <span class="keywordflow">if</span> (!error_msgs) <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;          </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;          *error_msgs &lt;&lt; std::endl</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;Informational Message: The current Metropolis proposal is about to be &quot;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;rejected becuase of the following issue:&quot;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                      &lt;&lt; std::endl</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                      &lt;&lt; e.what() &lt;&lt; std::endl</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;If this warning occurs sporadically, such as for highly constrained &quot;</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;variable types like covariance matrices, then the sampler is fine,&quot;</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                      &lt;&lt; std::endl</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;but if this warning occurs often then your model may be either severely &quot;</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                      &lt;&lt; <span class="stringliteral">&quot;ill-conditioned or misspecified.&quot;</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                      &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;          </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;      </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    };</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  } <span class="comment">// mcmc</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;} <span class="comment">// stan</span></div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <hr/>
 <div class="conents" style="font-size:80%;">
@@ -187,7 +188,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

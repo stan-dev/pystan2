@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -116,8 +116,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a92e6f182bccdd993e73f751e5aafd7e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a611c78b4786bb2a649bbaa660350dc35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1io_1_1mcmc__writer.html#a611c78b4786bb2a649bbaa660350dc35">print_diagnostic_params</a> (<a class="el" href="classstan_1_1mcmc_1_1sample.html">stan::mcmc::sample</a> &amp;sample, <a class="el" href="classstan_1_1mcmc_1_1base__mcmc.html">stan::mcmc::base_mcmc</a> *sampler)</td></tr>
 <tr class="separator:a611c78b4786bb2a649bbaa660350dc35"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acec599e2966fe94577b9a5e125edc058"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1io_1_1mcmc__writer.html#acec599e2966fe94577b9a5e125edc058">print_timing</a> (double warmDeltaT, double sampleDeltaT, std::ostream *stream, const char prefix= '\0')</td></tr>
-<tr class="separator:acec599e2966fe94577b9a5e125edc058"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a628eb2bcaf467470d81f9c66e264750c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1io_1_1mcmc__writer.html#a628eb2bcaf467470d81f9c66e264750c">print_timing</a> (double warmDeltaT, double sampleDeltaT, std::ostream *stream, const std::string &amp;prefix=&quot;&quot;)</td></tr>
+<tr class="separator:a628eb2bcaf467470d81f9c66e264750c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18d3702721db48c5a6a6ae0f693988fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1io_1_1mcmc__writer.html#a18d3702721db48c5a6a6ae0f693988fe">print_timing</a> (double warmDeltaT, double sampleDeltaT)</td></tr>
 <tr class="separator:a18d3702721db48c5a6a6ae0f693988fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -417,7 +417,7 @@ template&lt;class RNG &gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="acec599e2966fe94577b9a5e125edc058"></a>
+<a class="anchor" id="a628eb2bcaf467470d81f9c66e264750c"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -447,8 +447,8 @@ template&lt;class M&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>prefix</em> = <code>'\0'</code>&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>prefix</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -516,7 +516,7 @@ template&lt;class M&gt; </div>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -111,11 +111,17 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a1505aa1613749c7e976b2bf2d822070d"><td class="memTemplParams" colspan="2">template&lt;typename R , typename F , typename T &gt; </td></tr>
+<tr class="memitem:a1505aa1613749c7e976b2bf2d822070d"><td class="memTemplItemLeft" align="right" valign="top">R&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1agrad.html#a1505aa1613749c7e976b2bf2d822070d">stan::agrad::apply_recover</a> (const F &amp;f, T &amp;x)</td></tr>
+<tr class="memdesc:a1505aa1613749c7e976b2bf2d822070d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the specified function to the specified argument and return the result; if the function throws an exception, recover reverse-mode memory and rethrow.  <a href="#a1505aa1613749c7e976b2bf2d822070d"></a><br/></td></tr>
+<tr class="separator:a1505aa1613749c7e976b2bf2d822070d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf138af35c36b51a588f35e10dfa6e06"><td class="memTemplParams" colspan="2">template&lt;typename T , typename F &gt; </td></tr>
 <tr class="memitem:adf138af35c36b51a588f35e10dfa6e06"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1agrad.html#adf138af35c36b51a588f35e10dfa6e06">stan::agrad::derivative</a> (const F &amp;f, const T &amp;x, T &amp;fx, T &amp;dfx_dx)</td></tr>
+<tr class="memdesc:adf138af35c36b51a588f35e10dfa6e06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the derivative of the specified univariate function at the specified argument.  <a href="#adf138af35c36b51a588f35e10dfa6e06"></a><br/></td></tr>
 <tr class="separator:adf138af35c36b51a588f35e10dfa6e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8a49a8b8a5b06f4053c40cb64a1fe48"><td class="memTemplParams" colspan="2">template&lt;typename T , typename F &gt; </td></tr>
 <tr class="memitem:ad8a49a8b8a5b06f4053c40cb64a1fe48"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1agrad.html#ad8a49a8b8a5b06f4053c40cb64a1fe48">stan::agrad::partial_derivative</a> (const F &amp;f, const Eigen::Matrix&lt; T, Eigen::Dynamic, 1 &gt; &amp;x, int n, T &amp;fx, T &amp;dfx_dxn)</td></tr>
+<tr class="memdesc:ad8a49a8b8a5b06f4053c40cb64a1fe48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the partial derivative of the specified multiivariate function at the specified argument.  <a href="#ad8a49a8b8a5b06f4053c40cb64a1fe48"></a><br/></td></tr>
 <tr class="separator:ad8a49a8b8a5b06f4053c40cb64a1fe48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a0d7a65cb491249a40ce309b4c74433"><td class="memTemplParams" colspan="2">template&lt;typename F &gt; </td></tr>
 <tr class="memitem:a3a0d7a65cb491249a40ce309b4c74433"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1agrad.html#a3a0d7a65cb491249a40ce309b4c74433">stan::agrad::gradient</a> (const F &amp;f, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, double &amp;fx, Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;grad_fx)</td></tr>
@@ -157,7 +163,7 @@ Functions</h2></td></tr>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -103,6 +103,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstan_1_1model_1_1prob__grad.html">prob_grad</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <code><a class="el" href="classstan_1_1model_1_1prob__grad.html" title="The prob_grad class represents the basic parameter holders for a model.">prob_grad</a></code> class represents the basic parameter holders for a model.  <a href="classstan_1_1model_1_1prob__grad.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstan_1_1model_1_1model__functional.html">model_functional</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -111,7 +113,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a4f75ba8738a5667a7abaef3871e14ca8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to calculate log probability for <code>double</code> scalars up to a proportion.  <a href="#a4f75ba8738a5667a7abaef3871e14ca8"></a><br/></td></tr>
 <tr class="separator:a4f75ba8738a5667a7abaef3871e14ca8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad33e9d6c10b589acbe6e527b5f9de80"><td class="memTemplParams" colspan="2">template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </td></tr>
-<tr class="memitem:aad33e9d6c10b589acbe6e527b5f9de80"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#aad33e9d6c10b589acbe6e527b5f9de80">log_prob_grad</a> (const M &amp;model, std::vector&lt; double &gt; &amp;params_r, std::vector&lt; int &gt; &amp;params_i, std::vector&lt; double &gt; &amp;gradient, std::ostream *msgs=0)</td></tr>
+<tr class="memitem:aad33e9d6c10b589acbe6e527b5f9de80"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#aad33e9d6c10b589acbe6e527b5f9de80">log_prob_grad</a> (const M &amp;model, std::vector&lt; double &gt; &amp;params_r, std::vector&lt; int &gt; &amp;params_i, std::vector&lt; double &gt; &amp;<a class="el" href="namespacestan_1_1model.html#ab4e546deccf701b0255fc6ffee22848c">gradient</a>, std::ostream *msgs=0)</td></tr>
 <tr class="memdesc:aad33e9d6c10b589acbe6e527b5f9de80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the gradient using reverse-mode automatic differentiation, writing the result into the specified gradient, using the specified perturbation.  <a href="#aad33e9d6c10b589acbe6e527b5f9de80"></a><br/></td></tr>
 <tr class="separator:aad33e9d6c10b589acbe6e527b5f9de80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0267095f157269950cfd3f1f402abe21"><td class="memTemplParams" colspan="2">template&lt;bool jacobian_adjust_transform, class M &gt; </td></tr>
@@ -119,7 +121,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a0267095f157269950cfd3f1f402abe21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to calculate log probability for <code>double</code> scalars up to a proportion.  <a href="#a0267095f157269950cfd3f1f402abe21"></a><br/></td></tr>
 <tr class="separator:a0267095f157269950cfd3f1f402abe21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8bbac348a197c17f86d57cc3a65e7d2"><td class="memTemplParams" colspan="2">template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </td></tr>
-<tr class="memitem:aa8bbac348a197c17f86d57cc3a65e7d2"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#aa8bbac348a197c17f86d57cc3a65e7d2">log_prob_grad</a> (const M &amp;model, Eigen::VectorXd &amp;params_r, Eigen::VectorXd &amp;gradient, std::ostream *msgs=0)</td></tr>
+<tr class="memitem:aa8bbac348a197c17f86d57cc3a65e7d2"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#aa8bbac348a197c17f86d57cc3a65e7d2">log_prob_grad</a> (const M &amp;model, Eigen::VectorXd &amp;params_r, Eigen::VectorXd &amp;<a class="el" href="namespacestan_1_1model.html#ab4e546deccf701b0255fc6ffee22848c">gradient</a>, std::ostream *msgs=0)</td></tr>
 <tr class="memdesc:aa8bbac348a197c17f86d57cc3a65e7d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the gradient using reverse-mode automatic differentiation, writing the result into the specified gradient, using the specified perturbation.  <a href="#aa8bbac348a197c17f86d57cc3a65e7d2"></a><br/></td></tr>
 <tr class="separator:aa8bbac348a197c17f86d57cc3a65e7d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2660b5de2ccd8322d61f077d43289d18"><td class="memTemplParams" colspan="2">template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </td></tr>
@@ -131,9 +133,24 @@ Functions</h2></td></tr>
 <tr class="memdesc:a53b2d650c95140811fa1dee58bdfb0c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test the <a class="el" href="namespacestan_1_1model.html#aad33e9d6c10b589acbe6e527b5f9de80" title="Compute the gradient using reverse-mode automatic differentiation, writing the result into the specif...">log_prob_grad()</a> function's ability to produce accurate gradients using finite differences.  <a href="#a53b2d650c95140811fa1dee58bdfb0c4"></a><br/></td></tr>
 <tr class="separator:a53b2d650c95140811fa1dee58bdfb0c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad83f35a2e6e0b78d505d8128dee49588"><td class="memTemplParams" colspan="2">template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </td></tr>
-<tr class="memitem:ad83f35a2e6e0b78d505d8128dee49588"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#ad83f35a2e6e0b78d505d8128dee49588">grad_hess_log_prob</a> (const M &amp;model, std::vector&lt; double &gt; &amp;params_r, std::vector&lt; int &gt; &amp;params_i, std::vector&lt; double &gt; &amp;gradient, std::vector&lt; double &gt; &amp;hessian, std::ostream *msgs=0)</td></tr>
+<tr class="memitem:ad83f35a2e6e0b78d505d8128dee49588"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#ad83f35a2e6e0b78d505d8128dee49588">grad_hess_log_prob</a> (const M &amp;model, std::vector&lt; double &gt; &amp;params_r, std::vector&lt; int &gt; &amp;params_i, std::vector&lt; double &gt; &amp;<a class="el" href="namespacestan_1_1model.html#ab4e546deccf701b0255fc6ffee22848c">gradient</a>, std::vector&lt; double &gt; &amp;<a class="el" href="namespacestan_1_1model.html#a060489d342b8fd3139e7df33b4a01170">hessian</a>, std::ostream *msgs=0)</td></tr>
 <tr class="memdesc:ad83f35a2e6e0b78d505d8128dee49588"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the log-probability, its gradient, and its Hessian at params_r.  <a href="#ad83f35a2e6e0b78d505d8128dee49588"></a><br/></td></tr>
 <tr class="separator:ad83f35a2e6e0b78d505d8128dee49588"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4e546deccf701b0255fc6ffee22848c"><td class="memTemplParams" colspan="2">template&lt;class M &gt; </td></tr>
+<tr class="memitem:ab4e546deccf701b0255fc6ffee22848c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#ab4e546deccf701b0255fc6ffee22848c">gradient</a> (const M &amp;model, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, double &amp;f, Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;grad_f, std::ostream *msgs=0)</td></tr>
+<tr class="separator:ab4e546deccf701b0255fc6ffee22848c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a060489d342b8fd3139e7df33b4a01170"><td class="memTemplParams" colspan="2">template&lt;class M &gt; </td></tr>
+<tr class="memitem:a060489d342b8fd3139e7df33b4a01170"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#a060489d342b8fd3139e7df33b4a01170">hessian</a> (const M &amp;model, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, double &amp;f, Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;grad_f, Eigen::Matrix&lt; double, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;hess_f, std::ostream *msgs=0)</td></tr>
+<tr class="separator:a060489d342b8fd3139e7df33b4a01170"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fbd2cae4a29ea16ebe9c60597d2d84e"><td class="memTemplParams" colspan="2">template&lt;class M &gt; </td></tr>
+<tr class="memitem:a3fbd2cae4a29ea16ebe9c60597d2d84e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#a3fbd2cae4a29ea16ebe9c60597d2d84e">gradient_dot_vector</a> (const M &amp;model, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;v, double &amp;f, double &amp;grad_f_dot_v, std::ostream *msgs=0)</td></tr>
+<tr class="separator:a3fbd2cae4a29ea16ebe9c60597d2d84e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b836ad2524ecb1b50f465d6305f88d2"><td class="memTemplParams" colspan="2">template&lt;class M &gt; </td></tr>
+<tr class="memitem:a2b836ad2524ecb1b50f465d6305f88d2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#a2b836ad2524ecb1b50f465d6305f88d2">hessian_times_vector</a> (const M &amp;model, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;v, double &amp;f, Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;hess_f_dot_v, std::ostream *msgs=0)</td></tr>
+<tr class="separator:a2b836ad2524ecb1b50f465d6305f88d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9f018a163d9dc97339f88d82664ce73"><td class="memTemplParams" colspan="2">template&lt;class M &gt; </td></tr>
+<tr class="memitem:ac9f018a163d9dc97339f88d82664ce73"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacestan_1_1model.html#ac9f018a163d9dc97339f88d82664ce73">grad_tr_mat_times_hessian</a> (const M &amp;model, const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;x, const Eigen::Matrix&lt; double, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;X, Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;grad_tr_X_hess_f, std::ostream *msgs=0)</td></tr>
+<tr class="separator:ac9f018a163d9dc97339f88d82664ce73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>For compiling models. </p>
@@ -209,7 +226,7 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00212">212</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00214">214</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -285,7 +302,265 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00336">336</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00338">338</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ac9f018a163d9dc97339f88d82664ce73"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class M &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::model::grad_tr_mat_times_hessian </td>
+          <td>(</td>
+          <td class="paramtype">const M &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>grad_tr_X_hess_f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>msgs</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00449">449</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab4e546deccf701b0255fc6ffee22848c"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class M &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::model::gradient </td>
+          <td>(</td>
+          <td class="paramtype">const M &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>grad_f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>msgs</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00402">402</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a3fbd2cae4a29ea16ebe9c60597d2d84e"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class M &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::model::gradient_dot_vector </td>
+          <td>(</td>
+          <td class="paramtype">const M &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramname"><em>grad_f_dot_v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>msgs</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00425">425</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a060489d342b8fd3139e7df33b4a01170"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class M &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::model::hessian </td>
+          <td>(</td>
+          <td class="paramtype">const M &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>grad_f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Matrix&lt; double, Eigen::Dynamic, Eigen::Dynamic &gt; &amp;&#160;</td>
+          <td class="paramname"><em>hess_f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>msgs</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00413">413</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a2b836ad2524ecb1b50f465d6305f88d2"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class M &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void stan::model::hessian_times_vector </td>
+          <td>(</td>
+          <td class="paramtype">const M &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Matrix&lt; double, Eigen::Dynamic, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>hess_f_dot_v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>msgs</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00437">437</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -353,7 +628,7 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00081">81</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00083">83</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -414,7 +689,7 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00168">168</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00170">170</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -476,7 +751,7 @@ template&lt;bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00039">39</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00041">41</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -531,7 +806,7 @@ template&lt;bool jacobian_adjust_transform, class M &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00129">129</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00131">131</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -615,7 +890,7 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>number of failed gradient comparisons versus allowed error, so 0 if all gradients pass </dd></dl>
 
-<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00263">263</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
+<p>Definition at line <a class="el" href="model_2util_8hpp_source.html#l00265">265</a> of file <a class="el" href="model_2util_8hpp_source.html">util.hpp</a>.</p>
 
 </div>
 </div>
@@ -627,7 +902,7 @@ template&lt;bool propto, bool jacobian_adjust_transform, class M &gt; </div>
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

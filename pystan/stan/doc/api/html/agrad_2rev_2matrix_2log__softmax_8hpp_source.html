@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -154,7 +154,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordflow">throw</span> std::domain_error(<span class="stringliteral">&quot;arg vector to log_softmax() must have size &gt; 0&quot;</span>);</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      <a class="code" href="classstan_1_1agrad_1_1vari.html" title="The variable implementation base class.">vari</a>** alpha_vi_array </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        = (<a class="code" href="classstan_1_1agrad_1_1vari.html" title="The variable implementation base class.">vari</a>**) <span class="keyword">operator</span> <span class="keyword">new</span>(<span class="keyword">sizeof</span>(<a class="code" href="classstan_1_1agrad_1_1vari.html" title="The variable implementation base class.">vari</a>*) * alpha.size());</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        = (<a class="code" href="classstan_1_1agrad_1_1vari.html" title="The variable implementation base class.">vari</a>**) agrad::chainable::operator <span class="keyword">new</span>(<span class="keyword">sizeof</span>(<a class="code" href="classstan_1_1agrad_1_1vari.html" title="The variable implementation base class.">vari</a>*) * alpha.size());</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; alpha.size(); ++i)</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        alpha_vi_array[i] = alpha(i).vi_;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;      </div>
@@ -186,25 +186,26 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;      <span class="comment">// end fold</span></div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;      <span class="keywordtype">double</span>* softmax_alpha_d_array </div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        = (<span class="keywordtype">double</span>*) <span class="keyword">operator</span> <span class="keyword">new</span>(<span class="keyword">sizeof</span>(<span class="keywordtype">double</span>) * alpha_d.size());</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; alpha_d.size(); ++i)</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        softmax_alpha_d_array[i] = softmax_alpha_d(i);</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      Matrix&lt;var,Dynamic,1&gt; log_softmax_alpha(alpha.size());</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; log_softmax_alpha.size(); ++k)</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        log_softmax_alpha(k) = <a class="code" href="classstan_1_1agrad_1_1var.html" title="Independent (input) and dependent (output) variables for gradients.">var</a>(<span class="keyword">new</span> log_softmax_elt_vari(log_softmax_alpha_d[k],</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                                                            alpha_vi_array,</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                                                            softmax_alpha_d_array,</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                                                            alpha.size(),</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                                                            k));</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;      <span class="keywordflow">return</span> log_softmax_alpha;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    }</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    </div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  }</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;}</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;         = (<span class="keywordtype">double</span>*) agrad::chainable::operator <span class="keyword">new</span>(<span class="keyword">sizeof</span>(<span class="keywordtype">double</span>) * alpha_d.size());</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; alpha_d.size(); ++i)</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        softmax_alpha_d_array[i] = softmax_alpha_d(i);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      Matrix&lt;var,Dynamic,1&gt; log_softmax_alpha(alpha.size());</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; log_softmax_alpha.size(); ++k)</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        log_softmax_alpha(k) = <a class="code" href="classstan_1_1agrad_1_1var.html" title="Independent (input) and dependent (output) variables for gradients.">var</a>(<span class="keyword">new</span> log_softmax_elt_vari(log_softmax_alpha_d[k],</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                                                            alpha_vi_array,</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                                                            softmax_alpha_d_array,</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                                                            alpha.size(),</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                                                            k));</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;      <span class="keywordflow">return</span> log_softmax_alpha;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    }</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  }</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;}</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <hr/>
 <div class="conents" style="font-size:80%;">
@@ -213,7 +214,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

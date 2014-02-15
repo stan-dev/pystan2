@@ -12,6 +12,7 @@ var searchData=
   ['pow_2ehpp',['pow.hpp',['../fwd_2functions_2pow_8hpp.html',1,'']]],
   ['pow_2ehpp',['pow.hpp',['../rev_2functions_2pow_8hpp.html',1,'']]],
   ['precomp_5fv_5fvari_2ehpp',['precomp_v_vari.hpp',['../precomp__v__vari_8hpp.html',1,'']]],
+  ['precomputed_5fgradients_2ehpp',['precomputed_gradients.hpp',['../precomputed__gradients_8hpp.html',1,'']]],
   ['print_2ecpp',['print.cpp',['../print_8cpp.html',1,'']]],
   ['print_2ehpp',['print.hpp',['../print_8hpp.html',1,'']]],
   ['print_5fstack_2ehpp',['print_stack.hpp',['../print__stack_8hpp.html',1,'']]],

@@ -1,8 +1,8 @@
 var searchData=
 [
   ['v',['V',['../classstan_1_1mcmc_1_1ps__point.html#a21cea778ac74b5c026a2f23fbae71304',1,'stan::mcmc::ps_point']]],
-  ['v1_5f',['v1_',['../agrad_2rev_2matrix_2dot__product_8hpp.html#a8c886c0e0b0df10a90267645bac46674',1,'v1_():&#160;dot_product.hpp'],['../_eigen___num_traits_8hpp.html#a26e986ea55e50b52a5f24dc12146b280',1,'v1_():&#160;Eigen_NumTraits.hpp'],['../agrad_2rev_2matrix_2squared__dist_8hpp.html#a83c5c6dc5ed503252611e6e50af3557a',1,'v1_():&#160;squared_dist.hpp']]],
-  ['v2_5f',['v2_',['../agrad_2rev_2matrix_2dot__product_8hpp.html#a27e3d8b375e8f1fb1cb0078d150879ea',1,'v2_():&#160;dot_product.hpp'],['../_eigen___num_traits_8hpp.html#a07b9904c44113353bf64f61d7c1e5672',1,'v2_():&#160;Eigen_NumTraits.hpp'],['../agrad_2rev_2matrix_2squared__dist_8hpp.html#a2157c9243530cdafcfb1665c9e682ed7',1,'v2_():&#160;squared_dist.hpp']]],
+  ['v1_5f',['v1_',['../agrad_2rev_2matrix_2dot__product_8hpp.html#a8c886c0e0b0df10a90267645bac46674',1,'v1_():&#160;dot_product.hpp'],['../_eigen___num_traits_8hpp.html#a26e986ea55e50b52a5f24dc12146b280',1,'v1_():&#160;Eigen_NumTraits.hpp'],['../agrad_2rev_2matrix_2squared__distance_8hpp.html#a83c5c6dc5ed503252611e6e50af3557a',1,'v1_():&#160;squared_distance.hpp']]],
+  ['v2_5f',['v2_',['../agrad_2rev_2matrix_2dot__product_8hpp.html#a27e3d8b375e8f1fb1cb0078d150879ea',1,'v2_():&#160;dot_product.hpp'],['../_eigen___num_traits_8hpp.html#a07b9904c44113353bf64f61d7c1e5672',1,'v2_():&#160;Eigen_NumTraits.hpp'],['../agrad_2rev_2matrix_2squared__distance_8hpp.html#a2157c9243530cdafcfb1665c9e682ed7',1,'v2_():&#160;squared_distance.hpp']]],
   ['v_5f',['v_',['../agrad_2rev_2matrix_2dot__self_8hpp.html#ad96f2a078f01703996f5677e20cc34cd',1,'v_():&#160;dot_self.hpp'],['../agrad_2rev_2matrix_2sum_8hpp.html#ad96f2a078f01703996f5677e20cc34cd',1,'v_():&#160;sum.hpp']]],
   ['val_5f',['val_',['../classstan_1_1agrad_1_1vari.html#a03ed9389d9c07f294820e406adfc865e',1,'stan::agrad::vari::val_()'],['../structstan_1_1agrad_1_1fvar.html#a8aa2f2b763eea9bf8928fe5f4dcd0a3d',1,'stan::agrad::fvar::val_()'],['../structstan_1_1gm_1_1int__literal.html#a298151e163dc54d45f2876fe296cde5d',1,'stan::gm::int_literal::val_()'],['../structstan_1_1gm_1_1double__literal.html#a15debd030159098dafaac809c9565c48',1,'stan::gm::double_literal::val_()']]],
   ['validate_5fallow_5fsample_5ff',['validate_allow_sample_f',['../namespacestan_1_1gm.html#aa30c31af794258c24cb18df976cf4296',1,'stan::gm']]],
@@ -26,6 +26,7 @@ var searchData=
   ['var_5ftype_5f',['var_type_',['../structstan_1_1gm_1_1assignment.html#a32c7f69945a9335aad93f5b6c44b6b34',1,'stan::gm::assignment']]],
   ['variable_5f',['variable_',['../structstan_1_1gm_1_1for__statement.html#acc156ec777cc5ca5a60e65506a94c60f',1,'stan::gm::for_statement']]],
   ['variable_5fr',['variable_r',['../structstan_1_1gm_1_1term__grammar.html#ab0c2f2623b8f78f859c358cdf3e161a6',1,'stan::gm::term_grammar']]],
+  ['varis_5f',['varis_',['../classstan_1_1agrad_1_1precomputed__gradients__vari.html#a0f7895b9edc0610a09990e4179c2904e',1,'stan::agrad::precomputed_gradients_vari']]],
   ['vector_5fdecl_5fr',['vector_decl_r',['../structstan_1_1gm_1_1var__decls__grammar.html#abc85787fdc330600e8ed8418a29fb6ac',1,'stan::gm::var_decls_grammar']]],
   ['vector_5ft',['VECTOR_T',['../namespacestan_1_1gm.html#a994b5bf5385c2c96190f9aaf19e0c711',1,'stan::gm']]],
   ['vi_5f',['vi_',['../classstan_1_1agrad_1_1var.html#af62c13dcd2bfab818579f6715fbda6af',1,'stan::agrad::var']]],

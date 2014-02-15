@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['d_5f',['d_',['../structstan_1_1agrad_1_1fvar.html#a189f3e99b3716c92b73b43e709245787',1,'stan::agrad::fvar::d_()'],['../agrad_2rev_2matrix_2ldlt_8hpp.html#a924a423d56557fce1ab298532ab03bb8',1,'D_():&#160;ldlt.hpp'],['../agrad_2rev_2matrix_2trace__gen__quad__form_8hpp.html#ab8b790d54b5b04c9c5dd60e063ed40bc',1,'D_():&#160;trace_gen_quad_form.hpp']]],
+  ['d_5f',['d_',['../structstan_1_1agrad_1_1fvar.html#a189f3e99b3716c92b73b43e709245787',1,'stan::agrad::fvar::d_()'],['../agrad_2rev_2matrix_2trace__gen__quad__form_8hpp.html#ab8b790d54b5b04c9c5dd60e063ed40bc',1,'D_():&#160;trace_gen_quad_form.hpp'],['../agrad_2rev_2matrix_2trace__inv__quad__form__ldlt_8hpp.html#a924a423d56557fce1ab298532ab03bb8',1,'D_():&#160;trace_inv_quad_form_ldlt.hpp']]],
   ['d_5fx1',['d_x1',['../structstan_1_1agrad_1_1_operands_and_partials.html#a3c0b97cb24df6cf073c7585a2ced93ea',1,'stan::agrad::OperandsAndPartials']]],
   ['d_5fx2',['d_x2',['../structstan_1_1agrad_1_1_operands_and_partials.html#ae36664450bb09392fe8e0dae036ebfa1',1,'stan::agrad::OperandsAndPartials']]],
   ['d_5fx3',['d_x3',['../structstan_1_1agrad_1_1_operands_and_partials.html#a1858e4f3e9bc2dee0f3bd25b72ac7862',1,'stan::agrad::OperandsAndPartials']]],
@@ -32,5 +32,5 @@ var searchData=
   ['double_5fliteral_5fr',['double_literal_r',['../structstan_1_1gm_1_1term__grammar.html#a91f8666c8899032d59c1ad4f54a9c0c3',1,'stan::gm::term_grammar']]],
   ['double_5ft',['DOUBLE_T',['../namespacestan_1_1gm.html#a903b745f5e5ae0c05b667e45e5d62e66',1,'stan::gm']]],
   ['dtrs_5f',['dtrs_',['../classstan_1_1agrad_1_1stored__gradient__vari.html#afb98edd9fb9584921e7ef283e5c9478e',1,'stan::agrad::stored_gradient_vari']]],
-  ['dtype_5f',['Dtype_',['../agrad_2rev_2matrix_2ldlt_8hpp.html#a7c830ea3da654e2c30a3e8d4c41610e8',1,'ldlt.hpp']]]
+  ['dtype_5f',['Dtype_',['../agrad_2rev_2matrix_2trace__inv__quad__form__ldlt_8hpp.html#a7c830ea3da654e2c30a3e8d4c41610e8',1,'trace_inv_quad_form_ldlt.hpp']]]
 ];

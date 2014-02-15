@@ -11,7 +11,7 @@ var searchData=
   ['add_5fwhile_5fcondition_5ff',['add_while_condition_f',['../namespacestan_1_1gm.html#adb748e38743964139413d8a31c622474',1,'stan::gm']]],
   ['addition',['addition',['../namespacestan_1_1gm.html#a66dd9d718181d0b71df757b512a9e7b6',1,'stan::gm']]],
   ['adj_5f',['adj_',['../classstan_1_1agrad_1_1vari.html#a23c19b981f1a4f850e840884b76d08a0',1,'stan::agrad::vari']]],
-  ['ainvb_5f',['AinvB_',['../agrad_2rev_2matrix_2ldlt_8hpp.html#ab94d72eb089cbdafd7d658f9f21e2749',1,'ldlt.hpp']]],
+  ['ainvb_5f',['AinvB_',['../agrad_2rev_2matrix_2trace__inv__quad__form__ldlt_8hpp.html#ab94d72eb089cbdafd7d658f9f21e2749',1,'trace_inv_quad_form_ldlt.hpp']]],
   ['algorithm',['algorithm',['../structstan_1_1io_1_1stan__csv__metadata.html#ade7047cd16512c5a03c4d1dc9b6a3282',1,'stan::io::stan_csv_metadata']]],
   ['all_5fconstant',['all_constant',['../structstan_1_1agrad_1_1_operands_and_partials.html#af8cdd957e2c7d02ea713440ae2ff0d5c',1,'stan::agrad::OperandsAndPartials']]],
   ['all_5fpartials',['all_partials',['../structstan_1_1agrad_1_1_operands_and_partials.html#a72bcc7c3e6fb628355b1d147660dd1c1',1,'stan::agrad::OperandsAndPartials']]],

@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -215,6 +215,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="structstan_1_1gm_1_1member__var__decl__visgen.html#a4b118f12400d5b68e582659ad7156001">stan::gm::member_var_decl_visgen</a>
 , <a class="el" href="structstan_1_1gm_1_1write__csv__header__visgen.html#ab1ef373185ef957afb786883c4f1ab79">stan::gm::write_csv_header_visgen</a>
 , <a class="el" href="classstan_1_1optimization_1_1_model_adaptor.html#adb0fdd3e2c65d765607c3f30ba16aec8">stan::optimization::ModelAdaptor&lt; M &gt;</a>
+, <a class="el" href="structstan_1_1model_1_1model__functional.html#a7de709dc8075a21aea22f1f8b508bfcc">stan::model::model_functional&lt; M &gt;</a>
 , <a class="el" href="structstan_1_1gm_1_1validate__expr__type.html#a867deadb8d8aa863e91ba057584f88aa">stan::gm::validate_expr_type</a>
 , <a class="el" href="structstan_1_1gm_1_1validate__int__expr3.html#ad00cc4a51aa05e4cac78c6da0c54755f">stan::gm::validate_int_expr3</a>
 , <a class="el" href="structstan_1_1gm_1_1set__var__type.html#a81e8e16e1f75675c8aa2e99a45230fdd">stan::gm::set_var_type</a>
@@ -388,13 +389,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="classstan_1_1agrad_1_1var.html#a64086c7c9362cf53e57551f8ed5add14">stan::agrad::var</a>
 </li>
 <li>operator--()
-: <a class="el" href="structstan_1_1agrad_1_1fvar.html#a4b67eb3587d853feb8d7ca14cea9d1d0">stan::agrad::fvar&lt; T &gt;</a>
+: <a class="el" href="structstan_1_1agrad_1_1fvar.html#a018ea15f734397c5b035d2b08292a1af">stan::agrad::fvar&lt; T &gt;</a>
 </li>
 <li>operator-=()
-: <a class="el" href="classstan_1_1agrad_1_1var.html#adc63a21e809772e4e1943dcde7d81501">stan::agrad::var</a>
-, <a class="el" href="structstan_1_1gm_1_1expression.html#ab7fbe72fb912a2fa66c1084c69bfd1dd">stan::gm::expression</a>
+: <a class="el" href="structstan_1_1agrad_1_1fvar.html#acab2cd650a6ace2d2cbc919a2e295281">stan::agrad::fvar&lt; T &gt;</a>
+, <a class="el" href="classstan_1_1agrad_1_1var.html#a27e309010cc293bfc7b0895010ea576e">stan::agrad::var</a>
 , <a class="el" href="structstan_1_1agrad_1_1fvar.html#a9265544f8ff15013032381543e917321">stan::agrad::fvar&lt; T &gt;</a>
-, <a class="el" href="classstan_1_1agrad_1_1var.html#a7f0d2c15e16e20a61269259b7f7cc5b7">stan::agrad::var</a>
+, <a class="el" href="classstan_1_1agrad_1_1var.html#af175a08753073e2b5cd0431df96f685e">stan::agrad::var</a>
+, <a class="el" href="structstan_1_1gm_1_1expression.html#ab7fbe72fb912a2fa66c1084c69bfd1dd">stan::gm::expression</a>
+, <a class="el" href="classstan_1_1agrad_1_1var.html#adc63a21e809772e4e1943dcde7d81501">stan::agrad::var</a>
 </li>
 <li>operator-&gt;()
 : <a class="el" href="classstan_1_1agrad_1_1var.html#af706ab2096ce340463d8794edb603a22">stan::agrad::var</a>
@@ -405,6 +408,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="structstan_1_1agrad_1_1fvar.html#a51f4cc010b2c7c553c5ad138f53d2fd5">stan::agrad::fvar&lt; T &gt;</a>
 , <a class="el" href="classstan_1_1agrad_1_1var.html#aa006b46d2909a3924efd0275a57f85a9">stan::agrad::var</a>
 , <a class="el" href="structstan_1_1agrad_1_1fvar.html#acd050be117d173a998ddc0f3f6e2d00d">stan::agrad::fvar&lt; T &gt;</a>
+, <a class="el" href="classstan_1_1agrad_1_1var.html#a6bde2e6f35855e8455f3c9ec8bea97ee">stan::agrad::var</a>
 </li>
 <li>operator=()
 : <a class="el" href="classstan_1_1mcmc_1_1ps__point.html#a6465e2b1c8c8abf56bd716fcb069be47">stan::mcmc::ps_point</a>
@@ -416,34 +420,34 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="structstan_1_1gm_1_1expr__type.html#a40ff8512daac53614b78023e131f4638">stan::gm::expr_type</a>
 </li>
 <li>operator[]()
-: <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01std_1_1vector_3_01_s_01_4_01_4.html#acfe4d699397a114cabd8d970e569aac6">stan::math::seq_view&lt; T, std::vector&lt; S &gt; &gt;</a>
-, <a class="el" href="classstan_1_1_double_vector_view.html#a2d22664770b4a3061079683994cc5531">stan::DoubleVectorView&lt; used, is_vec &gt;</a>
+: <a class="el" href="classstan_1_1math_1_1seq__view.html#abdd1705b880895c4e32e917fad70fb0b">stan::math::seq_view&lt; T, S &gt;</a>
 , <a class="el" href="classstan_1_1_vector_view_3_01const_01_t_00_01is__array_00_01throw__if__accessed_01_4.html#a4ebd6fad997a99a0cb1ed71e4143befe">stan::VectorView&lt; const T, is_array, throw_if_accessed &gt;</a>
-, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01std_1_1vector_3_01_t_01_4_01_4.html#afe1bd346e72ac6adc53826801a7e54f2">stan::math::seq_view&lt; T, std::vector&lt; T &gt; &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01std_1_1vector_3_01_s_01_4_01_4.html#acfe4d699397a114cabd8d970e569aac6">stan::math::seq_view&lt; T, std::vector&lt; S &gt; &gt;</a>
 , <a class="el" href="classstan_1_1agrad_1_1op__matrix__vari.html#a33373afd7da2f7adc9283b5e7b140868">stan::agrad::op_matrix_vari</a>
-, <a class="el" href="classstan_1_1math_1_1seq__view_3_01double_00_01std_1_1vector_3_01int_01_4_01_4.html#a05bbd23ec952656521365f99d575a64c">stan::math::seq_view&lt; double, std::vector&lt; int &gt; &gt;</a>
-, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01_eigen_1_1_matrix_3_01_s_00_01_eigen_1_1_dynamic_00_011_01_4_01_4.html#a6466225a392d75a98f0ae43c5f001820">stan::math::seq_view&lt; T, Eigen::Matrix&lt; S, Eigen::Dynamic, 1 &gt; &gt;</a>
-, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01_eigen_1_1_matrix_3_01_s_00_011_00_01_eigen_1_1_dynamic_01_4_01_4.html#aafd342f1f6f9851fd8f8e3494b36068e">stan::math::seq_view&lt; T, Eigen::Matrix&lt; S, 1, Eigen::Dynamic &gt; &gt;</a>
 , <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01std_1_1vector_3_01std_1_1vector_3_01_t_01_4_01_4_01_4.html#aa8d34d4dd171acbd81d642aea1b8b61e">stan::math::seq_view&lt; T, std::vector&lt; std::vector&lt; T &gt; &gt; &gt;</a>
-, <a class="el" href="classstan_1_1math_1_1seq__view.html#abdd1705b880895c4e32e917fad70fb0b">stan::math::seq_view&lt; T, S &gt;</a>
-, <a class="el" href="classstan_1_1_vector_view_3_01const_01double_00_01false_00_01false_01_4.html#a2d4a632cfb7533c7ab183c8437b9433c">stan::VectorView&lt; const double, false, false &gt;</a>
-, <a class="el" href="classstan_1_1_vector_view.html#afa380e5d11746837925198eeb8669299">stan::VectorView&lt; T, is_array, throw_if_accessed &gt;</a>
-, <a class="el" href="classstan_1_1_double_vector_view_3_01true_00_01true_01_4.html#a7b95c038ecbc5526605715fca51f6737">stan::DoubleVectorView&lt; true, true &gt;</a>
+, <a class="el" href="classstan_1_1_double_vector_view.html#a2d22664770b4a3061079683994cc5531">stan::DoubleVectorView&lt; used, is_vec &gt;</a>
 , <a class="el" href="classstan_1_1_double_vector_view_3_01true_00_01false_01_4.html#adfc928699f9b1fdd936ff631ab68d405">stan::DoubleVectorView&lt; true, false &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01_eigen_1_1_matrix_3_01_s_00_011_00_01_eigen_1_1_dynamic_01_4_01_4.html#aafd342f1f6f9851fd8f8e3494b36068e">stan::math::seq_view&lt; T, Eigen::Matrix&lt; S, 1, Eigen::Dynamic &gt; &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01std_1_1vector_3_01_t_01_4_01_4.html#afe1bd346e72ac6adc53826801a7e54f2">stan::math::seq_view&lt; T, std::vector&lt; T &gt; &gt;</a>
 , <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01_eigen_1_1_matrix_3_01_s_00_01_eigen_1_1_dynamic_00_01_eigen_1_1_dynamic_01_4_01_4.html#ab45edf39aad64a4093db924b02322af9">stan::math::seq_view&lt; T, Eigen::Matrix&lt; S, Eigen::Dynamic, Eigen::Dynamic &gt; &gt;</a>
+, <a class="el" href="classstan_1_1_vector_view_3_01const_01double_00_01false_00_01false_01_4.html#a2d4a632cfb7533c7ab183c8437b9433c">stan::VectorView&lt; const double, false, false &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1seq__view_3_01_t_00_01_eigen_1_1_matrix_3_01_s_00_01_eigen_1_1_dynamic_00_011_01_4_01_4.html#a6466225a392d75a98f0ae43c5f001820">stan::math::seq_view&lt; T, Eigen::Matrix&lt; S, Eigen::Dynamic, 1 &gt; &gt;</a>
+, <a class="el" href="classstan_1_1_double_vector_view_3_01true_00_01true_01_4.html#a7b95c038ecbc5526605715fca51f6737">stan::DoubleVectorView&lt; true, true &gt;</a>
+, <a class="el" href="classstan_1_1_vector_view.html#afa380e5d11746837925198eeb8669299">stan::VectorView&lt; T, is_array, throw_if_accessed &gt;</a>
+, <a class="el" href="classstan_1_1math_1_1seq__view_3_01double_00_01std_1_1vector_3_01int_01_4_01_4.html#a05bbd23ec952656521365f99d575a64c">stan::math::seq_view&lt; double, std::vector&lt; int &gt; &gt;</a>
 , <a class="el" href="classstan_1_1agrad_1_1op__vector__vari.html#a4ad5b26a8c5e46b57eec2e9622c13fbc">stan::agrad::op_vector_vari</a>
 </li>
 <li>ordered()
 : <a class="el" href="classstan_1_1io_1_1reader.html#ae5597679b7085f74c44ae623ef117410">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>ordered_constrain()
-: <a class="el" href="classstan_1_1io_1_1reader.html#ae371520b9f4d28912092b43c40fdccb3">stan::io::reader&lt; T &gt;</a>
+: <a class="el" href="classstan_1_1io_1_1reader.html#a8e91154c913c5645c8a4ae474f1a6748">stan::io::reader&lt; T &gt;</a>
 </li>
 <li>ordered_unconstrain()
 : <a class="el" href="classstan_1_1io_1_1writer.html#af9e8b0cc64f52fe8b893aa68b24efe28">stan::io::writer&lt; T &gt;</a>
 </li>
 <li>ordered_var_decl()
-: <a class="el" href="structstan_1_1gm_1_1ordered__var__decl.html#a245a2f9aa050ab85b5586f98a7fa890d">stan::gm::ordered_var_decl</a>
+: <a class="el" href="structstan_1_1gm_1_1ordered__var__decl.html#a805bcb3c7b339fb728ee04a4b1bc3dff">stan::gm::ordered_var_decl</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -454,7 +458,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>

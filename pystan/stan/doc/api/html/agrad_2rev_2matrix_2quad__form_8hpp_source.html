@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="stanlogo-main.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Stan
-   &#160;<span id="projectnumber">1.3</span>
+   &#160;<span id="projectnumber">2.2.0</span>
    </div>
    <div id="projectbrief">probability, sampling &amp; optimization</div>
   </td>
@@ -117,13 +117,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        {</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;          <span class="keywordtype">int</span> i,j;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;          Eigen::Matrix&lt;double,CB,CB&gt; Cd(B.transpose()*A*B);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;          <span class="keywordflow">for</span> (j = 0; j &lt; <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>.cols(); j++) {</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;            <span class="keywordflow">for</span> (i = 0; i &lt; <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>.rows(); i++) {</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;          <span class="keywordflow">for</span> (j = 0; j &lt; <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>.cols(); j++) {</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;            <span class="keywordflow">for</span> (i = 0; i &lt; <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>.rows(); i++) {</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;              <span class="keywordflow">if</span> (<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a0f0c3a82aa9cb1ecd7d97fce67fea63d">_sym</a>) {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;                <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>(i,j) = var(<span class="keyword">new</span> vari(0.5*(Cd(i,j) + Cd(j,i)),<span class="keyword">false</span>));</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;                <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>(i,j) = var(<span class="keyword">new</span> vari(0.5*(Cd(i,j) + Cd(j,i)),<span class="keyword">false</span>));</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;              }</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;              <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>(i,j) = var(<span class="keyword">new</span> vari(Cd(i,j),<span class="keyword">false</span>));</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>(i,j) = var(<span class="keyword">new</span> vari(Cd(i,j),<span class="keyword">false</span>));</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;              }</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;            }</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;          }</div>
@@ -133,14 +133,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        quad_form_vari_alloc(<span class="keyword">const</span> Eigen::Matrix&lt;TA,RA,CA&gt; &amp;A,</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                             <span class="keyword">const</span> Eigen::Matrix&lt;TB,RB,CB&gt; &amp;B,</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                             <span class="keywordtype">bool</span> symmetric = <span class="keyword">false</span>)</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : <a class="code" href="agrad_2rev_2matrix_2determinant_8hpp.html#a11b6b3ab6459db606ab7f4bfd4ad2823">A_</a>(A), <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>(B), <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>.<a class="code" href="namespacestan_1_1math.html#a871bccc233a4dcd764ffece5a3f9a399">cols</a>(),<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>.<a class="code" href="namespacestan_1_1math.html#a871bccc233a4dcd764ffece5a3f9a399">cols</a>()), <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a0f0c3a82aa9cb1ecd7d97fce67fea63d">_sym</a>(symmetric)</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : <a class="code" href="agrad_2rev_2matrix_2determinant_8hpp.html#a11b6b3ab6459db606ab7f4bfd4ad2823">A_</a>(A), <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>(B), <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>.<a class="code" href="namespacestan_1_1math.html#a871bccc233a4dcd764ffece5a3f9a399">cols</a>(),<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>.<a class="code" href="namespacestan_1_1math.html#a871bccc233a4dcd764ffece5a3f9a399">cols</a>()), <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a0f0c3a82aa9cb1ecd7d97fce67fea63d">_sym</a>(symmetric)</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        {</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;          compute(<a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(A),<a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(B));</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        }</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        </div>
 <div class="line"><a name="l00048"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a74fc8e511e9ed21b74f2b3e281ff4c72">   48</a></span>&#160;        Eigen::Matrix&lt;TA,RA,CA&gt;  <a class="code" href="agrad_2rev_2matrix_2determinant_8hpp.html#a11b6b3ab6459db606ab7f4bfd4ad2823">A_</a>;</div>
 <div class="line"><a name="l00049"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">   49</a></span>&#160;        Eigen::Matrix&lt;TB,RB,CB&gt;  <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a9e12a47e6a37454b96cc03670779ebf0">B_</a>;</div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a55687fe74d2b370950b50b750657c48e">   50</a></span>&#160;        Eigen::Matrix&lt;var,CB,CB&gt; <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#aaed1328a1a8dc253591d2941edfec676">C_</a>;</div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a55687fe74d2b370950b50b750657c48e">   50</a></span>&#160;        Eigen::Matrix&lt;var,CB,CB&gt; <a class="code" href="agrad_2rev_2matrix_2mdivide__left_8hpp.html#a03e9f8989e0f5a0117b426e2b204933a">C_</a>;</div>
 <div class="line"><a name="l00051"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a0f0c3a82aa9cb1ecd7d97fce67fea63d">   51</a></span>&#160;        <span class="keywordtype">bool</span>                     <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#a0f0c3a82aa9cb1ecd7d97fce67fea63d">_sym</a>;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;      };</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      </div>
@@ -194,23 +194,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                       <span class="keyword">const</span> Eigen::Matrix&lt;TB,RB,CB&gt; &amp;B,</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                       <span class="keywordtype">bool</span> symmetric = <span class="keyword">false</span>)</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        : vari(0.0) {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;          <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a> = <span class="keyword">new</span> quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt;(A,B,symmetric);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;          <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a> = <span class="keyword">new</span> quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt;(A,B,symmetric);</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        }</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        </div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> chain() {</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;          <span class="keywordtype">int</span> i,j;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;          Eigen::Matrix&lt;double,CB,CB&gt; adjC(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;C_.rows(),<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;C_.cols());</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;          Eigen::Matrix&lt;double,CB,CB&gt; adjC(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;C_.rows(),<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;C_.cols());</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;          </div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;          <span class="keywordflow">for</span> (j = 0; j &lt; <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;C_.cols(); j++)</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            <span class="keywordflow">for</span> (i = 0; i &lt; <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;C_.rows(); i++)</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;              adjC(i,j) = <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;C_(i,j).vi_-&gt;adj_;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;          <span class="keywordflow">for</span> (j = 0; j &lt; <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;C_.cols(); j++)</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            <span class="keywordflow">for</span> (i = 0; i &lt; <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;C_.rows(); i++)</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;              adjC(i,j) = <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;C_(i,j).vi_-&gt;adj_;</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;          </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;          chainAB(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;A_, <a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;B_,</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                  <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;A_), <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>-&gt;B_),</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;          chainAB(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;A_, <a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;B_,</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                  <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;A_), <a class="code" href="namespacestan_1_1agrad.html#a8ce52917ab0cd91c9db4d615f1988e11" title="Return the value of the specified variable.">value_of</a>(<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>-&gt;B_),</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                  adjC);</div>
 <div class="line"><a name="l00118"></a><span class="lineno"><a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">  118</a></span>&#160;        };</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt; *<a class="code" href="agrad_2rev_2matrix_2ldlt_8hpp.html#ab89158b8e67137e7d7693f9d285e6a6b">_impl</a>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        quad_form_vari_alloc&lt;TA,RA,CA,TB,RB,CB&gt; *<a class="code" href="agrad_2rev_2matrix_2quad__form_8hpp.html#aba5296c623c71f7372cb23517d7a9cfa">_impl</a>;</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;      };</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    }</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    </div>
@@ -289,7 +289,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   [ <a href="http://mc-stan.org/">Stan Home Page</a> ]
   </span>
   <span style="float:right; margin=0 1em 0 1em;">
-  <i>&copy; 2011&ndash;2013,
+  <i>&copy; 2011&ndash;2014,
   Stan Development Team.
   &nbsp;&nbsp;&nbsp;&nbsp;
   </i>
