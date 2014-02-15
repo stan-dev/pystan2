@@ -42,6 +42,8 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         double log_prob(vector[double] upar, bool jacobian_adjust_transform, bool gradient) except +
         vector[double] grad_log_prob(vector[double] upar, bool jacobian_adjust_transform) except +
         int num_pars_unconstrained()
+        vector[string] unconstrained_param_names()
+        vector[string] constrained_param_names()
         int call_sampler(PyStanArgs&, PyStanHolder&) except +
         vector[string] param_names()
         vector[string] param_names_oi()

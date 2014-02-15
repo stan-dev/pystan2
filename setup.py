@@ -47,9 +47,9 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering :: Information Analysis'
 ]
 MAJOR = 2
-MINOR = 1
+MINOR = 2
 MICRO = 0
-NANO = 2
+NANO = 0
 ISRELEASED = False
 VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 

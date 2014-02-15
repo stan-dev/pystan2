@@ -14,4 +14,4 @@ logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
 
 # make sure this matches version found in setup.py
-__version__ = "2.1.0.2"
+__version__ = "2.2.0.0"

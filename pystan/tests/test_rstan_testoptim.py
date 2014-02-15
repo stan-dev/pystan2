@@ -54,3 +54,4 @@ class TestOptim(unittest.TestCase):
         optim = self.sm.optimizing(data=self.dat, algorithm='Nesterov')
         self.assertTrue(-3 < optim['par']['mu'] < 3)
         self.assertTrue(0 < optim['par']['sigma'] < 5)
+        optim = self.sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov')
