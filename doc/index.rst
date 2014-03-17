@@ -23,6 +23,7 @@ Documentation
    avoiding_recompilation
    differences_pystan_rstan
    api
+   conversion
    whats_new
 
 Stan documentation
