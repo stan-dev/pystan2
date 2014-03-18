@@ -222,8 +222,8 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.optim.tol_param = args['ctrl']['optim']['tol_param']
 
 
-cdef vars_r_t _dict_to_vars_r(dict data_r):
-    """Converts a dict to a C++ map of string, double pairs"""
+cdef vars_r_t _dict_to_vars_r(data_r):
+    """Converts a dict or OrderedDict to a C++ map of string, double pairs"""
     cdef vars_r_t vars_r
 
     # The dimension for a single value is an empty vector. A list of
@@ -240,8 +240,8 @@ cdef vars_r_t _dict_to_vars_r(dict data_r):
     return vars_r
 
 
-cdef vars_i_t _dict_to_vars_i(dict data_i):
-    """Converts a dict to a C++ map of string, int pairs"""
+cdef vars_i_t _dict_to_vars_i(data_i):
+    """Converts a dict or OrdereDict to a C++ map of string, int pairs"""
     cdef vars_i_t vars_i
 
     # The dimension for a single value is an empty vector. A list of
@@ -321,7 +321,7 @@ cdef class StanFit4$model_cppname:
     cdef stan_fit[$model_cppname, ecuyer1988] *thisptr
 
     # attributes populated by methods of StanModel
-    cdef public dict data
+    cdef public data  # dict or OrderedDict
     cdef public dict sim
     cdef public model_name
     cdef public model_pars
@@ -332,7 +332,7 @@ cdef class StanFit4$model_cppname:
     cdef public stanmodel
     cdef public date
 
-    def __cinit__(self, dict data):
+    def __cinit__(self, data):
         data_r, data_i = pystan.misc._split_data(data)
         # NB: dictionary keys must be byte strings
         cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
@@ -341,7 +341,7 @@ cdef class StanFit4$model_cppname:
         if not self.thisptr:
             raise MemoryError("Couldn't allocate space for stan_fit.")
 
-    def __init__(self, dict data):
+    def __init__(self, data):
         self.data = data
 
     def __dealloc__(self):

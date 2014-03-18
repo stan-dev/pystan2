@@ -3,6 +3,7 @@ import os
 import tempfile
 import time
 import unittest
+from collections import OrderedDict
 
 import numpy as np
 
@@ -54,6 +55,10 @@ class TestBernoulli(unittest.TestCase):
         self.assertNotEqual(model.model_name, "bernoulli")
         self.assertTrue(model.model_name.startswith("bernoulli"))
         self.assertTrue(model.model_cppname.startswith("bernoulli"))
+
+    def test_bernoulli_OrderedDict(self):
+        data = OrderedDict(self.bernoulli_data.items())
+        self.model.sampling(data=data, iter=2)
 
     def test_bernoulli_sampling(self):
         fit = self.fit
