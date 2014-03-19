@@ -14,5 +14,5 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
 
-# make sure this matches version found in setup.py
-__version__ = "2.2.0.0"
+# following PEP 386
+__version__ = "2.2.0.1"

@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU General Public License
 # along with PyStan.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
+import ast
+import codecs
 import os
 import sys
 
@@ -46,16 +48,29 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Information Analysis'
 ]
-MAJOR = 2
-MINOR = 2
-MICRO = 0
-NANO = 0
-ISRELEASED = True
-VERSION = '%d.%d.%d.%d' % (MAJOR, MINOR, MICRO, NANO)
 
-FULLVERSION = VERSION
-if not ISRELEASED:
-    FULLVERSION += '.dev'
+
+# VersionFinder from from django-compressor
+class VersionFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.version = None
+
+    def visit_Assign(self, node):
+        if node.targets[0].id == '__version__':
+            self.version = node.value.s
+
+
+def read(*parts):
+    filename = os.path.join(os.path.dirname(__file__), *parts)
+    with codecs.open(filename, encoding='utf-8') as fp:
+        return fp.read()
+
+
+def find_version(*parts):
+    finder = VersionFinder()
+    finder.visit(ast.parse(read(*parts)))
+    return finder.version
+
 
 ###############################################################################
 # Optional setuptools features
@@ -149,7 +164,7 @@ package_data_pats += lib_files_all
 
 def setup_package():
     metadata = dict(name=NAME,
-                    version=FULLVERSION,
+                    version=find_version("pystan", "__init__.py"),
                     maintainer=AUTHOR,
                     maintainer_email=AUTHOR_EMAIL,
                     packages=['pystan',
