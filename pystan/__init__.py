@@ -7,6 +7,7 @@
 import logging
 
 from pystan.api import stanc, stan
+from pystan.misc import read_rdump, stan_rdump
 from pystan.model import StanModel
 
 logging.basicConfig(level=logging.INFO)
