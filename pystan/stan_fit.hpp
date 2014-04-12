@@ -355,6 +355,7 @@ namespace pystan {
       size_t len = dim.size();
       idx.resize(0);
       size_t total = calc_num_params(dim);
+      if (0 >= total) return;
       std::vector<size_t> loopj;
       for (size_t i = 1; i <= len; ++i)
         loopj.push_back(len - i);
