@@ -652,7 +652,11 @@ class StanModel:
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
+
+        if isinstance(pars, string_types):
+            pars = [pars]
         if pars is not None and len(pars) > 0:
+            fit._update_param_oi(pars)
             if not all(p in m_pars for p in pars):
                 pars = np.asarray(pars)
                 unmatched = pars[np.invert(np.in1d(pars, m_pars))]

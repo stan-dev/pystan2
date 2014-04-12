@@ -53,7 +53,7 @@ cdef extern from "$model_cppname.hpp" namespace "${model_cppname}_namespace":
         $model_cppname(var_context& context) except +
 
 # NOTE: Methods that aren't intended for public use are prefixed by '_'. For
-# example, _update_param_names_oi probably shouldn't be called unless you know
+# example, _update_param_oi probably shouldn't be called unless you know
 # something about the state of the C++ class instance wrapped by the class.
 
 ctypedef map[string, pair[vector[double], vector[size_t]]] vars_r_t
@@ -617,7 +617,8 @@ cdef class StanFit4$model_cppname:
             raise AttributeError(msg.format(self.model_name))
 
     def _update_param_oi(self, pars):
-        cdef vector[string] pars_ = pars
+        pars_bytes = [n.encode('ascii') for n in pars]
+        cdef vector[string] pars_ = pars_bytes
         cdef int ret = self.thisptr.update_param_oi(pars_)
         return ret
 
