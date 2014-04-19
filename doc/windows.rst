@@ -23,7 +23,7 @@ The following ``conda`` command will install PyStan 2.2.0.0:
 
     conda install -c patricksnape pystan
 
-Detailed Instructions
+Detailed instructions
 ---------------------
 
 When you provide your model code to (Py)Stan, Stan generates and compiles C++

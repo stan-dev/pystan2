@@ -38,7 +38,7 @@ R:
 Reusing models and saving objects
 =================================
 
-*See also :ref:`avoiding-recompilation`*
+*See also :ref:`avoiding-recompilation`.*
 
 PyStan uses ``pickle`` to save objects for future use.
 

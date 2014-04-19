@@ -3,7 +3,7 @@
 .. currentmodule:: pystan
 
 =================
- Getting Started
+ Getting started
 =================
 
 PyStan is the `Python <http://python.org>`_ interface for `Stan <http://mc-stan.org/>`_.
@@ -27,8 +27,7 @@ Installation
 .. note:: Installing PyStan involves compiling Stan. This may take
     a considerable amount of time.
 
-
-Unix-based Systems including Mac OS X
+Unix-based systems including Mac OS X
 -------------------------------------
 
 PyStan and the required packages may be installed from the `Python Package Index

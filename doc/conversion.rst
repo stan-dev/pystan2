@@ -2,7 +2,7 @@
 
 .. currentmodule:: pystan.misc
 
-Conversion Utilities for Stan's R Dump Format
+Conversion utilities for Stan's R Dump format
 =============================================
 
 .. autosummary::
