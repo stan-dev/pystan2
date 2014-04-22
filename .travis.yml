@@ -28,7 +28,7 @@ before_install:
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
 install:
-  - conda create --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib
+  - conda create --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython=0.19 numpy=1.7 scipy nose matplotlib
   - source activate env_name
   # use pip install . rather than python setup.py install due to travis log limits
   - pip install .
