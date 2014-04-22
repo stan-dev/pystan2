@@ -1,4 +1,4 @@
-include MANIFEST.in LICENSE README.rst setup.py ez_setup.py
+include MANIFEST.in LICENSE README.rst setup.py
 
 graft doc
 prune doc/_build
@@ -7,3 +7,11 @@ global-exclude *.so
 global-exclude *.pyc
 global-exclude .git*
 global-exclude *.png
+
+# unused parts of the stan source
+prune pystan/stan/doc
+prune pystan/stan/logos
+prune pystan/stan/src/test
+prune pystan/stan/src/models
+prune pystan/stan/src/docs
+prune pystan/stan/lib/gtest_1.7.0
