@@ -460,6 +460,9 @@ cdef class StanFit4$model_cppname:
         s = pystan.misc._print_stanfit(self)
         return s.encode('utf-8') if PY2 else s
 
+    def __repr__(self):
+        return self.__str__()
+
     def summary(self, pars=None, probs=None):
         return pystan.misc._summary(self, pars, probs)
 
