@@ -48,6 +48,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         vector[string] param_names()
         vector[string] param_names_oi()
         vector[vector[uint]] param_dims()
+        vector[vector[uint]] param_dims_oi()
         vector[string] param_fnames_oi()
 
     cdef struct sampling_t:

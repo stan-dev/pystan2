@@ -705,7 +705,7 @@ class StanModel:
                    'warmup2': [warmup2] * chains,
                    'permutation': perm_lst,
                    'pars_oi': fit._get_param_names_oi(),
-                   'dims_oi': fit._get_param_dims(),
+                   'dims_oi': fit._get_param_dims_oi(),
                    'fnames_oi': fnames_oi,
                    'n_flatnames': n_flatnames}
         fit.model_name = self.model_name

@@ -1576,6 +1576,10 @@ namespace pystan {
         return dims_;
     } 
 
+    std::vector<std::vector<unsigned int> > param_dims_oi() const {
+        return dims_oi_;
+    }
+
     std::vector<std::string> param_fnames_oi() const {
        std::vector<std::string> fnames; 
        get_all_flatnames(names_oi_, dims_oi_, fnames, true); 

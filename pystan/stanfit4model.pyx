@@ -642,5 +642,10 @@ cdef class StanFit4$model_cppname:
         dims_ = dims
         return dims_
 
+    def _get_param_dims_oi(self):
+        cdef vector[vector[uint]] dims = self.thisptr.param_dims_oi()
+        dims_ = dims
+        return dims_
+
     def _call_sampler(self, dict args):
         return _call_sampler(self.data, args)
