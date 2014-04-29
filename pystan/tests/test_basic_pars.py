@@ -1,7 +1,6 @@
 import unittest
 
-
-from pystan import StanModel
+from pystan import StanModel, stan
 
 
 class Test8Schools(unittest.TestCase):
@@ -37,9 +36,26 @@ class Test8Schools(unittest.TestCase):
         data = self.schools_dat
         pars = ['mu']  # list of parameters
         fit = model.sampling(data=data, pars=pars)
+        self.assertEqual(len(fit.sim['pars_oi']), len(fit.sim['dims_oi']))
         self.assertEqual(len(fit.extract()), 2)
         self.assertIn('mu', fit.extract())
         self.assertRaises(ValueError, fit.extract, 'theta')
+        self.assertIsNotNone(fit.extract(permuted=False))
+
+        pars = ['eta']
+        fit = model.sampling(data=data, pars=pars)
+        self.assertEqual(len(fit.extract()), 2)
+        self.assertIn('eta', fit.extract())
+        self.assertRaises(ValueError, fit.extract, 'theta')
+        self.assertIsNotNone(fit.extract(permuted=False))
+
+        pars = ['mu', 'eta']
+        fit = model.sampling(data=data, pars=pars)
+        self.assertEqual(len(fit.extract()), 3)
+        self.assertIn('mu', fit.extract())
+        self.assertIn('eta', fit.extract())
+        self.assertRaises(ValueError, fit.extract, 'theta')
+        self.assertIsNotNone(fit.extract(permuted=False))
 
     def test_8schools_pars_bare(self):
         model = self.model
@@ -49,3 +65,11 @@ class Test8Schools(unittest.TestCase):
         self.assertEqual(len(fit.extract()), 2)
         self.assertIn('mu', fit.extract())
         self.assertRaises(ValueError, fit.extract, 'theta')
+        self.assertIsNotNone(fit.extract(permuted=False))
+
+        pars = 'eta'  # bare string
+        fit = model.sampling(data=data, pars=pars)
+        self.assertEqual(len(fit.extract()), 2)
+        self.assertIn('eta', fit.extract())
+        self.assertRaises(ValueError, fit.extract, 'theta')
+        self.assertIsNotNone(fit.extract(permuted=False))
