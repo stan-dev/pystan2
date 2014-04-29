@@ -131,6 +131,10 @@ class TestBernoulli(unittest.TestCase):
         fit = self.fit
         fig = fit.plot()
         assert fig is not None
+        fig = fit.plot(['theta'])
+        assert fig is not None
+        fig = fit.plot('theta')
+        assert fig is not None
 
     def test_bernoulli_sampling_sample_file(self):
         tmpdir = tempfile.mkdtemp()

@@ -354,13 +354,15 @@ cdef class StanFit4$model_cppname:
 
         Parameters
         ---------
-        pars : sequence of str
-            names of parameters
+        pars : {str, sequence of str}
+            parameter name(s)
 
         Note
         ----
         This is currently an alias for the `traceplot` method.
         """
+        if isinstance(pars, string_types):
+            pars = [pars]
         return pystan.plots.traceplot(self, pars)
 
     def traceplot(self, pars=None):
@@ -368,8 +370,8 @@ cdef class StanFit4$model_cppname:
 
         Parameters
         ---------
-        pars : sequence of str
-            names of parameters
+        pars : {str, sequence of str}
+            parameter name(s)
         """
         # FIXME: for now plot and traceplot do the same thing
         return pystan.plots.traceplot(self, pars)
@@ -379,8 +381,8 @@ cdef class StanFit4$model_cppname:
 
         Parameters
         ----------
-        pars : sequence of str
-            names of parameters (including other quantities)
+        pars : {str, sequence of str}
+            parameter (or quantile) name(s)
         permuted : bool
             If True, returned samples are permuted. All chains are merged and
             warmup samples are discarded.
