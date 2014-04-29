@@ -58,7 +58,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         int warmup
         int thin
         bool save_warmup  # whether to save warmup samples (always true now)
-        int iter_save # number of iterations saved 
+        int iter_save # number of iterations saved
         int iter_save_wo_warmup  # number of iterations saved wo warmup
         bool adapt_engaged
         double adapt_gamma
@@ -71,7 +71,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         sampling_metric_t metric  # UNIT_E, DIAG_E, DENSE_E
         double stepsize  # default to 1
         double stepsize_jitter
-        int max_treedepth  # for NUTS, default to 10.  
+        int max_treedepth  # for NUTS, default to 10.
         double int_time  # for HMC, default to 2 * pi
 
     cdef struct optim_t:
@@ -123,7 +123,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         string adaptation_info
         vector[vector[double] ] sampler_params
         vector[string] sampler_param_names
-    
+
     # free standing functions
     void get_all_flatnames(vector[string] names, vector[vector[uint]]& dims, vector[string] fnames, bool col_major)
 
