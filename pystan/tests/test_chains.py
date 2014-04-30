@@ -19,6 +19,7 @@ class TestChains(unittest.TestCase):
     c1_colnames = open(f1, 'r').readlines()[20].strip().split(',')[2:]
     c2 = np.loadtxt(f2, skiprows=21, delimiter=',')[:, 2:]
     c2_colnames = open(f2, 'r').readlines()[20].strip().split(',')[2:]
+    np.testing.assert_equal(c1_colnames, c2_colnames)
 
     n_samples = len(c1)
 
