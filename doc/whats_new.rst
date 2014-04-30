@@ -13,8 +13,8 @@ v2.2.0.1 (30. April 2014)
 - Add Windows installation instructions. Thanks to @patricksnape.
 - Lighten source distribution.
 
-v2.2.0.0 (16. January 2014)
-===========================
+v2.2.0.0 (16. February 2014)
+============================
 - Updates Stan to v2.2.0.
 
 v2.1.0.1 (27. January 2014)
