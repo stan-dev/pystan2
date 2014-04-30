@@ -24,6 +24,10 @@ issuing the command ``apt-get install build-essential``.
 Installation
 ============
 
+.. note:: Installing PyStan involves compiling Stan. This may take
+    a considerable amount of time.
+
+
 Unix-based Systems including Mac OS X
 -------------------------------------
 
@@ -49,11 +53,9 @@ dependencies, then issue the commands:
 Windows
 -------
 
-Installation under Windows is not well tested. Success installing PyStan under
-32-bit Windows has been reported.
-
-.. note:: Installing PyStan involves compiling Stan. This may take
-    a considerable amount of time.
+PyStan requires a working C++ compiler. Using PyStan with `Anaconda
+<https://store.continuum.io/cshop/anaconda/>`_ and Visual Studio 2008 is
+documented in :ref:`windows`.
 
 Using PyStan
 ============
