@@ -30,8 +30,8 @@ import sys
 LONG_DESCRIPTION = open('README.rst').read()
 NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
-AUTHOR       = 'Allen B. Riddell'
-AUTHOR_EMAIL = 'abr@ariddell.org'
+AUTHOR       = 'PyStan Developers'
+AUTHOR_EMAIL = 'stan-dev@googlegroups.com'
 URL          = 'https://github.com/stan-dev/pystan'
 LICENSE      = 'GPLv3'
 CLASSIFIERS = [
