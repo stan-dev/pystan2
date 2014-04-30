@@ -6,6 +6,13 @@
  What's New
 ============
 
+v2.2.0.1 (30. April 2014)
+=========================
+- Add support for reading Stan's R dump files.
+- Add support for specifying parameters of interest in ``stan``.
+- Add Windows installation instructions. Thanks to @patricksnape.
+- Lighten source distribution.
+
 v2.2.0.0 (16. January 2014)
 ===========================
 - Updates Stan to v2.2.0.
