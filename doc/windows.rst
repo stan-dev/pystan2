@@ -19,8 +19,9 @@ Quickstart
 Those using (or are willing to use) the Anaconda Python distribution and a free
 compiler provided by Microsoft will find installation of PyStan relatively
 painless. Instructions about downloading and configuring the compiler, Visual
-Studio 2008 Express, may be found on the Menpo wiki: [Setting up a development
-environment](https://github.com/menpo/menpo/wiki/%5BDevelopment-Windows%5D-Setting-up-a-development-environment).
+Studio 2008 Express, may be found on the Menpo wiki: `Setting up a development
+environment
+<https://github.com/menpo/menpo/wiki/%5BDevelopment-Windows%5D-Setting-up-a-development-environment>`_.
 
 Once you have Visual Studio 2008 installed and Anaconda's Python 2.7, you can
 install a binary version of PyStan provided by Patrick Snape with the following
