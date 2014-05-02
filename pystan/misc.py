@@ -36,10 +36,9 @@ import tempfile
 import time
 
 import numpy as np
-try:
-    from scipy.stats.mstats import mquantiles
-except ImportError:
-    from pystan.external.scipy.mstats import mquantiles
+
+# READTHEDOCS needs this change
+from pystan.external.scipy.mstats import mquantiles
 
 import pystan.chains
 import pystan._misc
