@@ -9,19 +9,27 @@
 Caveats
 -------
 
-- PyStan on Windows does not support multiprocessing. You must specify
-  ``n_jobs=1`` when calling the ``stan`` function or the ``sampling`` method.
+- PyStan on Windows does not support multiprocessing. You *must* specify
+  ``n_jobs=1`` when calling the ``stan`` function or using the ``sampling``
+  method.
 
 Quickstart
 ----------
 
-If you have Visual Studio 2008 installed and are using Python 2.7 through
-Anacaonda, you can use a binary version of PyStan provided by Patrick Snape.
-The following ``conda`` command will install PyStan 2.2.0.0:
+Those using (or are willing to use) the Anaconda Python distribution and a free
+compiler provided by Microsoft will find installation of PyStan relatively
+painless. Instructions about downloading and configuring the compiler, Visual
+Studio 2008 Express, may be found on the Menpo wiki: [Setting up a development
+environment](https://github.com/menpo/menpo/wiki/%5BDevelopment-Windows%5D-Setting-up-a-development-environment).
+
+Once you have Visual Studio 2008 installed and Anaconda's Python 2.7, you can
+install a binary version of PyStan provided by Patrick Snape with the following
+command:
 
 ::
 
     conda install -c patricksnape pystan
+
 
 Detailed instructions
 ---------------------
