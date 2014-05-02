@@ -3,7 +3,11 @@ This documentation is intended for use by pystan developers.
 Release checklist
 =================
 
-- Update doc/whats_new.rst
+- Double check version in ``pystan/__init__.py``
+- Update ``doc/whats_new.rst``
+- Bump version in snippet in ``doc/getting_started.rst``, i.e., "wget
+  https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
+  references to the version number.)
 - ``git tag``
 - Push tag to github ``git push --tags``
 - Git branch ``master`` should be fast-forwarded to ``develop``
@@ -19,11 +23,8 @@ Release checklist
 After release
 =============
 
-- Add placeholder for changes in doc/whats_new.rst
-- Bump version in pystan/__init__.py
-- Bump version in snippet in doc/getting_started.rst, i.e., "wget
-  https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
-  references to the version number.)
+- Add placeholder for changes in ``doc/whats_new.rst``
+- Bump version in ``pystan/__init__.py``
 
 See also
 ========
