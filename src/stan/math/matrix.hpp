@@ -62,7 +62,10 @@
 #include <stan/math/matrix/prod.hpp>
 #include <stan/math/matrix/promote_common.hpp>
 #include <stan/math/matrix/promoter.hpp>
+#include <stan/math/matrix/qr_Q.hpp>
+#include <stan/math/matrix/qr_R.hpp>
 #include <stan/math/matrix/quad_form.hpp>
+#include <stan/math/matrix/quad_form_diag.hpp>
 #include <stan/math/matrix/rank.hpp>
 #include <stan/math/matrix/resize.hpp>
 #include <stan/math/matrix/row.hpp>
@@ -75,6 +78,7 @@
 #include <stan/math/matrix/size.hpp>
 #include <stan/math/matrix/softmax.hpp>
 #include <stan/math/matrix/sort.hpp>
+#include <stan/math/matrix/sort_indices.hpp>
 #include <stan/math/matrix/stan_print.hpp>
 #include <stan/math/matrix/sub_col.hpp>
 #include <stan/math/matrix/sub_row.hpp>
