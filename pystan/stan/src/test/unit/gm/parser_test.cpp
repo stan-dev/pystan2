@@ -2,8 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <istream>
+#include <sstream>
 #include <exception>
 #include <stdexcept>
+
+#include <boost/lexical_cast.hpp>
 
 #include <stan/gm/ast.hpp>
 #include <stan/gm/parser.hpp>
@@ -32,13 +35,26 @@ std::string file_name_to_model_name(const std::string& name) {
   return name_copy;
 }
 
-bool is_parsable(const std::string& file_name) {
+bool is_parsable(const std::string& file_name,
+                 std::ostream* msgs = 0) {
   stan::gm::program prog;
   std::ifstream fs(file_name.c_str());
   std::string model_name = file_name_to_model_name(file_name);
-  bool parsable = stan::gm::parse(0, fs, file_name, model_name, prog);
+  bool parsable = stan::gm::parse(msgs, fs, file_name, model_name, prog);
   return parsable;
 }
+
+bool is_parsable_folder(const std::string& model_name,
+                        const std::string folder = "syntax-only",
+                        std::ostream* msgs = 0) {
+  std::string path("src/test/test-models/");
+  path += folder;
+  path += "/";
+  path += model_name;
+  path += ".stan";
+  return is_parsable(path,msgs);
+}
+
 
 TEST(gm_parser,eight_schools) {
   EXPECT_TRUE(is_parsable("src/models/misc/eight_schools/eight_schools.stan"));
@@ -47,12 +63,6 @@ TEST(gm_parser,eight_schools) {
 TEST(gm_parser,bugs_1_kidney) {
   EXPECT_TRUE(is_parsable("src/models/bugs_examples/vol1/kidney/kidney.stan"));
 }
-/*TEST(gm_parser,bugs_1_leuk) {
-  EXPECT_TRUE(is_parsable("src/models/bugs_examples/vol1/leuk/leuk.stan"));
-  }*/
-/*TEST(gm_parser,bugs_1_leukfr) {
-  EXPECT_TRUE(is_parsable("src/models/bugs_examples/vol1/leukfr/leukfr.stan"));
-}*/
 TEST(gm_parser,bugs_1_mice) {
   EXPECT_TRUE(is_parsable("src/models/bugs_examples/vol1/mice/mice.stan"));
 }
@@ -156,10 +166,10 @@ TEST(gm_parser,parsable_test_bad4) {
   EXPECT_THROW(is_parsable("src/test/test-models/reference/gm/bad4.stan"),
                std::invalid_argument);
 }
-// TEST(gm_parser,parsable_test_bad5) {
-//    EXPECT_THROW(is_parsable("src/test/test-models/reference/gm/bad5.stan"),
-//                 std::invalid_argument);
-// }
+TEST(gm_parser,parsable_test_bad5) {
+  EXPECT_THROW(is_parsable("src/test/test-models/reference/gm/bad5.stan"),
+               std::invalid_argument);
+}
 
 TEST(gm_parser,parsable_test_bad6) {
   EXPECT_THROW(is_parsable("src/test/test-models/reference/gm/bad6.stan"),
@@ -246,4 +256,250 @@ TEST(gm_parser,function_signatures) {
   EXPECT_TRUE(is_parsable("src/test/test-models/syntax-only/function_signatures_student_t_3.stan"));
   EXPECT_TRUE(is_parsable("src/test/test-models/syntax-only/function_signatures_uniform.stan"));
   EXPECT_TRUE(is_parsable("src/test/test-models/syntax-only/function_signatures_weibull.stan"));
+}
+
+void test_parsable(const std::string& model_name) {
+  EXPECT_TRUE(is_parsable_folder(model_name, "syntax-only"));
+}
+
+void test_warning(const std::string& model_name, const std::string& warning_msg) {
+  std::stringstream msgs;
+  EXPECT_TRUE(is_parsable_folder(model_name, "syntax-only", &msgs));
+  EXPECT_TRUE(msgs.str().find_first_of(warning_msg) != std::string::npos);
+}
+
+/** test that model with specified name in syntax-only path throws
+ * an exception containing the second arg as a substring
+ *
+ * @param model_name Name of model to parse
+ * @param msg Substring of error message expected.
+ */
+void test_throws(const std::string& model_name, const std::string& error_msg) {
+  std::stringstream msgs;
+  try {
+    is_parsable_folder(model_name, "reference", &msgs);
+  } catch (const std::invalid_argument& e) {
+    if (std::string(e.what()).find(error_msg) == std::string::npos
+        && msgs.str().find(error_msg) == std::string::npos) {
+      std::cout << std::endl << "*********************************" << std::endl
+                << "model name=" << model_name << std::endl
+                << "*** EXPECTED: error_msg=" << error_msg << std::endl
+                << "*** FOUND: e.what()=" << e.what() << std::endl
+                << "*** FOUND: msgs.str()=" << msgs.str() << std::endl
+                << "*********************************" << std::endl
+                << std::endl;
+      FAIL();
+    }
+    return;
+  }
+  std::cout << "model name=" << model_name 
+            << " is parsable and were exepecting msg=" << error_msg
+            << std::endl;
+  FAIL();
+}
+
+TEST(gmParserStatement2Grammar, addConditionalCondition) {
+  test_parsable("conditional_condition_good");
+  test_throws("conditional_condition_bad_1",
+              "conditions in if-else");
+  test_throws("conditional_condition_bad_2",
+              "conditions in if-else");
+}
+TEST(gmParserStatementGrammar, validateIntExpr2) {
+  test_parsable("validate_int_expr2_good");
+  test_throws("validate_int_expr2_bad1",
+              "expression denoting integer required");
+  test_throws("validate_int_expr2_bad2",
+              "expression denoting integer required");
+  test_throws("validate_int_expr2_bad3",
+              "expression denoting integer required");
+  test_throws("validate_int_expr2_bad4",
+              "expression denoting integer required");
+}
+TEST(gmParserStatementGrammar, validateAllowSample) {
+  test_throws("validate_allow_sample_bad1",
+              "sampling only allowed in model");
+  test_throws("validate_allow_sample_bad2",
+              "sampling only allowed in model");
+  test_throws("validate_allow_sample_bad3",
+              "sampling only allowed in model");
+}
+TEST(gmParserTermGrammar, multiplicationFun) {
+  test_parsable("validate_multiplication");
+}
+TEST(gmParserTermGrammar, divisionFun) {
+  test_warning("validate_division_int_warning", 
+               "integer division implicitly rounds");
+  test_parsable("validate_division_good");
+}
+TEST(gmParserTermGrammar, leftDivisionFun) {
+  test_parsable("validate_left_division_good");
+}
+TEST(gmParserTermGrammar, eltMultiplicationFun) {
+  test_parsable("validate_elt_multiplication_good");
+}
+TEST(gmParserTermGrammar, negateExprFun) {
+  test_parsable("validate_negate_expr_good");
+}
+TEST(gmParserTermGrammar, logicalNegateExprFun) {
+  test_throws("validate_logical_negate_expr_bad",
+              "logical negation operator ! only applies to int or real");
+  test_parsable("validate_logical_negate_expr_good");
+}
+TEST(gmParserTermGrammar, addExpressionDimssFun) {
+  test_throws("validate_add_expression_dimss_bad",
+              "indexes inappropriate");
+  test_parsable("validate_add_expression_dimss_good");
+}
+TEST(gmParserTermGrammar, setFunTypeNamed) {
+  test_throws("validate_set_fun_type_named_bad1",
+              "random number generators only allowed in generated quantities");
+  test_parsable("validate_set_fun_type_named_good");
+}
+TEST(gmParserVarDeclsGrammarDef, addVar) {
+  test_throws("validate_add_var_bad1",
+              "duplicate declaration of variable");
+  test_throws("validate_add_var_bad2",
+              "integer parameters or transformed parameters are not allowed");
+  test_parsable("validate_add_var_good");
+}
+TEST(gmParserVarDeclsGrammarDef, validateIntExpr) {
+  test_parsable("validate_validate_int_expr_good");
+  for (int i = 1; i <= 13; ++i) {
+    std::string model_name("validate_validate_int_expr_bad");
+    model_name += boost::lexical_cast<std::string>(i);
+    test_throws(model_name,
+                "expression denoting integer required");
+  }
+}
+TEST(gmParserVarDeclsGrammarDef, setIntRangeLower) {
+  test_parsable("validate_set_int_range_lower_good");
+  test_throws("validate_set_int_range_lower_bad1",
+              "expression denoting integer required");
+  test_throws("validate_set_int_range_lower_bad2",
+              "expression denoting integer required");
+  test_throws("validate_set_int_range_lower_bad3",
+              "expression denoting integer required");
+}
+TEST(gmParserVarDeclsGrammarDef, setIntRangeUpper) {
+  test_parsable("validate_set_int_range_upper_good");
+  test_throws("validate_set_int_range_upper_bad1",
+              "expression denoting integer required");
+  test_throws("validate_set_int_range_upper_bad2",
+              "expression denoting integer required");
+}
+TEST(gmParserVarDeclsGrammarDef, setDoubleRangeLower) {
+  test_parsable("validate_set_double_range_lower_good");
+  test_throws("validate_set_double_range_lower_bad1",
+              "expression denoting real required");
+  test_throws("validate_set_double_range_lower_bad2",
+              "expression denoting real required");
+}
+TEST(gmParserVarDeclsGrammarDef, setDoubleRangeUpper) {
+  test_parsable("validate_set_double_range_upper_good");
+  test_throws("validate_set_double_range_upper_bad1",
+              "expression denoting real required");
+  test_throws("validate_set_double_range_upper_bad2",
+              "expression denoting real required");
+}
+TEST(gmParserStatementGrammarDef, jacobianAdjustmentWarning) {
+  test_parsable("validate_jacobian_warning_good");
+  test_warning("validate_jacobian_warning1",
+               "you must call increment_log_prob() with the log absolute determinant");
+  test_warning("validate_jacobian_warning2",
+               "you must call increment_log_prob() with the log absolute determinant");
+  test_warning("validate_jacobian_warning3",
+               "you must call increment_log_prob() with the log absolute determinant");
+  test_warning("validate_jacobian_warning4",
+               "you must call increment_log_prob() with the log absolute determinant");
+  test_warning("validate_jacobian_warning5",
+               "you must call increment_log_prob() with the log absolute determinant");
+  test_warning("validate_jacobian_warning6",
+               "you must call increment_log_prob() with the log absolute determinant");
+}
+TEST(gmParserStatementGrammarDef, comparisonsInBoundsTest) {
+  test_parsable("validate_bounds_comparison");
+  EXPECT_THROW(is_parsable("src/test/test-models/reference/gm/bad_bounds1.stan"),
+               std::invalid_argument);
+}
+
+TEST(parserFunctions, funsGood0) {
+  test_parsable("validate_functions"); // tests proper definitions and use
+}
+TEST(parserFunctions, funsGood1) {
+  test_parsable("functions-good1");
+}
+TEST(parserFunctions, funsGood2) {
+  test_parsable("functions-good2");
+}
+TEST(parserFunctions, funsGood3) {
+  test_parsable("functions-good3");
+}
+TEST(parserFunctions, funsGood4) {
+  test_parsable("functions-good-void");
+}
+TEST(parserFunctions, funsBad1) {
+  test_throws("functions-bad1","Function already declared");
+}
+TEST(parserFunctions, funsBad2) {
+  test_throws("functions-bad2","Function declared, but not defined");
+}
+TEST(parserFunctions, funsBad3) {
+  test_throws("functions-bad3","EXPECTED: \"(\" BUT FOUND");
+}
+TEST(parserFunctions,funsBad4) {
+  test_throws("functions-bad4",
+              "Functions used as statements must be declared to have void returns");
+}
+TEST(parserFunctions,funsBad5) {
+  test_throws("functions-bad5",
+              "base type mismatch in assignment");
+}
+TEST(parserFunctions,funsBad6) {
+  test_throws("functions-bad6",
+              "lp suffixed functions only allowed in");
+}
+TEST(parserFunctions,funsBad7) {
+  test_throws("functions-bad7",
+              "lp suffixed functions only allowed in");
+}
+TEST(parserFunctions,funsBad8) {
+  test_throws("functions-bad8",
+              "random number generators only allowed in");
+}
+TEST(parserFunctions,funsBad9) {
+  test_throws("functions-bad9",
+              "random number generators only allowed in");
+}
+TEST(parserFunctions,funsBad10) {
+  test_throws("functions-bad10",
+              "random number generators only allowed in");
+}
+TEST(parserFunctions,funsBad11) {
+  test_throws("functions-bad11",
+              "sampling only allowed in model");
+}
+TEST(parserFunctions,funsBad12) {
+  test_throws("functions-bad12",
+              "sampling only allowed in model");
+}
+TEST(parserFunctions,funsBad13) {
+  test_throws("functions-bad13",
+              "Illegal to assign to function argument variables");
+}
+TEST(parserFunctions,funsBad14) {
+  test_throws("functions-bad14",
+              "Function already defined");
+}
+TEST(parserFunctions,funsBad15) {
+  test_throws("functions-bad15",
+              "attempt to increment log prob with void expression");
+}
+TEST(parserFunctions,funsBad16) {
+  test_throws("functions-bad16",
+              "Function system defined");
+}
+TEST(parserFunctions,funsBad17) {
+  test_throws("functions-bad17",
+              "Require real return type for functions ending in _log");
 }
