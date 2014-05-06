@@ -26,26 +26,16 @@ class TestChains(unittest.TestCase):
     c1 = OrderedDict((k, v) for k, v in zip(c1_colnames, c1.T))
     c2 = OrderedDict((k, v) for k, v in zip(c2_colnames, c2.T))
 
-    lst = dict(samples=[{'chains': c1}, {'chains': c2}],
+    lst = dict(fnames_oi=c1_colnames, samples=[{'chains': c1}, {'chains': c2}],
                n_save=np.repeat(n_samples, 2), permutation=None,
-               warmup2=[0, 0], chains=2, n_flatnames=len(c1))
-
-    def test_autocovariance(self):
-        c1 = self.c1
-        v = c1['mu.1']
-        acov = pystan._chains.stan_prob_autocovariance(v)
-        self.assertEqual(len(acov), len(v))
-        self.assertAlmostEqual(np.mean(acov), -0.005262112)
-        self.assertAlmostEqual(np.std(acov, ddof=1), 0.05985297)
+               warmup=0, warmup2=[0, 0], chains=2, n_flatnames=len(c1))
 
     def test_essnrhat(self):
         lst = self.lst
         ess = pystan.chains.ess(lst, 2)
-        # FIXME: delta=0.001 works in R; not sure why there is a difference
-        self.assertAlmostEqual(ess, 13.0778, delta=0.2)
+        self.assertAlmostEqual(ess, 13.0778, delta=0.001)
         ess2 = pystan.chains.ess(lst, 45)
-        # FIXME: delta=0.001 works in R; not sure why there is a difference
-        self.assertAlmostEqual(ess2, 43.0242, delta=2)
+        self.assertAlmostEqual(ess2, 43.0242, delta=0.001)
 
     def test_rhat(self):
         lst = self.lst
