@@ -45,13 +45,16 @@ class TestOptim(unittest.TestCase):
     #     optim = sm.optimizing(file='optim.data.R', algorithm='BFGS')
 
     def test_optim_stdnorm_bfgs(self):
-        optim = self.sm.optimizing(data=self.dat, algorithm='BFGS')
+        sm = self.sm
+        optim = sm.optimizing(data=self.dat, algorithm='BFGS')
         print(optim)
         self.assertTrue(-1 < optim['par']['mu'] < 1)
         self.assertTrue(0 < optim['par']['sigma'] < 2)
 
     def test_optim_stdnorm_nesterov(self):
-        optim = self.sm.optimizing(data=self.dat, algorithm='Nesterov')
+        sm = self.sm
+        optim = sm.optimizing(data=self.dat, algorithm='Nesterov')
         self.assertTrue(-3 < optim['par']['mu'] < 3)
         self.assertTrue(0 < optim['par']['sigma'] < 5)
-        optim = self.sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov')
+        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov')
+        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', as_vector=False)
