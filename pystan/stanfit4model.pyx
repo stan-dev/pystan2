@@ -355,14 +355,17 @@ cdef class StanFit4$model_cppname:
         Parameters
         ---------
         pars : {str, sequence of str}
-            parameter name(s)
+            parameter name(s); by default use all parameters of interest
 
         Note
         ----
         This is currently an alias for the `traceplot` method.
         """
-        if isinstance(pars, string_types):
+        if pars is None:
+            pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
+        elif isinstance(pars, string_types):
             pars = [pars]
+        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
         return pystan.plots.traceplot(self, pars)
 
     def traceplot(self, pars=None):
@@ -370,11 +373,11 @@ cdef class StanFit4$model_cppname:
 
         Parameters
         ---------
-        pars : {str, sequence of str}
-            parameter name(s)
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
         """
         # FIXME: for now plot and traceplot do the same thing
-        return pystan.plots.traceplot(self, pars)
+        return self.plot(pars)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False):
         """Extract samples in different forms for different parameters.
@@ -411,6 +414,7 @@ cdef class StanFit4$model_cppname:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
             pars = [pars]
+        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)

@@ -155,6 +155,8 @@ def _summary(fit, pars=None, probs=None, **kwargs):
         pars = fit.sim['pars_oi']
     elif isinstance(pars, string_types):
         pars = [pars]
+    pars = _remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+
     if probs is None:
         probs = (0.025, 0.25, 0.5, 0.75, 0.975)
     ss = _summary_sim(fit.sim, pars, probs)
@@ -978,6 +980,31 @@ def _rdump_value_to_numpy(s):
     else:
         arr = np.array(float(s) if '.' in s else int(s))
     return arr
+
+
+def _remove_empty_pars(pars, pars_oi, dims_oi):
+    """
+    Remove parameters that are actually empty. For example, the parameter
+    y would be removed with the following model code:
+
+        transformed data { int n; n <- 0; }
+        parameters { real y[n]; }
+
+    Parameters
+    ----------
+    pars: iterable of str
+    pars_oi: list of str
+    dims_oi: list of list of int
+
+    Returns
+    -------
+    pars_trimmed: list of str
+    """
+    pars = list(pars)
+    for par, dim in zip(pars_oi, dims_oi):
+        if par in pars and np.prod(dim) == 0:
+            del pars[pars.index(par)]
+    return pars
 
 
 def read_rdump(filename):
