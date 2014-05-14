@@ -34,7 +34,7 @@ class TestStanc(unittest.TestCase):
             y ~ normal(0, 1);}
         """
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(ValueError, 'Parser expecting: ";"'):
+        with assertRaisesRegex(ValueError, 'EXPECTED: ";" BUT FOUND'):
             stanc(model_code=model_code)
-        with assertRaisesRegex(ValueError, 'Parser expecting: ";"'):
+        with assertRaisesRegex(ValueError, 'EXPECTED: ";" BUT FOUND'):
             StanModel(model_code=model_code)

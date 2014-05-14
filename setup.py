@@ -122,14 +122,17 @@ libstan = ('stan', {'sources': libstan_sources,
 extensions_extra_compile_args = ['-O0', '-ftemplate-depth-256']
 
 stanc_sources = [
-    "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/ast_def.cpp",
+    "pystan/stan/src/stan/gm/grammars/bare_type_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/expression07_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/functions_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/program_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/statement_2_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/statement_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/term_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/program_grammar_inst.cpp",
+    "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/gm/grammars/whitespace_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/ast_def.cpp"
 ]
 
 extensions = [Extension("pystan._api",
