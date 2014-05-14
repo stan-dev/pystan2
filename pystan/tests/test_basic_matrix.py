@@ -44,7 +44,7 @@ class TestMatrixParam(unittest.TestCase):
     def test_matrix_param_order_optimizing(self):
         sm = self.model
         op = sm.optimizing(data=dict(K=3, D=2))
-        beta = op['par']['beta']
+        beta = op['beta']
         assert beta.shape == (3, 2)
         beta_colmeans = np.mean(beta, axis=0)
         assert beta_colmeans[0] < 4

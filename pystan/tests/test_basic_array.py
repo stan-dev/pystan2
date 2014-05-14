@@ -50,7 +50,7 @@ def test_array_param():
     # optimizing
     sm = fit.stanmodel
     op = sm.optimizing(data=dict(K=4))
-    beta = op['par']['beta']
+    beta = op['beta']
     assert beta.shape == (4, 1, 2)
     assert np.all(beta[:, 0, 0] < 4)
     assert np.all(beta[:, 0, 1] > 100 - 4)

@@ -36,8 +36,8 @@ class TestOptim(unittest.TestCase):
     def test_optim_stdnorm(self):
         optim = self.sm.optimizing(data=self.dat)
         print(optim)
-        self.assertTrue(-1 < optim['par']['mu'] < 1)
-        self.assertTrue(0 < optim['par']['sigma'] < 2)
+        self.assertTrue(-1 < optim['mu'] < 1)
+        self.assertTrue(0 < optim['sigma'] < 2)
 
     # FIXME: to implement
     # def test_optim_stdnorm_from_file(self):
@@ -48,13 +48,13 @@ class TestOptim(unittest.TestCase):
         sm = self.sm
         optim = sm.optimizing(data=self.dat, algorithm='BFGS')
         print(optim)
-        self.assertTrue(-1 < optim['par']['mu'] < 1)
-        self.assertTrue(0 < optim['par']['sigma'] < 2)
+        self.assertTrue(-1 < optim['mu'] < 1)
+        self.assertTrue(0 < optim['sigma'] < 2)
 
     def test_optim_stdnorm_nesterov(self):
         sm = self.sm
         optim = sm.optimizing(data=self.dat, algorithm='Nesterov')
-        self.assertTrue(-3 < optim['par']['mu'] < 3)
-        self.assertTrue(0 < optim['par']['sigma'] < 5)
+        self.assertTrue(-3 < optim['mu'] < 3)
+        self.assertTrue(0 < optim['sigma'] < 5)
         optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov')
         optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', as_vector=False)
