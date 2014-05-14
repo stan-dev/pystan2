@@ -157,9 +157,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     elif method == stan_args_method_t.TEST_GRADIENT:
         d["method"] = "test_grad"
         d["test_grad"] = True
-        ctrl_list = dict(epsilon=args.ctrl.test_grad.epsilon,
-                         error=args.ctrl.test_grad.error)
-        d["control"] = ctrl_list
+        ctrl_d["epsilon"] = args.ctrl.test_grad.epsilon
+        ctrl_d["error"] = args.ctrl.test_grad.error
+        d["control"] = ctrl_d
     return d
 
 
@@ -657,12 +657,12 @@ cdef class StanFit4$model_cppname:
         return dims_
 
     def constrained_param_names(self):
-        cdef vector[string] param_names_bytes = self.thisptr.constrained_param_names()
+        cdef vector[string] param_names_bytes = self.thisptr.constrained_param_names(False, False)
         param_names = [n.decode('utf-8') for n in param_names_bytes]
         return param_names
 
     def unconstrained_param_names(self):
-        cdef vector[string] param_names_bytes = self.thisptr.unconstrained_param_names()
+        cdef vector[string] param_names_bytes = self.thisptr.unconstrained_param_names(False, False)
         param_names = [n.decode('utf-8') for n in param_names_bytes]
         return param_names
 
