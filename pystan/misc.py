@@ -460,6 +460,8 @@ def _get_valid_stan_args(base_args=None):
     args['sample_file'] = args.get('sample_file', '').encode('ascii')
     args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
     args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
+    # NB: argument named "seed" not "random_seed"
+    args['random_seed'] = args.get('seed', int(time.time()))
 
     if args['method'] == stan_args_method_t.SAMPLING:
         args['ctrl'] = args.get('ctrl', dict(sampling=dict()))
@@ -474,8 +476,6 @@ def _get_valid_stan_args(base_args=None):
         args['ctrl']['sampling']['iter_save'] = iter_save_wo_warmup + 1 + (warmup - 1) // thin
         refresh = iter // 10 if iter >= 20 else 1
         args['ctrl']['sampling']['refresh'] = args.get('refresh', refresh)
-        # NB: argument named "seed" not "random_seed"
-        args['random_seed'] = args.get('seed', int(time.time()))
 
         algorithm = args.get('algorithm', 'NUTS')
         if algorithm == 'HMC':

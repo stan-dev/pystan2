@@ -656,5 +656,15 @@ cdef class StanFit4$model_cppname:
         dims_ = dims
         return dims_
 
+    def constrained_param_names(self):
+        cdef vector[string] param_names_bytes = self.thisptr.constrained_param_names()
+        param_names = [n.decode('utf-8') for n in param_names_bytes]
+        return param_names
+
+    def unconstrained_param_names(self):
+        cdef vector[string] param_names_bytes = self.thisptr.unconstrained_param_names()
+        param_names = [n.decode('utf-8') for n in param_names_bytes]
+        return param_names
+
     def _call_sampler(self, dict args):
         return _call_sampler(self.data, args)
