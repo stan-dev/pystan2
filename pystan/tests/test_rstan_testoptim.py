@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from pystan import StanModel
+import pystan
 
 
 class TestOptim(unittest.TestCase):
@@ -19,8 +19,6 @@ class TestOptim(unittest.TestCase):
     }
 
     model {
-    mu ~ normal(0, 5);
-    sigma ~ normal(0, 5);
     y ~ normal(mu, sigma);
     }
     """
@@ -31,7 +29,7 @@ class TestOptim(unittest.TestCase):
     dat = {'N': N, 'y': y}
     logging.info("mean(y)={} and sd(y)={}".format(np.mean(y),
                                                   np.std(y, ddof=1)))
-    sm = StanModel(model_code=stdnorm)
+    sm = pystan.StanModel(model_code=stdnorm)
 
     def test_optim_stdnorm(self):
         optim = self.sm.optimizing(data=self.dat)
@@ -39,22 +37,30 @@ class TestOptim(unittest.TestCase):
         self.assertTrue(-1 < optim['mu'] < 1)
         self.assertTrue(0 < optim['sigma'] < 2)
 
-    # FIXME: to implement
-    # def test_optim_stdnorm_from_file(self):
-    #     dump(c("N", "y"), file = 'optim.data.R')
-    #     optim = sm.optimizing(file='optim.data.R', algorithm='BFGS')
+    def test_optim_stdnorm_from_file(self):
+        sm = self.sm
+        dat = self.dat
+        dump_fn = 'optim_data.Rdump'
+        pystan.misc.stan_rdump(dat, dump_fn)
+        data_from_file = pystan.misc.read_rdump(dump_fn)
+        optim = sm.optimizing(data=data_from_file, algorithm='BFGS')
+        print(optim)
 
     def test_optim_stdnorm_bfgs(self):
         sm = self.sm
-        optim = sm.optimizing(data=self.dat, algorithm='BFGS')
+        dat = self.dat
+        optim = sm.optimizing(data=dat, algorithm='BFGS')
         print(optim)
         self.assertTrue(-1 < optim['mu'] < 1)
         self.assertTrue(0 < optim['sigma'] < 2)
+        optim2 = sm.optimizing(data=dat, algorithm='BFGS',
+                               sample_file='opt.csv', init_alpha=0.02,
+                               tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7)
+        print(optim2)
 
     def test_optim_stdnorm_nesterov(self):
         sm = self.sm
-        optim = sm.optimizing(data=self.dat, algorithm='Nesterov')
+        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', seed=5)
         self.assertTrue(-3 < optim['mu'] < 3)
         self.assertTrue(0 < optim['sigma'] < 5)
-        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov')
-        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', as_vector=False)
+        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', seed=5, as_vector=False)
