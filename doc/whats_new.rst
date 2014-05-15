@@ -8,6 +8,7 @@
 
 v2.x.x.x (TBD)
 ==============
+- Optimizing returns a vector (array) by default instead of a dictionary.
 - ...
 
 v2.2.0.1 (30. April 2014)

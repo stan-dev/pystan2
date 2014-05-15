@@ -157,9 +157,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     elif method == stan_args_method_t.TEST_GRADIENT:
         d["method"] = "test_grad"
         d["test_grad"] = True
-        ctrl_list = dict(epsilon=args.ctrl.test_grad.epsilon,
-                         error=args.ctrl.test_grad.error)
-        d["control"] = ctrl_list
+        ctrl_d["epsilon"] = args.ctrl.test_grad.epsilon
+        ctrl_d["error"] = args.ctrl.test_grad.error
+        d["control"] = ctrl_d
     return d
 
 
@@ -355,14 +355,17 @@ cdef class StanFit4$model_cppname:
         Parameters
         ---------
         pars : {str, sequence of str}
-            parameter name(s)
+            parameter name(s); by default use all parameters of interest
 
         Note
         ----
         This is currently an alias for the `traceplot` method.
         """
-        if isinstance(pars, string_types):
+        if pars is None:
+            pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
+        elif isinstance(pars, string_types):
             pars = [pars]
+        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
         return pystan.plots.traceplot(self, pars)
 
     def traceplot(self, pars=None):
@@ -370,11 +373,11 @@ cdef class StanFit4$model_cppname:
 
         Parameters
         ---------
-        pars : {str, sequence of str}
-            parameter name(s)
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
         """
         # FIXME: for now plot and traceplot do the same thing
-        return pystan.plots.traceplot(self, pars)
+        return self.plot(pars)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False):
         """Extract samples in different forms for different parameters.
@@ -411,6 +414,7 @@ cdef class StanFit4$model_cppname:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
             pars = [pars]
+        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)
@@ -651,6 +655,16 @@ cdef class StanFit4$model_cppname:
         cdef vector[vector[uint]] dims = self.thisptr.param_dims_oi()
         dims_ = dims
         return dims_
+
+    def constrained_param_names(self):
+        cdef vector[string] param_names_bytes = self.thisptr.constrained_param_names(False, False)
+        param_names = [n.decode('utf-8') for n in param_names_bytes]
+        return param_names
+
+    def unconstrained_param_names(self):
+        cdef vector[string] param_names_bytes = self.thisptr.unconstrained_param_names(False, False)
+        param_names = [n.decode('utf-8') for n in param_names_bytes]
+        return param_names
 
     def _call_sampler(self, dict args):
         return _call_sampler(self.data, args)

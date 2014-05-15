@@ -79,3 +79,14 @@ def test_rstan_read_rdump():
     np.testing.assert_equal(d['a'], a)
     np.testing.assert_equal(d['b'], b)
     np.testing.assert_equal(d['c'], c)
+
+
+def test_remove_empty_pars():
+    pars = ('alpha', 'beta', 'gamma', 'eta', 'xi')
+    dims = [[], (2,), (2, 4), 0, (2, 0)]
+    # NOTE: np.prod([]) -> 1
+    np.testing.assert_equal(misc._remove_empty_pars(pars[0:1], pars, dims), pars[0:1])
+    np.testing.assert_equal(misc._remove_empty_pars(pars[0:3], pars, dims), pars[0:3])
+    np.testing.assert_equal(misc._remove_empty_pars(pars[0:4], pars, dims), pars[0:3])
+    np.testing.assert_equal(misc._remove_empty_pars(['beta[1]'], pars, dims), ['beta[1]'])
+    np.testing.assert_equal(misc._remove_empty_pars(['eta'], pars, dims), [])

@@ -155,6 +155,8 @@ def _summary(fit, pars=None, probs=None, **kwargs):
         pars = fit.sim['pars_oi']
     elif isinstance(pars, string_types):
         pars = [pars]
+    pars = _remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+
     if probs is None:
         probs = (0.025, 0.25, 0.5, 0.75, 0.975)
     ss = _summary_sim(fit.sim, pars, probs)
@@ -458,6 +460,8 @@ def _get_valid_stan_args(base_args=None):
     args['sample_file'] = args.get('sample_file', '').encode('ascii')
     args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
     args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
+    # NB: argument named "seed" not "random_seed"
+    args['random_seed'] = args.get('seed', int(time.time()))
 
     if args['method'] == stan_args_method_t.SAMPLING:
         args['ctrl'] = args.get('ctrl', dict(sampling=dict()))
@@ -472,8 +476,6 @@ def _get_valid_stan_args(base_args=None):
         args['ctrl']['sampling']['iter_save'] = iter_save_wo_warmup + 1 + (warmup - 1) // thin
         refresh = iter // 10 if iter >= 20 else 1
         args['ctrl']['sampling']['refresh'] = args.get('refresh', refresh)
-        # NB: argument named "seed" not "random_seed"
-        args['random_seed'] = args.get('seed', int(time.time()))
 
         algorithm = args.get('algorithm', 'NUTS')
         if algorithm == 'HMC':
@@ -978,6 +980,31 @@ def _rdump_value_to_numpy(s):
     else:
         arr = np.array(float(s) if '.' in s else int(s))
     return arr
+
+
+def _remove_empty_pars(pars, pars_oi, dims_oi):
+    """
+    Remove parameters that are actually empty. For example, the parameter
+    y would be removed with the following model code:
+
+        transformed data { int n; n <- 0; }
+        parameters { real y[n]; }
+
+    Parameters
+    ----------
+    pars: iterable of str
+    pars_oi: list of str
+    dims_oi: list of list of int
+
+    Returns
+    -------
+    pars_trimmed: list of str
+    """
+    pars = list(pars)
+    for par, dim in zip(pars_oi, dims_oi):
+        if par in pars and np.prod(dim) == 0:
+            del pars[pars.index(par)]
+    return pars
 
 
 def read_rdump(filename):

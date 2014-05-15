@@ -375,7 +375,7 @@ class StanModel:
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, algorithm=None,
-                   verbose=False, **kwargs):
+                   verbose=False, as_vector=True, **kwargs):
         """Obtain a point estimate by maximizing the joint posterior.
 
         Parameters
@@ -419,14 +419,20 @@ class StanModel:
             Indicates whether intermediate output should be piped to the console.
             This output may be useful for debugging. False by default.
 
+        as_vector : boolean, optional
+            Indicates an OrderedDict will be returned rather than a nested
+            dictionary with keys 'par' and 'value'.
+
         Returns
         -------
-        optim : dict or None
-            Dictionary with components 'par' and 'value' if the optimization is
-            successful. ``optim['par']`` is a dictionary of point estimates,
-            indexed by the parameter name. ``optim['value']`` stores the value
-            of the log-posterior (up to an additive constant, the ``lp__`` in
-            Stan) corresponding to the point identified by `optim`['par'].
+        optim : OrderedDict
+            Depending on `as_vector`, returns either an OrderedDict having
+            parameters as keys and point estimates as values or an OrderedDict
+            with components 'par' and 'value'.  ``optim['par']`` is a dictionary
+            of point estimates, indexed by the parameter name.
+            ``optim['value']`` stores the value of the log-posterior (up to an
+            additive constant, the ``lp__`` in Stan) corresponding to the point
+            identified by `optim`['par'].
 
         Other parameters
         ----------------
@@ -494,8 +500,10 @@ class StanModel:
 
         ret, sample = fit._call_sampler(stan_args)
         pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
-        return OrderedDict([('par', pars),
-                            ('value', sample['value'])])
+        if not as_vector:
+            return OrderedDict([('par', pars), ('value', sample['value'])])
+        else:
+            return pars
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=None, init='random',
@@ -688,6 +696,7 @@ class StanModel:
         ret_and_samples = _map_parallel(call_sampler_star, call_sampler_args, n_jobs)
         samples = [smpl for _, smpl in ret_and_samples]
 
+        # _organize_inits strips out lp__ (RStan does it in this method)
         inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
                                                  m_pars, p_dims)
 

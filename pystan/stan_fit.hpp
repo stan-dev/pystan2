@@ -28,6 +28,9 @@
 #include <stan/mcmc/hmc/nuts/adapt_diag_e_nuts.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_dense_e_nuts.hpp>
 
+#include <stan/common/do_print.hpp>
+#include <stan/common/print_progress.hpp>
+
 #include "py_var_context.hpp"
 #include "mcmc_output.hpp"
 
@@ -524,25 +527,6 @@ namespace pystan {
       }
     }
 
-    bool do_print(int n, int refresh, int last = 0) {
-      if (refresh < 1) return false;
-      return (n == 0) || ((n + 1) % refresh == 0) || (n == last);
-    }
-
-    void print_progress(int m, int finish, int refresh, bool warmup) {
-      int it_print_width = std::ceil(std::log10(finish));
-      if (do_print(m, refresh, finish - 1)) {
-        std::cout << "\rIteration: ";
-        std::cout << std::setw(it_print_width) << (m + 1)
-                         << " / " << finish;
-        std::cout << " [" << std::setw(3)
-                         << static_cast<int>((100.0 * (m + 1)) / finish)
-                         << "%] ";
-        std::cout << (warmup ? " (Warmup)" : " (Sampling)");
-        std::cout.flush(); // NOTE: flushing appears to update the display in Python
-      }
-    }
-
     template <class Model>
     std::vector<std::string> get_param_names(Model& m) {
       std::vector<std::string> names;
@@ -595,7 +579,9 @@ namespace pystan {
         end = args.get_iter();
       }
       for (int m = start; m < end; ++m) {
-        print_progress(m, args.get_iter(), args.get_ctrl_sampling_refresh(), is_warmup);
+        stan::common::print_progress(m, 0, args.get_iter(),
+                                     args.get_ctrl_sampling_refresh(), is_warmup,
+                                     "\r", "", std::cout);
         // FIXME: PyStan equivalent? R_CheckUserInterrupt();
         init_s = sampler_ptr -> transition(init_s);
         if (args.get_ctrl_sampling_save_warmup() && (((m - start) % args.get_ctrl_sampling_thin()) == 0)) {
@@ -1036,7 +1022,7 @@ namespace pystan {
           int ret = 0;
           while (0 == ret) {
             int i = bfgs.iter_num();
-            if (do_print(i, 50 * args.get_ctrl_optim_refresh())) {
+            if (stan::common::do_print(i, i==0, 50 * args.get_ctrl_optim_refresh())) {
               std::cout << "    Iter ";
               std::cout << "     log prob ";
               std::cout << "       ||dx|| ";
@@ -1049,7 +1035,8 @@ namespace pystan {
             lp = bfgs.logp();
             bfgs.params_r(cont_vector);
 
-            if (do_print(i, args.get_ctrl_optim_refresh()) || ret != 0 || !bfgs.note().empty()) {
+            if (stan::common::do_print(i, i==0, args.get_ctrl_optim_refresh())
+                || ret != 0 || !bfgs.note().empty()) {
               std::cout << " " << std::setw(7) << i << " ";
               std::cout << " " << std::setw(12) << std::setprecision(6) << lp << " ";
               std::cout << " " << std::setw(12) << std::setprecision(6) << bfgs.prev_step_size() << " ";
@@ -1124,7 +1111,6 @@ namespace pystan {
           model.write_array(base_rng, cont_vector, disc_vector, params_inr_etc);
           holder.par = params_inr_etc;
           holder.value = lp;
-          // holder.attr("point_estimate") = Rcpp::wrap(true);
 
           if (args.get_sample_file_flag()) {
             sample_stream << lp << ',';
@@ -1161,7 +1147,7 @@ namespace pystan {
             lastlp = lp;
             lp = ng.step();
             ng.params_r(cont_vector);
-            if (do_print(i, args.get_ctrl_optim_refresh())) {
+            if (stan::common::do_print(i, i==0, args.get_ctrl_optim_refresh())) {
               std::cout << "Iteration ";
               std::cout << std::setw(2) << (m + 1) << ". ";
               std::cout << "Log joint probability = " << std::setw(10) << lp;
@@ -1451,6 +1437,18 @@ namespace pystan {
       std::vector<double> params_r;
       model_.transform_inits(par_context, params_i, params_r);
       return params_r;
+    }
+
+    std::vector<std::string> unconstrained_param_names(bool include_tparams, bool include_gqs) {
+      std::vector<std::string> names;
+      model_.unconstrained_param_names(names, include_tparams, include_gqs);
+      return names;
+    }
+
+    std::vector<std::string> constrained_param_names(bool include_tparams, bool include_gqs) {
+      std::vector<std::string> names;
+      model_.constrained_param_names(names, include_tparams, include_gqs);
+      return names;
     }
 
     /**

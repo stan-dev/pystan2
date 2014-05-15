@@ -44,5 +44,4 @@ code illustrates how to use Stan's optimizer methods via a call to
 
     op = sm.optimizing(data=dict(y=y2, N=len(y2)))
 
-    op['par']
-    op['value']
+    op
