@@ -84,7 +84,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyStan'
-copyright = '2013, Allen B. Riddell'
+copyright = '2013-2014, PyStan developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

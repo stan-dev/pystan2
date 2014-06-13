@@ -6,7 +6,7 @@ by the Cython file `stan_fit.pxd`.
 
 """
 #-----------------------------------------------------------------------------
-# Copyright (c) 2013, Allen B. Riddell
+# Copyright (c) 2013-2014, PyStan developers
 #
 # This file is licensed under Version 3.0 of the GNU General Public
 # License. See LICENSE for a text of the license.
