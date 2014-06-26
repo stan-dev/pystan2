@@ -545,9 +545,9 @@ class StanModel:
             dependency among random number streams. By default, seed is
             ``random.randint(0, MAX_UINT)``.
 
-        algorithm : {"NUTS", "HMC"}, optional
+        algorithm : {"NUTS", "HMC", "Fixed_param"}, optional
             One of algorithms that are implemented in Stan such as the No-U-Turn
-            sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
+            sampler (NUTS, Hoffman and Gelman 2011), static HMC, or ``Fixed_param``.
 
         init : {0, '0', 'random', function returning dict, list of dict}, optional
             Specifies how initial parameter values are chosen: 0 or '0'
@@ -651,7 +651,7 @@ class StanModel:
             data = {}
         if warmup is None:
             warmup = int(iter // 2)
-        algorithms = ("NUTS", "HMC")  # , "Metropolis")
+        algorithms = ("NUTS", "HMC", "Fixed_param")  # , "Metropolis")
         algorithm = "NUTS" if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))

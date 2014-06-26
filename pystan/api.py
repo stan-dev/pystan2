@@ -217,7 +217,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         dependency among random number streams. By default, seed is
         ``random.randint(0, MAX_UINT)``.
 
-    algorithm : {"NUTS", "HMC"}, optional
+    algorithm : {"NUTS", "HMC", "Fixed_param"}, optional
         One of algorithms that are implemented in Stan such as the No-U-Turn
         sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
 

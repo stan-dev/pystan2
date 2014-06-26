@@ -124,6 +124,9 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
             d["sampler_t"] = "HMC"
         elif algorithm == sampling_algo_t.Metropolis:
             d["sampler_t"] = "Metropolis"
+        else:
+            # included here to mirror rstan code
+            pass
         if algorithm != sampling_algo_t.Metropolis:
             metric = sampling_metric_t(args.ctrl.sampling.metric)
             if metric == sampling_metric_t.UNIT_E:

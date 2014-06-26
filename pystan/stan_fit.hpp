@@ -27,22 +27,32 @@
 #include <stan/mcmc/hmc/nuts/adapt_unit_e_nuts.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_diag_e_nuts.hpp>
 #include <stan/mcmc/hmc/nuts/adapt_dense_e_nuts.hpp>
+#include <stan/mcmc/fixed_param_sampler.hpp>
 
 #include <stan/common/do_print.hpp>
 #include <stan/common/print_progress.hpp>
 
 #include "py_var_context.hpp"
-#include "mcmc_output.hpp"
+void Py_CheckUserInterrupt(void);
 
-// REF: stan/gm/command.hpp
-// REF: rstan/rstan/inst/include/rstan/stan_fit.hpp
+// REF: stan/common/command.hpp
+#include <stan/io/mcmc_writer.hpp>
+#include <stan/common/recorder/messages.hpp>
+#include <stan/common/warmup.hpp>
+#include <stan/common/sample.hpp>
+#include "pystan_recorder.hpp"
+
 
 typedef std::map<std::string, std::pair<std::vector<double>, std::vector<size_t> > > vars_r_t;
 typedef std::map<std::string, std::pair<std::vector<int>, std::vector<size_t> > > vars_i_t;
 
+void Py_CheckUserInterrupt(void) {
+    // TODO(abr): currently a noop; need to check PyErr_Occured()
+}
+
 namespace pystan {
 
-  enum sampling_algo_t { NUTS = 1, HMC = 2, Metropolis = 3};
+  enum sampling_algo_t { NUTS = 1, HMC = 2, Metropolis = 3, Fixed_param = 4};
   enum optim_algo_t { Newton = 1, Nesterov = 2, BFGS = 3};
   enum sampling_metric_t { UNIT_E = 1, DIAG_E = 2, DENSE_E = 3};
   enum stan_args_method_t { SAMPLING = 1, OPTIM = 2, TEST_GRADIENT = 3};
@@ -142,6 +152,9 @@ namespace pystan {
     }
     inline int get_ctrl_sampling_warmup() const {
       return ctrl.sampling.warmup;
+    }
+    void set_ctrl_sampling_warmup(int n) {
+      ctrl.sampling.warmup = n;
     }
     inline int get_ctrl_sampling_thin() const {
       return ctrl.sampling.thin;
@@ -556,90 +569,6 @@ namespace pystan {
       o << std::endl;
     }
 
-    template <class Model, class RNG_t>
-    void run_markov_chain(stan::mcmc::base_mcmc* sampler_ptr,
-                          const PyStanArgs& args,
-                          bool is_warmup,
-                          mcmc_output<Model>& outputter,
-                          stan::mcmc::sample& init_s,
-                          Model& model,
-                          std::vector<std::vector<double> >& chains,
-                          int& iter_save_i,
-                          const std::vector<size_t>& qoi_idx,
-                          std::vector<double>& sum_pars,
-                          double& sum_lp,
-                          std::vector<std::vector<double> >& sampler_params,
-                          std::vector<std::vector<double> >& iter_params,
-                          std::string& adaptation_info,
-                          RNG_t& base_rng) {
-      int start = 0;
-      int end = args.get_ctrl_sampling_warmup();
-      if (!is_warmup) {
-        start = end;
-        end = args.get_iter();
-      }
-      for (int m = start; m < end; ++m) {
-        stan::common::print_progress(m, 0, args.get_iter(),
-                                     args.get_ctrl_sampling_refresh(), is_warmup,
-                                     "\r", "", std::cout);
-        // FIXME: PyStan equivalent? R_CheckUserInterrupt();
-        init_s = sampler_ptr -> transition(init_s);
-        if (args.get_ctrl_sampling_save_warmup() && (((m - start) % args.get_ctrl_sampling_thin()) == 0)) {
-          outputter.output_sample_params(base_rng, init_s, sampler_ptr, model,
-                                        chains, is_warmup,
-                                        sampler_params, iter_params,
-                                        sum_pars, sum_lp, qoi_idx,
-                                        iter_save_i, &std::cout);
-          iter_save_i++;
-          outputter.output_diagnostic_params(init_s, sampler_ptr);
-        }
-      }
-    }
-
-    template <class Model, class RNG_t>
-    void warmup_phase(stan::mcmc::base_mcmc* sampler_ptr,
-                      PyStanArgs& args,
-                      mcmc_output<Model>& outputter,
-                      stan::mcmc::sample& init_s,
-                      Model& model,
-                      std::vector<std::vector<double> >& chains,
-                      int& iter_save_i,
-                      const std::vector<size_t>& qoi_idx,
-                      std::vector<double>& sum_pars,
-                      double& sum_lp,
-                      std::vector<std::vector<double> >& sampler_params,
-                      std::vector<std::vector<double> >& iter_params,
-                      std::string& adaptation_info,
-                      RNG_t& base_rng) {
-      run_markov_chain<Model, RNG_t>(sampler_ptr, args, true, outputter,
-                                     init_s, model, chains, iter_save_i, qoi_idx,
-                                     sum_pars, sum_lp, sampler_params, iter_params,
-                                     adaptation_info, base_rng);
-    }
-
-    template <class Model, class RNG_t>
-    void sampling_phase(stan::mcmc::base_mcmc* sampler_ptr,
-                        const PyStanArgs& args,
-                        mcmc_output<Model>& outputter,
-                        stan::mcmc::sample& init_s,
-                        Model& model,
-                        std::vector<std::vector<double> >& chains,
-                        int& iter_save_i,
-                        const std::vector<size_t>& qoi_idx,
-                        std::vector<double>& sum_pars,
-                        double& sum_lp,
-                        std::vector<std::vector<double> >& sampler_params,
-                        std::vector<std::vector<double> >& iter_params,
-                        std::string& adaptation_info,
-                        RNG_t& base_rng) {
-      run_markov_chain<Model, RNG_t>(sampler_ptr, args, false, outputter,
-                                     init_s, model, chains, iter_save_i, qoi_idx,
-                                     sum_pars, sum_lp, sampler_params, iter_params,
-                                     adaptation_info,
-                                     base_rng);
-    }
-
-
     /**
      * Cast a size_t vector to an unsigned int vector.
      * The reason is that first Rcpp::wrap/as does not
@@ -730,6 +659,40 @@ namespace pystan {
       return true;
     }
 
+    struct Py_CheckUserInterrupt_Functor {
+      void operator()() {
+        Py_CheckUserInterrupt();
+      }
+    };
+
+    // in:  model, s, sampler_ptr
+    // out: sample_recorder_size, diagnostic_recorder_size
+    template <class Model>
+    void calculate_sizes(Model& model,
+                         stan::mcmc::sample& s,
+                         stan::mcmc::base_mcmc* sampler_ptr,
+                         size_t& sample_recorder_size,
+                         size_t& sample_recorder_offset,
+                         std::vector<std::string>& sample_names,
+                         std::vector<std::string>& sampler_names,
+                         std::vector<std::string>& model_constrained_param_names,
+                         std::vector<std::string>& model_unconstrained_param_names,
+                         std::vector<std::string>& sampler_diagnostic_names) {
+      s.get_sample_param_names(sample_names);
+
+      sampler_ptr->get_sampler_param_names(sampler_names);
+
+      model.constrained_param_names(model_constrained_param_names, true, true);
+
+      model.unconstrained_param_names(model_unconstrained_param_names, false, false);
+
+      sampler_ptr->get_sampler_diagnostic_names(model_unconstrained_param_names,
+                                                sampler_diagnostic_names);
+
+      sample_recorder_size = sample_names.size() + sampler_names.size()
+        + model_constrained_param_names.size();
+      sample_recorder_offset = sample_names.size() + sampler_names.size();
+    }
 
     template <class Model, class RNG_t>
     void execute_sampling(PyStanArgs& args, Model& model, PyStanHolder& holder,
@@ -740,72 +703,105 @@ namespace pystan {
                           std::fstream& sample_stream,
                           std::fstream& diagnostic_stream,
                           const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
-      int iter_save_i = 0;
-      double mean_lp(0);
-      std::string adaptation_info;
+      size_t sample_recorder_size, sample_recorder_offset;
+      std::vector<std::string> sample_names;
+      std::vector<std::string> sampler_names;
+      std::vector<std::string> model_constrained_param_names;
+      std::vector<std::string> model_unconstrained_param_names;
+      std::vector<std::string> sampler_diagnostic_names;
+      pystan::calculate_sizes(model, s, sampler_ptr,
+                             sample_recorder_size,
+                             sample_recorder_offset,
+                             sample_names,
+                             sampler_names,
+                             model_constrained_param_names,
+                             model_unconstrained_param_names,
+                             sampler_diagnostic_names);
 
-      std::vector<std::vector<double> > chains;
-      std::vector<double> mean_pars;
-      mean_pars.resize(initv.size(), 0);
-      std::vector<std::vector<double> > sampler_params;
-      std::vector<std::vector<double> > iter_params;
-      std::vector<std::string> sampler_param_names;
-      std::vector<std::string> iter_param_names;
+      pystan_sample_recorder sample_recorder
+        = sample_recorder_factory(&sample_stream, "# ",
+                                  sample_recorder_size,
+                                  args.get_ctrl_sampling_iter_save(),
+                                  args.get_ctrl_sampling_iter_save() - args.get_ctrl_sampling_iter_save_wo_warmup(),
+                                  sample_recorder_offset,
+                                  qoi_idx);
 
-
-      mcmc_output<Model> outputter(&sample_stream, &diagnostic_stream);
-      outputter.set_output_names(s, sampler_ptr, model, iter_param_names, sampler_param_names);
-      outputter.init_sampler_params(sampler_params, args.get_ctrl_sampling_iter_save());
-      outputter.init_iter_params(iter_params, args.get_ctrl_sampling_iter_save());
-
-      // NOTE: In PyStan we have to allocate space for chains. Anything that
-      // is a Rcpp::NumericVector in RStan but appears here as std::vector<double>
-      // likely needs special handling.
-      int iter_save = args.get_ctrl_sampling_iter_save();
-      for (size_t i = 0; i < qoi_idx.size(); i++)
-        chains.push_back(std::vector<double>(iter_save, 0));
+      stan::common::recorder::csv diagnostic_recorder
+        = diagnostic_recorder_factory(&diagnostic_stream, "# ");
+      stan::common::recorder::messages message_recorder(&std::cout, "# ");
+      stan::io::mcmc_writer<Model,
+                            pystan_sample_recorder, stan::common::recorder::csv,
+                            stan::common::recorder::messages>
+        writer(sample_recorder, diagnostic_recorder, message_recorder, &std::cout);
 
 
       if (!args.get_append_samples()) {
-        outputter.print_sample_names();
-        outputter.output_diagnostic_names(s, sampler_ptr, model);
+        writer.write_sample_names(s, sampler_ptr, model);
+        writer.write_diagnostic_names(s, sampler_ptr, model);
       }
       // Warm-Up
       clock_t start = clock();
-      warmup_phase<Model, RNG_t>(sampler_ptr, args, outputter,
-                                 s, model, chains, iter_save_i,
-                                 qoi_idx, mean_pars, mean_lp,
-                                 sampler_params, iter_params, adaptation_info,
-                                 base_rng);
+
+      std::string prefix = "\n";
+      std::string suffix = "";
+      Py_CheckUserInterrupt_Functor interruptCallback;
+
+      stan::common::warmup<Model, RNG_t,
+                           Py_CheckUserInterrupt_Functor>
+        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
+         args.get_ctrl_sampling_thin(),
+         args.get_ctrl_sampling_refresh(), args.get_ctrl_sampling_save_warmup(),
+         writer,
+         s, model, base_rng,
+         prefix, suffix, std::cout,
+         interruptCallback);
+
       clock_t end = clock();
       double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
+      std::string adaptation_info;
       if (args.get_ctrl_sampling_adapt_engaged()) {
         dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
-        outputter.output_adapt_finish(sampler_ptr, adaptation_info);
+        writer.write_adapt_finish(sampler_ptr);
+
+        std::stringstream ss;
+        stan::common::recorder::messages info(&ss, "# ");
+        writer.write_adapt_finish(sampler_ptr, info);
+        adaptation_info = ss.str();
+        adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
       }
+
       // Sampling
       start = clock();
-      sampling_phase<Model, RNG_t>(sampler_ptr, args, outputter,
-                                   s, model, chains, iter_save_i,
-                                   qoi_idx, mean_pars, mean_lp,
-                                   sampler_params, iter_params, adaptation_info,
-                                   base_rng);
+
+      stan::common::sample<Model, RNG_t,
+                           Py_CheckUserInterrupt_Functor>
+        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
+         args.get_ctrl_sampling_thin(),
+         args.get_ctrl_sampling_refresh(), true,
+         writer,
+         s, model, base_rng,
+         prefix, suffix, std::cout,
+         interruptCallback);
+
       end = clock();
       double sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
 
+      writer.write_timing(warmDeltaT, sampleDeltaT);
+
+
+
+      double mean_lp(0);
+      std::vector<double> mean_pars;
+      mean_pars.resize(initv.size(), 0);
+
       if (args.get_ctrl_sampling_iter_save_wo_warmup() > 0) {
-        mean_lp /= args.get_ctrl_sampling_iter_save_wo_warmup();
-        for (std::vector<double>::iterator it = mean_pars.begin();
-             it != mean_pars.end();
-             ++it)
-          (*it) /= args.get_ctrl_sampling_iter_save_wo_warmup();
-      }
-      if (args.get_ctrl_sampling_refresh() > 0) {
-        std::cout << std::endl;
-        outputter.print_timing(warmDeltaT, sampleDeltaT, &std::cout);
+        double inverse_saved = 1.0 / args.get_ctrl_sampling_iter_save_wo_warmup();
+        mean_lp = sample_recorder.sum_.sum()[0] * inverse_saved;
+        for (size_t n = 0; n < mean_pars.size(); n++) {
+          mean_pars[n] = sample_recorder.sum_.sum()[sample_recorder_offset + n] * inverse_saved;
+        }
       }
 
-      outputter.output_timing(warmDeltaT, sampleDeltaT);
       if (args.get_sample_file_flag()) {
         std::cout << "Sample of chain "
                          << args.get_chain_id()
@@ -816,20 +812,22 @@ namespace pystan {
       if (args.get_diagnostic_file_flag())
         diagnostic_stream.close();
 
-      holder.chains = chains;
+      holder.chains = sample_recorder.values_.x();
       holder.test_grad = false;
       holder.args = args;
       holder.inits = initv;
       holder.mean_pars = mean_pars;
       holder.mean_lp__ = mean_lp;
       holder.adaptation_info = adaptation_info;
-      // put sampler parameters such as treedepth together with iter_params
-      iter_params.insert(iter_params.end(), sampler_params.begin(), sampler_params.end());
-      iter_param_names.insert(iter_param_names.end(),
-                              sampler_param_names.begin(),
-                              sampler_param_names.end());
-      holder.sampler_params = iter_params;
-      holder.sampler_param_names = iter_param_names;
+
+      std::vector<std::vector<double> > slst(sample_recorder.sampler_values_.x().begin()+1,
+                      sample_recorder.sampler_values_.x().end());
+      std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
+      slst_names.insert(slst_names.end(), sampler_names.begin(), sampler_names.end());
+
+      holder.sampler_params = slst;
+      holder.sampler_param_names = slst_names;
+
       holder.chain_names = fnames_oi;
     }
 
@@ -1093,7 +1091,7 @@ namespace pystan {
           std::cout << "initial log joint probability = " << lp << std::endl;
           int m = 0;
           while ((lp - lastlp) / fabs(lp) > 1e-8) {
-            // FIXME: PyStan equivalent? R_CheckUserInterrupt();
+            Py_CheckUserInterrupt();
             lastlp = lp;
             lp = stan::optimization::newton_step(model, cont_vector, disc_vector);
             std::cout << "Iteration ";
@@ -1143,7 +1141,7 @@ namespace pystan {
           std::cout << "initial log joint probability = " << lp << std::endl;
           int m = 0;
           for (int i = 0; i < args.get_iter(); i++) {
-            // FIXME: PyStan equivalent? R_CheckUserInterrupt();
+            Py_CheckUserInterrupt();
             lastlp = lp;
             lp = ng.step();
             ng.params_r(cont_vector);
@@ -1204,13 +1202,30 @@ namespace pystan {
       else if (DIAG_E == metric) metric_index = 1;
       else if(DENSE_E == metric) metric_index = 2;
       sampling_algo_t algorithm = args.get_ctrl_sampling_algorithm();
+      if (model.num_params_r() == 0 && algorithm != Fixed_param) {
+        throw std::runtime_error("Must use algorithm=\"Fixed_param\" for model that has no parameters.");
+      }
+
+      stan::mcmc::sample s(cont_params, 0, 0);
+
+      if (algorithm == Fixed_param) {
+        stan::mcmc::fixed_param_sampler sampler;
+        if (args.get_ctrl_sampling_warmup() != 0) {
+          std::cout << "Warning: warmup will be skipped for the fixed parameter sampler!" << std::endl;
+          args.set_ctrl_sampling_warmup(0);
+        }
+        execute_sampling(args, model, holder, &sampler, s, qoi_idx, initv,
+                         sample_stream, diagnostic_stream, fnames_oi,
+                         base_rng);
+        return 0;
+
+      }
       switch (algorithm) {
          case Metropolis: engine_index = 3; break;
          case HMC: engine_index = 0; break;
          case NUTS: engine_index = 1; break;
+         default: engine_index = 10000; // make it fail in the end
       }
-
-      stan::mcmc::sample s(cont_params, 0, 0);
 
       int sampler_select = engine_index + 10 * metric_index;
       if (args.get_ctrl_sampling_adapt_engaged())  sampler_select += 100;
@@ -1408,8 +1423,9 @@ namespace pystan {
       return true;
     }
 
-    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) : data_(vars_r, vars_i),
-      model_(data_), // model_(data_, &rstan::io::rcout)
+    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) :
+      data_(vars_r, vars_i),
+      model_(data_, &std::cout),
       base_rng(static_cast<boost::uint32_t>(std::time(0))),
       names_(get_param_names(model_)),
       dims_(get_param_dims(model_)),

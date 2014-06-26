@@ -21,6 +21,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         NUTS = 1
         HMC = 2
         Metropolis = 3
+        Fixed_param = 4
     ctypedef enum optim_algo_t:
         Newton = 1
         Nesterov = 2

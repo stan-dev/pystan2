@@ -477,18 +477,6 @@ def _get_valid_stan_args(base_args=None):
         refresh = iter // 10 if iter >= 20 else 1
         args['ctrl']['sampling']['refresh'] = args.get('refresh', refresh)
 
-        algorithm = args.get('algorithm', 'NUTS')
-        if algorithm == 'HMC':
-            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.HMC
-        elif algorithm == 'Metropolis':
-            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Metropolis
-        elif algorithm == 'NUTS':
-            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.NUTS
-        else:
-            msg = "Invalid value for parameter algorithm (found {}; " \
-                "require HMC, Metropolis, or NUTS).".format(algorithm)
-            raise ValueError(msg)
-
         ctrl_lst = args.get('control', dict())
         ctrl_sampling = args['ctrl']['sampling']
         # NB: if these defaults change, remember to update docstrings
@@ -502,6 +490,20 @@ def _get_valid_stan_args(base_args=None):
         ctrl_sampling['adapt_window'] = ctrl_lst.get("adapt_window", 25)
         ctrl_sampling['stepsize'] = ctrl_lst.get("stepsize", 1.0)
         ctrl_sampling['stepsize_jitter'] = ctrl_lst.get("stepsize_jitter", 0.0)
+
+        algorithm = args.get('algorithm', 'NUTS')
+        if algorithm == 'HMC':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.HMC
+        elif algorithm == 'Metropolis':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Metropolis
+        elif algorithm == 'NUTS':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.NUTS
+        elif algorithm == 'Fixed_param':
+            args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Fixed_param
+        else:
+            msg = "Invalid value for parameter algorithm (found {}; " \
+                "require HMC, Metropolis, NUTS, or Fixed_param).".format(algorithm)
+            raise ValueError(msg)
 
         metric = ctrl_lst.get('metric')
         if metric == "unit_e":
@@ -518,6 +520,8 @@ def _get_valid_stan_args(base_args=None):
             elif ctrl_sampling['algorithm'] == sampling_algo_t.HMC:
                 ctrl_sampling['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
             elif ctrl_sampling['algorithm'] == sampling_algo_t.Metropolis:
+                pass
+            elif ctrl_sampling['algorithm'] == sampling_algo_t.Fixed_param:
                 pass
 
     elif args['method'] == stan_args_method_t.OPTIM:
