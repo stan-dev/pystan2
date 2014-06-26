@@ -38,8 +38,6 @@ R:
 Reusing models and saving objects
 =================================
 
-*See also :ref:`avoiding-recompilation`.*
-
 PyStan uses ``pickle`` to save objects for future use.
 
 Python:
@@ -87,3 +85,4 @@ R:
     model = stan_model(model_code=model_code)
     save(model, file='model.rdata')
 
+See also :ref:`avoiding-recompilation`.
