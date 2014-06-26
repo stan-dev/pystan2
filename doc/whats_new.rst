@@ -6,10 +6,10 @@
  What's New
 ============
 
-v2.x.x.x (TBD)
-==============
+v2.3.0.0 (26. June 2014)
+========================
+- Stan 2.3 (includes user-defined functions, among other improvements).
 - Optimizing returns a vector (array) by default instead of a dictionary.
-- ...
 
 v2.2.0.1 (30. April 2014)
 =========================
