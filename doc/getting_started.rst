@@ -49,6 +49,9 @@ dependencies, then issue the commands:
    python setup.py install
    cd ..  # change out of the source directory before using pystan
 
+Mac OS X users encountering installation problems may wish to consult the
+`PyStan Wiki <https://github.com/stan-dev/pystan/wiki>`_ for possible solutions.
+
 Windows
 -------
 

@@ -50,7 +50,3 @@ are:
     - ``-DBOOST_DATE_TIME_NO_LIB`` which solves a bug in linking boost
 
 These flags need to be added in ``setup.py`` and in ``model.py``.
-
-Stan also needs to be patched for Visual Studio 2008. These patches may be
-incorporated into Stan in future versions. Consult `issue #632
-<https://github.com/stan-dev/stan/issues/632>`_ for details on these patches. 
