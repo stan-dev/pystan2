@@ -412,7 +412,7 @@ class StanModel:
             underscore and chain number are appended to the file name.
             By default do not write samples to file.
 
-        algorithm : {"BFGS", "Nesterov", "Newton"}, optional
+        algorithm : {"BFGS", "LBFGS", "Newton"}, optional
             Name of optimization algorithm to be used. Default is BFGS.
 
         verbose : boolean, optional
@@ -440,16 +440,20 @@ class StanModel:
             The maximum number of iterations.
         save_iterations : bool, optional
         refresh : int, optional
-        stepsize : float, optional
-            For Nesterov, see Stan manual.
         init_alpha : float, optional
-            For BFGS, see Stan manual.
+            For BFGS and LBFGS, see Stan manual. Default is 0.001
         tol_obj : float, optional
-            For BFGS, see Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, see Stan manual. Default is 1e-12.
         tol_grad : float, optional
-            For BFGS, see Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, see Stan manual. Default is 1e-8.
         tol_param : float, optional
-            For BFGS, see Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, see Stan manual. Default is 1e-8.
+        tol_rel_grad : float, optional
+            For BFGS and LBFGS, see Stan manual. Default is 1e4.
+        tol_rel_param : float, optional
+            For BFGS and LBFGS, see Stan manual. Default is 1e7.
+        history_size : int, optional
+            For LBFGS, see Stan manual. Default is 5.
 
         Examples
         --------
@@ -458,7 +462,7 @@ class StanModel:
         >>> f = m.optimizing()
 
         """
-        algorithms = ("BFGS", "Nesterov", "Newton")
+        algorithms = ("BFGS", "LBFGS", "Newton")
         if algorithm is None:
             algorithm = "BFGS"
         if algorithm not in algorithms:

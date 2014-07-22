@@ -29,7 +29,6 @@ int stanc(std::string model_stancode, std::string model_name, PyStancResult& res
   static const int EXCEPTION_RC = -1;
   static const int PARSE_FAIL_RC = -2;
   
-  static const bool INCLUDE_MAIN = true; 
   /*
   std::string stan_version 
     = stan::MAJOR_VERSION + "." +
@@ -44,13 +43,12 @@ int stanc(std::string model_stancode, std::string model_name, PyStancResult& res
   std::istringstream in(mcode_); 
   try {
     bool valid_model
-      = stan::gm::compile(&std::cerr,in,out,mname_,!INCLUDE_MAIN);
+      = stan::gm::compile(&std::cerr,in,out,mname_);
     if (!valid_model) {
       result.status = PARSE_FAIL_RC;  
       return PARSE_FAIL_RC;
     }
   } catch(const std::exception& e) {
-    // REprintf("\nERROR PARSING\n %s\n", e.what()); 
     result.status = EXCEPTION_RC;
     result.msg = e.what();
     return EXCEPTION_RC; 

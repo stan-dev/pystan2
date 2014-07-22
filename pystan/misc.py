@@ -50,7 +50,7 @@ logger = logging.getLogger('pystan')
 
 
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
-                   digits_summary=1):
+                   digits_summary=2):
         if fit.mode == 1:
             return "Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(fit.model_name)
@@ -532,22 +532,24 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['optim']['algorithm'] = optim_algo_t.BFGS
         elif algorithm == "Newton":
             args['ctrl']['optim']['algorithm'] = optim_algo_t.Newton
-        elif algorithm == "Nesterov":
-            args['ctrl']['optim']['algorithm'] = optim_algo_t.Nesterov
+        elif algorithm == "LBFGS":
+            args['ctrl']['optim']['algorithm'] = optim_algo_t.LBFGS
         else:
             msg = "Invalid value for parameter algorithm (found {}; " \
-                  "require BFGS, Newton, or Nesterov).".format(algorithm)
+                  "require (L)BFGS or Newton).".format(algorithm)
             raise ValueError(msg)
         refresh = args['ctrl']['optim']['iter'] // 100
         args['ctrl']['optim']['refresh'] = args.get('refresh', refresh)
         if args['ctrl']['optim']['refresh'] < 1:
             args['ctrl']['optim']['refresh'] = 1
-        args['ctrl']['optim']['stepsize'] = args.get("stepsize", 1.0)
         args['ctrl']['optim']['init_alpha'] = args.get("init_alpha", 0.001)
-        args['ctrl']['optim']['tol_obj'] = args.get("tol_obj", 1e-8)
+        args['ctrl']['optim']['tol_obj'] = args.get("tol_obj", 1e-12)
         args['ctrl']['optim']['tol_grad'] = args.get("tol_grad", 1e-8)
         args['ctrl']['optim']['tol_param'] = args.get("tol_param", 1e-8)
+        args['ctrl']['optim']['tol_rel_obj'] = args.get("tol_rel_obj", 1e4)
+        args['ctrl']['optim']['tol_rel_grad'] = args.get("tol_rel_grad", 1e7)
         args['ctrl']['optim']['save_iterations'] = args.get("save_iterations", True)
+        args['ctrl']['optim']['history_size'] = args.get("history_size", 5)
     elif args['method'] == stan_args_method_t.TEST_GRADIENT:
         args['ctrl'] = args.get('ctrl', dict(test_grad=dict()))
         args['ctrl']['test_grad']['epsilon'] = args.get("epsilon", 1e-6)

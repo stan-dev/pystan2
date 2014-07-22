@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.4.0.0 (TBA)
+==============
+- Stan 2.4 (LBFGS optimizer added, Nesterov removed)
+
 v2.3.0.0 (26. June 2014)
 ========================
 - Stan 2.3 (includes user-defined functions, among other improvements).

@@ -148,15 +148,23 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
         if algorithm == optim_algo_t.Newton:
             d["algorithm"] = "Newton"
             pass
-        elif algorithm == optim_algo_t.Nesterov:
-            d["algorithm"] = "Nesterov"
-            d["stepsize"] = args.ctrl.optim.stepsize
+        elif algorithm == optim_algo_t.LBFGS:
+            d["algorithm"] = "LBFGS"
+            d["init_alpha"] = args.ctrl.optim.init_alpha
+            d["tol_param"] = args.ctrl.optim.tol_param
+            d["tol_obj"] = args.ctrl.optim.tol_obj
+            d["tol_grad"] = args.ctrl.optim.tol_grad
+            d["tol_rel_obj"] = args.ctrl.optim.tol_obj
+            d["tol_rel_grad"] = args.ctrl.optim.tol_grad
+            d["tol_history_size"] = args.ctrl.optim.tol_grad
         elif algorithm == optim_algo_t.BFGS:
             d["algorithm"] = "BFGS"
             d["init_alpha"] = args.ctrl.optim.init_alpha
+            d["tol_param"] = args.ctrl.optim.tol_param
             d["tol_obj"] = args.ctrl.optim.tol_obj
             d["tol_grad"] = args.ctrl.optim.tol_grad
-            d["tol_param"] = args.ctrl.optim.tol_param
+            d["tol_rel_obj"] = args.ctrl.optim.tol_obj
+            d["tol_rel_grad"] = args.ctrl.optim.tol_grad
     elif method == stan_args_method_t.TEST_GRADIENT:
         d["method"] = "test_grad"
         d["test_grad"] = True
@@ -218,11 +226,13 @@ cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
         p.ctrl.optim.refresh = args['ctrl']['optim']['refresh']
         p.ctrl.optim.algorithm = args['ctrl']['optim']['algorithm'].value
         p.ctrl.optim.save_iterations = args['ctrl']['optim']['save_iterations']
-        p.ctrl.optim.stepsize = args['ctrl']['optim']['stepsize']
         p.ctrl.optim.init_alpha = args['ctrl']['optim']['init_alpha']
         p.ctrl.optim.tol_obj = args['ctrl']['optim']['tol_obj']
         p.ctrl.optim.tol_grad = args['ctrl']['optim']['tol_grad']
         p.ctrl.optim.tol_param = args['ctrl']['optim']['tol_param']
+        p.ctrl.optim.tol_rel_obj = args['ctrl']['optim']['tol_rel_obj']
+        p.ctrl.optim.tol_rel_grad = args['ctrl']['optim']['tol_rel_grad']
+        p.ctrl.optim.history_size = args['ctrl']['optim']['history_size']
 
 
 cdef vars_r_t _dict_to_vars_r(data_r):
@@ -277,7 +287,7 @@ def _call_sampler(data, args):
     if not argsptr:
         raise MemoryError("Couldn't allocate space for PyStanArgs.")
     chain_id = args['chain_id']
-    logger.info("NOW ON CHAIN {}".format(chain_id))
+    logger.info("\nNOW ON CHAIN {}\n".format(chain_id))
     for handler in logger.handlers:
         handler.flush()
     _set_pystanargs_from_dict(argsptr, args)

@@ -24,8 +24,8 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         Fixed_param = 4
     ctypedef enum optim_algo_t:
         Newton = 1
-        Nesterov = 2
         BFGS = 3
+        LBFGS = 4
     ctypedef enum sampling_metric_t:
         UNIT_E = 1
         DIAG_E = 2
@@ -78,13 +78,15 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
     cdef struct optim_t:
         int iter  # default to 2000
         int refresh  # default to 100
-        optim_algo_t algorithm  # Newton, Nesterov, BFGS
+        optim_algo_t algorithm  # Newton (L)BFGS
         bool save_iterations  # default to false
-        double stepsize  # default to 1, for Nesterov
-        double init_alpha  # default to 0.0001, for BFGS
-        double tol_obj  # default to 1e-8, for BFGS
-        double tol_grad  # default to 1e-8, for BFGS
-        double tol_param  # default to 1e-8, for BFGS
+        double init_alpha
+        double tol_obj
+        double tol_grad
+        double tol_param
+        double tol_rel_obj
+        double tol_rel_grad
+        int history_size
 
     cdef struct test_grad_t:
         double epsilon # default to 1e-6, for test_grad

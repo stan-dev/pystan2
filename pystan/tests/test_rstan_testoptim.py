@@ -58,9 +58,11 @@ class TestOptim(unittest.TestCase):
                                tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7)
         print(optim2)
 
-    def test_optim_stdnorm_nesterov(self):
+    def test_optim_stdnorm_lbfgs(self):
         sm = self.sm
-        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', seed=5)
+        optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, init_alpha=0.02,
+                              tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7)
         self.assertTrue(-3 < optim['mu'] < 3)
         self.assertTrue(0 < optim['sigma'] < 5)
-        optim = sm.optimizing(data=self.dat, stepsize=0.5, algorithm='Nesterov', seed=5, as_vector=False)
+        optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, init_alpha=0.02,
+                              tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7, as_vector=False)
