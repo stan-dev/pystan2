@@ -101,7 +101,7 @@ Example
     fit.plot()
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
-    :target: http://badge.fury.io/py/pystan
+    :target: https://badge.fury.io/py/pystan
     :alt: pypi version
 
 .. |travis| image:: https://travis-ci.org/stan-dev/pystan.png?branch=develop

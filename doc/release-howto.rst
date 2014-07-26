@@ -9,10 +9,10 @@ Release checklist
   https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
   references to the version number.)
 - Commit any changes you just made.
-- ``git tag``
+- ``git tag --sign``
 - Push tag to github ``git push --tags``
 - Git branch ``master`` should be fast-forwarded to ``develop``
-- Git branch ``readthedocs`` force pushed after rebasing on new ``master``
+- Git branch ``readthedocs`` force pushed after rebasing on new ``master``: ``git rebase master readthedocs``
 - Assemble source distribution, sign it, upload to PyPI:
 
 ::
