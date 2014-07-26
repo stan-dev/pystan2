@@ -8,6 +8,7 @@ Release checklist
 - Bump version in snippet in ``doc/getting_started.rst``, i.e., "wget
   https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
   references to the version number.)
+- Commit any changes you just made.
 - ``git tag``
 - Push tag to github ``git push --tags``
 - Git branch ``master`` should be fast-forwarded to ``develop``
