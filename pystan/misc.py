@@ -26,6 +26,7 @@ import inspect
 import io
 import itertools
 import logging
+import math
 from numbers import Number
 import os
 import random
@@ -49,8 +50,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
 
 
-def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975),
-                   digits_summary=2):
+def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=1):
         if fit.mode == 1:
             return "Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(fit.model_name)
@@ -97,7 +97,9 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     """
     assert arr.shape == (len(rownames), len(colnames))
     rownames_maxwidth = max(len(n) for n in rownames)
-    widths = [rownames_maxwidth] + [max(5, len(n) + 1) for n in colnames]
+    max_col_width = 7
+    min_col_width = 5
+    widths = [rownames_maxwidth] + [max(max_col_width, max(len(n) + 1, min_col_width)) for n in colnames]
     header = '{:>{width}}'.format('', width=widths[0])
     for name, width in zip(colnames, widths[1:]):
         header += '{name:>{width}}'.format(name=name, width=width)
@@ -107,6 +109,10 @@ def _array_to_table(arr, rownames, colnames, n_digits):
         for j, (num, width) in enumerate(zip(row, widths[1:])):
             if colnames[j] == 'n_eff':
                 num = int(round(num, 0))
+            # FIXME: this is a hotfix just to avoid really ugly summaries.
+            # any number which has abs value more than 999 is turned into an int
+            if (math.floor(math.log10(abs(num))) + 1) > 3:
+                num = int(round(num))
             line += '{num:{width}}'.format(num=round(num, n_digits), width=width)
         lines.append(line)
     return '\n'.join(lines)
