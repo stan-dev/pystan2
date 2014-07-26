@@ -4,8 +4,9 @@ from collections import OrderedDict
 
 import numpy as np
 
-from pystan.constants import MAX_UINT
 from pystan import misc
+from pystan._compat import PY2
+from pystan.constants import MAX_UINT
 
 
 def test_pars_total_indexes():
@@ -90,3 +91,69 @@ def test_remove_empty_pars():
     np.testing.assert_equal(misc._remove_empty_pars(pars[0:4], pars, dims), pars[0:3])
     np.testing.assert_equal(misc._remove_empty_pars(['beta[1]'], pars, dims), ['beta[1]'])
     np.testing.assert_equal(misc._remove_empty_pars(['eta'], pars, dims), [])
+
+
+def test_format_number_si():
+    np.testing.assert_equal(misc._format_number_si(-12345, 2), '-1.2e4')
+    np.testing.assert_equal(misc._format_number_si(123456, 2), '1.2e5')
+    np.testing.assert_equal(misc._format_number_si(-123456, 2), '-1.2e5')
+    np.testing.assert_equal(misc._format_number_si(-123456.393, 2), '-1.2e5')
+    np.testing.assert_equal(misc._format_number_si(1234567, 2), '1.2e6')
+    np.testing.assert_equal(misc._format_number_si(0.12, 2), '1.2e-1')
+    np.testing.assert_equal(misc._format_number_si(3.32, 2), '3.3e0')
+
+
+def test_format_number():
+    np.testing.assert_equal(misc._format_number(-1234, 2, 6), '-1234')
+    np.testing.assert_equal(misc._format_number(-12345, 2, 6), '-12345')
+    np.testing.assert_equal(misc._format_number(123456, 2, 6), '123456')
+    np.testing.assert_equal(misc._format_number(-123456, 2, 6), '-1.2e5')
+    np.testing.assert_equal(misc._format_number(1234567, 2, 6), '1.2e6')
+    np.testing.assert_equal(misc._format_number(0.12, 2, 6), '0.12')
+    np.testing.assert_equal(misc._format_number(3.32, 2, 6), '3.32')
+    np.testing.assert_equal(misc._format_number(3.3, 2, 6), '3.3')
+    np.testing.assert_equal(misc._format_number(3.32, 2, 6), '3.32')
+    np.testing.assert_equal(misc._format_number(3.323945, 2, 6), '3.32')
+    np.testing.assert_equal(misc._format_number(-0.0003434, 2, 6), '-3.4e-4')
+    np.testing.assert_equal(misc._format_number(1654.25, 2, 6), '1654.2')
+    np.testing.assert_equal(misc._format_number(-1654.25, 2, 6), '-1654')
+    np.testing.assert_equal(misc._format_number(-165.25, 2, 6), '-165.2')
+    np.testing.assert_equal(misc._format_number(9.94598693e-01, 2, 6), '0.99')
+    np.testing.assert_equal(misc._format_number(-9.94598693e-01, 2, 6), '-0.99')
+
+
+def test_array_to_table():
+    rownames = np.array(['alpha', 'beta[0]', 'beta[1]', 'beta[2]', 'beta[3]', 'sigma', 'lp__'])
+    colnames = ('mean', 'se_mean', 'sd', '2.5%', '25%', '50%', '75%', '97.5%', 'n_eff', 'Rhat')
+    arr = np.array([[-1655,   625,  1654, -4378, -3485,  -927,   -27,    -9,     7, 2],
+                    [  -47,    59,   330,  -770,   -69,    -2,     2,  1060,    31, 1],
+                    [  -18,    70,   273,  -776,   -30,     0,    35,   608,    15, 1],
+                    [    8,    38,   230,  -549,   -26,     0,    17,   604,    36, 1],
+                    [   23,    32,   303,  -748,   -34,     0,    49,   751,    92, 1],
+                    [  405,   188,   974,     0,     4,    73,   458,  2203,    27, 1],
+                    [  -13,     3,     8,   -23,   -20,   -15,    -5,     1,     8, 2]])
+    n_digits = 2
+    result = misc._array_to_table(arr, rownames, colnames, n_digits)
+    desired = "alpha    -1655     625   1654  -4378  -3485   -927    -27     -9      7      2"
+    desired_py2 = "alpha    -1655   625.0 1654.0  -4378  -3485 -927.0  -27.0   -9.0    7.0    2.0"
+    # round() behaves differently in Python 3
+    if PY2:
+        np.testing.assert_equal(result.split('\n')[1], desired_py2)
+    else:
+        np.testing.assert_equal(result.split('\n')[1], desired)
+    arr = np.array([[-1655325, 625.25,  1654.25, -4378.25, -3485.25,  -927.25, -27.25,    -9.25,   7.25, 2],
+                    [  -47.25,  59.25,   330.25,  -770.25,   -69.25,    -2.25,   2.25,  1060.25,  31.25, 1],
+                    [  -18.25,  70.25,   273.25,  -776.25,   -30.25,     0.25,  35.25,   608.25,  15.25, 1],
+                    [    8.25,  38.25,   230.25,  -549.25,   -26.25,     0.25,  17.25,   604.25,  36.25, 1],
+                    [   23.25,  32.25,   303.25,  -748.25,   -34.25,     0.25,  49.25,   751.25,  92.25, 1],
+                    [  405.25, 188.25,   974.25,     0.25,     4.25,    73.25, 458.25,  2203.25,  27.25, 1],
+                    [  -13.25,   3.25,     8.25,   -23.25,   -20.25,   -15.25,  -5.25,     1.25,   8.25, 2]])
+
+    result = misc._array_to_table(arr, rownames, colnames, n_digits)
+    desired = "alpha   -1.7e6  625.25 1654.2  -4378  -3485 -927.2 -27.25  -9.25      7    2.0"
+    desired_py2 = "alpha   -1.7e6  625.25 1654.2  -4378  -3485 -927.2 -27.25  -9.25    7.0    2.0"
+    # round() behaves differently in Python 3
+    if PY2:
+        np.testing.assert_equal(result.split('\n')[1], desired_py2)
+    else:
+        np.testing.assert_equal(result.split('\n')[1], desired)

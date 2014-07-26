@@ -50,7 +50,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
 
 
-def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=1):
+def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
         if fit.mode == 1:
             return "Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(fit.model_name)
@@ -109,13 +109,47 @@ def _array_to_table(arr, rownames, colnames, n_digits):
         for j, (num, width) in enumerate(zip(row, widths[1:])):
             if colnames[j] == 'n_eff':
                 num = int(round(num, 0))
-            # FIXME: this is a hotfix just to avoid really ugly summaries.
-            # any number which has abs value more than 999 is turned into an int
-            if (math.floor(math.log10(abs(num))) + 1) > 3:
-                num = int(round(num))
-            line += '{num:{width}}'.format(num=round(num, n_digits), width=width)
+            line += '{num:>{width}}'.format(num=_format_number(num, n_digits, max_col_width - 1), width=width)
         lines.append(line)
     return '\n'.join(lines)
+
+
+def _number_width(n):
+    """Calculate the width in characters required to print a number
+
+    For example, -1024 takes 5 characters. -0.034 takes 6 characters.
+    """
+    return len(str(n))
+
+
+def _format_number_si(num, n_signif_figures):
+    """Format a number using scientific notation to given significant figures"""
+    leading, exp = '{:E}'.format(num).split('E')
+    leading = round(float(leading), n_signif_figures - 1)
+    exp = exp[:1] + exp[2:] if exp[1] == '0' else exp
+    formatted = '{}e{}'.format(leading, exp.lstrip('+'))
+    return formatted
+
+
+def _format_number(num, n_signif_figures, max_width):
+    """Format a number as a string while obeying space constraints.
+
+    `n_signif_figures` is the minimum number of significant figures expressed
+    `max_width` is the maximum width in characters allowed
+    """
+    if max_width < 6:
+        raise NotImplementedError("Guaranteed formatting in fewer than 6 characters not supported.")
+    n_digits = math.floor(math.log10(abs(num) + 1e-5)) + 1
+    if abs(num) > 10**-n_signif_figures and n_digits <= max_width - n_signif_figures:
+        return str(round(num, n_signif_figures))[:max_width].rstrip('.')
+    elif _number_width(num) <= max_width:
+        if n_digits >= n_signif_figures:
+            # the int() is necessary for consistency between Python 2 and 3
+            return str(int(round(num)))
+        else:
+            return str(num)
+    else:
+        return _format_number_si(num, n_signif_figures)
 
 
 def _summary(fit, pars=None, probs=None, **kwargs):
