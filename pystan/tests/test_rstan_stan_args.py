@@ -9,7 +9,7 @@ from pystan import stan
 
 class TestPyStanArgs(unittest.TestCase):
 
-    def test_pystanags(self):
+    def test_pystanargs(self):
         y = np.array([0.70,  -0.16,  0.77, -1.37, -1.99,  1.35, 0.08,
                       0.02,  -1.48, -0.08,  0.34,  0.03, -0.42, 0.87,
                       -1.36,  1.43,  0.80, -0.48, -1.61, -1.27])

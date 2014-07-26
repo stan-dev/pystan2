@@ -56,6 +56,8 @@ class TestOptim(unittest.TestCase):
         optim2 = sm.optimizing(data=dat, algorithm='BFGS',
                                sample_file='opt.csv', init_alpha=0.02,
                                tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7)
+        self.assertTrue(-1 < optim['mu'] < 1)
+        self.assertTrue(0 < optim['sigma'] < 2)
         print(optim2)
 
     def test_optim_stdnorm_lbfgs(self):
@@ -66,3 +68,8 @@ class TestOptim(unittest.TestCase):
         self.assertTrue(0 < optim['sigma'] < 5)
         optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, init_alpha=0.02,
                               tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7, as_vector=False)
+        self.assertTrue(-3 < optim[0] < 3)
+        self.assertTrue(0 < optim[1] < 5)
+        optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, history_size=10)
+        self.assertTrue(-3 < optim['mu'] < 3)
+        self.assertTrue(0 < optim['sigma'] < 5)
