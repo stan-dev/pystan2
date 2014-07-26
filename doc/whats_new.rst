@@ -9,6 +9,7 @@
 v2.4.0.0 (26. July 2014)
 ========================
 - Stan 2.4 (LBFGS optimizer added, Nesterov removed)
+- Improve display of fit summaries
 
 v2.3.0.0 (26. June 2014)
 ========================
