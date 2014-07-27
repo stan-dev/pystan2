@@ -95,7 +95,10 @@ else:
 ###############################################################################
 
 from distutils.errors import CCompilerError, DistutilsError
-from distutils.extension import Extension
+try:
+    from setuptools import Extension
+except ImportError:
+    from distutils.extension import Extension
 
 
 ## static libraries
@@ -199,8 +202,10 @@ def setup_package():
         dist = setup(**metadata)
     else:
         import distutils.core
-        distutils.core._setup_stop_after = 'commandline'
-        from distutils.core import setup
+        try:
+            from setuptools import setup
+        except ImportError:
+            from distutils.core import setup
         try:
             from Cython.Build import cythonize
             from numpy.distutils.command import install, install_clib
@@ -208,6 +213,7 @@ def setup_package():
         except ImportError:
             raise SystemExit("Cython>=0.19 and NumPy are required.")
 
+        distutils.core._setup_stop_after = 'commandline'
         metadata['ext_modules'] = cythonize(extensions)
 
         # use numpy.distutils machinery to install libstan.a
