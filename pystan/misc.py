@@ -506,7 +506,7 @@ def _get_valid_stan_args(base_args=None):
     if args['method'] == stan_args_method_t.SAMPLING:
         args['ctrl'] = args.get('ctrl', dict(sampling=dict()))
         args['ctrl']['sampling']['iter'] = iter = args.get('iter', 2000)
-        args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', args['iter'] // 2)
+        args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', iter // 2)
         calculated_thin = iter - warmup // 1000
         if calculated_thin < 1:
             calculated_thin = 1
