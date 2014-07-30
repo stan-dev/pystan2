@@ -412,8 +412,8 @@ class StanModel:
             underscore and chain number are appended to the file name.
             By default do not write samples to file.
 
-        algorithm : {"BFGS", "LBFGS", "Newton"}, optional
-            Name of optimization algorithm to be used. Default is BFGS.
+        algorithm : {"LBFGS", "BFGS", "Newton"}, optional
+            Name of optimization algorithm to be used. Default is LBFGS.
 
         verbose : boolean, optional
             Indicates whether intermediate output should be piped to the console.
@@ -462,9 +462,9 @@ class StanModel:
         >>> f = m.optimizing()
 
         """
-        algorithms = ("BFGS", "LBFGS", "Newton")
+        algorithms = {"BFGS", "LBFGS", "Newton"}
         if algorithm is None:
-            algorithm = "BFGS"
+            algorithm = "LBFGS"
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
         if data is None:

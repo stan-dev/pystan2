@@ -55,6 +55,11 @@ namespace pystan {
     }
   };
 
+  /**
+    @param      N
+    @param      M    number of iterations to be saved
+    @param      warmup    number of warmup iterations to be saved
+   */
 
   pystan_sample_recorder
   sample_recorder_factory(std::ostream *o, const std::string prefix,

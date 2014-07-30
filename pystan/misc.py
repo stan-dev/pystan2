@@ -567,7 +567,7 @@ def _get_valid_stan_args(base_args=None):
     elif args['method'] == stan_args_method_t.OPTIM:
         args['ctrl'] = args.get('ctrl', dict(optim=dict()))
         args['ctrl']['optim']['iter'] = iter = args.get('iter', 2000)
-        algorithm = args.get('algorithm', 'BFGS')
+        algorithm = args.get('algorithm', 'LBFGS')
         if algorithm == "BFGS":
             args['ctrl']['optim']['algorithm'] = optim_algo_t.BFGS
         elif algorithm == "Newton":
