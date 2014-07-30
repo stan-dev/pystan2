@@ -1,38 +1,24 @@
-language: python
+# language is set to c to work around travis ci bug
+# https://github.com/travis-ci/travis-ci/issues/2312
+language: c
+os:
+  - linux
+  - osx
+compiler:
+  - clang
+  - gcc
 env:
-  - TEST_SUITE_REGEX='^test_rstan'
-  - TEST_SUITE_REGEX='^(?!test_rstan).*'
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-# notifications
+  - TRAVIS_PYTHON_VERSION=2.7 TEST_SUITE_REGEX='^test_rstan'
+  - TRAVIS_PYTHON_VERSION=2.7 TEST_SUITE_REGEX='^(?!test_rstan).*'
+  - TRAVIS_PYTHON_VERSION=3.3 TEST_SUITE_REGEX='^test_rstan'
+  - TRAVIS_PYTHON_VERSION=3.3 TEST_SUITE_REGEX='^(?!test_rstan).*'
+  - TRAVIS_PYTHON_VERSION=3.4 TEST_SUITE_REGEX='^test_rstan'
+  - TRAVIS_PYTHON_VERSION=3.4 TEST_SUITE_REGEX='^(?!test_rstan).*'
 notifications:
   email:
     recipients:
       - stan-buildbot@googlegroups.com
     on_success: change
     on_failure: always
-# command to install dependencies
-before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  # use Anaconda to get compiled versions of scipy and numpy,
-  # modified from https://gist.github.com/dan-blanchard/7045057
-  - wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  # Update conda itself
-  - conda update --yes --quiet conda
-  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
-  - sudo rm -rf /dev/shm
-  - sudo ln -s /run/shm /dev/shm
-install:
-  - if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython=0.19 numpy=1.7 scipy nose matplotlib; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib; fi
-  - source activate env_name
-  # use pip install . rather than python setup.py install due to travis log limits
-  - pip install .
-# command to run tests
-script: DISPLAY=:99.0 JOBLIB_MULTIPROCESSING=0 nosetests -w /tmp --process-timeout=1200 --processes=2 --exclude=$TEST_SUITE_REGEX pystan.tests
+install: source continuous_integration/install.sh
+script: bash continuous_integration/test_script.sh
