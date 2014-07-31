@@ -6,6 +6,12 @@
  What's New
 ============
 
+v2.4.0.1 (31. July 2014)
+========================
+- Sets LBFGS as default optimizer.
+- Adds preliminary support for Python binary wheels on OS X and Windows.
+- Fixes bug in edge case in new summary code.
+
 v2.4.0.0 (26. July 2014)
 ========================
 - Stan 2.4 (LBFGS optimizer added, Nesterov removed)
