@@ -30,5 +30,5 @@ if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then conda create --quiet --yes -n env
 if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib; fi
 source activate env_name
 
-# use pip install . rather than python setup.py install due to travis log limits
-pip install .
+# run quietly due to travis ci's log limit
+python setup.py -q install
