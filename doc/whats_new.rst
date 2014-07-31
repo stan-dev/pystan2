@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.4.0.2 (TBD)
+==============
+- ...
+
 v2.4.0.1 (31. July 2014)
 ========================
 - Sets LBFGS as default optimizer.

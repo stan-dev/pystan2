@@ -9,10 +9,13 @@ Release checklist
   https://github.com/stan-dev/pystan/archive/0.2.0.zip" (Note there are three
   references to the version number.)
 - Commit any changes you just made.
+- Verify source distribution is working ``python setup.py sdist``
 - ``git tag --sign``
 - Push tag to github ``git push --tags``
 - Git branch ``master`` should be fast-forwarded to ``develop``
-- Git branch ``readthedocs`` force pushed after rebasing on new ``master``: ``git rebase master readthedocs``
+- Release documentation:
+  - ``git rebase master readthedocs``
+  - ``git push --force origin readthedocs``
 - Assemble source distribution, sign it, upload to PyPI:
 
 ::
