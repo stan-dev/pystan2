@@ -287,7 +287,6 @@ def _call_sampler(data, args):
     if not argsptr:
         raise MemoryError("Couldn't allocate space for PyStanArgs.")
     chain_id = args['chain_id']
-    logger.info("\nNOW ON CHAIN {}\n".format(chain_id))
     for handler in logger.handlers:
         handler.flush()
     _set_pystanargs_from_dict(argsptr, args)
