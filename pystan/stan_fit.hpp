@@ -754,7 +754,9 @@ namespace pystan {
       clock_t start = clock();
 
       std::string prefix = "\n";
-      std::string suffix = "";
+      std::stringstream ss;
+      ss << " (Chain " << args.get_chain_id() << ")";
+      std::string suffix = ss.str();
       Py_CheckUserInterrupt_Functor interruptCallback;
 
       stan::common::warmup<Model, RNG_t,
