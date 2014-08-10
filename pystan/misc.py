@@ -139,11 +139,12 @@ def _format_number(num, n_signif_figures, max_width):
     """
     if max_width < 6:
         raise NotImplementedError("Guaranteed formatting in fewer than 6 characters not supported.")
-    n_digits = math.floor(math.log10(abs(num) + 1e-5)) + 1
-    if abs(num) > 10**-n_signif_figures and n_digits <= max_width - n_signif_figures:
+    # add 0.5 to prevent log(0) errors; only affects n_digits calculation for num > 0
+    n_digits = lambda num: math.floor(math.log10(abs(num) + 0.5)) + 1
+    if abs(num) > 10**-n_signif_figures and n_digits(num) <= max_width - n_signif_figures:
         return str(round(num, n_signif_figures))[:max_width].rstrip('.')
     elif _number_width(num) <= max_width:
-        if n_digits >= n_signif_figures:
+        if n_digits(num) >= n_signif_figures:
             # the int() is necessary for consistency between Python 2 and 3
             return str(int(round(num)))
         else:
