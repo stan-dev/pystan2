@@ -35,7 +35,10 @@
 
 
 #include "py_var_context.hpp"
-void Py_CheckUserInterrupt(void);
+#include "Python.h"
+#ifndef Py_PYTHON_H
+    #error Python headers needed to compile C extensions, please install development version of Python.
+#endif
 
 // REF: stan/common/command.hpp
 
@@ -48,10 +51,6 @@ void Py_CheckUserInterrupt(void);
 
 typedef std::map<std::string, std::pair<std::vector<double>, std::vector<size_t> > > vars_r_t;
 typedef std::map<std::string, std::pair<std::vector<int>, std::vector<size_t> > > vars_i_t;
-
-void Py_CheckUserInterrupt(void) {
-    // TODO(abr): currently a noop; need to check PyErr_Occured()
-}
 
 namespace pystan {
 
@@ -670,9 +669,10 @@ namespace pystan {
       return true;
     }
 
-    struct Py_CheckUserInterrupt_Functor {
+    struct PyErr_CheckSignals_Functor {
       void operator()() {
-        Py_CheckUserInterrupt();
+        // PyErr_CheckSignals is defined in Python.h
+        PyErr_CheckSignals();
       }
     };
 
@@ -757,10 +757,10 @@ namespace pystan {
       std::stringstream ss;
       ss << " (Chain " << args.get_chain_id() << ")" << std::endl;
       std::string suffix = ss.str();
-      Py_CheckUserInterrupt_Functor interruptCallback;
+      PyErr_CheckSignals_Functor interruptCallback;
 
       stan::common::warmup<Model, RNG_t,
-                           Py_CheckUserInterrupt_Functor>
+                           PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
          args.get_ctrl_sampling_refresh(), args.get_ctrl_sampling_save_warmup(),
@@ -787,7 +787,7 @@ namespace pystan {
       start = clock();
 
       stan::common::sample<Model, RNG_t,
-                           Py_CheckUserInterrupt_Functor>
+                           PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
          args.get_ctrl_sampling_refresh(), true,
@@ -1141,7 +1141,7 @@ namespace pystan {
           std::cout << "initial log joint probability = " << lp << std::endl;
           int m = 0;
           while ((lp - lastlp) / fabs(lp) > 1e-8) {
-            Py_CheckUserInterrupt();
+            PyErr_CheckSignals();
             lastlp = lp;
             lp = stan::optimization::newton_step(model, cont_vector, disc_vector);
             if (args.get_ctrl_optim_refresh() > 0) {
