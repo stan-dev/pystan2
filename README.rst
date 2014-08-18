@@ -104,7 +104,7 @@ Example
     :target: https://badge.fury.io/py/pystan
     :alt: pypi version
 
-.. |travis| image:: https://travis-ci.org/stan-dev/pystan.png?branch=develop
+.. |travis| image:: https://travis-ci.org/stan-dev/pystan.png?branch=master
     :target: https://travis-ci.org/stan-dev/pystan
     :alt: travis-ci build status
 
