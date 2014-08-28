@@ -15,7 +15,6 @@ from pystan._compat import string_types
 from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
 
 

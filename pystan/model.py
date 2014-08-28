@@ -37,7 +37,6 @@ import numpy as np
 import pystan.api
 import pystan.misc
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pystan')
 
 
