@@ -24,13 +24,18 @@ from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
-from cython.operator cimport dereference as deref
+from cython.operator cimport dereference as deref, preincrement as inc
+
+cimport numpy as np
 
 from pystan.io cimport py_var_context, var_context
-from pystan.stan_fit cimport stan_fit, PyStanArgs, PyStanHolder, get_all_flatnames
+from pystan.stan_fit cimport stan_fit, StanArgs, StanHolder, get_all_flatnames
+
+# Initialize numpy for use from C. When using numpy from C or Cython this must always be done.
+np.import_array()
 
 # python imports
-from collections import OrderedDict
+import collections
 import logging
 
 import numpy as np
@@ -58,7 +63,7 @@ cdef extern from "$model_cppname.hpp" namespace "${model_cppname}_namespace":
 ctypedef map[string, pair[vector[double], vector[size_t]]] vars_r_t
 ctypedef map[string, pair[vector[int], vector[size_t]]] vars_i_t
 
-cdef dict _dict_from_pystanholder(PyStanHolder* holder):
+cdef dict _dict_from_stanholder(StanHolder* holder):
     r = {}
     r['num_failed'] = holder.num_failed
     r['test_grad'] = holder.test_grad
@@ -67,20 +72,104 @@ cdef dict _dict_from_pystanholder(PyStanHolder* holder):
     r['value'] = holder.value
     chains = [np.asarray(ch) for ch in holder.chains]
     chain_names = [n.decode('utf-8') for n in holder.chain_names]
-    r['chains'] = OrderedDict(zip(chain_names, chains))
-    # NOTE: when _dict_from_pystanholder is called we also have a pointer
+    r['chains'] = collections.OrderedDict(zip(chain_names, chains))
+    # NOTE: when _dict_from_stanholder is called we also have a pointer
     # to holder.args available so we will use it directly
-    # r['args'] = _dict_from_pystanargs(holder.args)
+    # r['args'] = _dict_from_stanargs(holder.args)
     r['mean_pars'] = holder.mean_pars
     r['mean_lp__'] = holder.mean_lp__
     cdef bytes adaptation_info_bytes = holder.adaptation_info
     r['adaptation_info'] = adaptation_info_bytes.decode('utf-8')
     r['sampler_params'] = holder.sampler_params
-    r['sampler_param_names'] = [n.decode('utf-8') \
-                                for n in holder.sampler_param_names]
+    r['sampler_param_names'] = [n.decode('utf-8') for n in holder.sampler_param_names]
     return r
 
-cdef dict _dict_from_pystanargs(PyStanArgs* args):
+cdef class PyStanHolder:
+    """Allow access to a StanHolder instance from Python
+
+    A PyStanHolder instance wraps a StanHolder instance. When the PyStanHolder
+    instance is deleted, the StanHolder instance will be as well.
+
+    There are slight differences between the StanHolder and PyStanHolder. For
+    example, chains is an OrderedDict in the PyStanHolder where a StanHolder
+    tracks the same information in the fields ``chains`` and ``chain_names``.
+    The same holds for ``sampler_params``.
+    """
+    cdef public int num_failed
+    cdef public bool test_grad
+    cdef public list inits
+    cdef public list par
+    cdef public double value
+    cdef public chains
+    cdef public dict args
+    cdef public mean_pars
+    cdef public double mean_lp__
+    cdef public adaptation_info
+    cdef public sampler_params
+    cdef public list sampler_param_names
+    cdef StanHolder * holderptr
+
+    # for backward compatibility allow holder[attr]
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __dealloc__(self):
+        del self.holderptr
+
+    # the following three methods give Cython classes instructions for pickling
+    def __getstate__(self):
+        attr_names = ('num_failed test_grad inits par value chains args mean_lp__ '
+                      'adaptation_info sampler_params sampler_param_names').split()
+        state = dict((k, getattr(self, k)) for k in attr_names)
+        return state
+
+    def __setstate__(self, state):
+        for k in state:
+            setattr(self, k, state[k])
+
+    def __reduce__(self):
+        return (PyStanHolder, tuple(), self.__getstate__(), None, None)
+
+
+cdef PyStanHolder _pystanholder_from_stanholder(StanHolder* holder):
+    cdef int num_iter
+    cdef double* data_ptr
+    cdef np.npy_intp dims[1]
+
+    h = PyStanHolder()
+    h.holderptr = holder
+    h.num_failed = holder.num_failed
+    h.test_grad = holder.test_grad
+    h.inits = holder.inits
+    h.par = holder.par
+    h.value = holder.value
+
+    chains = []
+    cdef vector[vector[double] ].iterator it = holder.chains.begin()
+    while it != holder.chains.end():
+        num_iter = deref(it).size()
+        dims[0] = <np.npy_intp> num_iter
+        data_ptr = &(deref(it).front())
+        ch = np.PyArray_SimpleNewFromData(1, dims, np.NPY_DOUBLE, data_ptr)
+        chains.append(ch)
+        inc(it)
+    chain_names = [n.decode('utf-8') for n in holder.chain_names]
+    h.chains = collections.OrderedDict(zip(chain_names, chains))
+
+    # NOTE: when _pystanholder_from_stanholder is called we also have a pointer
+    # to holder.args available so we will use it directly from there. Strictly
+    # speaking it should be done here, but Cython kept throwing errors
+    # FIXME: figure out origins of difficulties
+    # r['args'] = _dict_from_stanargs(holder.args)
+    h.mean_pars = holder.mean_pars
+    h.mean_lp__ = holder.mean_lp__
+    h.adaptation_info = holder.adaptation_info.decode('utf-8')
+    h.sampler_params = holder.sampler_params
+    h.sampler_param_names = [n.decode('utf-8') for n in holder.sampler_param_names]
+    return h
+
+
+cdef dict _dict_from_stanargs(StanArgs* args):
     d = dict()
     ctrl_d = dict()
     d['random_seed'] = str(args.random_seed)
@@ -173,7 +262,7 @@ cdef dict _dict_from_pystanargs(PyStanArgs* args):
     return d
 
 
-cdef void _set_pystanargs_from_dict(PyStanArgs* p, dict args):
+cdef void _set_stanargs_from_dict(StanArgs* p, dict args):
     """Insert values in dictionary `args` into `p`"""
     # _call_sampler requires a specially crafted dictionary of arguments
     # intended for the c++ function sampler_command(...) in stan_fit.hpp
@@ -280,16 +369,16 @@ def _call_sampler(data, args):
 
     """
     data_r, data_i = pystan.misc._split_data(data)
-    cdef PyStanHolder *holderptr = new PyStanHolder()
-    cdef PyStanArgs *argsptr = new PyStanArgs()
+    cdef StanHolder *holderptr = new StanHolder()
+    cdef StanArgs *argsptr = new StanArgs()
     if not holderptr:
-        raise MemoryError("Couldn't allocate space for PyStanHolder.")
+        raise MemoryError("Couldn't allocate space for StanHolder.")
     if not argsptr:
-        raise MemoryError("Couldn't allocate space for PyStanArgs.")
+        raise MemoryError("Couldn't allocate space for StanArgs.")
     chain_id = args['chain_id']
     for handler in logger.handlers:
         handler.flush()
-    _set_pystanargs_from_dict(argsptr, args)
+    _set_stanargs_from_dict(argsptr, args)
 
     cdef stan_fit[$model_cppname, ecuyer1988] *fitptr
     cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
@@ -298,15 +387,14 @@ def _call_sampler(data, args):
     if not fitptr:
         raise MemoryError("Couldn't allocate space for stan_fit.")
     ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
-    holder_dict = _dict_from_pystanholder(holderptr)
+    holder = _pystanholder_from_stanholder(holderptr)
     # FIXME: rather than fetching the args from the holderptr, we just use
     # the argsptr we passed directly. This is a hack to solve a problem
     # that holder.args gets dropped somewhere in C++.
-    holder_dict['args'] = _dict_from_pystanargs(argsptr)
-    del holderptr
+    holder.args = _dict_from_stanargs(argsptr)
     del argsptr
     del fitptr
-    return ret, holder_dict
+    return ret, holder
 
 
 cdef class StanFit4$model_cppname:
@@ -439,7 +527,7 @@ cdef class StanFit4$model_cppname:
         n_kept = [s-w for s, w in zip(self.sim['n_save'], self.sim['warmup2'])]
 
         if permuted:
-            extracted = OrderedDict()
+            extracted = collections.OrderedDict()
             for par in pars:
                 sss = [pystan.misc._get_kept_samples(p, self.sim)
                        for p in tidx[par]]
@@ -565,7 +653,7 @@ cdef class StanFit4$model_cppname:
         parameter `inc_warmup` indicates whether to include the warmup period.
         """
         self._verify_has_samples()
-        ldf = [OrderedDict(zip(ch['sampler_param_names'], np.array(ch['sampler_params']))) for ch in self.sim['samples']]
+        ldf = [collections.OrderedDict(zip(ch['sampler_param_names'], np.array(ch['sampler_params']))) for ch in self.sim['samples']]
         if inc_warmup:
             return ldf
         else:

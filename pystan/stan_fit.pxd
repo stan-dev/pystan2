@@ -45,7 +45,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         int num_pars_unconstrained()
         vector[string] unconstrained_param_names(bool include_tparams, bool include_gqs)
         vector[string] constrained_param_names(bool include_tparams, bool include_gqs)
-        int call_sampler(PyStanArgs&, PyStanHolder&) except +
+        int call_sampler(StanArgs&, StanHolder&) except +
         vector[string] param_names()
         vector[string] param_names_oi()
         vector[vector[uint]] param_dims()
@@ -97,7 +97,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         optim_t optim
         test_grad_t test_grad
 
-    cdef cppclass PyStanArgs:
+    cdef cppclass StanArgs:
         uint random_seed
         uint chain_id
         string init
@@ -112,7 +112,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         bool diagnostic_file_flag
         ctrl_t ctrl
 
-    cdef cppclass PyStanHolder:
+    cdef cppclass StanHolder:
         int num_failed
         bool test_grad
         vector[double] inits
@@ -120,7 +120,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         double value
         vector[vector[double] ] chains
         vector[string] chain_names
-        PyStanArgs args
+        StanArgs args
         vector[double] mean_pars
         double mean_lp__
         string adaptation_info

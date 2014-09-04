@@ -43,6 +43,7 @@ except ImportError:
     from pystan.external.scipy.mstats import mquantiles
 
 import pystan.chains as chains
+import pystan._misc
 from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
                               sampling_metric_t, stan_args_method_t)
 
@@ -818,7 +819,6 @@ def _idx_col2rowm(d):
 
 
 def _get_kept_samples(n, sim):
-    # NOTE: this is in stanfit-class.R in RStan (rather than misc.R)
     """Get samples to be kept from the chain(s) for `n`th parameter.
 
     Samples from different chains are merged.
@@ -835,12 +835,7 @@ def _get_kept_samples(n, sim):
         Samples being kept, permuted and in column-major order.
 
     """
-    ss = []
-    for s, nw, perm in zip(sim['samples'], sim['warmup2'], sim['permutation']):
-        nth_key = list(s['chains'].keys())[n]
-        r = s['chains'][nth_key][nw:]
-        ss.extend(r[perm])
-    return np.asarray(ss)
+    return pystan._misc.get_kept_samples(n, sim)
 
 
 def _get_samples(n, sim, inc_warmup=True):
@@ -859,15 +854,7 @@ def _get_samples(n, sim, inc_warmup=True):
         Each chain is an element in the list.
 
     """
-    if all(w2 == 0 for w2 in sim['warmup2']):
-        # from RStan
-        inc_warmup = True
-    ss = []
-    for s, nw in zip(sim['samples'], sim['warmup2']):
-        nth_key = list(s['chains'].keys())[n]
-        r = s['chains'][nth_key] if inc_warmup else s['chains'][nth_key][nw:]
-        ss.append(np.asarray(r))
-    return ss
+    return pystan._misc.get_samples(n, sim, inc_warmup)
 
 
 def _redirect_stderr():
