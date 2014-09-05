@@ -61,12 +61,12 @@ namespace pystan {
 
   /* Simple class to store arguments provided by Python. Mirrors RStan's stan_args.
    *
-   * Apart from the PyStanArgs class all the functionality found in RStan's
+   * Apart from the StanArgs class all the functionality found in RStan's
    * stan_args.hpp such as validate_args() and the constructor is handled in
    * Python for easier debugging.
    *
    */
-  class PyStanArgs {
+  class StanArgs {
   public:
     unsigned int random_seed;
     unsigned int chain_id;
@@ -271,7 +271,7 @@ namespace pystan {
   };
 
   /* simple class to store data for Python */
-  class PyStanHolder {
+  class StanHolder {
 
       public:
           int num_failed;
@@ -281,7 +281,7 @@ namespace pystan {
           double value;
           std::vector<std::vector<double> > chains;
           std::vector<std::string> chain_names;
-          PyStanArgs args;
+          StanArgs args;
           std::vector<double> mean_pars;
           double mean_lp__;
           std::string adaptation_info;
@@ -611,7 +611,7 @@ namespace pystan {
     }
 
     template<class Sampler>
-    void init_static_hmc(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args) {
+    void init_static_hmc(stan::mcmc::base_mcmc* sampler_ptr, const StanArgs& args) {
       double epsilon = args.get_ctrl_sampling_stepsize();
       double epsilon_jitter = args.get_ctrl_sampling_stepsize_jitter();
       double int_time = args.get_ctrl_sampling_int_time();
@@ -622,7 +622,7 @@ namespace pystan {
     }
 
     template<class Sampler>
-    void init_nuts(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args) {
+    void init_nuts(stan::mcmc::base_mcmc* sampler_ptr, const StanArgs& args) {
       double epsilon = args.get_ctrl_sampling_stepsize();
       double epsilon_jitter = args.get_ctrl_sampling_stepsize_jitter();
       int max_depth = args.get_ctrl_sampling_max_treedepth();
@@ -634,7 +634,7 @@ namespace pystan {
     }
 
     template<class Sampler>
-    void init_adapt(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args,
+    void init_adapt(stan::mcmc::base_mcmc* sampler_ptr, const StanArgs& args,
                     const Eigen::VectorXd& cont_params) {
 
       if (!args.get_ctrl_sampling_adapt_engaged()) return;
@@ -657,7 +657,7 @@ namespace pystan {
     }
 
     template<class Sampler>
-    bool init_windowed_adapt(stan::mcmc::base_mcmc* sampler_ptr, const PyStanArgs& args,
+    bool init_windowed_adapt(stan::mcmc::base_mcmc* sampler_ptr, const StanArgs& args,
                              const Eigen::VectorXd& cont_params) {
 
       init_adapt<Sampler>(sampler_ptr, args, cont_params);
@@ -706,7 +706,7 @@ namespace pystan {
     }
 
     template <class Model, class RNG_t>
-    void execute_sampling(PyStanArgs& args, Model& model, PyStanHolder& holder,
+    void execute_sampling(StanArgs& args, Model& model, StanHolder& holder,
                           stan::mcmc::base_mcmc* sampler_ptr,
                           stan::mcmc::sample& s,
                           const std::vector<size_t>& qoi_idx,
@@ -857,7 +857,7 @@ namespace pystan {
      * @param base_rng: the boost RNG instance.
      */
     template <class Model, class RNG_t>
-    int sampler_command(PyStanArgs& args, Model& model, PyStanHolder& holder,
+    int sampler_command(StanArgs& args, Model& model, StanHolder& holder,
                         const std::vector<size_t>& qoi_idx,
                         const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
 
@@ -1566,7 +1566,7 @@ namespace pystan {
       return n;
     }
 
-    int call_sampler(PyStanArgs& args, PyStanHolder& holder) {
+    int call_sampler(StanArgs& args, StanHolder& holder) {
       int ret;
       ret = sampler_command(args, model_, holder, names_oi_tidx_,
                             fnames_oi_, base_rng);

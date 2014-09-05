@@ -254,11 +254,14 @@ class StanModel:
         temp_dir = tempfile.mkdtemp()
         lib_dir = os.path.join(temp_dir, 'pystan')
         pystan_dir = os.path.dirname(__file__)
-        include_dirs = [lib_dir,
-                        pystan_dir,
-                        os.path.join(pystan_dir, "stan/src"),
-                        os.path.join(pystan_dir, "stan/lib/eigen_3.2.0"),
-                        os.path.join(pystan_dir, "stan/lib/boost_1.54.0")]
+        include_dirs = [
+            lib_dir,
+            pystan_dir,
+            os.path.join(pystan_dir, "stan/src"),
+            os.path.join(pystan_dir, "stan/lib/eigen_3.2.0"),
+            os.path.join(pystan_dir, "stan/lib/boost_1.54.0"),
+            np.get_include(),
+        ]
         library_dirs = [os.path.join(pystan_dir)]
         libraries = ['stan']
 
@@ -700,8 +703,7 @@ class StanModel:
         samples = [smpl for _, smpl in ret_and_samples]
 
         # _organize_inits strips out lp__ (RStan does it in this method)
-        inits_used = pystan.misc._organize_inits([s['inits'] for s in samples],
-                                                 m_pars, p_dims)
+        inits_used = pystan.misc._organize_inits([s['inits'] for s in samples], m_pars, p_dims)
 
         random_state = np.random.RandomState(args_list[0]['seed'])
         perm_lst = [random_state.permutation(int(n_kept)) for _ in range(chains)]

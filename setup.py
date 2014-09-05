@@ -135,18 +135,22 @@ stanc_sources = [
     "pystan/stan/src/stan/gm/grammars/whitespace_grammar_inst.cpp",
 ]
 
-extensions = [Extension("pystan._api",
-                        ["pystan/_api.pyx"] + stanc_sources,
-                        language='c++',
-                        define_macros=stan_macros,
-                        include_dirs=stan_include_dirs,
-                        extra_compile_args=extensions_extra_compile_args),
-              Extension("pystan._chains",
-                        ["pystan/_chains.pyx"],
-                        language='c++',
-                        define_macros=stan_macros,
-                        include_dirs=stan_include_dirs,
-                        extra_compile_args=extensions_extra_compile_args)]
+extensions = [
+    Extension("pystan._api",
+              ["pystan/_api.pyx"] + stanc_sources,
+              language='c++',
+              define_macros=stan_macros,
+              include_dirs=stan_include_dirs,
+              extra_compile_args=extensions_extra_compile_args),
+    Extension("pystan._chains",
+              ["pystan/_chains.pyx"],
+              language='c++',
+              define_macros=stan_macros,
+              include_dirs=stan_include_dirs,
+              extra_compile_args=extensions_extra_compile_args),
+    # _misc.pyx does not use Stan libs
+    Extension("pystan._misc", ["pystan/_misc.pyx"], language='c++')
+]
 
 
 ## package data
