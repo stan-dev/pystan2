@@ -544,7 +544,7 @@ cdef class StanFit4$model_cppname:
                 if len(newdim) == 2 and newdim[1] == 1:
                    extracted[par] = np.squeeze(extracted[par])
         else:
-            extracted = None
+            extracted = []
             for n in range(len(self.sim['fnames_oi'])):
                 chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
                 # FIXME: n_save doesn't appear to be used?
@@ -552,10 +552,8 @@ cdef class StanFit4$model_cppname:
                 if not inc_warmup:
                     n_save = n_save - self.sim['warmup2'][0]
                 samples = np.array(chains).T
-                if extracted is None:
-                    extracted = samples[:, :, np.newaxis]
-                else:
-                    extracted = np.dstack([extracted, samples])
+                extracted.append(samples[:, :, np.newaxis])
+            extracted = np.dstack(extracted)
         return extracted
 
     def __unicode__(self):
