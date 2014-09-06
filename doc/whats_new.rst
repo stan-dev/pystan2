@@ -6,9 +6,13 @@
  What's New
 ============
 
-v2.4.0.2 (TBD)
-==============
-- ...
+v2.4.0.2 (6. Sept 2014)
+=======================
+- Performance improvements for the ``extract`` method (5-10 times faster)
+- Performance improvements for the printed summary of a fit. Printing
+  a summary of a model with more than a hundred parameters is not recommended.
+  Consider using ``extract`` and calculating summary statistics for the
+  parameters of interest.
 
 v2.4.0.1 (31. July 2014)
 ========================
