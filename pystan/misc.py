@@ -42,7 +42,7 @@ try:
 except ImportError:
     from pystan.external.scipy.mstats import mquantiles
 
-import pystan.chains as chains
+import pystan.chains
 import pystan._misc
 from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
                               sampling_metric_t, stan_args_method_t)
@@ -311,9 +311,9 @@ def _summary_sim(sim, pars, probs):
     c_quan_names = dict(parameters=np.asarray(sim['fnames_oi'])[tidx_colm],
                         stats=probs_str,
                         chains=tuple("chain:{}".format(cid) for cid in cids))
-    # TODO: include sem, ess and rhat, see rstan/rstan/src/chains.cpp
-    ess = np.array([chains.ess(sim, n) for n in tidx_colm], dtype=int)
-    rhat = np.array([chains.splitrhat(sim, n) for n in tidx_colm])
+    ess_and_rhat = np.array([pystan.chains.ess_and_splitrhat(sim, n) for n in tidx_colm])
+    ess, rhat = [arr.ravel() for arr in np.hsplit(ess_and_rhat, 2)]
+    ess = ess.astype(int)
     return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
                 c_quan=c_quan, c_quan_names=c_quan_names,
                 sem=msd[:, 1] / np.sqrt(ess), ess=ess, rhat=rhat,

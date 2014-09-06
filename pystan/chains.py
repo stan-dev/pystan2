@@ -23,3 +23,11 @@ def splitrhat(sim, n):
         Chain index starting from 0
     """
     return _chains.split_potential_scale_reduction(sim, n)
+
+
+def ess_and_splitrhat(sim, n):
+    """Calculate ess and rhat
+
+    This saves time by creating just one stan::mcmc::chains instance.
+    """
+    return _chains.effective_sample_size_and_rhat(sim, n)

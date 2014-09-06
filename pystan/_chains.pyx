@@ -118,3 +118,42 @@ def split_potential_scale_reduction(dict sim, int index):
     rhat = chainsptr.split_potential_scale_reduction(index)
     del chainsptr
     return rhat
+
+
+def effective_sample_size_and_rhat(dict sim, int index):
+    """
+    Return the effective sample size and rhat for the specified parameter
+    across all kept samples.
+
+    This implementation matches BDA3's effective size description.
+
+    Current implementation takes the minimum number of samples
+    across chains as the number of samples per chain.
+
+    Parameters
+    ----------
+    sim : dict
+        Contains samples as well as related information (warmup, number
+        of iterations, etc).
+    index : int
+        Parameter index
+
+    Returns
+    -------
+    ess, rhat : tuple of float
+    """
+    # convert param names to bytes for C++
+    param_names_bytes = [name.encode('ascii') for name in sim['fnames_oi']]
+    cdef chains[ecuyer1988] *chainsptr = new chains[ecuyer1988](param_names_bytes)
+    if not chainsptr:
+        raise MemoryError("Couldn't allocate space for stan::mcmc::chains instance.")
+    chainsptr.set_warmup(sim['warmup'])
+    samples = _get_samples(sim)
+    cdef vector[vector[double]] sample_vector
+    for sample in samples:
+        sample_vector = sample
+        chainsptr.add(sample_vector)
+    ess = chainsptr.effective_sample_size(index)
+    rhat = chainsptr.split_potential_scale_reduction(index)
+    del chainsptr
+    return (ess, rhat)
