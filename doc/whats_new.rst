@@ -6,6 +6,10 @@
  What's New
 ============
 
+Next version (TBA)
+==================
+- ...
+
 v2.4.0.2 (6. Sept 2014)
 =======================
 - Performance improvements for the ``extract`` method (5-10 times faster)
