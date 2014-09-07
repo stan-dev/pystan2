@@ -51,8 +51,8 @@ available, PyStan may be installed from source with the following commands
    python setup.py install
 
 If you encounter an ``ImportError`` after compiling from source, try changing
-out of the source directory before attempting ``import pystan``. For example, on
-Linux and OS X ``cd /tmp`` would work.
+out of the source directory before attempting ``import pystan``. On Linux and
+OS X ``cd /tmp`` will work.
 
 Example
 -------

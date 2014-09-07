@@ -47,7 +47,7 @@ dependencies, then issue the commands:
    unzip 2.4.0.2.zip
    cd pystan-2.4.0.2
    python setup.py install
-   cd ..  # change out of the source directory before using pystan
+   cd ..  # change out of the source directory before importing pystan
 
 Mac OS X users encountering installation problems may wish to consult the
 `PyStan Wiki <https://github.com/stan-dev/pystan/wiki>`_ for possible solutions.

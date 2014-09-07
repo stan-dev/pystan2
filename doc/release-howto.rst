@@ -33,7 +33,7 @@
   - See https://github.com/ariddell/pystan-wheel-builder for instructions.
   - Download, sign, and upload wheels::
 
-    gpg --detach-sign -a *.whl
+    for i in *.whl; do gpg --detach-sign -a $i; done
     twine upload *.whl
 
 After release
