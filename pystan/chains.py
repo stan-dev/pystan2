@@ -30,4 +30,5 @@ def ess_and_splitrhat(sim, n):
 
     This saves time by creating just one stan::mcmc::chains instance.
     """
-    return _chains.effective_sample_size_and_rhat(sim, n)
+    # FIXME: does not yet save time
+    return (ess(sim, n), splitrhat(sim, n))

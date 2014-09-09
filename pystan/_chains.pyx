@@ -1,74 +1,78 @@
-cimport cython
-cimport cython.view
-from libc.string cimport memcpy
+#cython: language_level=3
+#cython: boundscheck=False
+#cython: wraparound=False
+
 from libcpp.vector cimport vector
-from libcpp.string cimport string
+from libc.math cimport sqrt
+
+# autocovariance is a template function, which Cython doesn't yet support
+cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
+    void stan_autocovariance "stan::prob::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
+
+cdef extern from "stan/math.hpp" namespace "stan::math":
+    double stan_sum "stan::math::sum"(vector[double]& x)
+    double stan_mean "stan::math::mean"(vector[double]& x)
+    double stan_variance "stan::math::variance"(vector[double]& x)
 
 
-cdef extern from "Eigen/Dense" namespace "Eigen":
-    cdef cppclass MatrixXd:
-        MatrixXd()
-        MatrixXd(int rows, int cols)
-        double* data()
-
-# Cython doesn't support default templates, so we specify the RNG explicitly
-cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
-    cdef cppclass additive_combine_engine[T, U]:
-        pass
-    ctypedef additive_combine_engine ecuyer1988
-
-
-cdef extern from "stan/mcmc/chains.hpp" namespace "stan::mcmc":
-    cdef cppclass chains[RNG]:
-        chains(const vector[string]& param_names)
-        void add(const vector[ vector[double] ]& samples)
-        void add(MatrixXd& sample)
-        int num_params()
-        int num_chains()
-        double effective_sample_size(const int index)
-        double split_potential_scale_reduction(const int index)
-        void set_warmup(const int)
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef MatrixXd _get_sample_matrix(holder, list fnames_oi):
+cdef void get_kept_samples(dict sim, int k, int n, vector[double]& samples):
     """
-    Extract samples into a MatrixXd of arrays having shape n_iter, n_param
-
+    
     Parameters
     ----------
-    sim : dict
-        Contains samples as well as related information.
+    k : unsigned int
+        Chain index
+    n : unsigned int
+        Parameter index
+    """
+    cdef int i
+    warmup2 = sim['warmup2']
 
-    fnames_oi : list of str
-        Parameter names of interest
+    slst = sim['samples'][k]['chains']  # chain k, an OrderedDict
+    param_names = list(slst.keys())  # e.g., 'beta[1]', 'beta[2]', ...
+    cdef double[:] nv = slst[param_names[n]]  # parameter n
+    samples.clear()
+    for i in range(nv.shape[0] - warmup2[k]):
+        samples.push_back(nv[warmup2[k] + i])
+
+
+cdef double get_chain_mean(dict sim, int k, int n):
+    warmup2 = sim['warmup2']
+    slst = sim['samples'][k]['chains']  # chain k, an OrderedDict
+    param_names = list(slst.keys())  # e.g., 'beta[1]', 'beta[2]', ...
+    cdef vector[double] nv = slst[param_names[n]]  # parameter n
+    return stan_mean(nv[warmup2[k]:])
+
+
+cdef vector[double] autocovariance(dict sim, int k, int n):
+    """
+    Returns the autocovariance for the specified parameter in the
+    kept samples of the chain specified.
+    
+    Parameters
+    ----------
+    k : unsigned int
+        Chain index
+    n : unsigned int
+        Parameter index
 
     Returns
     -------
-    sample : a vector[vector[double]] shape n_iter, n_params
+    acov : vector[double]
 
+    Note
+    ----
+    PyStan is profligate with memory here in comparison to RStan. A variety
+    of copies are made where RStan passes around references. This is done
+    mainly for convenience; the Cython code is simpler.
     """
-    cdef int i, j, n_col, n_row
-    n_col = len(fnames_oi)
-    n_row = len(holder['chains'][fnames_oi[0]])
-    cdef double[:] chain
-    input_arr_cython = cython.view.array(shape=(n_row, n_col), itemsize=sizeof(double), format="d", mode="fortran")
-    cdef double[:, :] input_arr = input_arr_cython
-    cdef MatrixXd sample = MatrixXd(n_row, n_col)  # column-major
-
-    # convert from row-major (in essence) to column-major
-    j = 0
-    for par in fnames_oi:
-        chain = holder['chains'][par]
-        for i in range(n_row):
-            input_arr[i, j] = chain[i]
-        j = j + 1
-    memcpy(sample.data(), &input_arr[0, 0], n_col * n_row * sizeof(double))
-    return sample
+    cdef vector[double] samples, acov
+    get_kept_samples(sim, k, n, samples)
+    stan_autocovariance(samples, acov)
+    return acov
 
 
-def effective_sample_size(dict sim, int index):
+def effective_sample_size(dict sim, int n):
     """
     Return the effective sample size for the specified parameter
     across all kept samples.
@@ -83,92 +87,116 @@ def effective_sample_size(dict sim, int index):
     sim : dict
         Contains samples as well as related information (warmup, number
         of iterations, etc).
-    index : int
+    n : int
         Parameter index
 
     Returns
     -------
-    ess : float
+    ess : int
     """
-    # convert param names to bytes for C++
-    param_names_bytes = [name.encode('ascii') for name in sim['fnames_oi']]
-    cdef chains[ecuyer1988] *chainsptr = new chains[ecuyer1988](param_names_bytes)
-    if not chainsptr:
-        raise MemoryError("Couldn't allocate space for stan::mcmc::chains instance.")
-    chainsptr.set_warmup(sim['warmup'])
-    fnames_oi = sim['fnames_oi']
-    for holder in sim['samples']:
-        chainsptr.add(_get_sample_matrix(holder, fnames_oi))
-    ess = chainsptr.effective_sample_size(index)
-    del chainsptr
+    cdef int i, chain
+    cdef int m = sim['chains']
+
+    cdef vector[int] ns_save = sim['n_save']
+
+    cdef vector[int] ns_warmup2 = sim['warmup2']
+
+    cdef vector[int] ns_kept = [s - w for s, w in zip(sim['n_save'], sim['warmup2'])]
+
+    cdef int n_samples = min(ns_kept)
+
+    cdef vector[vector[double]] acov
+    cdef vector[double] acov_chain
+    for chain in range(m):
+        acov_chain = autocovariance(sim, chain, n)
+        acov.push_back(acov_chain)
+
+    cdef vector[double] chain_mean
+    cdef vector[double] chain_var
+    cdef int n_kept_samples
+    for chain in range(m):
+        n_kept_samples = ns_kept[chain]
+        chain_mean.push_back(get_chain_mean(sim, chain, n))
+        chain_var.push_back(acov[chain][0] * n_kept_samples / (n_kept_samples-1))
+
+    cdef double mean_var = stan_mean(chain_var)
+    cdef double var_plus = mean_var * (n_samples-1) / n_samples
+
+    if m > 1:
+        var_plus = var_plus + stan_variance(chain_mean)
+
+    cdef vector[double] rho_hat_t
+    cdef double rho_hat = 0
+    cdef vector[double] acov_t
+    cdef int t = 0
+    while t < n_samples and rho_hat >= 0:
+        acov_t.clear()
+        for chain in range(m):
+            acov_t.push_back(acov[chain][t])
+        rho_hat = 1 - (mean_var - stan_mean(acov_t)) / var_plus
+        if rho_hat >= 0:
+            rho_hat_t.push_back(rho_hat)
+        t += 1
+
+    cdef double ess = m * n_samples
+    if rho_hat_t.size() > 0:
+        ess = ess / (1 + 2 * stan_sum(rho_hat_t))
+
     return ess
 
 
-def split_potential_scale_reduction(dict sim, int index):
+def split_potential_scale_reduction(dict sim, int n):
     """
     Return the split potential scale reduction (split R hat) for the
     specified parameter.
-
+    
     Current implementation takes the minimum number of samples
     across chains as the number of samples per chain.
-
+    
     Parameters
     ----------
-    index : int
+    n : unsigned int
         Parameter index
 
     Returns
     -------
     rhat : float
         Split R hat
-
+    
     """
-    # convert param names to bytes for C++
-    param_names_bytes = [name.encode('ascii') for name in sim['fnames_oi']]
-    cdef chains[ecuyer1988] *chainsptr = new chains[ecuyer1988](param_names_bytes)
-    if not chainsptr:
-        raise MemoryError("Couldn't allocate space for stan::mcmc::chains instance.")
-    chainsptr.set_warmup(sim['warmup'])
-    fnames_oi = sim['fnames_oi']
-    for holder in sim['samples']:
-        chainsptr.add(_get_sample_matrix(holder, fnames_oi))
-    rhat = chainsptr.split_potential_scale_reduction(index)
-    del chainsptr
-    return rhat
+    cdef int i, chain
+    cdef int n_chains = sim['chains']
 
+    cdef vector[int] ns_save = sim['n_save']
 
-def effective_sample_size_and_rhat(dict sim, int index):
-    """
-    Return the effective sample size and rhat for the specified parameter
-    across all kept samples.
+    cdef vector[int] ns_warmup2 = sim['warmup2']
 
-    This implementation matches BDA3's effective size description.
+    cdef vector[int] ns_kept = [s - w for s, w in zip(sim['n_save'], sim['warmup2'])]
 
-    Current implementation takes the minimum number of samples
-    across chains as the number of samples per chain.
+    cdef int n_samples = min(ns_kept)
 
-    Parameters
-    ----------
-    sim : dict
-        Contains samples as well as related information (warmup, number
-        of iterations, etc).
-    index : int
-        Parameter index
+    if n_samples % 2 == 1:
+        n_samples = n_samples - 1
 
-    Returns
-    -------
-    ess, rhat : tuple of float
-    """
-    # convert param names to bytes for C++
-    param_names_bytes = [name.encode('ascii') for name in sim['fnames_oi']]
-    cdef chains[ecuyer1988] *chainsptr = new chains[ecuyer1988](param_names_bytes)
-    if not chainsptr:
-        raise MemoryError("Couldn't allocate space for stan::mcmc::chains instance.")
-    chainsptr.set_warmup(sim['warmup'])
-    fnames_oi = sim['fnames_oi']
-    for holder in sim['samples']:
-        chainsptr.add(_get_sample_matrix(holder, fnames_oi))
-    ess = chainsptr.effective_sample_size(index)
-    rhat = chainsptr.split_potential_scale_reduction(index)
-    del chainsptr
-    return (ess, rhat)
+    cdef vector[double] split_chain_mean, split_chain_var
+    cdef vector[double] samples, split_chain
+    for chain in range(n_chains):
+        samples.clear()
+        get_kept_samples(sim, chain, n, samples)
+        split_chain.clear()
+        for i in range(n_samples/2):
+            split_chain.push_back(samples[i])
+        split_chain_mean.push_back(stan_mean(split_chain))
+        split_chain_var.push_back(stan_variance(split_chain))
+
+        split_chain.clear()
+        for i in range(n_samples/2, n_samples):
+            split_chain.push_back(samples[i])
+        split_chain_mean.push_back(stan_mean(split_chain))
+        split_chain_var.push_back(stan_variance(split_chain))
+
+    cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
+    cdef double var_within = stan_mean(split_chain_var)
+
+    cdef double srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
+    return srhat

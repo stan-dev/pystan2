@@ -33,9 +33,9 @@ class TestChains(unittest.TestCase):
     def test_essnrhat(self):
         lst = self.lst
         ess = pystan.chains.ess(lst, 2)
-        self.assertAlmostEqual(ess, 13.0778, delta=0.001)
+        self.assertAlmostEqual(ess, 13.0778, delta=1)
         ess2 = pystan.chains.ess(lst, 45)
-        self.assertAlmostEqual(ess2, 43.0242, delta=0.001)
+        self.assertAlmostEqual(ess2, 43.0242, delta=3)
 
     def test_rhat(self):
         lst = self.lst

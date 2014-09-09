@@ -313,7 +313,7 @@ def _summary_sim(sim, pars, probs):
                         chains=tuple("chain:{}".format(cid) for cid in cids))
     ess_and_rhat = np.array([pystan.chains.ess_and_splitrhat(sim, n) for n in tidx_colm])
     ess, rhat = [arr.ravel() for arr in np.hsplit(ess_and_rhat, 2)]
-    ess = ess.astype(int)
+    ess = ess.round().astype(int)  # for display, round effective sample size
     return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
                 c_quan=c_quan, c_quan_names=c_quan_names,
                 sem=msd[:, 1] / np.sqrt(ess), ess=ess, rhat=rhat,
