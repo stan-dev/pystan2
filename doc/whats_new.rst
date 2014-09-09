@@ -6,9 +6,9 @@
  What's New
 ============
 
-Next version (TBA)
-==================
-- ...
+v2.4.0.3 (9. Sept 2014)
+=======================
+- Performance improvements for the printed summary of a fit.
 
 v2.4.0.2 (6. Sept 2014)
 =======================
