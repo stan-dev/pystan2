@@ -21,6 +21,7 @@ import logging
 from numbers import Number
 import os
 import tempfile
+import shutil
 import string
 import sys
 import warnings
@@ -251,7 +252,7 @@ class StanModel:
         module_name = ("stanfit4" + self.model_name + '_' +
                        hashlib.md5(str(key).encode('utf-8')).hexdigest())
 
-        temp_dir = tempfile.mkdtemp()
+        self._temp_dir = temp_dir = tempfile.mkdtemp()
         lib_dir = os.path.join(temp_dir, 'pystan')
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [
@@ -320,6 +321,9 @@ class StanModel:
         s = u"StanModel object '{}' coded as follows:\n{}"
         return s.format(self.model_name, self.model_code)
 
+    def __del__(self):
+        shutil.rmtree(self._temp_dir, ignore_errors=True)
+
     def show(self):
         return self.model_code
 
@@ -360,7 +364,7 @@ class StanModel:
             del self.module_filename
             del self.module_bytes
             del self.module_name
-            temp_dir = tempfile.mkdtemp()
+            self._temp_dir = temp_dir = tempfile.mkdtemp()
             lib_dir = os.path.join(temp_dir, 'pystan')
             if not os.path.exists(lib_dir):
                 os.makedirs(lib_dir)

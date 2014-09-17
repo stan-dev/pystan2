@@ -1,21 +1,20 @@
-import logging
+from collections import OrderedDict
+import gc
 import os
 import tempfile
-import time
 import unittest
-from collections import OrderedDict
 
 import numpy as np
 
-from pystan import StanModel
+import pystan
 from pystan._compat import PY2
 
 
 class TestNormal(unittest.TestCase):
 
     model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-    model = StanModel(model_code=model_code, model_name="normal1",
-                      verbose=True, obfuscate_model_name=False)
+    model = pystan.StanModel(model_code=model_code, model_name="normal1",
+                             verbose=True, obfuscate_model_name=False)
 
     def test_constructor(self):
         self.assertEqual(self.model.model_name, "normal1")
@@ -45,7 +44,7 @@ class TestBernoulli(unittest.TestCase):
         """
     bernoulli_data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-    model = StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
+    model = pystan.StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
 
     fit = model.sampling(data=bernoulli_data)
 
@@ -157,3 +156,12 @@ class TestBernoulli(unittest.TestCase):
 
         fit = self.model.optimizing(data=self.bernoulli_data, sample_file='/tmp/pathdoesnotexist/optim.csv')
         assert fit is not None
+
+    def test_model_delete_temporary_files(self):
+        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        m = pystan.StanModel(model_code=model_code, model_name="normal1")
+        temp_dir = m._temp_dir  # this is a string; copy made
+        self.assertTrue(os.path.exists(temp_dir))
+        del m
+        gc.collect()
+        self.assertFalse(os.path.exists(temp_dir))
