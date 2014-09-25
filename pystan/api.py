@@ -7,12 +7,10 @@
 
 import io
 import logging
-import random
 import hashlib
 
 import pystan._api  # stanc wrapper
 from pystan._compat import string_types
-from pystan.constants import MAX_UINT
 from pystan.model import StanModel
 
 logger = logging.getLogger('pystan')

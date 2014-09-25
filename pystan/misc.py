@@ -204,9 +204,9 @@ def _summary(fit, pars=None, probs=None, **kwargs):
     # TODO: include sem, ess and rhat: ss['ess'], ss['rhat']
     s1 = np.column_stack([ss['msd'][:, 0], ss['sem'], ss['msd'][:, 1], ss['quan'], ss['ess'], ss['rhat']])
     s1_rownames = ss['c_msd_names']['parameters']
-    s1_colnames = (ss['c_msd_names']['stats'][0],) + ('se_mean',) + \
-            (ss['c_msd_names']['stats'][1],) + ss['c_quan_names']['stats'] + \
-            ('n_eff', 'Rhat')
+    s1_colnames = ((ss['c_msd_names']['stats'][0],) + ('se_mean',) +
+                   (ss['c_msd_names']['stats'][1],) + ss['c_quan_names']['stats'] +
+                   ('n_eff', 'Rhat'))
     s2 = _combine_msd_quan(ss['c_msd'], ss['c_quan'])
     s2_rownames = ss['c_msd_names']['parameters']
     s2_colnames = ss['c_msd_names']['stats'] + ss['c_quan_names']['stats']
@@ -232,7 +232,6 @@ def _combine_msd_quan(msd, quan):
     msdquan : array of shape (num_params, 2 + num_quan, num_chains)
     """
     dim1 = msd.shape
-    dim2 = quan.shape
     n_par, _, n_chains = dim1
     ll = []
     for i in range(n_chains):
@@ -400,7 +399,7 @@ def _config_argss(chains, iter, warmup, thin,
             chain_id = chain_id
         else:
             chain_id = chain_id + [max(chain_id) + 1 + i
-                                    for i in range(chains - chain_id_len)]
+                                   for i in range(chains - chain_id_len)]
         del kwargs['chain_id']
 
     inits_specified = False
@@ -691,7 +690,7 @@ def _calc_starts(dims):
     s = [np.prod(d) for d in dims]
     starts = np.cumsum([0] + s)[0:l].tolist()
     # coerce things into ints before returning
-    return [int(s) for s in starts]
+    return [int(i) for i in starts]
 
 
 def _par_vector2dict(v, pars, dims, starts=None):
@@ -808,14 +807,14 @@ def _pars_total_indexes(names, dims, fnames, pars):
 
 
 def _idx_col2rowm(d):
-  """Generate indexes to change from col-major to row-major ordering"""
-  if 0 == len(d):
-      return 1
-  if 1 == len(d):
-      return np.arange(d[0])
-  # order='F' indicates column-major ordering
-  idx = np.array(np.arange(np.prod(d))).reshape(d, order='F').T
-  return idx.flatten(order='F')
+    """Generate indexes to change from col-major to row-major ordering"""
+    if 0 == len(d):
+        return 1
+    if 1 == len(d):
+        return np.arange(d[0])
+    # order='F' indicates column-major ordering
+    idx = np.array(np.arange(np.prod(d))).reshape(d, order='F').T
+    return idx.flatten(order='F')
 
 
 def _get_kept_samples(n, sim):
@@ -874,6 +873,7 @@ def _redirect_stderr():
     os.dup2(devnull, stderr_fileno)
     os.close(devnull)
     return orig_stderr
+
 
 def _has_fileno(stream):
     """Returns whether the stream object seems to have a working fileno()
