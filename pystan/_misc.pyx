@@ -29,19 +29,22 @@ cpdef get_kept_samples(int n, dict sim):
 @cython.wraparound(False)
 cpdef get_samples(int n, dict sim, inc_warmup):
     """See documentation in misc.py"""
-    cdef int i, num_chains, num_iter, num_warmup
+    cdef int i
     cdef double[:] s
     cdef long[:] perm
-    num_chains = sim['chains']
-    num_warmup = sim['warmup']
+    cdef int num_chains = sim['chains']
+    cdef int num_warmup = sim['warmup']
+    cdef int num_iter = sim['iter']
     if num_warmup == 0:
         inc_warmup = True
-    num_iter = sim['iter']
     nth_key = list(sim['samples'][0]['chains'].keys())[n]
     ss = []
     for i in range(num_chains):
         perm = sim['permutation'][i]
         s = sim['samples'][i]['chains'][nth_key]
-        ss.append(s[num_warmup:])
+        if inc_warmup:
+            ss.append(s)
+        else:
+            ss.append(s[num_warmup:])
     return ss
 
