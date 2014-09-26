@@ -5,6 +5,8 @@
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
 
+import numpy as np
+
 # autocovariance is a template function, which Cython doesn't yet support
 cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
     void stan_autocovariance "stan::prob::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
@@ -26,7 +28,7 @@ cdef void get_kept_samples(dict sim, int k, int n, vector[double]& samples):
         Parameter index
     """
     cdef int i
-    warmup2 = sim['warmup2']
+    cdef long[:] warmup2 = np.array(sim['warmup2'])
 
     slst = sim['samples'][k]['chains']  # chain k, an OrderedDict
     param_names = list(slst.keys())  # e.g., 'beta[1]', 'beta[2]', ...
@@ -37,7 +39,7 @@ cdef void get_kept_samples(dict sim, int k, int n, vector[double]& samples):
 
 
 cdef double get_chain_mean(dict sim, int k, int n):
-    warmup2 = sim['warmup2']
+    cdef long[:] warmup2 = np.array(sim['warmup2'])
     slst = sim['samples'][k]['chains']  # chain k, an OrderedDict
     param_names = list(slst.keys())  # e.g., 'beta[1]', 'beta[2]', ...
     cdef vector[double] nv = slst[param_names[n]]  # parameter n
