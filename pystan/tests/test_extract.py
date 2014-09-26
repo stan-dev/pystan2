@@ -24,7 +24,7 @@ class TestExtract(unittest.TestCase):
     def setUpClass(cls):
         ex_model_code = cls.ex_model_code
         cls.sm = sm = pystan.StanModel(model_code=ex_model_code)
-        cls.fit = sm.sampling(chains=4)
+        cls.fit = sm.sampling(chains=4, iter=2000)
 
     def test_extract_permuted(self):
         ss = self.fit.extract(permuted=True)
@@ -60,4 +60,31 @@ class TestExtract(unittest.TestCase):
         ss = fit.extract(inc_warmup=True, permuted=False)
         num_samples = fit.sim['iter']
         self.assertEqual(ss.shape, (num_samples, 4, 9))
+        self.assertTrue((~np.isnan(ss)).all())
+
+    def test_extract_thin(self):
+        sm = self.sm
+        fit = sm.sampling(chains=4, iter=2000, thin=2)
+
+        # permuted True
+        ss = fit.extract(permuted=True)
+        alpha = ss['alpha']
+        beta = ss['beta']
+        lp__ = ss['lp__']
+        self.assertEqual(sorted(ss.keys()), sorted({'alpha', 'beta', 'lp__'}))
+        self.assertEqual(alpha.shape, (2000, 2, 3))
+        self.assertEqual(beta.shape, (2000, 2))
+        self.assertEqual(lp__.shape, (2000,))
+        self.assertTrue((~np.isnan(alpha)).all())
+        self.assertTrue((~np.isnan(beta)).all())
+        self.assertTrue((~np.isnan(lp__)).all())
+
+        # permuted False
+        ss = fit.extract(permuted=False)
+        self.assertEqual(ss.shape, (500, 4, 9))
+        self.assertTrue((~np.isnan(ss)).all())
+
+        # permuted False inc_warmup True
+        ss = fit.extract(inc_warmup=True, permuted=False)
+        self.assertEqual(ss.shape, (1000, 4, 9))
         self.assertTrue((~np.isnan(ss)).all())
