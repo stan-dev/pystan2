@@ -149,7 +149,7 @@ parameters of interest, or just an array.
 
     print(fit)
 
-If `matplotlib <http://matplotlib.org/>`_ is installed, a visual summary may
+If `matplotlib <http://matplotlib.org/>`_ and `scipy <http://http://www.scipy.org/>`_ are installed, a visual summary may
 also be displayed using the ``plot()`` method.
 
 .. code-block:: python
