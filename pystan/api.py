@@ -368,6 +368,13 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
                       save_dso=save_dso, verbose=verbose)
+    # check that arguments in kwargs are valid
+    valid_args = {"chain_id", "init_r", "test_grad", "append_samples",
+                  "refresh", "control", "obfuscate_model_name"}
+    for arg in kwargs:
+        if arg not in valid_args:
+            raise ValueError("Parameter `{}` is not recognized.".format(arg))
+
     fit = m.sampling(data, pars=pars, chains=chains, iter=iter,
                      warmup=warmup, thin=thin, seed=seed, init=init,
                      sample_file=sample_file, diagnostic_file=diagnostic_file,

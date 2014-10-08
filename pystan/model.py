@@ -502,6 +502,14 @@ class StanModel:
         if sample_file is not None:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
 
+        # check that arguments in kwargs are valid
+        valid_args = {"iter", "save_iterations", "save_iterations", "refresh",
+                      "init_alpha", "tol_obj", "tol_grad", "tol_param",
+                      "tol_rel_obj", "tol_rel_grad", "history_size"}
+        for arg in kwargs:
+            if arg not in valid_args:
+                raise ValueError("Parameter `{}` is not recognized.".format(arg))
+
         # This check is is to warn users of older versions of PyStan
         if kwargs.get('method'):
             raise ValueError('`method` is no longer used. Specify `algorithm` instead.')
@@ -684,6 +692,12 @@ class StanModel:
         if chains < 1:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
+
+        # check that arguments in kwargs are valid
+        valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
+        for arg in kwargs:
+            if arg not in valid_args:
+                raise ValueError("Parameter `{}` is not recognized.".format(arg))
 
         args_list = pystan.misc._config_argss(chains=chains, iter=iter,
                                               warmup=warmup, thin=thin,
