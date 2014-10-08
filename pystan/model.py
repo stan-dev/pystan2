@@ -447,19 +447,19 @@ class StanModel:
         save_iterations : bool, optional
         refresh : int, optional
         init_alpha : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 0.001
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 0.001
         tol_obj : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 1e-12.
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-12.
         tol_grad : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-8.
         tol_param : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-8.
         tol_rel_grad : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 1e4.
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e4.
         tol_rel_param : float, optional
-            For BFGS and LBFGS, see Stan manual. Default is 1e7.
+            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e7.
         history_size : int, optional
-            For LBFGS, see Stan manual. Default is 5.
+            For LBFGS, see (Cmd)Stan manual. Default is 5.
 
         Examples
         --------

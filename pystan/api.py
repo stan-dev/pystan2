@@ -300,7 +300,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     init_r : float, optional
         `init_r` is only valid if `init` == "random". In this case, the intial
         values are simulated from [-`init_r`, `init_r`] rather than using the
-        default interval (see the manual of Stan).
+        default interval (see the manual of (Cmd)Stan).
 
     test_grad: bool, optional
 
