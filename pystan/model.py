@@ -325,7 +325,7 @@ class StanModel:
         shutil.rmtree(self._temp_dir, ignore_errors=True)
 
     def show(self):
-        return self.model_code
+        print(self)
 
     @property
     def dso(self):
