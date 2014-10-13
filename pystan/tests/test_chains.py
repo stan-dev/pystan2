@@ -1,8 +1,10 @@
 from collections import OrderedDict
+import math
 import os
 import unittest
 
 import numpy as np
+import pystan
 import pystan.chains
 import pystan._chains
 
@@ -43,3 +45,14 @@ class TestChains(unittest.TestCase):
         self.assertAlmostEqual(rhat, 1.187, delta=0.001)
         rhat2 = pystan.chains.splitrhat(lst, 45)
         self.assertAlmostEqual(rhat2, 1.03715, delta=0.001)
+
+    def test_rhat_zero(self):
+        model_code = """
+          parameters { real x; }
+          transformed parameters { real y; y <- 0.0; }
+          model {x ~ normal(0, 1);}
+          """
+        model = pystan.StanModel(model_code=model_code)
+        fit = model.sampling()
+        rhat = pystan.chains.splitrhat(fit.sim, 1)
+        self.assertTrue(math.isnan(rhat))

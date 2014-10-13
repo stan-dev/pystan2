@@ -167,6 +167,8 @@ def split_potential_scale_reduction(dict sim, int n):
     
     """
     cdef int i, chain
+    cdef double srhat
+
     cdef int n_chains = sim['chains']
 
     cdef vector[int] ns_save = sim['n_save']
@@ -200,5 +202,8 @@ def split_potential_scale_reduction(dict sim, int n):
     cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
     cdef double var_within = stan_mean(split_chain_var)
 
-    cdef double srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
+    if var_within == 0:
+        srhat = float('nan')
+    else:
+        srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
     return srhat
