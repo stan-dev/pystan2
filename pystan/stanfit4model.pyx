@@ -427,6 +427,20 @@ cdef class StanFit4$model_cppname:
     def __dealloc__(self):
         del self.thisptr
 
+    # the following three methods give Cython classes instructions for pickling
+    def __getstate__(self):
+        attr_names = ('data sim model_name model_pars par_dims mode inits stan_args '
+                      'stanmodel date').split()
+        state = dict((k, getattr(self, k)) for k in attr_names)
+        return state
+
+    def __setstate__(self, state):
+        for k in state:
+            setattr(self, k, state[k])
+
+    def __reduce__(self):
+        return (StanFit4$model_cppname, (self.data,), self.__getstate__(), None, None)
+
     # public methods
 
     def plot(self, pars=None):
