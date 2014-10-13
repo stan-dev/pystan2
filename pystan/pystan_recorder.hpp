@@ -1,5 +1,5 @@
-#ifndef __PYSTAN__PYSTAN_RECORDER_HPP__
-#define __PYSTAN__PYSTAN_RECORDER_HPP__
+#ifndef PYSTAN__PYSTAN_RECORDER_HPP
+#define PYSTAN__PYSTAN_RECORDER_HPP
 
 #include <stan/common/recorder/csv.hpp>
 #include <stan/common/recorder/filtered_values.hpp>

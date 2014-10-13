@@ -1,5 +1,5 @@
-#ifndef __PYSTAN__IO__PY_VAR_CONTEXT_HPP__
-#define __PYSTAN__IO__PY_VAR_CONTEXT_HPP__
+#ifndef PYSTAN__IO__PY_VAR_CONTEXT_HPP
+#define PYSTAN__IO__PY_VAR_CONTEXT_HPP
 
 #include <map>
 #include <vector>

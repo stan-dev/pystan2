@@ -1,5 +1,5 @@
-#ifndef __PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP__
-#define __PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP__
+#ifndef PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP
+#define PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP
 
 #include <stan/common/context_factory.hpp>
 #include "py_var_context.hpp"

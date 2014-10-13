@@ -1,6 +1,5 @@
-
-#ifndef __PYSTAN__STAN_FIT_HPP__
-#define __PYSTAN__STAN_FIT_HPP__
+#ifndef PYSTAN__STAN_FIT_HPP
+#define PYSTAN__STAN_FIT_HPP
 
 #include <iomanip>
 #include <fstream>
