@@ -712,6 +712,10 @@ class StanModel:
         if n_jobs is None:
             n_jobs = -1
 
+        # disable multiprocessing if we only have a single chain
+        if chains == 1:
+            n_jobs = 1
+
         assert len(args_list) == chains
         call_sampler_args = izip(itertools.repeat(data), args_list)
         call_sampler_star = self.module._call_sampler_star
