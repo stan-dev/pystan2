@@ -25,16 +25,14 @@
 - Assemble source distribution, sign it, upload to PyPI::
 
     python setup.py sdist
-    gpg --detach-sign -a dist/pystan-x.x.x.x.tar.gz
-    twine upload dist/*
+    twine upload --sign dist/*
 
 - Build OS X wheels
   
   - See https://github.com/ariddell/pystan-wheel-builder for instructions.
   - Download, sign, and upload wheels::
 
-    for i in *.whl; do gpg --detach-sign -a $i; done
-    twine upload *.whl
+    twine upload --sign *.whl
 
 After release
 =============
