@@ -455,8 +455,6 @@ class StanModel:
         tol_param : float, optional
             For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-8.
         tol_rel_grad : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e4.
-        tol_rel_param : float, optional
             For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e7.
         history_size : int, optional
             For LBFGS, see (Cmd)Stan manual. Default is 5.
