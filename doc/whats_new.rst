@@ -6,6 +6,11 @@
  What's New
 ============
 
+v2.5.0.0 (21. Oct 2014)
+=======================
+- Update Stan source to v2.5.0
+- Fix several significant bugs in the ``extract`` method
+
 v2.4.0.3 (9. Sept 2014)
 =======================
 - Performance improvements for the printed summary of a fit.

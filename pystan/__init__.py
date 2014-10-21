@@ -15,4 +15,4 @@ logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
 
 # following PEP 386
-__version__ = "2.4.0.3"
+__version__ = "2.5.0.0"
