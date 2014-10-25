@@ -98,7 +98,6 @@ from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
 
-## static libraries
 stan_include_dirs = ["pystan/stan/src",
                      "pystan/stan/lib/eigen_3.2.0",
                      "pystan/stan/lib/boost_1.54.0"]
@@ -106,17 +105,6 @@ stan_include_dirs = ["pystan/stan/src",
 stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
                ('BOOST_NO_DECLTYPE', None),
                ('BOOST_DISABLE_ASSERTS', None)]
-
-libstan_sources = [
-    "pystan/stan/src/stan/agrad/rev/var_stack.cpp",
-]
-
-libstan_extra_compile_args = ['-O3', '-ftemplate-depth-256']
-
-libstan = ('stan', {'sources': libstan_sources,
-                    'include_dirs': stan_include_dirs,
-                    'extra_compile_args': libstan_extra_compile_args,
-                    'macros': stan_macros})
 
 ## extensions
 extensions_extra_compile_args = ['-O0', '-ftemplate-depth-256']
@@ -181,7 +169,6 @@ def setup_package():
                               'pystan.external.enum',
                               'pystan.external.scipy'],
                     ext_modules=extensions,
-                    libraries=[libstan],
                     package_data={'pystan': package_data_pats},
                     platforms='any',
                     description=DESCRIPTION,
@@ -207,20 +194,15 @@ def setup_package():
         from distutils.core import setup
         try:
             from Cython.Build import cythonize
-            from numpy.distutils.command import install, install_clib
-            from numpy.distutils.misc_util import InstallableLib
+            # FIXME: if header only works, no need for numpy.distutils at all
+            from numpy.distutils.command import install
         except ImportError:
             raise SystemExit("Cython>=0.19 and NumPy are required.")
 
         metadata['ext_modules'] = cythonize(extensions)
-
-        # use numpy.distutils machinery to install libstan.a
-        metadata['cmdclass'] = {'install': install.install,
-                                'install_clib': install_clib.install_clib}
         dist = setup(**metadata)
-        dist.installed_libraries = [InstallableLib(libstan[0],
-                                                   libstan[1],
-                                                   'pystan/')]
+
+        metadata['cmdclass'] = {'install': install.install}
     try:
         dist.run_commands()
     except KeyboardInterrupt:

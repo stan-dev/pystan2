@@ -263,8 +263,6 @@ class StanModel:
             os.path.join(pystan_dir, "stan/lib/boost_1.54.0"),
             np.get_include(),
         ]
-        library_dirs = [os.path.join(pystan_dir)]
-        libraries = ['stan']
 
         if not os.path.exists(lib_dir):
             os.makedirs(lib_dir)
@@ -288,8 +286,6 @@ class StanModel:
                               language="c++",
                               sources=[pyx_file],
                               include_dirs=include_dirs,
-                              library_dirs=library_dirs,
-                              libraries=libraries,
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]

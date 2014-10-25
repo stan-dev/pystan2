@@ -7,6 +7,10 @@ from libc.math cimport sqrt
 
 import numpy as np
 
+
+cdef extern from "stan/agrad/rev/var_stack_def.hpp":
+    pass
+
 # autocovariance is a template function, which Cython doesn't yet support
 cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
     void stan_autocovariance "stan::prob::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
