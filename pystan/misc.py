@@ -360,8 +360,8 @@ def _split_data(data):
         elif np.issubdtype(np.asarray(v).dtype, float):
             data_r.update({k.encode('utf-8'): np.asarray(v, dtype=float)})
         else:
-            msg = "Variable {} neither int nor float (dtype: {})"
-            raise ValueError(msg.format(k, v.dtype))
+            msg = "Variable {} is neither int nor float nor list/array thereof"
+            raise ValueError(msg.format(k))
     return data_r, data_i
 
 
