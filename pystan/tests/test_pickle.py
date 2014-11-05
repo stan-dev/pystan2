@@ -56,6 +56,7 @@ class TestPickle(unittest.TestCase):
         with open(pickle_file, 'wb') as f:
             pickle.dump(fit, f)
         del fit
+        del sm
 
         # load from file
         with open(pickle_file, 'rb') as f:

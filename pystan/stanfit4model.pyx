@@ -37,6 +37,7 @@ np.import_array()
 # python imports
 import collections
 import logging
+import warnings
 
 import numpy as np
 
@@ -108,6 +109,10 @@ cdef class PyStanHolder:
             setattr(self, k, state[k])
 
     def __reduce__(self):
+        msg = ("Pickling fit objects is an experimental feature!\n"
+               "The relevant StanModel instance must be pickled along with this fit object.\n"
+               "When unpickling the StanModel must be unpickled first.")
+        warnings.warn(msg)
         return (PyStanHolder, tuple(), self.__getstate__(), None, None)
 
 
@@ -377,7 +382,7 @@ def _call_sampler(data, args):
     return ret, holder
 
 
-cdef class StanFit4$model_cppname:
+cdef class StanFit4Model:
     """Holder for results obtained from running a Stan model with data
 
     Attributes
@@ -412,14 +417,19 @@ cdef class StanFit4$model_cppname:
     cdef public stanmodel
     cdef public date
 
-    def __cinit__(self, data):
-        data_r, data_i = pystan.misc._split_data(data)
-        # NB: dictionary keys must be byte strings
-        cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
-        cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
-        self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
-        if not self.thisptr:
-            raise MemoryError("Couldn't allocate space for stan_fit.")
+    def __cinit__(self, *args):
+        # __cinit__ must be callable with no arguments for unpickling
+        cdef vars_r_t vars_r
+        cdef vars_i_t vars_i
+        if len(args) == 1:
+            data = args[0]
+            data_r, data_i = pystan.misc._split_data(data)
+            # NB: dictionary keys must be byte strings
+            vars_r = _dict_to_vars_r(data_r)
+            vars_i = _dict_to_vars_i(data_i)
+            self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
+            if not self.thisptr:
+                raise MemoryError("Couldn't allocate space for stan_fit.")
 
     def __init__(self, data):
         self.data = data
@@ -439,7 +449,7 @@ cdef class StanFit4$model_cppname:
             setattr(self, k, state[k])
 
     def __reduce__(self):
-        return (StanFit4$model_cppname, (self.data,), self.__getstate__(), None, None)
+        return (StanFit4Model, (self.data,), self.__getstate__(), None, None)
 
     # public methods
 

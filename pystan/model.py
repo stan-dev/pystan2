@@ -309,7 +309,7 @@ class StanModel:
                 os.dup2(orig_stderr, sys.stderr.fileno())
 
         self.module = load_module(module_name, lib_dir)
-        self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
+        self.fit_class = getattr(self.module, "StanFit4Model")
 
     def __str__(self):
         # NOTE: returns unicode even for Python 2.7, implements_to_string
@@ -369,7 +369,7 @@ class StanModel:
                 f.write(module_bytes)
             try:
                 self.module = load_module(module_name, lib_dir)
-                self.fit_class = getattr(self.module, "StanFit4" + self.model_cppname)
+                self.fit_class = getattr(self.module, "StanFit4Model")
             except Exception as e:
                 logger.warning(e)
                 logger.warning("Something went wrong while unpickling "
@@ -620,7 +620,7 @@ class StanModel:
 
         Returns
         -------
-        fit : StanFit4<model_name>
+        fit : StanFit4Model
             Instance containing the fitted results.
 
         Other parameters

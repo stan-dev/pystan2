@@ -160,7 +160,7 @@ def _summary(fit, pars=None, probs=None, **kwargs):
 
     Parameters
     ----------
-    fit : stanfit4model object
+    fit : StanFit4Model object
     pars : str or sequence of str, optional
         Parameter names. By default use all parameters
     probs : sequence of float, optional
@@ -826,7 +826,7 @@ def _get_kept_samples(n, sim):
     ----------
     n : int
     sim : dict
-        A dictionary tied to a StanFit4<model> instance.
+        A dictionary tied to a StanFit4Model instance.
 
     Returns
     -------
@@ -845,7 +845,7 @@ def _get_samples(n, sim, inc_warmup=True):
     ----------
     n : int
     sim : dict
-        A dictionary tied to a StanFit4<model> instance.
+        A dictionary tied to a StanFit4Model instance.
 
     Returns
     -------
