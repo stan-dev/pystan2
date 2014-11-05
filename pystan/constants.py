@@ -1,4 +1,5 @@
 MAX_UINT = 2**32 - 2  # simpler than ctypes.uint(-1).value, I think
+EPSILON = 1e-6
 
 try:
     from enum import Enum  # Python 3.4

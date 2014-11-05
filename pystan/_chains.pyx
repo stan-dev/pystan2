@@ -7,6 +7,8 @@ from libc.math cimport sqrt
 
 import numpy as np
 
+import pystan.constants
+
 
 cdef extern from "stan/agrad/rev/var_stack_def.hpp":
     pass
@@ -206,7 +208,7 @@ def split_potential_scale_reduction(dict sim, int n):
     cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
     cdef double var_within = stan_mean(split_chain_var)
 
-    if var_within == 0:
+    if var_within < pystan.constants.EPSILON:
         srhat = float('nan')
     else:
         srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
