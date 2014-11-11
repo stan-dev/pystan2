@@ -45,7 +45,8 @@ class TestPickle(unittest.TestCase):
     def test_pickle_fit(self):
         tmpdir = tempfile.mkdtemp()
         num_iter = 100
-        pickle_file = os.path.join(tmpdir, 'stanfit.pkl')
+        fit_pickle_filename = os.path.join(tmpdir, 'stanfit.pkl')
+        model_pickle_filename = os.path.join(tmpdir, 'stanmodel.pkl')
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
         sm = pystan.StanModel(model_code=model_code, model_name="normal1")
@@ -53,13 +54,23 @@ class TestPickle(unittest.TestCase):
         y = fit.extract()['y'].copy()
 
         # pickle
-        with open(pickle_file, 'wb') as f:
+        with open(fit_pickle_filename, 'wb') as f:
             pickle.dump(fit, f)
         del fit
+
+        with open(model_pickle_filename, 'wb') as f:
+            pickle.dump(sm, f)
+
+        # unload module
+        module_name = sm.module.__name__
         del sm
+        if module_name in sys.modules:
+            del(sys.modules[module_name])
 
         # load from file
-        with open(pickle_file, 'rb') as f:
+        with open(model_pickle_filename, 'rb') as f:
+            sm = pickle.load(f)  # noqa
+        with open(fit_pickle_filename, 'rb') as f:
             fit = pickle.load(f)
 
         self.assertIsNotNone(fit)
