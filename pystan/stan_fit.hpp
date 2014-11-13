@@ -879,7 +879,6 @@ namespace pystan {
       std::vector<double> params_inr_etc; // cont, disc, and others
       std::vector<double> init_grad;
       std::string init_val = args.get_init();
-      double init_log_prob;
       int num_init_tries = 0;
       PyErr_CheckSignals_Functor interruptCallback;
       // parameter initialization

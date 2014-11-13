@@ -342,10 +342,9 @@ class StanModel:
         """
         state = self.__dict__.copy()
         if state['save_dso']:
-            module_filename = state['module'].__file__
-            state['module_filename'] = module_filename
+            state['module_filename'] = state['module'].__file__
             state['module_name'] = state['module'].__name__
-            with io.open(module_filename, 'rb') as f:
+            with io.open(state['module_filename'], 'rb') as f:
                 state['module_bytes'] = f.read()
         del state['module']
         del state['fit_class']
