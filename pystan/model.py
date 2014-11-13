@@ -318,7 +318,9 @@ class StanModel:
         return s.format(self.model_name, self.model_code)
 
     def __del__(self):
-        shutil.rmtree(self._temp_dir, ignore_errors=True)
+        _temp_dir = getattr(self, '_temp_dir', None)
+        if _temp_dir:
+            shutil.rmtree(_temp_dir, ignore_errors=True)
 
     def show(self):
         print(self)
