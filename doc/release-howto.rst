@@ -38,7 +38,6 @@ After release
 =============
 
 - Checkout the ``develop`` branch
-- Add placeholder for changes in ``doc/whats_new.rst``
 - Update version in ``pystan/__init__.py``
 
 See also
