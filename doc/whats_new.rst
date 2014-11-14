@@ -6,6 +6,11 @@
  What's New
 ============
 
+v2.5.0.1 (14. Nov 2014)
+=======================
+- Support for pickling fit objects (experimental)
+- Fix bug that occurs when printing fit summary
+
 v2.5.0.0 (21. Oct 2014)
 =======================
 - Update Stan source to v2.5.0
