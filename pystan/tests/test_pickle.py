@@ -54,24 +54,23 @@ class TestPickle(unittest.TestCase):
         y = fit.extract()['y'].copy()
 
         # pickle
+        with open(model_pickle_filename, 'wb') as f:
+            pickle.dump(sm, f)
+
         with open(fit_pickle_filename, 'wb') as f:
             pickle.dump(fit, f)
         del fit
 
-        with open(model_pickle_filename, 'wb') as f:
-            pickle.dump(sm, f)
-
         # unload module
         module_name = sm.module.__name__
-        del sm
         if module_name in sys.modules:
             del(sys.modules[module_name])
 
         # load from file
         with open(model_pickle_filename, 'rb') as f:
-            sm = pickle.load(f)  # noqa
+            sm_from_pickle = pickle.load(f)  # noqa
         with open(fit_pickle_filename, 'rb') as f:
-            fit = pickle.load(f)
+            fit_from_pickle = pickle.load(f)
 
-        self.assertIsNotNone(fit)
-        self.assertTrue((fit.extract()['y'] == y).all())
+        self.assertIsNotNone(fit_from_pickle)
+        self.assertTrue((fit_from_pickle.extract()['y'] == y).all())
