@@ -7,14 +7,17 @@
 ===================
 
 Caveats
--------
+=======
 
 - PyStan on Windows does not support multiprocessing. You *must* specify
   ``n_jobs=1`` when calling the ``stan`` function or using the ``sampling``
   method.
 
-Quickstart
-----------
+Installation
+============
+
+Recommended method: Anaconda Python 2.7 and Visual Studio 2008 Express
+----------------------------------------------------------------------
 
 Those using (or are willing to use) the Anaconda Python distribution and a free
 compiler provided by Microsoft will find installation of PyStan relatively
@@ -32,8 +35,17 @@ command:
     conda install -c patricksnape pystan
 
 
-Detailed instructions
----------------------
+If the ``conda install`` command succeeds, PyStan is available for use. You will
+be able to ``import pystan`` from the Python interpreter.
+
+
+Installation from source (experimental)
+---------------------------------------
+
+*Installing PyStan from source on Windows is not currently supported. If you
+have experience compiling C++ extensions on Windows, you may find the following
+suggestions helpful. If you manage to install PyStan from source, please share
+your experiences with: stan-users@googlegroups.com*
 
 When you provide your model code to (Py)Stan, Stan generates and compiles C++
 code that corresponds to your model. In order to compile the generated C++ code,
