@@ -1,4 +1,4 @@
-MAX_UINT = 2**32 - 2  # simpler than ctypes.uint(-1).value, I think
+MAX_UINT = 2**31 - 1  # simpler than ctypes.uint(-1).value, I think
 EPSILON = 1e-6
 
 try:
