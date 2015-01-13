@@ -111,7 +111,7 @@ the sampler will run more efficiently.
 
 In PyStan, we can also specify the Stan model using a file. For example, we can
 download the file `8schools.stan
-<https://raw.githubusercontent.com/stan-dev/pystan/develop/pystan/stan/src/models/misc/eight_schools/eight_schools.stan>`_ into
+<https://raw.githubusercontent.com/stan-dev/example-models/master/misc/eight_schools/eight_schools.stan>`_ into
 our working directory and use the following call to ``stan`` instead:
 
 .. code-block:: python
