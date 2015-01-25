@@ -966,8 +966,10 @@ def _dict_to_rdump(data):
                 s = '{} <-\nc({})\n'.format(name, ', '.join(str(v) for v in value))
         elif value.ndim > 1:
             tmpl = '{} <-\nstructure(c({}), .Dim = c({}))\n'
+            # transpose value as R uses column-major
+            # 'F' = Fortran, column-major
             s = tmpl.format(name,
-                            ', '.join(str(v) for v in value.flat),
+                            ', '.join(str(v) for v in value.flatten(order='F')),
                             ', '.join(str(v) for v in value.shape))
         parts.append(s)
     return ''.join(parts)
@@ -1006,12 +1008,13 @@ def _rdump_value_to_numpy(s):
             arr = np.array([float(v) for v in vector_str[2:-1].split(',')])
         else:
             arr = np.array([int(v) for v in vector_str[2:-1].split(',')])
-        arr = arr.reshape(shape)
+        # 'F' = Fortran, column-major
+        arr = arr.reshape(shape, order='F')
     elif "c(" in s:
         if '.' in s:
-            arr = np.array([float(v) for v in s[2:-1].split(',')])
+            arr = np.array([float(v) for v in s[2:-1].split(',')], order='F')
         else:
-            arr = np.array([int(v) for v in s[2:-1].split(',')])
+            arr = np.array([int(v) for v in s[2:-1].split(',')], order='F')
     else:
         arr = np.array(float(s) if '.' in s else int(s))
     return arr

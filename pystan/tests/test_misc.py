@@ -68,6 +68,32 @@ def test_stan_rdump():
     np.testing.assert_raises(ValueError, misc.stan_rdump, data, filename)
 
 
+def test_stan_rdump_array():
+    y = np.asarray([[1, 3, 5], [2, 4, 6]])
+    data = {'y': y}
+    expected = 'y <-\nstructure(c(1, 2, 3, 4, 5, 6), .Dim = c(2, 3))\n'
+    np.testing.assert_equal(misc._dict_to_rdump(data), expected)
+
+
+def test_stan_read_rdump_array():
+    """
+    For reference:
+    > structure(c(1, 2, 3, 4, 5, 6), .Dim = c(2, 3))
+         [,1] [,2] [,3]
+    [1,]    1    3    5
+    [2,]    2    4    6
+    """
+    # make this into some sort of stream
+    rdump = 'y <-\nstructure(c(1, 2, 3, 4, 5, 6), .Dim = c(2, 3))\n'
+    tempdir = tempfile.mkdtemp()
+    filename = os.path.join(tempdir, 'test_rdump.rdump')
+    with open(filename, 'w') as f:
+        f.write(rdump)
+    d = misc.read_rdump(filename)
+    y = np.asarray([[1, 3, 5], [2, 4, 6]])
+    np.testing.assert_equal(d['y'], y)
+
+
 def test_rstan_read_rdump():
     a = np.array([1, 3, 5])
     b = np.arange(10).reshape((-1, 2))
