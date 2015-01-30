@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.5.0.2 (30. Jan 2014)
+=======================
+- Fix bug in rdump (for >1 dimensional arrays)
+
 v2.5.0.1 (14. Nov 2014)
 =======================
 - Support for pickling fit objects (experimental)
