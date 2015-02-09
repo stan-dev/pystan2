@@ -53,6 +53,11 @@ class TestPickle(unittest.TestCase):
         fit = sm.sampling(iter=num_iter)
         y = fit.extract()['y'].copy()
 
+        # additional error checking
+        state = sm.__dict__.copy()
+        module_filename = state['module'].__file__
+        assert os.path.exists(module_filename)
+
         # pickle
         with open(model_pickle_filename, 'wb') as f:
             pickle.dump(sm, f)

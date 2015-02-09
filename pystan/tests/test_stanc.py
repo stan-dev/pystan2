@@ -34,7 +34,7 @@ class TestStanc(unittest.TestCase):
             y ~ normal(0, 1);}
         """
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(ValueError, 'Error parsing model code'):
+        with assertRaisesRegex(ValueError, 'Failed to parse'):
             stanc(model_code=model_code)
-        with assertRaisesRegex(ValueError, 'Error parsing model code'):
+        with assertRaisesRegex(ValueError, 'Failed to parse'):
             StanModel(model_code=model_code)

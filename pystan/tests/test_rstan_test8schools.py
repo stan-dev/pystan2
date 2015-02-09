@@ -8,14 +8,15 @@ from pystan import StanModel, stan
 
 def test8schools():
 
-    model_name = "_8chools"
-    sfile = os.path.join(os.path.dirname(__file__),
-                         "../stan/src/models/misc/eight_schools/eight_schools.stan")
+    model_name = "8schools"
+    sfile = os.path.join(os.path.dirname(__file__), '../../example-models/misc/eight_schools/eight_schools.stan')
     m = StanModel(file=sfile, model_name=model_name, verbose=True)
-    m.dso
+    assert m.dso is not None
 
+    model_name = "8schools2"
     yam = StanModel(file=sfile, model_name=model_name, save_dso=False, verbose=True)
-    yam.dso
+    assert yam.dso is not none
+    del yam
 
     dat = dict(J=8, y=(28,  8, -3,  7, -1,  1, 18, 12),
                sigma=(15, 10, 16, 11,  9, 11, 10, 18))
@@ -32,7 +33,7 @@ def test8schools():
     sp1 = ss1.get_sampler_params()
     yasp1 = ss1.get_sampler_params(inc_warmup=False)
     gm1 = ss1.get_posterior_mean()
-    print(gm1)
+    assert gm1 is not None
 
     # NUTS 1
     ss2 = m.sampling(data=dat, iter=iter, chains=4, refresh=100,
@@ -43,7 +44,7 @@ def test8schools():
     sp2 = ss2.get_sampler_params()
     yasp2 = ss2.get_sampler_params(inc_warmup=False)
     gm2 = ss2.get_posterior_mean()
-    print(gm2)
+    assert gm2 is not None
 
     # NUTS 2
     ss3 = m.sampling(data=dat, iter=iter, chains=4, refresh=100)
@@ -54,7 +55,7 @@ def test8schools():
     yasp3 = ss3.get_sampler_params(inc_warmup=False)
 
     gm3 = ss3.get_posterior_mean()
-    print(gm3)
+    assert gm3 is not None
 
     # Non-diag
     ss4 = m.sampling(data=dat, iter=iter, chains=4,
@@ -66,11 +67,11 @@ def test8schools():
     yasp4 = ss4.get_sampler_params(inc_warmup=False)
 
     gm4 = ss4.get_posterior_mean()
-    print(gm4)
+    assert gm4 is not None
 
-    print(ss1)
-    print(ss2)
-    print(ss3)
+    assert ss1 is not None
+    assert ss2 is not None
+    assert ss3 is not None
 
     ss1.plot()
     ss1.traceplot()
@@ -81,7 +82,7 @@ def test8schools():
 
     ss = stan(sfile, data=dat, iter=iter, chains=4, sample_file='8schools.csv')
 
-    print(ss)
+    assert ss is not None
 
     ss_inits = ss.inits
     ss_same = stan(sfile, data=dat, iter=iter, chains=4,
@@ -92,5 +93,3 @@ def test8schools():
     # b is not true as ss is initialized randomly while ss.same is not.
 
     s = ss_same.summary(pars="mu", probs=(.3, .8))
-    # not in python: print(ss.same, pars='theta', probs=c(.4, .8))
-    print(ss_same)

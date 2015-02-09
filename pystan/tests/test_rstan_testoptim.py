@@ -29,7 +29,7 @@ class TestOptim(unittest.TestCase):
     dat = {'N': N, 'y': y}
     logging.info("mean(y)={} and sd(y)={}".format(np.mean(y),
                                                   np.std(y, ddof=1)))
-    sm = pystan.StanModel(model_code=stdnorm)
+    sm = pystan.StanModel(model_code=stdnorm, verbose=True)
 
     def test_optim_stdnorm(self):
         optim = self.sm.optimizing(data=self.dat)
@@ -68,8 +68,8 @@ class TestOptim(unittest.TestCase):
         self.assertTrue(0 < optim['sigma'] < 5)
         optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, init_alpha=0.02,
                               tol_obj=1e-7, tol_grad=1e-9, tol_param=1e-7, as_vector=False)
-        self.assertTrue(-3 < optim[0] < 3)
-        self.assertTrue(0 < optim[1] < 5)
+        self.assertTrue(-3 < optim['par']['mu'] < 3)
+        self.assertTrue(0 < optim['par']['sigma'] < 5)
         optim = sm.optimizing(data=self.dat, algorithm='LBFGS', seed=5, history_size=10)
         self.assertTrue(-3 < optim['mu'] < 3)
         self.assertTrue(0 < optim['sigma'] < 5)

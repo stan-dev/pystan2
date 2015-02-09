@@ -441,15 +441,22 @@ def _config_argss(chains, iter, warmup, thin,
 
     kwargs['method'] = "test_grad" if kwargs.get('test_grad') else 'sampling'
 
-    all_metrics = ("unit_e", "diag_e", "dense_e")
+    all_control = {
+        "adapt_engaged", "adapt_gamma", "adapt_delta", "adapt_kappa",
+        "adapt_t0", "adapt_init_buffer", "adapt_term_buffer", "adapt_window",
+        "stepsize", "stepsize_jitter", "metric", "int_time", "max_treedepth",
+        "epsilon", "error"
+    }
+    all_metrics = {"unit_e", "diag_e", "dense_e"}
+
     if control is not None:
         if not isinstance(control, dict):
-            raise ValueError("control must be a dictionary")
-        metric = control.get('metric')
-        if metric is not None:
-            if metric not in all_metrics:
-                raise ValueError("Metric must be one of {}".format(all_metrics))
-            control['metric'] = metric
+            raise ValueError("`control` must be a dictionary")
+        if not all(key in all_control for key in control):
+            unknown = set(control) - all_control
+            raise ValueError("`control` contains unknown parameters: {}".format(unknown))
+        if control['metric'] not in all_metrics:
+            raise ValueError("`metric` must be one of {}".format(all_metrics))
         kwargs['control'] = control
 
     argss = [dict() for _ in range(chains)]
