@@ -10,7 +10,7 @@ import numpy as np
 import pystan.constants
 
 
-cdef extern from "stan/agrad/rev/var_stack_def.hpp":
+cdef extern from "stan/agrad/rev/var_stack.hpp":
     pass
 
 # autocovariance is a template function, which Cython doesn't yet support

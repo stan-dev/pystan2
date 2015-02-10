@@ -15,7 +15,7 @@
 #include <boost/random/additive_combine.hpp> // L'Ecuyer RNG
 #include <boost/random/uniform_real_distribution.hpp>
 
-#include <stan/agrad/rev/var_stack_def.hpp>
+#include <stan/agrad/rev/var_stack.hpp>
 
 #include <stan/model/util.hpp>
 
@@ -994,10 +994,10 @@ namespace pystan {
           lbfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           lbfgs._conv_opts.maxIts     = args.get_iter();
 
-          int return_code = stan::common::do_bfgs_optimize(model, lbfgs, base_rng,
-                                                           lp, cont_vector, disc_vector,
-                                                           &sample_stream, &std::cout,
-                                                           save_iterations, refresh, interruptCallback);
+          stan::common::do_bfgs_optimize(model, lbfgs, base_rng,
+                                         lp, cont_vector, disc_vector,
+                                         &sample_stream, &std::cout,
+                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::common::write_iteration(sample_stream, model, base_rng,
@@ -1058,10 +1058,10 @@ namespace pystan {
           bfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           bfgs._conv_opts.maxIts     = args.get_iter();
 
-          int return_code = stan::common::do_bfgs_optimize(model, bfgs, base_rng,
-                                                           lp, cont_vector, disc_vector,
-                                                           &sample_stream, &std::cout,
-                                                           save_iterations, refresh, interruptCallback);
+          stan::common::do_bfgs_optimize(model, bfgs, base_rng,
+                                         lp, cont_vector, disc_vector,
+                                         &sample_stream, &std::cout,
+                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::common::write_iteration(sample_stream, model, base_rng,
@@ -1401,7 +1401,7 @@ namespace pystan {
       pystan::io::py_var_context par_context(vars_r, vars_i);
       std::vector<int> params_i;
       std::vector<double> params_r;
-      model_.transform_inits(par_context, params_i, params_r);
+      model_.transform_inits(par_context, params_i, params_r, &std::cout);
       return params_r;
     }
 
