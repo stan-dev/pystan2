@@ -901,7 +901,7 @@ def _has_fileno(stream):
     """
     try:
         stream.fileno()
-    except (AttributeError, OSError, io.UnsupportedOperation):
+    except (AttributeError, OSError, IOError, io.UnsupportedOperation):
         return False
     return True
 
