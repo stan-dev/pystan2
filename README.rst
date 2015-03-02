@@ -22,6 +22,11 @@ Important links
 - Stan: http://mc-stan.org/
 - Stan User's Guide and Reference Manual (pdf) available at http://mc-stan.org
 
+Related projects
+----------------
+
+- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
+
 Similar projects
 ----------------
 
