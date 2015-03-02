@@ -455,7 +455,7 @@ def _config_argss(chains, iter, warmup, thin,
         if not all(key in all_control for key in control):
             unknown = set(control) - all_control
             raise ValueError("`control` contains unknown parameters: {}".format(unknown))
-        if control['metric'] not in all_metrics:
+        if control.get('metric') and control['metric'] not in all_metrics:
             raise ValueError("`metric` must be one of {}".format(all_metrics))
         kwargs['control'] = control
 
@@ -554,24 +554,22 @@ def _get_valid_stan_args(base_args=None):
                 "require HMC, Metropolis, NUTS, or Fixed_param).".format(algorithm)
             raise ValueError(msg)
 
-        metric = ctrl_lst.get('metric')
+        metric = ctrl_lst.get('metric', 'diag_e')
         if metric == "unit_e":
             ctrl_sampling['metric'] = sampling_metric_t.UNIT_E
         elif metric == "diag_e":
             ctrl_sampling['metric'] = sampling_metric_t.DIAG_E
         elif metric == "dense_e":
             ctrl_sampling['metric'] = sampling_metric_t.DENSE_E
-        elif metric is None:
-            ctrl_sampling['metric'] = sampling_metric_t.DIAG_E
 
-            if ctrl_sampling['algorithm'] == sampling_algo_t.NUTS:
-                ctrl_sampling['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
-            elif ctrl_sampling['algorithm'] == sampling_algo_t.HMC:
-                ctrl_sampling['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
-            elif ctrl_sampling['algorithm'] == sampling_algo_t.Metropolis:
-                pass
-            elif ctrl_sampling['algorithm'] == sampling_algo_t.Fixed_param:
-                pass
+        if ctrl_sampling['algorithm'] == sampling_algo_t.NUTS:
+            ctrl_sampling['max_treedepth'] = ctrl_lst.get("max_treedepth", 10)
+        elif ctrl_sampling['algorithm'] == sampling_algo_t.HMC:
+            ctrl_sampling['int_time'] = ctrl_lst.get('int_time', 6.283185307179586476925286766559005768e+00)
+        elif ctrl_sampling['algorithm'] == sampling_algo_t.Metropolis:
+            pass
+        elif ctrl_sampling['algorithm'] == sampling_algo_t.Fixed_param:
+            pass
 
     elif args['method'] == stan_args_method_t.OPTIM:
         args['ctrl'] = args.get('ctrl', dict(optim=dict()))
