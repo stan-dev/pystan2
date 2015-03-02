@@ -455,7 +455,7 @@ def _config_argss(chains, iter, warmup, thin,
         if not all(key in all_control for key in control):
             unknown = set(control) - all_control
             raise ValueError("`control` contains unknown parameters: {}".format(unknown))
-        if control['metric'] not in all_metrics:
+        if control.get('metric') and control['metric'] not in all_metrics:
             raise ValueError("`metric` must be one of {}".format(all_metrics))
         kwargs['control'] = control
 
