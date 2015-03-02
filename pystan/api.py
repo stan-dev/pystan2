@@ -218,7 +218,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         ``random.randint(0, MAX_UINT)``.
 
     algorithm : {"NUTS", "HMC", "Fixed_param"}, optional
-        One of algorithms that are implemented in Stan such as the No-U-Turn
+        One of the algorithms that are implemented in Stan such as the No-U-Turn
         sampler (NUTS, Hoffman and Gelman 2011) and static HMC.
 
     sample_file : string, optional
