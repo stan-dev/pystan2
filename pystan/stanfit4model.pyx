@@ -571,6 +571,10 @@ cdef class StanFit4Model:
     def __repr__(self):
         return self.__str__()
 
+    def __getitem__(self, key):
+        extr = self.extract(pars=(key,))
+        return extr[key]
+
     def summary(self, pars=None, probs=None):
         return pystan.misc._summary(self, pars, probs)
 

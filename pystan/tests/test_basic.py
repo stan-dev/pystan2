@@ -87,6 +87,11 @@ class TestBernoulli(unittest.TestCase):
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
 
+        # use __getitem__
+        assert -7.4 < np.mean(fit['lp__']) < -7.0
+        assert 0.1 < np.mean(fit['theta']) < 0.4
+        assert 0.01 < np.var(fit['theta']) < 0.02
+
         # permuted=False
         extr = fit.extract(permuted=False)
         self.assertEqual(extr.shape, (1000, 4, 2))
