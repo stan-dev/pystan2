@@ -12,9 +12,11 @@ from pystan._compat import PY2
 
 class TestNormal(unittest.TestCase):
 
-    model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-    model = pystan.StanModel(model_code=model_code, model_name="normal1",
-                             verbose=True, obfuscate_model_name=False)
+    @classmethod
+    def setUpClass(cls):
+        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        cls.model = pystan.StanModel(model_code=model_code, model_name="normal1",
+                                     verbose=True, obfuscate_model_name=False)
 
     def test_constructor(self):
         self.assertEqual(self.model.model_name, "normal1")
@@ -26,27 +28,33 @@ class TestNormal(unittest.TestCase):
         y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
         self.assertEqual(fit.log_prob(y_last), log_prob_last)
 
+    def test_control_stepsize(self):
+        fit = self.model.sampling(control=dict(stepsize=0.001))
+        self.assertIsNotNone(fit)
+
 
 class TestBernoulli(unittest.TestCase):
 
-    bernoulli_model_code = """
-        data {
-        int<lower=0> N;
-        int<lower=0,upper=1> y[N];
-        }
-        parameters {
-        real<lower=0,upper=1> theta;
-        }
-        model {
-        for (n in 1:N)
-            y[n] ~ bernoulli(theta);
-        }
-        """
-    bernoulli_data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
+    @classmethod
+    def setUpClass(cls):
+        bernoulli_model_code = """
+            data {
+            int<lower=0> N;
+            int<lower=0,upper=1> y[N];
+            }
+            parameters {
+            real<lower=0,upper=1> theta;
+            }
+            model {
+            for (n in 1:N)
+                y[n] ~ bernoulli(theta);
+            }
+            """
+        cls.bernoulli_data = bernoulli_data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-    model = pystan.StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
+        cls.model = model = pystan.StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
 
-    fit = model.sampling(data=bernoulli_data)
+        cls.fit = model.sampling(data=bernoulli_data)
 
     def test_bernoulli_constructor(self):
         model = self.model

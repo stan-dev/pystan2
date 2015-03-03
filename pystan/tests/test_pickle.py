@@ -9,10 +9,15 @@ import pystan
 
 class TestPickle(unittest.TestCase):
 
-    def test_pickle_model(self):
-        tmpdir = tempfile.mkdtemp()
-        pickle_file = os.path.join(tmpdir, 'stanmodel.pkl')
-        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+    @classmethod
+    def setUpClass(cls):
+        cls.tmpdir = tmpdir = tempfile.mkdtemp()
+        cls.pickle_file = os.path.join(tmpdir, 'stanmodel.pkl')
+        cls.model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+
+    def test_pickle_model_no_save_dso(self):
+        pickle_file = self.pickle_file
+        model_code = self.model_code
         m = pystan.StanModel(model_code=model_code, model_name="normal1",
                              save_dso=False)
         module_name = m.module.__name__
@@ -23,8 +28,11 @@ class TestPickle(unittest.TestCase):
 
         with open(pickle_file, 'rb') as f:
             m = pickle.load(f)
-        assert m.model_name.startswith("normal1")
+        self.assertTrue(m.model_name.startswith("normal1"))
 
+    def test_pickle_model(self):
+        pickle_file = self.pickle_file
+        model_code = self.model_code
         m = pystan.StanModel(model_code=model_code, model_name="normal2")
         module_name = m.module.__name__
         module_filename = m.module.__file__
@@ -35,28 +43,26 @@ class TestPickle(unittest.TestCase):
 
         with open(pickle_file, 'rb') as f:
             m = pickle.load(f)
-        assert m.model_name.startswith("normal2")
-        assert m.module is not None
-        assert module_filename != m.module.__file__
+        self.assertTrue(m.model_name.startswith("normal2"))
+        self.assertIsNotNone(m.module)
+        self.assertNotEqual(module_filename, m.module.__file__)
         fit = m.sampling()
         y = fit.extract()['y']
         assert len(y) == 4000
 
     def test_pickle_fit(self):
-        tmpdir = tempfile.mkdtemp()
+        tmpdir = self.tmpdir
         num_iter = 100
         fit_pickle_filename = os.path.join(tmpdir, 'stanfit.pkl')
         model_pickle_filename = os.path.join(tmpdir, 'stanmodel.pkl')
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
         sm = pystan.StanModel(model_code=model_code, model_name="normal1")
-        fit = sm.sampling(iter=num_iter)
-        y = fit.extract()['y'].copy()
 
         # additional error checking
-        state = sm.__dict__.copy()
-        module_filename = state['module'].__file__
-        assert os.path.exists(module_filename)
+        fit = sm.sampling(iter=num_iter)
+        y = fit.extract()['y'].copy()
+        self.assertIsNotNone(y)
 
         # pickle
         with open(model_pickle_filename, 'wb') as f:

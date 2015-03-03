@@ -7,22 +7,20 @@ import pystan
 
 class TestExtract(unittest.TestCase):
 
-    ex_model_code = '''
-    parameters {
-        real alpha[2,3];
-        real beta[2];
-    }
-    model {
-        for (i in 1:2) for (j in 1:3)
-        alpha[i, j] ~ normal(0, 1);
-        for (i in 1:2)
-        beta ~ normal(0, 2);
-    }
-    '''
-
     @classmethod
     def setUpClass(cls):
-        ex_model_code = cls.ex_model_code
+        ex_model_code = '''
+        parameters {
+            real alpha[2,3];
+            real beta[2];
+        }
+        model {
+            for (i in 1:2) for (j in 1:3)
+            alpha[i, j] ~ normal(0, 1);
+            for (i in 1:2)
+            beta ~ normal(0, 2);
+        }
+        '''
         cls.sm = sm = pystan.StanModel(model_code=ex_model_code)
         cls.fit = sm.sampling(chains=4, iter=2000)
 
