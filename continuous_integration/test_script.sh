@@ -20,10 +20,10 @@ SKLEARN_SKIP_NETWORK_TESTS=1
 export PYSTAN_SKIP_PLOT_TESTS=1
 
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
-    DISPLAY=:99.0 JOBLIB_MULTIPROCESSING=0 nosetests -w /tmp --process-timeout=1200 --processes=2 --exclude=$TEST_SUITE_REGEX pystan.tests
+    DISPLAY=:99.0 JOBLIB_MULTIPROCESSING=0 nosetests -w /tmp --process-timeout=600 --processes=1 --exclude=$TEST_SUITE_REGEX pystan.tests
 fi
 
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     # skip DISPLAY setting and hope for the best
-    JOBLIB_MULTIPROCESSING=0 nosetests -w /tmp --process-timeout=1200 --processes=2 --exclude=$TEST_SUITE_REGEX pystan.tests
+    JOBLIB_MULTIPROCESSING=0 nosetests -w /tmp --process-timeout=600 --processes=1 --exclude=$TEST_SUITE_REGEX pystan.tests
 fi
