@@ -57,7 +57,7 @@ cdef vector[double] autocovariance(dict sim, int k, int n):
     """
     Returns the autocovariance for the specified parameter in the
     kept samples of the chain specified.
-    
+
     Parameters
     ----------
     k : unsigned int
@@ -158,10 +158,10 @@ def split_potential_scale_reduction(dict sim, int n):
     """
     Return the split potential scale reduction (split R hat) for the
     specified parameter.
-    
+
     Current implementation takes the minimum number of samples
     across chains as the number of samples per chain.
-    
+
     Parameters
     ----------
     n : unsigned int
@@ -171,7 +171,7 @@ def split_potential_scale_reduction(dict sim, int n):
     -------
     rhat : float
         Split R hat
-    
+
     """
     cdef int i, chain
     cdef double srhat
