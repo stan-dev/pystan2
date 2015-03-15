@@ -6,11 +6,11 @@
  What's New
 ============
 
-v2.6.0.0 (9. Feb 2014)
+v2.6.0.0 (9. Feb 2015)
 =======================
 - Update Stan source to v2.6.0 (`release notes <https://github.com/stan-dev/stan.6.0>`_).
 
-v2.5.0.2 (30. Jan 2014)
+v2.5.0.2 (30. Jan 2015)
 =======================
 - Fix bug in rdump (for >1 dimensional arrays)
 
