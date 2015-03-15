@@ -10,22 +10,23 @@ import numpy as np
 import pystan.constants
 
 
-cdef extern from "stan/agrad/rev/var_stack.hpp":
-    pass
-
 # autocovariance is a template function, which Cython doesn't yet support
-cdef extern from "stan/prob/autocovariance.hpp" namespace "stan::prob":
+cdef extern from "stan/math/prim/mat/fun/autocovariance.hpp" namespace "stan::prob":
     void stan_autocovariance "stan::prob::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
 
-cdef extern from "stan/math.hpp" namespace "stan::math":
+cdef extern from "stan/math/prim/mat/fun/sum.hpp" namespace "stan::math":
     double stan_sum "stan::math::sum"(vector[double]& x)
+
+cdef extern from "stan/math/prim/mat/fun/mean.hpp" namespace "stan::math":
     double stan_mean "stan::math::mean"(vector[double]& x)
+
+cdef extern from "stan/math/prim/mat/fun/variance.hpp" namespace "stan::math":
     double stan_variance "stan::math::variance"(vector[double]& x)
 
 
 cdef void get_kept_samples(dict sim, int k, int n, vector[double]& samples):
     """
-    
+
     Parameters
     ----------
     k : unsigned int

@@ -1,5 +1,5 @@
 #include <stan/version.hpp>
-#include <stan/gm/compiler.hpp>
+#include <stan/lang/compiler.hpp>
 
 #include <exception>
 #include <iostream>
@@ -43,7 +43,7 @@ int stanc(std::string model_stancode, std::string model_name, PyStancResult& res
   std::istringstream in(mcode_); 
   try {
     bool valid_model
-      = stan::gm::compile(&std::cerr,in,out,mname_);
+      = stan::lang::compile(&std::cerr,in,out,mname_);
     if (!valid_model) {
       result.status = PARSE_FAIL_RC;  
       return PARSE_FAIL_RC;

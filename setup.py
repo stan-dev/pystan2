@@ -110,17 +110,17 @@ stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
 extensions_extra_compile_args = ['-O0', '-ftemplate-depth-256']
 
 stanc_sources = [
-    "pystan/stan/src/stan/gm/ast_def.cpp",
-    "pystan/stan/src/stan/gm/grammars/bare_type_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/expression07_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/expression_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/functions_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/program_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/statement_2_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/statement_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/term_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/var_decls_grammar_inst.cpp",
-    "pystan/stan/src/stan/gm/grammars/whitespace_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/ast_def.cpp",
+    "pystan/stan/src/stan/lang/grammars/bare_type_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/expression07_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/expression_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/functions_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/program_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/statement_2_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/term_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/var_decls_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/whitespace_grammar_inst.cpp",
 ]
 
 extensions = [
