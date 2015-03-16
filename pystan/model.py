@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Copyright (c) 2013-2014, PyStan developers
+# Copyright (c) 2013-2015, PyStan developers
 #
 # This file is licensed under Version 3.0 of the GNU General Public
 # License. See LICENSE for a text of the license.
@@ -259,7 +259,7 @@ class StanModel:
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan/src"),
-            os.path.join(pystan_dir, "stan/lib/eigen_3.2.2"),
+            os.path.join(pystan_dir, "stan/lib/eigen_3.2.4"),
             os.path.join(pystan_dir, "stan/lib/boost_1.55.0"),
             np.get_include(),
         ]
