@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Copyright (c) 2013-2014, PyStan developers
+# Copyright (c) 2013-2015, PyStan developers
 #
 # This file is licensed under Version 3.0 of the GNU General Public
 # License. See LICENSE for a text of the license.
@@ -259,7 +259,7 @@ class StanModel:
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan/src"),
-            os.path.join(pystan_dir, "stan/lib/eigen_3.2.2"),
+            os.path.join(pystan_dir, "stan/lib/eigen_3.2.4"),
             os.path.join(pystan_dir, "stan/lib/boost_1.55.0"),
             np.get_include(),
         ]
@@ -280,11 +280,24 @@ class StanModel:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
-        extra_compile_args = ['-O3', '-ftemplate-depth-256']
+        stan_macros = [
+            ('BOOST_RESULT_OF_USE_TR1', None),
+            ('BOOST_NO_DECLTYPE', None),
+            ('BOOST_DISABLE_ASSERTS', None),
+            ('EIGEN_NO_DEBUG', None),
+        ]
+        extra_compile_args = [
+            '-O0',
+            '-ftemplate-depth-256',
+            '-Wno-unused-function',
+            '-Wno-uninitialized',
+        ]
+
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=module_name,
                               language="c++",
                               sources=[pyx_file],
+                              define_macros=stan_macros,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args)
 

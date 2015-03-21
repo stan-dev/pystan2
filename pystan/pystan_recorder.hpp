@@ -1,17 +1,18 @@
 #ifndef PYSTAN__PYSTAN_RECORDER_HPP
 #define PYSTAN__PYSTAN_RECORDER_HPP
 
-#include <stan/common/recorder/csv.hpp>
-#include <stan/common/recorder/filtered_values.hpp>
-#include <stan/common/recorder/sum_values.hpp>
+#include <stan/interface/recorder/csv.hpp>
+#include <stan/interface/recorder/filtered_values.hpp>
+#include <stan/interface/recorder/sum_values.hpp>
+
 
 namespace pystan {
 
   class pystan_sample_recorder {
   public:
-    typedef stan::common::recorder::csv CsvRecorder;
-    typedef stan::common::recorder::filtered_values<std::vector<double> > FilteredValuesRecorder;
-    typedef stan::common::recorder::sum_values SumValuesRecorder;
+    typedef stan::interface::recorder::csv CsvRecorder;
+    typedef stan::interface::recorder::filtered_values<std::vector<double> > FilteredValuesRecorder;
+    typedef stan::interface::recorder::sum_values SumValuesRecorder;
 
     CsvRecorder csv_;
     FilteredValuesRecorder values_;
@@ -80,17 +81,17 @@ namespace pystan {
     for (size_t n = 0; n < offset; n++)
       filter_sampler_values[n] = n;
 
-    stan::common::recorder::csv csv(o, prefix);
-    stan::common::recorder::filtered_values<std::vector<double> > values(N, M, filter);
-    stan::common::recorder::filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
-    stan::common::recorder::sum_values sum(N, warmup);
+    stan::interface::recorder::csv csv(o, prefix);
+    stan::interface::recorder::filtered_values<std::vector<double> > values(N, M, filter);
+    stan::interface::recorder::filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
+    stan::interface::recorder::sum_values sum(N, warmup);
 
     return pystan_sample_recorder(csv, values, sampler_values, sum);
   }
 
-  stan::common::recorder::csv
+  stan::interface::recorder::csv
   diagnostic_recorder_factory(std::ostream *o, const std::string prefix) {
-    stan::common::recorder::csv csv(o, prefix);
+    stan::interface::recorder::csv csv(o, prefix);
     return csv;
   }
 

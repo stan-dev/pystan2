@@ -1,26 +1,29 @@
 import unittest
 
-from pystan import StanModel
 import numpy as np
+
+import pystan
 
 
 class TestOptimizingExample(unittest.TestCase):
     """Test optimizing example from documentation"""
 
-    ocode = """
-    data {
-        int<lower=1> N;
-        real y[N];
-    }
-    parameters {
-        real mu;
-    }
-    model {
-        y ~ normal(mu, 1);
-    }
-    """
+    @classmethod
+    def setUpClass(cls):
+        ocode = """
+        data {
+            int<lower=1> N;
+            real y[N];
+        }
+        parameters {
+            real mu;
+        }
+        model {
+            y ~ normal(mu, 1);
+        }
+        """
 
-    sm = StanModel(model_code=ocode)
+        cls.sm = pystan.StanModel(model_code=ocode)
 
     def test_optimizing(self):
         sm = self.sm

@@ -5,20 +5,23 @@ from pystan import StanModel
 
 
 class TestMatrixParam(unittest.TestCase):
-    model_code = """
-    data {
-    int<lower=2> K;
-    int<lower=1> D;
-    }
-    parameters {
-    matrix[K,D] beta;
-    }
-    model {
-    for (k in 1:K)
-        for (d in 1:D)
-          beta[k,d] ~ normal(if_else(d==2,100, 0),1);
-    }"""
-    model = StanModel(model_code=model_code)
+
+    @classmethod
+    def setUpClass(cls):
+        model_code = """
+        data {
+        int<lower=2> K;
+        int<lower=1> D;
+        }
+        parameters {
+        matrix[K,D] beta;
+        }
+        model {
+        for (k in 1:K)
+            for (d in 1:D)
+            beta[k,d] ~ normal(if_else(d==2,100, 0),1);
+        }"""
+        cls.model = StanModel(model_code=model_code)
 
     def test_matrix_param(self):
         sm = self.model

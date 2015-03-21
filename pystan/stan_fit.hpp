@@ -15,26 +15,12 @@
 #include <boost/random/additive_combine.hpp> // L'Ecuyer RNG
 #include <boost/random/uniform_real_distribution.hpp>
 
-#include <stan/agrad/rev/var_stack.hpp>
-
 #include <stan/model/util.hpp>
 
-#include <stan/optimization/newton.hpp>
-#include <stan/optimization/bfgs.hpp>
-
-#include <stan/mcmc/hmc/static/adapt_unit_e_static_hmc.hpp>
-#include <stan/mcmc/hmc/static/adapt_diag_e_static_hmc.hpp>
-#include <stan/mcmc/hmc/static/adapt_dense_e_static_hmc.hpp>
-#include <stan/mcmc/hmc/nuts/adapt_unit_e_nuts.hpp>
-#include <stan/mcmc/hmc/nuts/adapt_diag_e_nuts.hpp>
-#include <stan/mcmc/hmc/nuts/adapt_dense_e_nuts.hpp>
-#include <stan/mcmc/fixed_param_sampler.hpp>
-
-
-#include <stan/common/do_print.hpp>
-#include <stan/common/do_bfgs_optimize.hpp>
-#include <stan/common/print_progress.hpp>
-#include <stan/common/initialize_state.hpp>
+#include <stan/services/io.hpp>
+#include <stan/services/init.hpp>
+#include <stan/services/mcmc.hpp>
+#include <stan/services/optimization.hpp>
 
 
 #include "py_var_context.hpp"
@@ -44,12 +30,10 @@
     #error Python headers needed to compile C extensions, please install development version of Python.
 #endif
 
-// REF: stan/common/command.hpp
-
+// REF: stan/services/command.hpp
+#include <stan/services/command.hpp>
 #include <stan/io/mcmc_writer.hpp>
-#include <stan/common/recorder/messages.hpp>
-#include <stan/common/warmup.hpp>
-#include <stan/common/sample.hpp>
+#include <stan/interface/recorder.hpp>
 #include "pystan_recorder.hpp"
 
 
@@ -741,12 +725,12 @@ namespace pystan {
                                   sample_recorder_offset,
                                   qoi_idx);
 
-      stan::common::recorder::csv diagnostic_recorder
+      stan::interface::recorder::csv diagnostic_recorder
         = diagnostic_recorder_factory(&diagnostic_stream, "# ");
-      stan::common::recorder::messages message_recorder(&std::cout, "# ");
+      stan::interface::recorder::messages message_recorder(&std::cout, "# ");
       stan::io::mcmc_writer<Model,
-                            pystan_sample_recorder, stan::common::recorder::csv,
-                            stan::common::recorder::messages>
+                            pystan_sample_recorder, stan::interface::recorder::csv,
+                            stan::interface::recorder::messages>
         writer(sample_recorder, diagnostic_recorder, message_recorder, &std::cout);
 
 
@@ -763,7 +747,7 @@ namespace pystan {
       std::string suffix = ss.str();
       PyErr_CheckSignals_Functor interruptCallback;
 
-      stan::common::warmup<Model, RNG_t,
+      stan::services::mcmc::warmup<Model, RNG_t,
                            PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
@@ -781,7 +765,7 @@ namespace pystan {
         writer.write_adapt_finish(sampler_ptr);
 
         std::stringstream ss;
-        stan::common::recorder::messages info(&ss, "# ");
+        stan::interface::recorder::messages info(&ss, "# ");
         writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
@@ -790,7 +774,7 @@ namespace pystan {
       // Sampling
       start = clock();
 
-      stan::common::sample<Model, RNG_t,
+      stan::services::mcmc::sample<Model, RNG_t,
                            PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
@@ -804,8 +788,6 @@ namespace pystan {
       double sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
 
       writer.write_timing(warmDeltaT, sampleDeltaT);
-
-
 
       double mean_lp(0);
       std::vector<double> mean_pars;
@@ -897,12 +879,12 @@ namespace pystan {
           init = R.str();
         }
 
-        if (stan::common::initialize_state(init,
-                                           cont_params,
-                                           model,
-                                           base_rng,
-                                           &ss,
-                                           context_factory) == false)
+        if (stan::services::init::initialize_state(init,
+                                                   cont_params,
+                                                   model,
+                                                   base_rng,
+                                                   &ss,
+                                                   context_factory) == false)
           throw std::runtime_error(ss.str());
 
         std::cout << ss.str();
@@ -994,13 +976,13 @@ namespace pystan {
           lbfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           lbfgs._conv_opts.maxIts     = args.get_iter();
 
-          stan::common::do_bfgs_optimize(model, lbfgs, base_rng,
-                                         lp, cont_vector, disc_vector,
-                                         &sample_stream, &std::cout,
-                                         save_iterations, refresh, interruptCallback);
+          stan::services::optimization::do_bfgs_optimize(model, lbfgs, base_rng,
+                                                         lp, cont_vector, disc_vector,
+                                                         &sample_stream, &std::cout,
+                                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
-            stan::common::write_iteration(sample_stream, model, base_rng,
+            stan::services::io::write_iteration(sample_stream, model, base_rng,
                                           lp, cont_vector, disc_vector);
             sample_stream.close();
           }
@@ -1058,13 +1040,13 @@ namespace pystan {
           bfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           bfgs._conv_opts.maxIts     = args.get_iter();
 
-          stan::common::do_bfgs_optimize(model, bfgs, base_rng,
-                                         lp, cont_vector, disc_vector,
-                                         &sample_stream, &std::cout,
-                                         save_iterations, refresh, interruptCallback);
+          stan::services::optimization::do_bfgs_optimize(model, bfgs, base_rng,
+                                                         lp, cont_vector, disc_vector,
+                                                         &sample_stream, &std::cout,
+                                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
-            stan::common::write_iteration(sample_stream, model, base_rng,
+            stan::services::io::write_iteration(sample_stream, model, base_rng,
                                           lp, cont_vector, disc_vector);
             sample_stream.close();
           }
