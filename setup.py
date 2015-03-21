@@ -97,17 +97,21 @@ else:
 from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
-
 stan_include_dirs = ["pystan/stan/src",
                      "pystan/stan/lib/eigen_3.2.4",
                      "pystan/stan/lib/boost_1.55.0"]
-
-stan_macros = [('BOOST_RESULT_OF_USE_TR1', None),
-               ('BOOST_NO_DECLTYPE', None),
-               ('BOOST_DISABLE_ASSERTS', None)]
-
-## extensions
-extensions_extra_compile_args = ['-O0', '-ftemplate-depth-256']
+stan_macros = [
+    ('BOOST_RESULT_OF_USE_TR1', None),
+    ('BOOST_NO_DECLTYPE', None),
+    ('BOOST_DISABLE_ASSERTS', None),
+    ('EIGEN_NO_DEBUG', None),
+]
+extra_compile_args = [
+    '-O0',
+    '-ftemplate-depth-256',
+    '-Wno-unused-function',
+    '-Wno-uninitialized',
+]
 
 stanc_sources = [
     "pystan/stan/src/stan/lang/ast_def.cpp",
@@ -129,13 +133,13 @@ extensions = [
               language='c++',
               define_macros=stan_macros,
               include_dirs=stan_include_dirs,
-              extra_compile_args=extensions_extra_compile_args),
+              extra_compile_args=extra_compile_args),
     Extension("pystan._chains",
               ["pystan/_chains.pyx"],
               language='c++',
               define_macros=stan_macros,
               include_dirs=stan_include_dirs,
-              extra_compile_args=extensions_extra_compile_args),
+              extra_compile_args=extra_compile_args),
     # _misc.pyx does not use Stan libs
     Extension("pystan._misc", ["pystan/_misc.pyx"], language='c++')
 ]

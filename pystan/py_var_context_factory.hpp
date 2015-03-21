@@ -12,18 +12,12 @@ namespace pystan {
     class py_var_context_factory
       : public stan::interface::var_context_factory::var_context_factory<py_var_context> {
     public:
-      py_var_context_factory(vars_r_t vars_r, vars_i_t vars_i) {
-          vars_r_ = vars_r;
-          vars_i_ = vars_i;
-      }
-
+      py_var_context_factory(vars_r_t vars_r, vars_i_t vars_i) : vars_r_(vars_r), vars_i_(vars_i) { }
       py_var_context operator()(const std::string source) {
           return pystan::io::py_var_context(vars_r_, vars_i_);
       }
-
       vars_r_t vars_r_;
       vars_i_t vars_i_;
-
     };
   }
 }

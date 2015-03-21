@@ -31,10 +31,9 @@
 #endif
 
 // REF: stan/services/command.hpp
-
+#include <stan/services/command.hpp>
 #include <stan/io/mcmc_writer.hpp>
-#include <stan/interface/warmup.hpp>
-#include <stan/services/mcmc.hpp>
+#include <stan/interface/recorder.hpp>
 #include "pystan_recorder.hpp"
 
 
@@ -748,7 +747,7 @@ namespace pystan {
       std::string suffix = ss.str();
       PyErr_CheckSignals_Functor interruptCallback;
 
-      stan::mcmc::warmup<Model, RNG_t,
+      stan::services::mcmc::warmup<Model, RNG_t,
                            PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
@@ -775,7 +774,7 @@ namespace pystan {
       // Sampling
       start = clock();
 
-      stan::common::sample<Model, RNG_t,
+      stan::services::mcmc::sample<Model, RNG_t,
                            PyErr_CheckSignals_Functor>
         (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
@@ -789,8 +788,6 @@ namespace pystan {
       double sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
 
       writer.write_timing(warmDeltaT, sampleDeltaT);
-
-
 
       double mean_lp(0);
       std::vector<double> mean_pars;
@@ -883,11 +880,11 @@ namespace pystan {
         }
 
         if (stan::services::init::initialize_state(init,
-                                           cont_params,
-                                           model,
-                                           base_rng,
-                                           &ss,
-                                           context_factory) == false)
+                                                   cont_params,
+                                                   model,
+                                                   base_rng,
+                                                   &ss,
+                                                   context_factory) == false)
           throw std::runtime_error(ss.str());
 
         std::cout << ss.str();
@@ -980,9 +977,9 @@ namespace pystan {
           lbfgs._conv_opts.maxIts     = args.get_iter();
 
           stan::services::optimization::do_bfgs_optimize(model, lbfgs, base_rng,
-                                         lp, cont_vector, disc_vector,
-                                         &sample_stream, &std::cout,
-                                         save_iterations, refresh, interruptCallback);
+                                                         lp, cont_vector, disc_vector,
+                                                         &sample_stream, &std::cout,
+                                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
@@ -1044,9 +1041,9 @@ namespace pystan {
           bfgs._conv_opts.maxIts     = args.get_iter();
 
           stan::services::optimization::do_bfgs_optimize(model, bfgs, base_rng,
-                                         lp, cont_vector, disc_vector,
-                                         &sample_stream, &std::cout,
-                                         save_iterations, refresh, interruptCallback);
+                                                         lp, cont_vector, disc_vector,
+                                                         &sample_stream, &std::cout,
+                                                         save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
