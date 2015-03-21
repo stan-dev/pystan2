@@ -6,9 +6,13 @@
  What's New
 ============
 
+v2.6.3.0 (21. Mar 2015)
+=======================
+- Update Stan source to v2.6.3 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.6.3>`_).
+
 v2.6.0.0 (9. Feb 2015)
 =======================
-- Update Stan source to v2.6.0 (`release notes <https://github.com/stan-dev/stan.6.0>`_).
+- Update Stan source to v2.6.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.6.0>`_).
 
 v2.5.0.2 (30. Jan 2015)
 =======================
