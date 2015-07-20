@@ -98,6 +98,7 @@ from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
 stan_include_dirs = ["pystan/stan/src",
+                     "pystan/math",
                      "pystan/stan/lib/eigen_3.2.4",
                      "pystan/stan/lib/boost_1.55.0"]
 stan_macros = [

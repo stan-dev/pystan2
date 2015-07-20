@@ -15,3 +15,8 @@ prune pystan/stan/src/test
 prune pystan/stan/src/models
 prune pystan/stan/src/docs
 prune pystan/stan/lib/gtest_1.7.0
+
+# unused parts of the stan math source
+prune pystan/math/doxygen
+prune pystan/math/test
+prune pystan/math/make

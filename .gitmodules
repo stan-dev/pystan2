@@ -4,3 +4,6 @@
 [submodule "example-models"]
 	path = example-models
 	url = https://github.com/stan-dev/example-models
+[submodule "pystan/math"]
+	path = pystan/math
+	url = https://github.com/stan-dev/math.git
