@@ -104,6 +104,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         map[string, pair[vector[double], vector[size_t] ] ] init_vars_r
         map[string, pair[vector[int], vector[size_t] ] ] init_vars_i
         double init_radius
+        bool enable_random_init  # enable randomly partially specifying inits
         string sample_file
         bool append_samples
         bool sample_file_flag

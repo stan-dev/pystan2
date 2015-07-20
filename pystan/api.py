@@ -372,7 +372,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
                       save_dso=save_dso, verbose=verbose)
     # check that arguments in kwargs are valid
-    valid_args = {"chain_id", "init_r", "test_grad", "append_samples",
+    valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",
                   "refresh", "control", "obfuscate_model_name"}
     for arg in kwargs:
         if arg not in valid_args:

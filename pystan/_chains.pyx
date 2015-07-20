@@ -11,8 +11,8 @@ import pystan.constants
 
 
 # autocovariance is a template function, which Cython doesn't yet support
-cdef extern from "stan/math/prim/mat/fun/autocovariance.hpp" namespace "stan::prob":
-    void stan_autocovariance "stan::prob::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
+cdef extern from "stan/math/prim/mat/fun/autocovariance.hpp" namespace "stan::math":
+    void stan_autocovariance "stan::math::autocovariance<double>"(const vector[double]& y, vector[double]& acov)
 
 cdef extern from "stan/math/prim/mat/fun/sum.hpp" namespace "stan::math":
     double stan_sum "stan::math::sum"(vector[double]& x)

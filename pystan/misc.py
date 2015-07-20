@@ -616,6 +616,7 @@ def _get_valid_stan_args(base_args=None):
     args['init_radius'] = args.get('init_r', 2.0)
     if (args['init_radius'] <= 0):
         args['init'] = "0".encode('ascii')
+    args['enable_random_init'] = args.get('enable_random_init', True)
     # RStan calls validate_args() here
     return args
 
