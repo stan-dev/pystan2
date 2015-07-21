@@ -17,9 +17,9 @@ class TestStanc(unittest.TestCase):
     def test_stanc_exception(self):
         model_code = 'parameters {real z;} model {z ~ no_such_distribution();}'
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(ValueError, 'unknown distribution'):
+        with assertRaisesRegex(ValueError, 'Distribution .* not found\.'):
             stanc(model_code=model_code)
-        with assertRaisesRegex(ValueError, 'unknown distribution'):
+        with assertRaisesRegex(ValueError, 'Distribution .* not found\.'):
             StanModel(model_code=model_code)
 
     def test_stanc_exception_semicolon(self):
