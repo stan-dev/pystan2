@@ -6,6 +6,12 @@
  What's New
 ============
 
+v2.7.0.0 (21. July 2015)
+=======================
+-   Update Stan source to v2.7.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.7.0>`_).
+-   Highlights: Black-box variational inference, mean field and full rank (`#1505 <https://github.com/stan-dev/stan/pull/1505>`_),
+    standalone Math library `#1520 <https://github.com/stan-dev/stan/issues/1520>`_.
+
 v2.6.3.0 (21. Mar 2015)
 =======================
 - Update Stan source to v2.6.3 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.6.3>`_).
