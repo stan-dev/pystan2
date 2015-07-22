@@ -1,7 +1,7 @@
 PyStan: The Python Interface to Stan
 ====================================
 
-.. image:: https://github.com/stan-dev/stan/blob/master/logos/stanlogo-main.png?raw=true
+.. image:: https://raw.githubusercontent.com/stan-dev/logos/master/logo.png
     :alt: Stan logo
 
 |pypi| |travis| |crate|
@@ -113,6 +113,6 @@ Example
     :target: https://travis-ci.org/stan-dev/pystan
     :alt: travis-ci build status
 
-.. |crate| image:: https://pypip.in/d/pystan/badge.png
+.. |crate| image:: https://img.shields.io/pypi/dm/pystan.svg
     :target: https://pypi.python.org/pypi/pystan
     :alt: pypi download statistics
