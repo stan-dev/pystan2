@@ -9,9 +9,6 @@ set -e
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
     export DISPLAY=:99.0
     sh -e /etc/init.d/xvfb start
-    # fix a crash with multiprocessing on Travis
-    sudo rm -rf /dev/shm
-    sudo ln -s /run/shm /dev/shm
 fi
 
 

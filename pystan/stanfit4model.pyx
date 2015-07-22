@@ -164,6 +164,7 @@ cdef dict _dict_from_stanargs(StanArgs* args):
     # args.init_vars_i requires additional work. The initial values for each
     # chain are accessible with the method get_inits()
     d['init_radius'] = args.init_radius
+    d['enable_random_init'] = args.enable_random_init
     d['append_samples'] = args.append_samples
     if args.sample_file_flag:
         d['sample_file'] = args.sample_file

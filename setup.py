@@ -98,8 +98,9 @@ from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
 stan_include_dirs = ["pystan/stan/src",
+                     "pystan/math",
                      "pystan/stan/lib/eigen_3.2.4",
-                     "pystan/stan/lib/boost_1.55.0"]
+                     "pystan/stan/lib/boost_1.58.0"]
 stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -153,11 +154,16 @@ stan_files_all = sum(
     [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
      for path, dirs, files in os.walk('pystan/stan/src/')], [])
 
+stan_math_files_all = sum(
+    [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
+     for path, dirs, files in os.walk('pystan/math/')], [])
+
 lib_files_all = sum(
     [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
      for path, dirs, files in os.walk('pystan/stan/lib/')], [])
 
 package_data_pats += stan_files_all
+package_data_pats += stan_math_files_all
 package_data_pats += lib_files_all
 
 

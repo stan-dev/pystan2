@@ -17,10 +17,63 @@
 
 #include <stan/model/util.hpp>
 
-#include <stan/services/io.hpp>
-#include <stan/services/init.hpp>
-#include <stan/services/mcmc.hpp>
-#include <stan/services/optimization.hpp>
+#include <stan/mcmc/base_adaptation.hpp>
+#include <stan/mcmc/base_adapter.hpp>
+#include <stan/mcmc/base_mcmc.hpp>
+#include <stan/mcmc/covar_adaptation.hpp>
+#include <stan/mcmc/fixed_param_sampler.hpp>
+#include <stan/mcmc/hmc/base_hmc.hpp>
+#include <stan/mcmc/hmc/hamiltonians/base_hamiltonian.hpp>
+#include <stan/mcmc/hmc/hamiltonians/dense_e_metric.hpp>
+#include <stan/mcmc/hmc/hamiltonians/dense_e_point.hpp>
+#include <stan/mcmc/hmc/hamiltonians/diag_e_metric.hpp>
+#include <stan/mcmc/hmc/hamiltonians/diag_e_point.hpp>
+#include <stan/mcmc/hmc/hamiltonians/ps_point.hpp>
+#include <stan/mcmc/hmc/hamiltonians/unit_e_metric.hpp>
+#include <stan/mcmc/hmc/hamiltonians/unit_e_point.hpp>
+#include <stan/mcmc/hmc/integrators/base_integrator.hpp>
+#include <stan/mcmc/hmc/integrators/base_leapfrog.hpp>
+#include <stan/mcmc/hmc/integrators/expl_leapfrog.hpp>
+#include <stan/mcmc/hmc/nuts/adapt_dense_e_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/adapt_diag_e_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/adapt_unit_e_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/base_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/dense_e_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/diag_e_nuts.hpp>
+#include <stan/mcmc/hmc/nuts/unit_e_nuts.hpp>
+#include <stan/mcmc/hmc/static/adapt_dense_e_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/adapt_diag_e_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/adapt_unit_e_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/base_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/dense_e_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/diag_e_static_hmc.hpp>
+#include <stan/mcmc/hmc/static/unit_e_static_hmc.hpp>
+#include <stan/mcmc/sample.hpp>
+#include <stan/mcmc/stepsize_adaptation.hpp>
+#include <stan/mcmc/stepsize_adapter.hpp>
+#include <stan/mcmc/stepsize_covar_adapter.hpp>
+#include <stan/mcmc/stepsize_var_adapter.hpp>
+#include <stan/mcmc/var_adaptation.hpp>
+#include <stan/mcmc/windowed_adaptation.hpp>
+#include <stan/optimization/newton.hpp>
+#include <stan/optimization/bfgs.hpp>
+
+#include <stan/services/io/do_print.hpp>
+#include <stan/services/io/write_error_msg.hpp>
+#include <stan/services/io/write_iteration.hpp>
+#include <stan/services/io/write_iteration_csv.hpp>
+#include <stan/services/io/write_model.hpp>
+#include <stan/services/io/write_stan.hpp>
+#include <stan/services/init/init_adapt.hpp>
+#include <stan/services/init/init_nuts.hpp>
+#include <stan/services/init/init_static_hmc.hpp>
+#include <stan/services/init/init_windowed_adapt.hpp>
+#include <stan/services/init/initialize_state.hpp>
+#include <stan/services/mcmc/print_progress.hpp>
+#include <stan/services/mcmc/run_markov_chain.hpp>
+#include <stan/services/mcmc/sample.hpp>
+#include <stan/services/mcmc/warmup.hpp>
+#include <stan/services/optimization/do_bfgs_optimize.hpp>
 
 
 #include "py_var_context.hpp"
@@ -30,10 +83,15 @@
     #error Python headers needed to compile C extensions, please install development version of Python.
 #endif
 
-// REF: stan/services/command.hpp
-#include <stan/services/command.hpp>
 #include <stan/io/mcmc_writer.hpp>
-#include <stan/interface/recorder.hpp>
+#include <stan/interface/recorder/csv.hpp>
+#include <stan/interface/recorder/filtered_values.hpp>
+#include <stan/interface/recorder/messages.hpp>
+#include <stan/interface/recorder/noop.hpp>
+#include <stan/interface/recorder/recorder.hpp>
+#include <stan/interface/recorder/sum_values.hpp>
+#include <stan/interface/recorder/values.hpp>
+
 #include "pystan_recorder.hpp"
 
 
@@ -63,6 +121,7 @@ namespace pystan {
     vars_r_t init_vars_r;
     vars_i_t init_vars_i;
     double init_radius;
+    bool enable_random_init;
     std::string sample_file; // the file for outputting the samples
     bool append_samples;
     bool sample_file_flag; // true: write out to a file; false, do not
@@ -251,6 +310,9 @@ namespace pystan {
     }
     inline double get_init_radius() const {
       return init_radius;
+    }
+    inline bool get_enable_random_init() const {
+      return enable_random_init;
     }
     const std::string& get_init() const {
       return init;
@@ -551,7 +613,7 @@ namespace pystan {
                       const std::vector<size_t>& midx,
                       const std::string& sep = ",") {
       if (v.size() > 0)
-        o << v[0];
+        o << v[midx.at(0)];
       for (size_t i = 1; i < v.size(); i++)
         o << sep << v[midx.at(i)];
       o << std::endl;
@@ -861,7 +923,6 @@ namespace pystan {
       std::vector<double> params_inr_etc; // cont, disc, and others
       std::vector<double> init_grad;
       std::string init_val = args.get_init();
-      int num_init_tries = 0;
       PyErr_CheckSignals_Functor interruptCallback;
       // parameter initialization
       {
@@ -879,15 +940,16 @@ namespace pystan {
           init = R.str();
         }
 
-        if (stan::services::init::initialize_state(init,
-                                                   cont_params,
-                                                   model,
-                                                   base_rng,
-                                                   &ss,
-                                                   context_factory) == false)
+        if (!stan::services::init::initialize_state(init,
+                                                    cont_params,
+                                                    model,
+                                                    base_rng,
+                                                    &ss,
+                                                    context_factory,
+                                                    args.get_enable_random_init(),
+                                                    args.get_init_radius())) {
           throw std::runtime_error(ss.str());
-
-        std::cout << ss.str();
+        }
         for (int n = 0; n < cont_params.size(); n++)
           cont_vector[n] = cont_params[n];
       }
@@ -901,7 +963,9 @@ namespace pystan {
         std::stringstream ss;
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
-        int num_failed = stan::model::test_gradients<true,true>(model,cont_vector,disc_vector,epsilon,error,ss);
+        int num_failed =
+          stan::model::test_gradients<true,true>(model,cont_vector,disc_vector,
+                                                 epsilon,error,ss,&std::cout);
         std::cout << ss.str() << std::endl;
         holder.num_failed = num_failed;
         holder.test_grad = true;
@@ -923,8 +987,6 @@ namespace pystan {
         if (LBFGS == args.get_ctrl_optim_algorithm()) {
           std::cout << "STAN OPTIMIZATION COMMAND (LBFGS)" << std::endl;
           std::cout << "init = " << init_val << std::endl;
-          if (num_init_tries > 0)
-            std::cout << "init tries = " << num_init_tries << std::endl;
           if (args.get_sample_file_flag())
             std::cout << "output = " << args.get_sample_file() << std::endl;
           std::cout << "save_iterations = " << args.get_ctrl_optim_save_iterations() << std::endl;
@@ -955,8 +1017,10 @@ namespace pystan {
             write_comment_property(sample_stream,"seed",args.get_random_seed());
             write_comment(sample_stream);
 
-            sample_stream << "lp__,"; // log probability first
-            model.write_csv_header(sample_stream);
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names);
+            print_vector(names, sample_stream);
           }
 
           double lp(0);
@@ -983,7 +1047,7 @@ namespace pystan {
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
-                                          lp, cont_vector, disc_vector);
+                                          lp, cont_vector, disc_vector, &std::cout);
             sample_stream.close();
           }
           model.write_array(base_rng,cont_vector,disc_vector, params_inr_etc);
@@ -992,8 +1056,6 @@ namespace pystan {
         } else if (BFGS == args.get_ctrl_optim_algorithm()) {
           std::cout << "STAN OPTIMIZATION COMMAND (BFGS)" << std::endl;
           std::cout << "init = " << init_val << std::endl;
-          if (num_init_tries > 0)
-            std::cout << "init tries = " << num_init_tries << std::endl;
           if (args.get_sample_file_flag())
             std::cout << "output = " << args.get_sample_file() << std::endl;
           std::cout << "save_iterations = " << args.get_ctrl_optim_save_iterations() << std::endl;
@@ -1022,8 +1084,10 @@ namespace pystan {
             write_comment_property(sample_stream,"seed",args.get_random_seed());
             write_comment(sample_stream);
 
-            sample_stream << "lp__,"; // log probability first
-            model.write_csv_header(sample_stream);
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names);
+            print_vector(names, sample_stream);
           }
           double lp(0);
           bool save_iterations = args.get_ctrl_optim_save_iterations();
@@ -1047,7 +1111,7 @@ namespace pystan {
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
-                                          lp, cont_vector, disc_vector);
+                                          lp, cont_vector, disc_vector, &std::cout);
             sample_stream.close();
           }
           model.write_array(base_rng,cont_vector,disc_vector,params_inr_etc);
@@ -1065,8 +1129,10 @@ namespace pystan {
             write_comment_property(sample_stream,"seed",args.get_random_seed());
             write_comment(sample_stream);
 
-            sample_stream << "lp__,"; // log probability first
-            model.write_csv_header(sample_stream);
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names);
+            print_vector(names, sample_stream);
           }
           std::vector<double> gradient;
           double lp = stan::model::log_prob_grad<true,true>(model, cont_vector, disc_vector, gradient);
@@ -1089,7 +1155,8 @@ namespace pystan {
             m++;
             if (args.get_sample_file_flag()) {
               sample_stream << lp << ',';
-              model.write_csv(base_rng,cont_vector,disc_vector,sample_stream);
+              model.write_array(base_rng, cont_vector, disc_vector, params_inr_etc);
+              print_vector(params_inr_etc, sample_stream);
             }
           }
           model.write_array(base_rng, cont_vector, disc_vector, params_inr_etc);
@@ -1141,7 +1208,7 @@ namespace pystan {
       stan::mcmc::sample s(cont_params, 0, 0);
 
       if (algorithm == Fixed_param) {
-        stan::mcmc::fixed_param_sampler sampler;
+        stan::mcmc::fixed_param_sampler sampler(&std::cout, &std::cerr);
         if (args.get_ctrl_sampling_warmup() != 0) {
           std::cout << "Warning: warmup will be skipped for the fixed parameter sampler!" << std::endl;
           args.set_ctrl_sampling_warmup(0);

@@ -1,7 +1,8 @@
 #ifndef PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP
 #define PYSTAN__IO__PY_VAR_CONTEXT_FACTORY_HPP
 
-#include <stan/interface/var_context_factory.hpp>
+#include <stan/interface/var_context_factory/dump_factory.hpp>
+#include <stan/interface/var_context_factory/var_context_factory.hpp>
 #include "py_var_context.hpp"
 
 typedef std::map<std::string, std::pair<std::vector<double>, std::vector<size_t> > > vars_r_t;
