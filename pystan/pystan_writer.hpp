@@ -1,25 +1,25 @@
-#ifndef PYSTAN__PYSTAN_RECORDER_HPP
-#define PYSTAN__PYSTAN_RECORDER_HPP
+#ifndef PYSTAN__PYSTAN_WRITER_HPP
+#define PYSTAN__PYSTAN_WRITER_HPP
 
-#include <stan/interface/recorder/csv.hpp>
-#include <stan/interface/recorder/filtered_values.hpp>
-#include <stan/interface/recorder/sum_values.hpp>
+#include <stan/interface_callbacks/writer/csv.hpp>
+#include <stan/interface_callbacks/writer/filtered_values.hpp>
+#include <stan/interface_callbacks/writer/sum_values.hpp>
 
 
 namespace pystan {
 
-  class pystan_sample_recorder {
+  class pystan_sample_writer {
   public:
-    typedef stan::interface::recorder::csv CsvRecorder;
-    typedef stan::interface::recorder::filtered_values<std::vector<double> > FilteredValuesRecorder;
-    typedef stan::interface::recorder::sum_values SumValuesRecorder;
+    typedef stan::interface_callbacks::writer::csv CsvWriter;
+    typedef stan::interface_callbacks::writer::filtered_values<std::vector<double> > FilteredValuesWriter;
+    typedef stan::interface_callbacks::writer::sum_values SumValuesWriter;
 
-    CsvRecorder csv_;
-    FilteredValuesRecorder values_;
-    FilteredValuesRecorder sampler_values_;
-    SumValuesRecorder sum_;
+    CsvWriter csv_;
+    FilteredValuesWriter values_;
+    FilteredValuesWriter sampler_values_;
+    SumValuesWriter sum_;
 
-    pystan_sample_recorder(CsvRecorder csv, FilteredValuesRecorder values, FilteredValuesRecorder sampler_values, SumValuesRecorder sum)
+    pystan_sample_writer(CsvWriter csv, FilteredValuesWriter values, FilteredValuesWriter sampler_values, SumValuesWriter sum)
       : csv_(csv), values_(values), sampler_values_(sampler_values), sum_(sum) { }
 
     void operator()(const std::vector<std::string>& x) {
@@ -62,8 +62,8 @@ namespace pystan {
     @param      warmup    number of warmup iterations to be saved
    */
 
-  pystan_sample_recorder
-  sample_recorder_factory(std::ostream *o, const std::string prefix,
+  pystan_sample_writer
+  sample_writer_factory(std::ostream *o, const std::string prefix,
                           const size_t N, const size_t M, const size_t warmup,
                           const size_t offset,
                           const std::vector<size_t>& qoi_idx) {
@@ -81,17 +81,17 @@ namespace pystan {
     for (size_t n = 0; n < offset; n++)
       filter_sampler_values[n] = n;
 
-    stan::interface::recorder::csv csv(o, prefix);
-    stan::interface::recorder::filtered_values<std::vector<double> > values(N, M, filter);
-    stan::interface::recorder::filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
-    stan::interface::recorder::sum_values sum(N, warmup);
+    stan::interface_callbacks::writer::csv csv(o, prefix);
+    stan::interface_callbacks::writer::filtered_values<std::vector<double> > values(N, M, filter);
+    stan::interface_callbacks::writer::filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
+    stan::interface_callbacks::writer::sum_values sum(N, warmup);
 
-    return pystan_sample_recorder(csv, values, sampler_values, sum);
+    return pystan_sample_writer(csv, values, sampler_values, sum);
   }
 
-  stan::interface::recorder::csv
-  diagnostic_recorder_factory(std::ostream *o, const std::string prefix) {
-    stan::interface::recorder::csv csv(o, prefix);
+  stan::interface_callbacks::writer::csv
+  diagnostic_writer_factory(std::ostream *o, const std::string prefix) {
+    stan::interface_callbacks::writer::csv csv(o, prefix);
     return csv;
   }
 
