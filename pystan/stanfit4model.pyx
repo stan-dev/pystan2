@@ -99,7 +99,7 @@ cdef class PyStanHolder:
 
     # the following three methods give Cython classes instructions for pickling
     def __getstate__(self):
-        attr_names = ('num_failed test_grad inits par value chains args mean_lp__ '
+        attr_names = ('num_failed test_grad inits par value chains args mean_pars mean_lp__ '
                       'adaptation_info sampler_params sampler_param_names').split()
         state = dict((k, getattr(self, k)) for k in attr_names)
         return state
