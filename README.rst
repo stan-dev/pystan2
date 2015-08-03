@@ -32,8 +32,12 @@ Similar projects
 
 - PyMC: http://pymc-devs.github.io/pymc/
 
-Installation
-------------
+Detailed Installation Instructions
+----------------------------------
+Detailed installation instructions can be found in the installation_beginner.rst file
+
+Quick Installation
+------------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
 (version 0.19 or greater) are required. `matplotlib <http://matplotlib.org/>`_
