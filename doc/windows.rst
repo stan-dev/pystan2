@@ -54,11 +54,13 @@ Python, the compiler used *should be the same compiler that compiled Python*.
 The following instructions assume that you are using Python 2.7.x and that your
 version of Python has been compiled with Visual Studio 2008.
 
-In order to compile on Windows you will need to make modifications to
-``setup.py`` and ``pystan/model.py``. Two flags required for Visual Studio 2008
+In order to compile on Windows you will need to make modifications to `extra_compile_args` in
+``setup.py`` and ``pystan/model.py``. Please replace the compile options as below for Visual Studio 2008
 are:
 
-    - ``/Ehsc`` which turns on exceptions for boost
+    - ``/Ox`` which turns on optimization
+    - ``/EHsc`` which turns on exceptions for boost
     - ``-DBOOST_DATE_TIME_NO_LIB`` which solves a bug in linking boost
 
-These flags need to be added in ``setup.py`` and in ``model.py``.
+For more information about the compiler options, please refer `Compiler Options List <https://msdn.microsoft.com/library/19z1t1wy(v=vs.120).aspx>`_.
+These flags need to be set in ``setup.py`` and in ``model.py``.
