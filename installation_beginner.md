@@ -11,7 +11,8 @@ Installing PyStan requires installing:
 It is highly recommended to know what `bash` is and the basics of
 navigating the terminal.  You can review or learn it from the
 [Software Carpentry](http://software-carpentry.org/) bash lesson here:
-[http://swcarpentry.github.io/shell-novice/](http://swcarpentry.github.io/shell-novice/)
+[http://swcarpentry.github.io/shell-novice/](http://swcarpentry.github.io/shell-novice/).
+Lessons 1 - 3 are proabably the most important.
 
 ## Installing Python
 
