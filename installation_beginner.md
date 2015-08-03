@@ -49,9 +49,11 @@ installation.
 After downloading the installer run: `bash
 Anaconda-2.3.0-Linux-x86_64.sh` in the directory where you installed
 
-### Uninstalling Anaconda The default location for anaconda can be
-found in your home directory.  Typically this means it in in the
-`~/anaconda` or `~/anaconda3` directory when you open a terminal.
+### Uninstalling Anaconda
+
+The default location for anaconda can be found in your home directory.
+Typically this means it in in the `~/anaconda` or `~/anaconda3`
+directory when you open a terminal.
 
 ## Python dependencies
 
