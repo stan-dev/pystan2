@@ -34,7 +34,7 @@ Similar projects
 
 Detailed Installation Instructions
 ----------------------------------
-Detailed installation instructions can be found in the installation_beginner.rst file
+Detailed installation instructions can be found in the installation_beginner.md file
 
 Quick Installation
 ------------------
