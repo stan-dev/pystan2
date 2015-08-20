@@ -195,13 +195,13 @@ def split_potential_scale_reduction(dict sim, int n):
         samples.clear()
         get_kept_samples(sim, chain, n, samples)
         split_chain.clear()
-        for i in range(n_samples/2):
+        for i in range(n_samples//2):
             split_chain.push_back(samples[i])
         split_chain_mean.push_back(stan_mean(split_chain))
         split_chain_var.push_back(stan_variance(split_chain))
 
         split_chain.clear()
-        for i in range(n_samples/2, n_samples):
+        for i in range(n_samples//2, n_samples):
             split_chain.push_back(samples[i])
         split_chain_mean.push_back(stan_mean(split_chain))
         split_chain_var.push_back(stan_variance(split_chain))
