@@ -1,5 +1,3 @@
-import os
-import tempfile
 import unittest
 
 import numpy as np
@@ -66,7 +64,7 @@ class TestStanfit(unittest.TestCase):
         self.assertEqual(sf.log_prob(sf.unconstrain_pars(dict(mu=mu, sigma=sigma)), False),
                          log_prob_fun(mu, np.log(sigma), adjust=False))
         g1 = sf.grad_log_prob(sf.unconstrain_pars(dict(mu=mu, sigma=sigma)), False)
-        np.testing.assert_equal(g1, log_prob_grad_fun(mu, np.log(sigma), adjust=False))
+        np.testing.assert_allclose(g1, log_prob_grad_fun(mu, np.log(sigma), adjust=False))
 
     def test_specify_args(self):
         y = (0.70,  -0.16,  0.77, -1.37, -1.99,  1.35, 0.08,
