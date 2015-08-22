@@ -6,6 +6,11 @@
  What's New
 ============
 
+v2.7.0.1 (22. August 2015)
+==========================
+-   Minor Cython 0.23.1 compatibility fixes
+-   Bug preventing `mean_pars` from being recorded
+
 v2.7.0.0 (21. July 2015)
 =======================
 -   Update Stan source to v2.7.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.7.0>`_).
