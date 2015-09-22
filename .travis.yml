@@ -4,6 +4,10 @@ language: c
 sudo: false
 os:
   - linux
+git:
+  submodules: false
+before_install:
+  - git submodule update --init --recursive
 compiler:
   - clang
   - gcc
