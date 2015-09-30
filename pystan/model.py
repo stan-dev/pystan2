@@ -331,6 +331,9 @@ class StanModel:
 
     @property
     def dso(self):
+        # warning added in PyStan 2.8.0
+        warnings.warn('Accessing the module with `dso` is deprecated and will be removed in a future version. '\
+                      'Use `module` instead.', DeprecationWarning)
         return self.module
 
     def get_cppcode(self):
