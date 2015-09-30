@@ -358,6 +358,9 @@ class StanModel:
         if state['save_dso']:
             state['module_filename'] = state['module'].__file__
             state['module_name'] = state['module'].__name__
+            if not os.path.exists(state['module_filename']):
+                msg = 'Compiled module associated with Stan model not found at {}'.format(state['module_filename'])
+                raise RuntimeError(msg)
             with io.open(state['module_filename'], 'rb') as f:
                 state['module_bytes'] = f.read()
         del state['module']
