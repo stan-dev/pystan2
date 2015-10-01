@@ -258,10 +258,10 @@ class StanModel:
         include_dirs = [
             lib_dir,
             pystan_dir,
-            os.path.join(pystan_dir, "stan/src"),
-            os.path.join(pystan_dir, "math"),
-            os.path.join(pystan_dir, "stan/lib/eigen_3.2.4"),
-            os.path.join(pystan_dir, "stan/lib/boost_1.58.0"),
+            os.path.join(pystan_dir, "stan", "src"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.8.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.8.0", "lib", "eigen_3.2.4"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.8.0", "lib", "boost_1.58.0"),
             np.get_include(),
         ]
 
@@ -358,6 +358,9 @@ class StanModel:
         if state['save_dso']:
             state['module_filename'] = state['module'].__file__
             state['module_name'] = state['module'].__name__
+            if not os.path.exists(state['module_filename']):
+                msg = 'Compiled module associated with Stan model not found at {}'.format(state['module_filename'])
+                raise RuntimeError(msg)
             with io.open(state['module_filename'], 'rb') as f:
                 state['module_bytes'] = f.read()
         del state['module']

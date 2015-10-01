@@ -9,14 +9,15 @@ global-exclude .git*
 global-exclude *.png
 
 # unused parts of the stan source
-prune pystan/stan/doc
-prune pystan/stan/logos
-prune pystan/stan/src/test
-prune pystan/stan/src/models
+prune pystan/stan/make
 prune pystan/stan/src/docs
-prune pystan/stan/lib/gtest_1.7.0
+prune pystan/stan/src/doxygen
+prune pystan/stan/src/python
+prune pystan/stan/src/test
 
 # unused parts of the stan math source
-prune pystan/math/doxygen
-prune pystan/math/test
-prune pystan/math/make
+prune pystan/stan/lib/stan_math_2.8.0/doxygen
+prune pystan/stan/lib/stan_math_2.8.0/make
+prune pystan/stan/lib/stan_math_2.8.0/test
+prune pystan/stan/lib/stan_math_2.8.0/lib/cpplint_4.45
+prune pystan/stan/lib/stan_math_2.8.0/lib/gtest_1.7.0

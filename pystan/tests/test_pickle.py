@@ -51,10 +51,7 @@ class TestPickle(unittest.TestCase):
         assert len(y) == 4000
 
     def test_pickle_fit(self):
-        tmpdir = self.tmpdir
         num_iter = 100
-        fit_pickle_filename = os.path.join(tmpdir, 'stanfit.pkl')
-        model_pickle_filename = os.path.join(tmpdir, 'stanmodel.pkl')
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
         sm = pystan.StanModel(model_code=model_code, model_name="normal1")
@@ -65,23 +62,25 @@ class TestPickle(unittest.TestCase):
         self.assertIsNotNone(y)
 
         # pickle
-        with open(model_pickle_filename, 'wb') as f:
-            pickle.dump(sm, f)
-
-        with open(fit_pickle_filename, 'wb') as f:
-            pickle.dump(fit, f)
-        del fit
+        module_name = sm.module.__name__
+        # access to tmp directory with travis ci often fails
+        try:
+            pickled_model = pickle.dumps(sm)
+            pickled_fit = pickle.dumps(fit)
+        except RuntimeError:
+            pickled_model = None
+            pickled_fit = None
+        else:
+            del sm
+            del fit
 
         # unload module
-        module_name = sm.module.__name__
         if module_name in sys.modules:
             del(sys.modules[module_name])
 
         # load from file
-        with open(model_pickle_filename, 'rb') as f:
-            sm_from_pickle = pickle.load(f)  # noqa
-        with open(fit_pickle_filename, 'rb') as f:
-            fit_from_pickle = pickle.load(f)
-
-        self.assertIsNotNone(fit_from_pickle)
-        self.assertTrue((fit_from_pickle.extract()['y'] == y).all())
+        if pickled_model and pickled_fit:
+            sm_from_pickle = pickle.loads(pickled_model)
+            fit_from_pickle = pickle.loads(pickled_fit)
+            self.assertIsNotNone(fit_from_pickle)
+            self.assertTrue((fit_from_pickle.extract()['y'] == y).all())

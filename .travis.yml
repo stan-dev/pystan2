@@ -4,16 +4,17 @@ language: c
 sudo: false
 os:
   - linux
+git:
+  submodules: false
+before_install:
+  - git submodule update --init --recursive
 compiler:
   - clang
   - gcc
 env:
-  - TRAVIS_PYTHON_VERSION=2.7 TEST_SUITE_REGEX='^test_rstan'
-  - TRAVIS_PYTHON_VERSION=2.7 TEST_SUITE_REGEX='^(?!test_rstan).*'
-  - TRAVIS_PYTHON_VERSION=3.3 TEST_SUITE_REGEX='^test_rstan'
-  - TRAVIS_PYTHON_VERSION=3.3 TEST_SUITE_REGEX='^(?!test_rstan).*'
-  - TRAVIS_PYTHON_VERSION=3.4 TEST_SUITE_REGEX='^test_rstan'
-  - TRAVIS_PYTHON_VERSION=3.4 TEST_SUITE_REGEX='^(?!test_rstan).*'
+  - TRAVIS_PYTHON_VERSION=2.7
+  - TRAVIS_PYTHON_VERSION=3.3
+  - TRAVIS_PYTHON_VERSION=3.4
 notifications:
   email:
     recipients:
