@@ -6,8 +6,8 @@
  What's New
 ============
 
-v2.8.0.0 (22. Sept 2015)
-========================
+v2.8.0.0 (1. Oct 2015)
+======================
 - Update Stan source to v2.8.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.8.0>`_)
 
 v2.7.0.1 (22. August 2015)
