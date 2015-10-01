@@ -15,21 +15,6 @@ class TestPickle(unittest.TestCase):
         cls.pickle_file = os.path.join(tmpdir, 'stanmodel.pkl')
         cls.model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
-    def test_pickle_model_no_save_dso(self):
-        pickle_file = self.pickle_file
-        model_code = self.model_code
-        m = pystan.StanModel(model_code=model_code, model_name="normal1",
-                             save_dso=False)
-        module_name = m.module.__name__
-        with open(pickle_file, 'wb') as f:
-            pickle.dump(m, f)
-        del m
-        del sys.modules[module_name]
-
-        with open(pickle_file, 'rb') as f:
-            m = pickle.load(f)
-        self.assertTrue(m.model_name.startswith("normal1"))
-
     def test_pickle_model(self):
         pickle_file = self.pickle_file
         model_code = self.model_code

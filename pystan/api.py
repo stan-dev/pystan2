@@ -138,7 +138,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=None, algorithm=None, control=None, sample_file=None,
-         diagnostic_file=None, save_dso=True, verbose=False, boost_lib=None,
+         diagnostic_file=None, verbose=False, boost_lib=None,
          eigen_lib=None, n_jobs=-1, **kwargs):
     """Fit a model using Stan.
 
@@ -240,11 +240,6 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     eigen_lib : string, optional
         The path to a version of the Eigen C++ library to use instead of
         the one in the supplied with PyStan.
-
-    save_dso : boolean, optional
-        Indicates whether the dynamic shared object (DSO) compiled from
-        C++ code will be saved for use in a future Python session. True by
-        default.
 
     verbose : boolean, optional
         Indicates whether intermediate output should be piped to the console.
@@ -370,7 +365,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     else:
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
-                      save_dso=save_dso, verbose=verbose)
+                      verbose=verbose)
     # check that arguments in kwargs are valid
     valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",
                   "refresh", "control", "obfuscate_model_name"}

@@ -129,10 +129,6 @@ class StanModel:
         The path to a version of the Eigen C++ library to use instead of
         the one in the supplied with PyStan.
 
-    save_dso : boolean, True by default
-        Indicates whether the dynamic shared object (DSO) compiled from
-        C++ code will be saved for use in a future Python session.
-
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging.
@@ -147,7 +143,7 @@ class StanModel:
         Stan code for the model.
     model_cpp : string
         C++ code for the model.
-    dso : builtins.module
+    module : builtins.module
         Python module created by compiling the C++ code for the model.
 
     Methods
@@ -170,11 +166,6 @@ class StanModel:
 
     Notes
     -----
-    Instances of StanModel can be saved for use across Python sessions only
-    if `save_dso` is set to True during the construction of StanModel objects.
-
-    Even if `save_dso` is True, models cannot be loaded on platforms that
-    differ from the one on which the model was compiled.
 
     More details of Stan, including the full user's guide and
     reference manual can be found at <URL: http://mc-stan.org/>.
@@ -208,7 +199,7 @@ class StanModel:
     """
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
-                 eigen_lib=None, save_dso=True, verbose=False, obfuscate_model_name=True):
+                 eigen_lib=None, verbose=False, obfuscate_model_name=True):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -232,7 +223,6 @@ class StanModel:
         self.model_name = stanc_ret['model_name']
         self.model_code = stanc_ret['model_code']
         self.model_cppcode = stanc_ret['cppcode']
-        self.save_dso = save_dso
 
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
         logger.info(msg.format(self.model_name))
@@ -341,6 +331,9 @@ class StanModel:
 
     @property
     def dso(self):
+        # warning added in PyStan 2.8.0
+        warnings.warn('Accessing the module with `dso` is deprecated and will be removed in a future version. '\
+                      'Use `module` instead.', DeprecationWarning)
         return self.module
 
     def get_cppcode(self):
@@ -355,43 +348,41 @@ class StanModel:
         self.module is unpicklable, for example.
         """
         state = self.__dict__.copy()
-        if state['save_dso']:
-            state['module_filename'] = state['module'].__file__
-            state['module_name'] = state['module'].__name__
-            if not os.path.exists(state['module_filename']):
-                msg = 'Compiled module associated with Stan model not found at {}'.format(state['module_filename'])
-                raise RuntimeError(msg)
-            with io.open(state['module_filename'], 'rb') as f:
-                state['module_bytes'] = f.read()
+        state['module_filename'] = state['module'].__file__
+        state['module_name'] = state['module'].__name__
+        if not os.path.exists(state['module_filename']):
+            msg = 'Compiled module associated with Stan model not found at {}'.format(state['module_filename'])
+            raise RuntimeError(msg)
+        with io.open(state['module_filename'], 'rb') as f:
+            state['module_bytes'] = f.read()
         del state['module']
         del state['fit_class']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        if self.save_dso:
-            # the following attributes are temporary and exist only in the
-            # pickled object to facilitate reloading the module
-            module_filename = self.module_filename
-            module_bytes = self.module_bytes
-            module_name = self.module_name
-            del self.module_filename
-            del self.module_bytes
-            del self.module_name
-            self._temp_dir = temp_dir = tempfile.mkdtemp()
-            lib_dir = os.path.join(temp_dir, 'pystan')
-            if not os.path.exists(lib_dir):
-                os.makedirs(lib_dir)
-            module_basename = os.path.basename(module_filename)
-            with io.open(os.path.join(lib_dir, module_basename), 'wb') as f:
-                f.write(module_bytes)
-            try:
-                self.module = load_module(module_name, lib_dir)
-                self.fit_class = getattr(self.module, "StanFit4Model")
-            except Exception as e:
-                logger.warning(e)
-                logger.warning("Something went wrong while unpickling "
-                               "the StanModel. Consider recompiling.")
+        # the following attributes are temporary and exist only in the
+        # pickled object to facilitate reloading the module
+        module_filename = self.module_filename
+        module_bytes = self.module_bytes
+        module_name = self.module_name
+        del self.module_filename
+        del self.module_bytes
+        del self.module_name
+        self._temp_dir = temp_dir = tempfile.mkdtemp()
+        lib_dir = os.path.join(temp_dir, 'pystan')
+        if not os.path.exists(lib_dir):
+            os.makedirs(lib_dir)
+        module_basename = os.path.basename(module_filename)
+        with io.open(os.path.join(lib_dir, module_basename), 'wb') as f:
+            f.write(module_bytes)
+        try:
+            self.module = load_module(module_name, lib_dir)
+            self.fit_class = getattr(self.module, "StanFit4Model")
+        except Exception as e:
+            logger.warning(e)
+            logger.warning("Something went wrong while unpickling "
+                            "the StanModel. Consider recompiling.")
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, algorithm=None,
