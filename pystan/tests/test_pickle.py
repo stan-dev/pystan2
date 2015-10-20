@@ -45,28 +45,21 @@ class TestPickle(unittest.TestCase):
         self.assertIsNotNone(y)
 
         # pickle
+        pickled_model = pickle.dumps(sm)
         module_name = sm.module.__name__
-        # access to tmp directory with travis ci often fails
-        try:
-            pickled_model = pickle.dumps(sm)
-            pickled_fit = pickle.dumps(fit)
-        except RuntimeError:
-            pickled_model = None
-            pickled_fit = None
-        else:
-            del sm
-            del fit
+        del sm
+        pickled_fit = pickle.dumps(fit)
+        del fit
 
         # unload module
         if module_name in sys.modules:
             del(sys.modules[module_name])
 
         # load from file
-        if pickled_model and pickled_fit:
-            sm_from_pickle = pickle.loads(pickled_model)
-            fit_from_pickle = pickle.loads(pickled_fit)
-            self.assertIsNotNone(fit_from_pickle)
-            self.assertTrue((fit_from_pickle.extract()['y'] == y).all())
+        sm_from_pickle = pickle.loads(pickled_model)
+        fit_from_pickle = pickle.loads(pickled_fit)
+        self.assertIsNotNone(fit_from_pickle)
+        self.assertTrue((fit_from_pickle.extract()['y'] == y).all())
 
     def test_pickle_model_and_reload(self):
         pickle_file = self.pickle_file
@@ -86,3 +79,9 @@ class TestPickle(unittest.TestCase):
         with open(pickle_file2, 'rb') as f:
             model_from_pickle = pickle.load(f)
         self.assertIsNotNone(model_from_pickle.sampling(iter=100).extract())
+
+    def test_model_unique_names(self):
+        model_code = self.model_code
+        model1 = pystan.StanModel(model_code=model_code, model_name="normal1")
+        model2 = pystan.StanModel(model_code=model_code, model_name="normal1")
+        self.assertNotEqual(model1.module_name, model2.module_name)
