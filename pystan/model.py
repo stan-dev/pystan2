@@ -242,8 +242,7 @@ class StanModel:
         module_name = ("stanfit4" + self.model_name + '_' +
                        hashlib.md5(str(key).encode('utf-8')).hexdigest())
 
-        self._temp_dir = temp_dir = tempfile.mkdtemp()
-        lib_dir = os.path.join(temp_dir, 'pystan')
+        lib_dir = tempfile.mkdtemp()
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [
             lib_dir,
@@ -254,9 +253,6 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "lib", "stan_math_2.8.0", "lib", "boost_1.58.0"),
             np.get_include(),
         ]
-
-        if not os.path.exists(lib_dir):
-            os.makedirs(lib_dir)
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
         with io.open(model_cpp_file, 'w', encoding='utf-8') as outfile:
@@ -313,6 +309,13 @@ class StanModel:
                 os.dup2(orig_stderr, sys.stderr.fileno())
 
         self.module = load_module(module_name, lib_dir)
+        self.module_name = module_name
+        self.module_filename = os.path.basename(self.module.__file__)
+        # once the model is in memory, we no longer need the file on disk
+        # but we do need a copy of the file for pickling and the module name
+        with io.open(os.path.join(lib_dir, self.module_filename), 'rb') as f:
+            self.module_bytes = f.read()
+        shutil.rmtree(lib_dir, ignore_errors=True)
         self.fit_class = getattr(self.module, "StanFit4Model")
 
     def __str__(self):
@@ -320,11 +323,6 @@ class StanModel:
         # decorator creates __unicode__ and __str__
         s = u"StanModel object '{}' coded as follows:\n{}"
         return s.format(self.model_name, self.model_code)
-
-    def __del__(self):
-        _temp_dir = getattr(self, '_temp_dir', None)
-        if _temp_dir:
-            shutil.rmtree(_temp_dir, ignore_errors=True)
 
     def show(self):
         print(self)
@@ -348,41 +346,24 @@ class StanModel:
         self.module is unpicklable, for example.
         """
         state = self.__dict__.copy()
-        state['module_filename'] = state['module'].__file__
-        state['module_name'] = state['module'].__name__
-        if not os.path.exists(state['module_filename']):
-            msg = 'Compiled module associated with Stan model not found at {}'.format(state['module_filename'])
-            raise RuntimeError(msg)
-        with io.open(state['module_filename'], 'rb') as f:
-            state['module_bytes'] = f.read()
         del state['module']
         del state['fit_class']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        # the following attributes are temporary and exist only in the
-        # pickled object to facilitate reloading the module
-        module_filename = self.module_filename
-        module_bytes = self.module_bytes
-        module_name = self.module_name
-        del self.module_filename
-        del self.module_bytes
-        del self.module_name
-        self._temp_dir = temp_dir = tempfile.mkdtemp()
-        lib_dir = os.path.join(temp_dir, 'pystan')
-        if not os.path.exists(lib_dir):
-            os.makedirs(lib_dir)
-        module_basename = os.path.basename(module_filename)
-        with io.open(os.path.join(lib_dir, module_basename), 'wb') as f:
-            f.write(module_bytes)
+        lib_dir = tempfile.mkdtemp()
+        with io.open(os.path.join(lib_dir, self.module_filename), 'wb') as f:
+            f.write(self.module_bytes)
         try:
-            self.module = load_module(module_name, lib_dir)
+            self.module = load_module(self.module_name, lib_dir)
             self.fit_class = getattr(self.module, "StanFit4Model")
         except Exception as e:
             logger.warning(e)
             logger.warning("Something went wrong while unpickling "
                             "the StanModel. Consider recompiling.")
+        # once the model is in memory, we no longer need the file on disk
+        shutil.rmtree(lib_dir, ignore_errors=True)
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, algorithm=None,
