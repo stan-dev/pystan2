@@ -11,8 +11,7 @@ class TestPickle(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmpdir = tmpdir = tempfile.mkdtemp()
-        cls.pickle_file = os.path.join(tmpdir, 'stanmodel.pkl')
+        cls.pickle_file = os.path.join(tempfile.mkdtemp(), 'stanmodel.pkl')
         cls.model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
     def test_pickle_model(self):
@@ -36,13 +35,12 @@ class TestPickle(unittest.TestCase):
         assert len(y) == 4000
 
     def test_pickle_fit(self):
-        num_iter = 100
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
 
         sm = pystan.StanModel(model_code=model_code, model_name="normal1")
 
         # additional error checking
-        fit = sm.sampling(iter=num_iter)
+        fit = sm.sampling(iter=100)
         y = fit.extract()['y'].copy()
         self.assertIsNotNone(y)
 
@@ -69,3 +67,22 @@ class TestPickle(unittest.TestCase):
             fit_from_pickle = pickle.loads(pickled_fit)
             self.assertIsNotNone(fit_from_pickle)
             self.assertTrue((fit_from_pickle.extract()['y'] == y).all())
+
+    def test_pickle_model_and_reload(self):
+        pickle_file = self.pickle_file
+        pickle_file2 = os.path.join(tempfile.mkdtemp(), 'stanmodel.pkl')
+        model_code = self.model_code
+        model = pystan.StanModel(model_code=model_code, model_name="normal1")
+        with open(pickle_file, 'wb') as f:
+            pickle.dump(model, f)
+        with open(pickle_file2, 'wb') as f:
+            pickle.dump(model, f)
+
+        del model
+
+        with open(pickle_file, 'rb') as f:
+            model_from_pickle = pickle.load(f)
+        self.assertIsNotNone(model_from_pickle.sampling(iter=100).extract())
+        with open(pickle_file2, 'rb') as f:
+            model_from_pickle = pickle.load(f)
+        self.assertIsNotNone(model_from_pickle.sampling(iter=100).extract())
