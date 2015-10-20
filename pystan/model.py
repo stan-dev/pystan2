@@ -12,7 +12,6 @@ if PY2:
 else:
     from collections.abc import Callable, Iterable
 import datetime
-import hashlib
 import importlib
 import imp
 import io
@@ -20,10 +19,11 @@ import itertools
 import logging
 from numbers import Number
 import os
-import tempfile
 import shutil
 import string
 import sys
+import tempfile
+import time
 import warnings
 
 import distutils
@@ -237,11 +237,9 @@ class StanModel:
         if eigen_lib is not None:
             raise NotImplementedError
 
-        key = tuple([self.model_code, self.model_cppcode, sys.version_info,
-                     sys.executable])
-        module_name = ("stanfit4" + self.model_name + '_' +
-                       hashlib.md5(str(key).encode('utf-8')).hexdigest())
-
+        # module_name needs to be unique so that each model has its own module
+        nonce = abs(hash((self.model_name, time.time())))
+        self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
         lib_dir = tempfile.mkdtemp()
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [
@@ -258,7 +256,7 @@ class StanModel:
         with io.open(model_cpp_file, 'w', encoding='utf-8') as outfile:
             outfile.write(self.model_cppcode)
 
-        pyx_file = os.path.join(lib_dir, module_name + '.pyx')
+        pyx_file = os.path.join(lib_dir, self.module_name + '.pyx')
         pyx_template_file = os.path.join(pystan_dir, 'stanfit4model.pyx')
         with io.open(pyx_template_file, 'r', encoding='utf-8') as infile:
             s = infile.read()
@@ -281,7 +279,7 @@ class StanModel:
         ]
 
         distutils.log.set_verbosity(verbose)
-        extension = Extension(name=module_name,
+        extension = Extension(name=self.module_name,
                               language="c++",
                               sources=[pyx_file],
                               define_macros=stan_macros,
@@ -308,8 +306,7 @@ class StanModel:
                 # restore stderr
                 os.dup2(orig_stderr, sys.stderr.fileno())
 
-        self.module = load_module(module_name, lib_dir)
-        self.module_name = module_name
+        self.module = load_module(self.module_name, lib_dir)
         self.module_filename = os.path.basename(self.module.__file__)
         # once the model is in memory, we no longer need the file on disk
         # but we do need a copy of the file for pickling and the module name
