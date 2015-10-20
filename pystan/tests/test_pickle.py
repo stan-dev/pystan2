@@ -86,3 +86,9 @@ class TestPickle(unittest.TestCase):
         with open(pickle_file2, 'rb') as f:
             model_from_pickle = pickle.load(f)
         self.assertIsNotNone(model_from_pickle.sampling(iter=100).extract())
+
+    def test_model_unique_names(self):
+        model_code = self.model_code
+        model1 = pystan.StanModel(model_code=model_code, model_name="normal1")
+        model2 = pystan.StanModel(model_code=model_code, model_name="normal1")
+        self.assertNotEqual(model1.module_name, model2.module_name)
