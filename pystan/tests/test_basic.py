@@ -169,12 +169,3 @@ class TestBernoulli(unittest.TestCase):
 
         fit = self.model.optimizing(data=self.bernoulli_data, sample_file='/tmp/pathdoesnotexist/optim.csv')
         assert fit is not None
-
-    def test_model_delete_temporary_files(self):
-        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-        m = pystan.StanModel(model_code=model_code, model_name="normal1")
-        temp_dir = m._temp_dir  # this is a string; copy made
-        self.assertTrue(os.path.exists(temp_dir))
-        del m
-        gc.collect()
-        self.assertFalse(os.path.exists(temp_dir))
