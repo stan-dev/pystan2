@@ -237,7 +237,7 @@ class StanModel:
         if eigen_lib is not None:
             raise NotImplementedError
 
-        # module_name needs to be unique so that each model has its own module
+        # module_name needs to be unique so that each model instance has its own module
         nonce = abs(hash((self.model_name, time.time())))
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
         lib_dir = tempfile.mkdtemp()
@@ -310,7 +310,7 @@ class StanModel:
 
         self.module = load_module(self.module_name, lib_dir)
         self.module_filename = os.path.basename(self.module.__file__)
-        # once the model is in memory, we no longer need the file on disk
+        # once the module is in memory, we no longer need the file on disk
         # but we do need a copy of the file for pickling and the module name
         with io.open(os.path.join(lib_dir, self.module_filename), 'rb') as f:
             self.module_bytes = f.read()
@@ -361,7 +361,7 @@ class StanModel:
             logger.warning(e)
             logger.warning("Something went wrong while unpickling "
                             "the StanModel. Consider recompiling.")
-        # once the model is in memory, we no longer need the file on disk
+        # once the module is in memory, we no longer need the file on disk
         shutil.rmtree(lib_dir, ignore_errors=True)
 
     def optimizing(self, data=None, seed=None,
