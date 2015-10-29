@@ -6,7 +6,6 @@ import unittest
 import numpy as np
 import pystan
 import pystan.chains
-import pystan._chains
 
 
 class TestChains(unittest.TestCase):
