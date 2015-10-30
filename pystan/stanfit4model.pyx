@@ -109,10 +109,6 @@ cdef class PyStanHolder:
             setattr(self, k, state[k])
 
     def __reduce__(self):
-        msg = ("Pickling fit objects is an experimental feature!\n"
-               "The relevant StanModel instance must be pickled along with this fit object.\n"
-               "When unpickling the StanModel must be unpickled first.")
-        warnings.warn(msg)
         return (PyStanHolder, tuple(), self.__getstate__(), None, None)
 
 
@@ -450,6 +446,10 @@ cdef class StanFit4Model:
             setattr(self, k, state[k])
 
     def __reduce__(self):
+        msg = ("Pickling fit objects is an experimental feature!\n"
+               "The relevant StanModel instance must be pickled along with this fit object.\n"
+               "When unpickling the StanModel must be unpickled first.")
+        warnings.warn(msg)
         return (StanFit4Model, (self.data,), self.__getstate__(), None, None)
 
     # public methods
