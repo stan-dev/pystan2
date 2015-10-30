@@ -119,11 +119,13 @@ def effective_sample_size(dict sim, int n):
 
     cdef vector[double] chain_mean
     cdef vector[double] chain_var
-    cdef int n_kept_samples
+    # double rather than int to deal with Cython quirk, see issue #186
+    cdef double n_kept_samples
     for chain in range(m):
         n_kept_samples = ns_kept[chain]
         chain_mean.push_back(get_chain_mean(sim, chain, n))
         chain_var.push_back(acov[chain][0] * n_kept_samples / (n_kept_samples-1))
+        assert chain_var[chain] < float('inf'), chain_var[chain]
 
     cdef double mean_var = stan_mean(chain_var)
     cdef double var_plus = mean_var * (n_samples-1) / n_samples
