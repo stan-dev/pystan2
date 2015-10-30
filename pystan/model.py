@@ -271,8 +271,10 @@ class StanModel:
             ('BOOST_DISABLE_ASSERTS', None),
             ('EIGEN_NO_DEBUG', None),
         ]
+        # compile stan models with optimization (-O2)
+        # (stanc is compiled without optimization (-O0) currently, see #33)
         extra_compile_args = [
-            '-O0',
+            '-O2',
             '-ftemplate-depth-256',
             '-Wno-unused-function',
             '-Wno-uninitialized',
