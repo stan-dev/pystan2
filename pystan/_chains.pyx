@@ -4,6 +4,7 @@
 
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
+cimport cython
 
 import numpy as np
 
@@ -107,26 +108,24 @@ def effective_sample_size(dict sim, int n):
     cdef int m = sim['chains']
 
     cdef vector[int] ns_save = sim['n_save']
-
     cdef vector[int] ns_warmup2 = sim['warmup2']
-
     cdef vector[int] ns_kept = [s - w for s, w in zip(sim['n_save'], sim['warmup2'])]
 
     cdef int n_samples = min(ns_kept)
 
     cdef vector[vector[double]] acov
-    cdef vector[double] acov_chain
     for chain in range(m):
-        acov_chain = autocovariance(sim, chain, n)
-        acov.push_back(acov_chain)
+        acov.push_back(autocovariance(sim, chain, n))
 
     cdef vector[double] chain_mean
     cdef vector[double] chain_var
-    cdef int n_kept_samples
+    # double rather than int to deal with Cython quirk, see issue #186
+    cdef double n_kept_samples
     for chain in range(m):
         n_kept_samples = ns_kept[chain]
         chain_mean.push_back(get_chain_mean(sim, chain, n))
         chain_var.push_back(acov[chain][0] * n_kept_samples / (n_kept_samples-1))
+        assert chain_var[chain] < float('inf'), chain_var[chain]
 
     cdef double mean_var = stan_mean(chain_var)
     cdef double var_plus = mean_var * (n_samples-1) / n_samples
@@ -154,6 +153,7 @@ def effective_sample_size(dict sim, int n):
     return ess
 
 
+@cython.cdivision(True)
 def split_potential_scale_reduction(dict sim, int n):
     """
     Return the split potential scale reduction (split R hat) for the
@@ -179,9 +179,7 @@ def split_potential_scale_reduction(dict sim, int n):
     cdef int n_chains = sim['chains']
 
     cdef vector[int] ns_save = sim['n_save']
-
     cdef vector[int] ns_warmup2 = sim['warmup2']
-
     cdef vector[int] ns_kept = [s - w for s, w in zip(sim['n_save'], sim['warmup2'])]
 
     cdef int n_samples = min(ns_kept)
@@ -195,22 +193,37 @@ def split_potential_scale_reduction(dict sim, int n):
         samples.clear()
         get_kept_samples(sim, chain, n, samples)
         split_chain.clear()
-        for i in range(n_samples//2):
+        for i in range(n_samples / 2):
             split_chain.push_back(samples[i])
         split_chain_mean.push_back(stan_mean(split_chain))
         split_chain_var.push_back(stan_variance(split_chain))
 
         split_chain.clear()
-        for i in range(n_samples//2, n_samples):
+        for i in range(n_samples / 2, n_samples):
             split_chain.push_back(samples[i])
         split_chain_mean.push_back(stan_mean(split_chain))
         split_chain_var.push_back(stan_variance(split_chain))
 
-    cdef double var_between = n_samples/2 * stan_variance(split_chain_mean)
+    cdef double var_between = n_samples / 2 * stan_variance(split_chain_mean)
     cdef double var_within = stan_mean(split_chain_var)
 
     if var_within < pystan.constants.EPSILON:
         srhat = float('nan')
     else:
-        srhat = sqrt((var_between/var_within + n_samples/2 - 1)/(n_samples/2))
+        srhat = sqrt((var_between/var_within + n_samples / 2 - 1)/ (n_samples / 2))
     return srhat
+
+
+def _test_autocovariance(dict sim, int k, int n):
+    '''Test point for autocovariance function'''
+    return autocovariance(sim, k, n)
+
+
+def _test_stan_functions():
+    y = np.arange(10)
+    cdef vector[double] acov
+    stan_autocovariance(y, acov)
+    assert sum(acov) == -40.0, sum(acov)
+    assert stan_sum(y) == sum(y)
+    assert stan_mean(y) == np.mean(y)
+    assert stan_variance(y) == np.var(y, ddof=1)
