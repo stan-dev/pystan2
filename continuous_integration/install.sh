@@ -23,9 +23,11 @@ chmod +x miniconda.sh
 export PATH=$HOME/miniconda/bin:$PATH
 # Update conda itself
 conda update --yes --quiet conda
-if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython=0.19 numpy=1.7 scipy nose matplotlib; fi
-if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib; fi
+PYTHON_VERSION_MAJOR=${TRAVIS_PYTHON_VERSION:0:1}
+if [[ $PYTHON_VERSION_MAJOR == '2' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython=0.19 numpy=1.7 scipy nose matplotlib; fi
+if [[ $PYTHON_VERSION_MAJOR == '3' ]]; then conda create --quiet --yes -n env_name python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib; fi
 source activate env_name
+python -c "import numpy"
 
 # run quietly due to travis ci's log limit
 python setup.py -q install
