@@ -1,18 +1,243 @@
 #ifndef PYSTAN__PYSTAN_WRITER_HPP
 #define PYSTAN__PYSTAN_WRITER_HPP
 
-#include <stan/interface_callbacks/writer/csv.hpp>
-#include <stan/interface_callbacks/writer/filtered_values.hpp>
-#include <stan/interface_callbacks/writer/sum_values.hpp>
-
+#include <stan/interface_callbacks/writer/stream_writer.hpp>
 
 namespace pystan {
 
+  template <class InternalVector>
+  class values
+    : public stan::interface_callbacks::writer::base_writer {
+  private:
+    size_t m_;
+    size_t N_;
+    size_t M_;
+    std::vector<InternalVector> x_;
+
+  public:
+    values(const size_t N,
+           const size_t M)
+      : m_(0), N_(N), M_(M) {
+      x_.reserve(N_);
+      for (size_t n = 0; n < N_; n++)
+        x_.push_back(InternalVector(M_));
+    }
+
+    explicit values(const std::vector<InternalVector>& x)
+      : m_(0), N_(x.size()), M_(0),
+        x_(x) {
+      if (N_ > 0)
+        M_ = x_[0].size();
+    }
+
+    void operator()(const std::string& key,
+                    double value) { }
+
+    void operator()(const std::string& key,
+                    int value) { }
+
+    void operator()(const std::string& key,
+                    const std::string& value) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_values) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_rows, int n_cols) { } 
+        
+    void operator()(const std::vector<std::string>& names) { }
+
+    void operator()(const std::vector<double>& x) {
+      if (N_ != x.size())
+        throw std::length_error("vector provided does not "
+                                "match the parameter length");
+      if (m_ == M_)
+        throw std::out_of_range("");
+      for (size_t n = 0; n < N_; n++)
+        x_[n][m_] = x[n];
+      m_++;
+    }
+    
+    void operator()() { }
+
+    void operator()(const std::string& message) { }
+    
+
+    const std::vector<InternalVector>& x() const {
+      return x_;
+    }
+  };
+  
+  template <class InternalVector>
+  class filtered_values
+    : public stan::interface_callbacks::writer::base_writer {
+  private:
+    size_t N_, M_, N_filter_;
+    std::vector<size_t> filter_;
+    values<InternalVector> values_;
+    std::vector<double> tmp;
+
+  public:
+    filtered_values(const size_t N,
+                    const size_t M,
+                    const std::vector<size_t>& filter)
+      : N_(N), M_(M), N_filter_(filter.size()), filter_(filter),
+        values_(N_filter_, M_), tmp(N_filter_) {
+      for (size_t n = 0; n < N_filter_; n++)
+        if (filter.at(n) >= N_)
+          throw std::out_of_range("filter is looking for "
+                                  "elements out of range");
+    }
+
+    filtered_values(const size_t N,
+                    const std::vector<InternalVector>& x,
+                    const std::vector<size_t>& filter)
+      : N_(N), M_(0), filter_(filter), N_filter_(filter.size()),
+        values_(x), tmp(N_filter_) {
+      if (x.size() != filter.size())
+        throw std::length_error("filter provided does not "
+                                "match dimensions of the storage");
+      if (N_filter_ > 0)
+        M_ = x[0].size();
+      for (size_t n = 0; n < N_filter_; n++)
+        if (filter.at(n) >= N_)
+          throw std::out_of_range("filter is looking for "
+                                  "elements out of range");
+    }
+
+    void operator()(const std::string& key,
+                    double value) { }
+
+    void operator()(const std::string& key,
+                    int value) { }
+
+    void operator()(const std::string& key,
+                    const std::string& value) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_values) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_rows, int n_cols) { } 
+
+    void operator()(const std::vector<std::string>& names) {
+    }
+    
+    void operator()(const std::vector<double>& state) {
+      if (state.size() != N_)
+        throw std::length_error("vector provided does not "
+                                "match the parameter length");
+      for (size_t n = 0; n < N_filter_; n++)
+        tmp[n] = state[filter_[n]];
+      values_(tmp);
+    }
+
+    void operator()(const std::string& message) { }
+
+    void operator()() { }
+
+    const std::vector<InternalVector>& x() {
+      return values_.x();
+    }
+  };
+
+  class sum_values
+    : public stan::interface_callbacks::writer::base_writer {
+  public:
+    explicit sum_values(const size_t N)
+      : N_(N), m_(0), skip_(0), sum_(N_, 0.0) { }
+
+    sum_values(const size_t N, const size_t skip)
+      : N_(N), m_(0), skip_(skip), sum_(N_, 0.0) { }
+
+
+    void operator()(const std::string& key,
+                    double value) { }
+    
+    void operator()(const std::string& key,
+                    int value) { }
+
+    void operator()(const std::string& key,
+                    const std::string& value) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_values) { }
+
+    void operator()(const std::string& key,
+                    const double* values,
+                    int n_rows, int n_cols) { } 
+        
+    /**
+     * Do nothing with std::string vector
+     *
+     * @param names
+     */
+    void operator()(const std::vector<std::string>& names) { }
+
+
+    /**
+     * Add values to cumulative sum
+     *
+     * @param x vector of type T
+     */
+    void operator()(const std::vector<double>& state) {
+      if (N_ != state.size())
+        throw std::length_error("vector provided does not "
+                                "match the parameter length");
+      if (m_ >= skip_) {
+        for (size_t n = 0; n < N_; n++)
+          sum_[n] += state[n];
+      }
+      m_++;
+    }
+
+
+    /**
+     * Do nothing with a string.
+     *
+     * @param x string to print with prefix in front
+     */
+    void operator()(const std::string& message) { }
+
+    /**
+     * Do nothing
+     *
+     */
+    void operator()() { }
+
+    const std::vector<double>& sum() const {
+      return sum_;
+    }
+
+    const size_t called() const {
+      return m_;
+    }
+
+    const size_t recorded() const {
+      if (m_ >= skip_)
+        return m_ - skip_;
+      else
+        return 0;
+    }
+
+  private:
+    size_t N_;
+    size_t m_;
+    size_t skip_;
+    std::vector<double> sum_;
+  };
+
+  
   class pystan_sample_writer {
   public:
-    typedef stan::interface_callbacks::writer::csv CsvWriter;
-    typedef stan::interface_callbacks::writer::filtered_values<std::vector<double> > FilteredValuesWriter;
-    typedef stan::interface_callbacks::writer::sum_values SumValuesWriter;
+    typedef stan::interface_callbacks::writer::stream_writer CsvWriter;
+    typedef filtered_values<std::vector<double> > FilteredValuesWriter;
+    typedef sum_values SumValuesWriter;
 
     CsvWriter csv_;
     FilteredValuesWriter values_;
@@ -51,22 +276,19 @@ namespace pystan {
       sum_();
     }
 
-    bool is_writing() const {
-      return csv_.is_writing() || values_.is_writing() || sampler_values_.is_writing() || sum_.is_writing();
-    }
   };
 
   /**
-    @param      N
-    @param      M    number of iterations to be saved
-    @param      warmup    number of warmup iterations to be saved
-   */
+     @param      N
+     @param      M    number of iterations to be saved
+     @param      warmup    number of warmup iterations to be saved
+  */
 
   pystan_sample_writer
   sample_writer_factory(std::ostream *o, const std::string prefix,
-                          const size_t N, const size_t M, const size_t warmup,
-                          const size_t offset,
-                          const std::vector<size_t>& qoi_idx) {
+                        const size_t N, const size_t M, const size_t warmup,
+                        const size_t offset,
+                        const std::vector<size_t>& qoi_idx) {
     std::vector<size_t> filter(qoi_idx);
     std::vector<size_t> lp;
     for (size_t n = 0; n < filter.size(); n++)
@@ -81,17 +303,17 @@ namespace pystan {
     for (size_t n = 0; n < offset; n++)
       filter_sampler_values[n] = n;
 
-    stan::interface_callbacks::writer::csv csv(o, prefix);
-    stan::interface_callbacks::writer::filtered_values<std::vector<double> > values(N, M, filter);
-    stan::interface_callbacks::writer::filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
-    stan::interface_callbacks::writer::sum_values sum(N, warmup);
+    stan::interface_callbacks::writer::stream_writer csv(*o, prefix);
+    filtered_values<std::vector<double> > values(N, M, filter);
+    filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
+    sum_values sum(N, warmup);
 
     return pystan_sample_writer(csv, values, sampler_values, sum);
   }
 
-  stan::interface_callbacks::writer::csv
+  stan::interface_callbacks::writer::stream_writer
   diagnostic_writer_factory(std::ostream *o, const std::string prefix) {
-    stan::interface_callbacks::writer::csv csv(o, prefix);
+    stan::interface_callbacks::writer::stream_writer csv(*o, prefix);
     return csv;
   }
 
