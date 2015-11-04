@@ -38,7 +38,7 @@ class Test8Schools(unittest.TestCase):
         model = self.model
         data = self.schools_dat
         pars = ['mu']  # list of parameters
-        fit = model.sampling(data=data, pars=pars)
+        fit = model.sampling(data=data, pars=pars, iter=100)
         self.assertEqual(len(fit.sim['pars_oi']), len(fit.sim['dims_oi']))
         self.assertEqual(len(fit.extract()), 2)
         self.assertIn('mu', fit.extract())
@@ -46,14 +46,14 @@ class Test8Schools(unittest.TestCase):
         self.assertIsNotNone(fit.extract(permuted=False))
 
         pars = ['eta']
-        fit = model.sampling(data=data, pars=pars)
+        fit = model.sampling(data=data, pars=pars, iter=100)
         self.assertEqual(len(fit.extract()), 2)
         self.assertIn('eta', fit.extract())
         self.assertRaises(ValueError, fit.extract, 'theta')
         self.assertIsNotNone(fit.extract(permuted=False))
 
         pars = ['mu', 'eta']
-        fit = model.sampling(data=data, pars=pars)
+        fit = model.sampling(data=data, pars=pars, iter=100)
         self.assertEqual(len(fit.extract()), 3)
         self.assertIn('mu', fit.extract())
         self.assertIn('eta', fit.extract())
@@ -64,7 +64,7 @@ class Test8Schools(unittest.TestCase):
         model = self.model
         data = self.schools_dat
         pars = 'mu'  # bare string
-        fit = model.sampling(data=data, pars=pars)
+        fit = model.sampling(data=data, pars=pars, iter=100)
         self.assertEqual(len(fit.extract()), 2)
         self.assertIn('mu', fit.extract())
         self.assertRaises(ValueError, fit.extract, 'theta')
@@ -76,3 +76,43 @@ class Test8Schools(unittest.TestCase):
         self.assertIn('eta', fit.extract())
         self.assertRaises(ValueError, fit.extract, 'theta')
         self.assertIsNotNone(fit.extract(permuted=False))
+
+class TestParsLabels(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        model_code = '''\
+            parameters {
+              real a;
+              real b;
+              real c;
+              real d;
+            }
+            model {
+              a ~ normal(0, 1);
+              b ~ normal(-19, 1);
+              c ~ normal(5, 1);
+              d ~ normal(11, 1);
+            }
+        '''
+        cls.model = pystan.StanModel(model_code=model_code)
+
+    def test_pars_single(self):
+        '''Make sure labels are not getting switched'''
+        fit = self.model.sampling(iter=100, chains=1, n_jobs=1, pars=['d'])
+        self.assertGreater(fit.extract()['d'].mean(), 7)
+
+    def test_pars_single_chains(self):
+        '''Make sure labels are not getting switched'''
+        fit = self.model.sampling(iter=100, chains=2, n_jobs=2, pars=['d'])
+        self.assertGreater(fit.extract()['d'].mean(), 7)
+
+    def test_pars_labels(self):
+        '''Make sure labels are not getting switched'''
+        fit = self.model.sampling(iter=100, chains=2, n_jobs=2, pars=['a', 'd'])
+        extr = fit.extract()
+        a = extr['a'].mean()
+        d = extr['d'].mean()
+        self.assertTrue('b' not in extr)
+        self.assertTrue('c' not in extr)
+        self.assertGreater(d, a)
