@@ -6,6 +6,13 @@
  What's New
 ============
 
+v2.8.0.1 (5. Nov 2015)
+======================
+- Python 3.5 support added
+- Cython 0.22 or higher now required
+- Compiler optimization (``-O2``) turned on for model compilation. This should increase sampling speed.
+- Significant bug fixes (pickling, pars keyword)
+
 v2.8.0.0 (1. Oct 2015)
 ======================
 - Update Stan source to v2.8.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.8.0>`_)
