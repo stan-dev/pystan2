@@ -665,12 +665,19 @@ class StanModel:
         if isinstance(pars, string_types):
             pars = [pars]
         if pars is not None and len(pars) > 0:
+            # Implementation note: this does not set the params_oi for the
+            # instances of stan_fit which actually make the calls to
+            # call_sampler. This is because we need separate instances of
+            # stan_fit in each thread/process. So update_param_oi needs to
+            # be called in every stan_fit instance.
             fit._update_param_oi(pars)
             if not all(p in m_pars for p in pars):
                 pars = np.asarray(pars)
                 unmatched = pars[np.invert(np.in1d(pars, m_pars))]
                 msg = "No parameter(s): {}; sampling not done."
                 raise ValueError(msg.format(', '.join(pars[unmatched])))
+        else:
+            pars = m_pars
 
         if chains < 1:
             raise ValueError("The number of chains is less than one; sampling"
@@ -702,7 +709,7 @@ class StanModel:
             n_jobs = 1
 
         assert len(args_list) == chains
-        call_sampler_args = izip(itertools.repeat(data), args_list)
+        call_sampler_args = izip(itertools.repeat(data), args_list, itertools.repeat(pars))
         call_sampler_star = self.module._call_sampler_star
         ret_and_samples = _map_parallel(call_sampler_star, call_sampler_args, n_jobs)
         samples = [smpl for _, smpl in ret_and_samples]

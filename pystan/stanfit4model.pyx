@@ -344,7 +344,7 @@ cdef vars_i_t _dict_to_vars_i(data_i):
 def _call_sampler_star(data_args):
     return _call_sampler(*data_args)
 
-def _call_sampler(data, args):
+def _call_sampler(data, args, pars_oi=None):
     """Wrapper for call_sampler in stan_fit
 
     This function is self-contained and suitable for parallel invocation.
@@ -368,6 +368,13 @@ def _call_sampler(data, args):
     fitptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
     if not fitptr:
         raise MemoryError("Couldn't allocate space for stan_fit.")
+    # Implementation note: there is an extra stan_fit instance associated
+    # with the model (which enables access to some methods). This is a
+    # horrible, confusing idea which will hopefully be fixed in Stan 3.
+    if pars_oi is not None:
+        pars_oi_bytes = [n.encode('ascii') for n in pars_oi]
+        if len(pars_oi_bytes) != fitptr.param_names_oi().size():
+            fitptr.update_param_oi(pars_oi_bytes)
     ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
     holder = _pystanholder_from_stanholder(holderptr)
     # FIXME: rather than fetching the args from the holderptr, we just use
