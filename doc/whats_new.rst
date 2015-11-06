@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.8.0.2 (6. Nov 2015)
+======================
+- Cython 0.22 or higher requirement included on PyPI
+
 v2.8.0.1 (5. Nov 2015)
 ======================
 - Python 3.5 support added
