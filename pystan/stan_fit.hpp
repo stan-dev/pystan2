@@ -64,17 +64,20 @@
 #include <stan/services/io/write_iteration_csv.hpp>
 #include <stan/services/io/write_model.hpp>
 #include <stan/services/io/write_stan.hpp>
-#include <stan/services/init/init_adapt.hpp>
-#include <stan/services/init/init_nuts.hpp>
-#include <stan/services/init/init_static_hmc.hpp>
-#include <stan/services/init/init_windowed_adapt.hpp>
 #include <stan/services/init/initialize_state.hpp>
-#include <stan/services/mcmc/print_progress.hpp>
-#include <stan/services/mcmc/run_markov_chain.hpp>
 #include <stan/services/mcmc/sample.hpp>
 #include <stan/services/mcmc/warmup.hpp>
-#include <stan/services/optimization/do_bfgs_optimize.hpp>
+#include <stan/src/stan/services/optimize/do_bfgs_optimize.hpp>
+#include <stan/services/sample/init_adapt.hpp>
+#include <stan/services/sample/init_nuts.hpp>
+#include <stan/services/sample/init_static_hmc.hpp>
+#include <stan/services/sample/init_windowed_adapt.hpp>
+#include <stan/services/sample/mcmc_writer.hpp>
+#include <stan/services/sample/progress.hpp>
 
+#include <stan/interface_callbacks/writer/noop_writer.hpp>
+#include <stan/interface_callbacks/writer/base_writer.hpp>
+#include <stan/interface_callbacks/writer/stream_writer.hpp>
 
 #include "py_var_context.hpp"
 #include "py_var_context_factory.hpp"
@@ -83,14 +86,6 @@
     #error Python headers needed to compile C extensions, please install development version of Python.
 #endif
 
-#include <stan/io/mcmc_writer.hpp>
-#include <stan/interface_callbacks/writer/csv.hpp>
-#include <stan/interface_callbacks/writer/filtered_values.hpp>
-#include <stan/interface_callbacks/writer/messages.hpp>
-#include <stan/interface_callbacks/writer/noop.hpp>
-#include <stan/interface_callbacks/writer/base_writer.hpp>
-#include <stan/interface_callbacks/writer/sum_values.hpp>
-#include <stan/interface_callbacks/writer/values.hpp>
 
 #include "pystan_writer.hpp"
 
@@ -787,12 +782,13 @@ namespace pystan {
                                   sample_writer_offset,
                                   qoi_idx);
 
-      stan::interface_callbacks::writer::csv diagnostic_writer
+      stan::interface_callbacks::writer::stream_writer diagnostic_writer
         = diagnostic_writer_factory(&diagnostic_stream, "# ");
-      stan::interface_callbacks::writer::messages message_writer(&std::cout, "# ");
-      stan::io::mcmc_writer<Model,
-                            pystan_sample_writer, stan::interface_callbacks::writer::csv,
-                            stan::interface_callbacks::writer::messages>
+      stan::interface_callbacks::writer::stream_writer message_writer(std::cout, "# ");
+      stan::services::sample::mcmc_writer<Model,
+                                          pystan_sample_writer,
+                                          stan::interface_callbacks::writer::stream_writer,
+                                          stan::interface_callbacks::writer::stream_writer>
         writer(sample_writer, diagnostic_writer, message_writer, &std::cout);
 
 
@@ -810,13 +806,20 @@ namespace pystan {
       PyErr_CheckSignals_Functor interruptCallback;
 
       stan::services::mcmc::warmup<Model, RNG_t,
-                           PyErr_CheckSignals_Functor>
-        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
+                                   PyErr_CheckSignals_Functor>
+        (sampler_ptr,
+         args.get_ctrl_sampling_warmup(),
+         args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
-         args.get_ctrl_sampling_refresh(), args.get_ctrl_sampling_save_warmup(),
+         args.get_ctrl_sampling_refresh(),
+         args.get_ctrl_sampling_save_warmup(),
          writer,
-         s, model, base_rng,
-         prefix, suffix, std::cout,
+         s,
+         model,
+         base_rng,
+         prefix,
+         suffix,
+         std::cout,
          interruptCallback);
 
       clock_t end = clock();
@@ -827,7 +830,7 @@ namespace pystan {
         writer.write_adapt_finish(sampler_ptr);
 
         std::stringstream ss;
-        stan::interface_callbacks::writer::messages info(&ss, "# ");
+        stan::interface_callbacks::writer::stream_writer info(ss, "# ");
         writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
@@ -837,13 +840,20 @@ namespace pystan {
       start = clock();
 
       stan::services::mcmc::sample<Model, RNG_t,
-                           PyErr_CheckSignals_Functor>
-        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
+                                   PyErr_CheckSignals_Functor>
+        (sampler_ptr,
+         args.get_ctrl_sampling_warmup(),
+         args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
-         args.get_ctrl_sampling_refresh(), true,
+         args.get_ctrl_sampling_refresh(),
+         true,
          writer,
-         s, model, base_rng,
-         prefix, suffix, std::cout,
+         s,
+         model,
+         base_rng,
+         prefix,
+         suffix,
+         std::cout,
          interruptCallback);
 
       end = clock();
@@ -1040,10 +1050,10 @@ namespace pystan {
           lbfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           lbfgs._conv_opts.maxIts     = args.get_iter();
 
-          stan::services::optimization::do_bfgs_optimize(model, lbfgs, base_rng,
-                                                         lp, cont_vector, disc_vector,
-                                                         &sample_stream, &std::cout,
-                                                         save_iterations, refresh, interruptCallback);
+          stan::services::optimize::do_bfgs_optimize(model, lbfgs, base_rng,
+                                                     lp, cont_vector, disc_vector,
+                                                     &sample_stream, &std::cout,
+                                                     save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
@@ -1104,10 +1114,10 @@ namespace pystan {
           bfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           bfgs._conv_opts.maxIts     = args.get_iter();
 
-          stan::services::optimization::do_bfgs_optimize(model, bfgs, base_rng,
-                                                         lp, cont_vector, disc_vector,
-                                                         &sample_stream, &std::cout,
-                                                         save_iterations, refresh, interruptCallback);
+          stan::services::optimize::do_bfgs_optimize(model, bfgs, base_rng,
+                                                     lp, cont_vector, disc_vector,
+                                                     &sample_stream, &std::cout,
+                                                     save_iterations, refresh, interruptCallback);
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
