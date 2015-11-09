@@ -25,6 +25,7 @@
 import ast
 import codecs
 import os
+import platform
 import sys
 
 LONG_DESCRIPTION = open('README.rst').read()
@@ -113,6 +114,10 @@ extra_compile_args = [
     '-Wno-unused-function',
     '-Wno-uninitialized',
 ]
+
+# remove gcc/clang specific options on windows
+if platform.platform().startswith('Win'):
+    extra_compile_args = []
 
 stanc_sources = [
     "pystan/stan/src/stan/lang/ast_def.cpp",
