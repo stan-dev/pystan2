@@ -281,9 +281,11 @@ class StanModel:
             '-Wno-uninitialized',
         ]
 
-        # remove gcc/clang specific options on windows
         if platform.platform().startswith('Win'):
-            extra_compile_args = []
+            extra_compile_args = [
+                '/EHsc',
+                '-DBOOST_DATE_TIME_NO_LIB',
+            ]
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,

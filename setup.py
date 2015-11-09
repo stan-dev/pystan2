@@ -115,9 +115,12 @@ extra_compile_args = [
     '-Wno-uninitialized',
 ]
 
-# remove gcc/clang specific options on windows
 if platform.platform().startswith('Win'):
-    extra_compile_args = []
+    extra_compile_args = [
+        '/EHsc',
+        '-DBOOST_DATE_TIME_NO_LIB',
+    ]
+
 
 stanc_sources = [
     "pystan/stan/src/stan/lang/ast_def.cpp",
