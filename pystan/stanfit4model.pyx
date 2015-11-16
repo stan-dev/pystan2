@@ -684,7 +684,7 @@ cdef class StanFit4Model:
         means : array of shape (num_parameters, num_chains)
             Order of parameters is given by self.model_pars or self.flatnames
             if parameters of interest include non-scalar parameters. An additional
-            column for mean_lp__ is also included.
+            column for mean lp__ is also included.
         """
         self._verify_has_samples()
         fnames = self.flatnames
