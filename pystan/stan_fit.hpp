@@ -837,6 +837,9 @@ namespace pystan {
                                   sample_writer_offset,
                                   qoi_idx);
 
+      std::stringstream ss;
+      stan::interface_callbacks::writer::stream_writer info(ss);
+
       stan::interface_callbacks::writer::stream_writer diagnostic_writer
         = diagnostic_writer_factory(&diagnostic_stream, "# ");
       stan::interface_callbacks::writer::stream_writer message_writer(std::cout, "# ");
@@ -854,10 +857,10 @@ namespace pystan {
       // Warm-Up
       clock_t start = clock();
 
-      std::stringstream prefix_stream;
-      prefix_stream << "\nChain " << args.get_chain_id() << ", ";
-      std::string prefix = prefix_stream.str();
-      std::string suffix = "";
+      std::string prefix = "";
+      ss.str("");
+      ss << " (Chain " << args.get_chain_id() << ")" << std::endl;
+      std::string suffix = ss.str();
       PyErr_CheckSignals_Functor interruptCallback;
 
       stan::services::mcmc::warmup<Model, RNG_t,
@@ -874,12 +877,9 @@ namespace pystan {
       double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
       std::string adaptation_info;
       if (args.get_ctrl_sampling_adapt_engaged()) {
+        ss.str("");
         dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
         writer.write_adapt_finish(sampler_ptr);
-
-        std::stringstream ss;
-        stan::interface_callbacks::writer::stream_writer info(ss, "# ");
-        writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
       }
@@ -959,7 +959,8 @@ namespace pystan {
                         const std::vector<size_t>& qoi_idx,
                         const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
       std::stringstream ss;
-      
+      stan::interface_callbacks::writer::stream_writer info(ss);
+
       base_rng.seed(args.get_random_seed());
       // (2**50 = 1T samples, 1000 chains)
       static boost::uintmax_t DISCARD_STRIDE =
