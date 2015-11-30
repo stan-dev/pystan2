@@ -782,6 +782,9 @@ namespace pystan {
                                   sample_writer_offset,
                                   qoi_idx);
 
+      std::stringstream ss;
+      stan::interface_callbacks::writer::stream_writer info(ss);
+
       stan::interface_callbacks::writer::stream_writer diagnostic_writer
         = diagnostic_writer_factory(&diagnostic_stream, "# ");
       stan::interface_callbacks::writer::stream_writer message_writer(std::cout, "# ");
@@ -800,7 +803,7 @@ namespace pystan {
       clock_t start = clock();
 
       std::string prefix = "";
-      std::stringstream ss;
+      ss.str("");
       ss << " (Chain " << args.get_chain_id() << ")" << std::endl;
       std::string suffix = ss.str();
       PyErr_CheckSignals_Functor interruptCallback;
@@ -826,12 +829,9 @@ namespace pystan {
       double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
       std::string adaptation_info;
       if (args.get_ctrl_sampling_adapt_engaged()) {
+        ss.str("");
         dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
         writer.write_adapt_finish(sampler_ptr);
-
-        std::stringstream ss;
-        stan::interface_callbacks::writer::stream_writer info(ss, "# ");
-        writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
       }
@@ -918,6 +918,8 @@ namespace pystan {
     int sampler_command(StanArgs& args, Model& model, StanHolder& holder,
                         const std::vector<size_t>& qoi_idx,
                         const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
+      std::stringstream ss;
+      stan::interface_callbacks::writer::stream_writer info(ss);
 
       base_rng.seed(args.get_random_seed());
       // (2**50 = 1T samples, 1000 chains)
@@ -936,7 +938,6 @@ namespace pystan {
       PyErr_CheckSignals_Functor interruptCallback;
       // parameter initialization
       {
-        std::stringstream ss;
         std::string init;
         pystan::io::py_var_context_factory context_factory(args.init_vars_r, args.init_vars_i);
 
@@ -954,7 +955,7 @@ namespace pystan {
                                                     cont_params,
                                                     model,
                                                     base_rng,
-                                                    &ss,
+                                                    info,
                                                     context_factory,
                                                     args.get_enable_random_init(),
                                                     args.get_init_radius())) {
@@ -970,9 +971,9 @@ namespace pystan {
 
       if (TEST_GRADIENT == args.get_method()) {
         std::cout << std::endl << "TEST GRADIENT MODE" << std::endl;
-        std::stringstream ss;
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
+        ss.str("");
         int num_failed =
           stan::model::test_gradients<true,true>(model,cont_vector,disc_vector,
                                                  epsilon,error,ss,&std::cout);
