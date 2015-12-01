@@ -120,6 +120,7 @@ stanc_sources = [
     "pystan/stan/src/stan/lang/grammars/expression07_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/expression_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/functions_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/indexes_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/program_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_2_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
