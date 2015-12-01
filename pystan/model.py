@@ -19,6 +19,7 @@ import itertools
 import logging
 from numbers import Number
 import os
+import platform
 import shutil
 import string
 import sys
@@ -279,6 +280,12 @@ class StanModel:
             '-Wno-unused-function',
             '-Wno-uninitialized',
         ]
+
+        if platform.platform().startswith('Win'):
+            extra_compile_args = [
+                '/EHsc',
+                '-DBOOST_DATE_TIME_NO_LIB',
+            ]
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
