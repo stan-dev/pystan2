@@ -44,7 +44,8 @@ import numpy as np
 import pystan.misc
 import pystan.plots
 from pystan._compat import PY2, string_types
-from pystan.constants import sampling_algo_t, optim_algo_t, sampling_metric_t, stan_args_method_t
+from pystan.constants import (sampling_algo_t, optim_algo_t, variational_algo_t,
+                              sampling_metric_t, stan_args_method_t)
 
 logger = logging.getLogger('pystan')
 
@@ -209,6 +210,15 @@ cdef dict _dict_from_stanargs(StanArgs* args):
                 ctrl_d["metric"] = "dense_e"
                 d["sampler_t"] = d["sampler_t"] + "(dense_e)"
         d["control"] = ctrl_d
+    elif method == stan_args_method_t.VARIATIONAL:
+        d["method"] = "VARIATIONAL"
+        d["iter"] = args.ctrl.variational.iter
+        d["grad_samples"] = args.ctrl.variational.grad_samples
+        d["elbo_samples"] = args.ctrl.variational.elbo_samples
+        d["eval_elbo"] = args.ctrl.variational.eval_elbo
+        d["output_samples"] = args.ctrl.variational.output_samples
+        d["tol_rel_obj"] = args.ctrl.variational.tol_rel_obj
+        d['algorithm'] = variational_algo_t(args.ctrl.variational.algorithm).name
     elif method == stan_args_method_t.OPTIM:
         d["method"] = "optim"
         d["iter"] = args.ctrl.optim.iter
