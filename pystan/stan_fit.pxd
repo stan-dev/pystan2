@@ -99,7 +99,9 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         int elbo_samples
         int eval_elbo
         int output_samples
-        double eta_adagrad
+        double eta
+        bool adapt_engaged
+        int adapt_iter
         double tol_rel_obj
 
     cdef struct test_grad_t:

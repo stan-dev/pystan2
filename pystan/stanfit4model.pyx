@@ -216,6 +216,9 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         d["elbo_samples"] = args.ctrl.variational.elbo_samples
         d["eval_elbo"] = args.ctrl.variational.eval_elbo
         d["output_samples"] = args.ctrl.variational.output_samples
+        d["eta"] = args.ctrl.variational.eta
+        d["adapt_engaged"] = args.ctrl.variational.adapt_engaged
+        d["adapt_iter"] = args.ctrl.variational.adapt_iter
         d["tol_rel_obj"] = args.ctrl.variational.tol_rel_obj
         d['algorithm'] = variational_algo_t(args.ctrl.variational.algorithm).name
     elif method == stan_args_method_t.OPTIM:

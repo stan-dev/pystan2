@@ -55,6 +55,7 @@
 #include <stan/mcmc/stepsize_var_adapter.hpp>
 #include <stan/mcmc/var_adaptation.hpp>
 #include <stan/mcmc/windowed_adaptation.hpp>
+
 #include <stan/optimization/newton.hpp>
 #include <stan/optimization/bfgs.hpp>
 
@@ -79,6 +80,8 @@
 #include <stan/interface_callbacks/writer/base_writer.hpp>
 #include <stan/interface_callbacks/writer/stream_writer.hpp>
 
+#include <stan/variational/advi.hpp>
+
 #include "py_var_context.hpp"
 #include "py_var_context_factory.hpp"
 #include "Python.h"
@@ -94,6 +97,8 @@ typedef std::map<std::string, std::pair<std::vector<double>, std::vector<size_t>
 typedef std::map<std::string, std::pair<std::vector<int>, std::vector<size_t> > > vars_i_t;
 
 namespace pystan {
+
+  // rstan's stan_fit.hpp adds an anonymous namespace here; pystan needs direct access to items below
 
   enum sampling_algo_t { NUTS = 1, HMC = 2, Metropolis = 3, Fixed_param = 4};
   enum optim_algo_t { Newton = 1, BFGS = 3, LBFGS = 4};
@@ -168,7 +173,9 @@ namespace pystan {
         int elbo_samples; // default to 100
         int eval_elbo;    // default to 100
         int output_samples; // default to 1000
-        double eta_adagrad; // default to 0.1
+        double eta; // defaults to 1.0
+        bool adapt_engaged; // defaults to 1
+        int adapt_iter; // defaults to 50
         double tol_rel_obj; // default to 0.01
       } variational;
       struct {
@@ -198,6 +205,34 @@ namespace pystan {
       return random_seed;
     }
 
+    inline int get_ctrl_variational_grad_samples() const {
+      return ctrl.variational.grad_samples;
+    }
+    inline int get_ctrl_variational_elbo_samples() const {
+      return ctrl.variational.elbo_samples;
+    }
+    inline int get_ctrl_variational_output_samples() const {
+      return ctrl.variational.output_samples;
+    }
+    inline int get_ctrl_variational_eval_elbo() const {
+      return ctrl.variational.eval_elbo;
+    }
+    inline double get_ctrl_variational_eta() const {
+      return ctrl.variational.eta;
+    }
+    inline bool get_ctrl_variational_adapt_engaged() const {
+      return ctrl.variational.adapt_engaged;
+    }
+    inline double get_ctrl_variational_tol_rel_obj() const {
+      return ctrl.variational.tol_rel_obj;
+    }
+    inline variational_algo_t get_ctrl_variational_algorithm() const {
+      return ctrl.variational.algorithm;
+    }
+    inline int get_ctrl_variational_adapt_iter() const {
+      return ctrl.variational.adapt_iter;
+    }
+    
     inline int get_ctrl_sampling_refresh() const {
       return ctrl.sampling.refresh;
     }
@@ -229,6 +264,7 @@ namespace pystan {
       switch (method) {
         case SAMPLING: return ctrl.sampling.iter;
         case OPTIM: return ctrl.optim.iter;
+        case VARIATIONAL: return ctrl.variational.iter;
         case TEST_GRADIENT: return 0;
       }
       return 0;
@@ -376,7 +412,7 @@ namespace pystan {
     }
 
     /* the following mirrors RStan's stan_fit.hpp */
-
+  namespace {
     /**
      *@tparam T The type by which we use for dimensions. T could be say size_t
      * or unsigned int. This whole business (not using size_t) is due to that
@@ -635,6 +671,12 @@ namespace pystan {
       o << std::endl;
     }
 
+    void write_stan_version_as_comment(std::ostream& output) {
+       write_comment_property(output,"stan_version_major",stan::MAJOR_VERSION);
+       write_comment_property(output,"stan_version_minor",stan::MINOR_VERSION);
+       write_comment_property(output,"stan_version_patch",stan::PATCH_VERSION);
+    }
+
     /**
      * Cast a size_t vector to an unsigned int vector.
      * The reason is that first Rcpp::wrap/as does not
@@ -761,6 +803,7 @@ namespace pystan {
       sample_writer_offset = sample_names.size() + sampler_names.size();
     }
 
+
     template <class Model, class RNG_t>
     void execute_sampling(StanArgs& args, Model& model, StanHolder& holder,
                           stan::mcmc::base_mcmc* sampler_ptr,
@@ -785,6 +828,7 @@ namespace pystan {
                              model_unconstrained_param_names,
                              sampler_diagnostic_names);
 
+
       pystan_sample_writer sample_writer
         = sample_writer_factory(&sample_stream, "# ",
                                   sample_writer_size,
@@ -792,9 +836,6 @@ namespace pystan {
                                   args.get_ctrl_sampling_iter_save() - args.get_ctrl_sampling_iter_save_wo_warmup(),
                                   sample_writer_offset,
                                   qoi_idx);
-
-      std::stringstream ss;
-      stan::interface_callbacks::writer::stream_writer info(ss);
 
       stan::interface_callbacks::writer::stream_writer diagnostic_writer
         = diagnostic_writer_factory(&diagnostic_stream, "# ");
@@ -805,44 +846,40 @@ namespace pystan {
                                           stan::interface_callbacks::writer::stream_writer>
         writer(sample_writer, diagnostic_writer, message_writer, &std::cout);
 
-
       if (!args.get_append_samples()) {
         writer.write_sample_names(s, sampler_ptr, model);
         writer.write_diagnostic_names(s, sampler_ptr, model);
       }
+
       // Warm-Up
       clock_t start = clock();
 
-      std::string prefix = "";
-      ss.str("");
-      ss << " (Chain " << args.get_chain_id() << ")" << std::endl;
-      std::string suffix = ss.str();
+      std::stringstream prefix_stream;
+      prefix_stream << "\nChain " << args.get_chain_id() << ", ";
+      std::string prefix = prefix_stream.str();
+      std::string suffix = "";
       PyErr_CheckSignals_Functor interruptCallback;
 
       stan::services::mcmc::warmup<Model, RNG_t,
                                    PyErr_CheckSignals_Functor>
-        (sampler_ptr,
-         args.get_ctrl_sampling_warmup(),
-         args.get_iter() - args.get_ctrl_sampling_warmup(),
+        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
-         args.get_ctrl_sampling_refresh(),
-         args.get_ctrl_sampling_save_warmup(),
+         args.get_ctrl_sampling_refresh(), args.get_ctrl_sampling_save_warmup(),
          writer,
-         s,
-         model,
-         base_rng,
-         prefix,
-         suffix,
-         std::cout,
+         s, model, base_rng,
+         prefix, suffix, std::cout,
          interruptCallback);
 
       clock_t end = clock();
       double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
       std::string adaptation_info;
       if (args.get_ctrl_sampling_adapt_engaged()) {
-        ss.str("");
         dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
         writer.write_adapt_finish(sampler_ptr);
+
+        std::stringstream ss;
+        stan::interface_callbacks::writer::stream_writer info(ss, "# ");
+        writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
       }
@@ -852,19 +889,12 @@ namespace pystan {
 
       stan::services::mcmc::sample<Model, RNG_t,
                                    PyErr_CheckSignals_Functor>
-        (sampler_ptr,
-         args.get_ctrl_sampling_warmup(),
-         args.get_iter() - args.get_ctrl_sampling_warmup(),
+        (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
          args.get_ctrl_sampling_thin(),
-         args.get_ctrl_sampling_refresh(),
-         true,
+         args.get_ctrl_sampling_refresh(), true,
          writer,
-         s,
-         model,
-         base_rng,
-         prefix,
-         suffix,
-         std::cout,
+         s, model, base_rng,
+         prefix, suffix, std::cout,
          interruptCallback);
 
       end = clock();
@@ -913,7 +943,6 @@ namespace pystan {
       holder.chain_names = fnames_oi;
     }
 
-
     /**
      * @tparam Model
      * @tparam RNG
@@ -930,8 +959,7 @@ namespace pystan {
                         const std::vector<size_t>& qoi_idx,
                         const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
       std::stringstream ss;
-      stan::interface_callbacks::writer::stream_writer info(ss);
-
+      
       base_rng.seed(args.get_random_seed());
       // (2**50 = 1T samples, 1000 chains)
       static boost::uintmax_t DISCARD_STRIDE =
@@ -951,8 +979,8 @@ namespace pystan {
       {
         std::string init;
         pystan::io::py_var_context_factory context_factory(args.init_vars_r, args.init_vars_i);
-
-        if (init_val == "0")
+        
+        if (init_val == "0") 
           init = "0";
         else if (init_val == "user")
           init = "user";
@@ -961,7 +989,7 @@ namespace pystan {
           R << args.get_init_radius();
           init = R.str();
         }
-
+        stan::interface_callbacks::writer::stream_writer info(ss);
         if (!stan::services::init::initialize_state(init,
                                                     cont_params,
                                                     model,
@@ -975,7 +1003,7 @@ namespace pystan {
         for (int n = 0; n < cont_params.size(); n++)
           cont_vector[n] = cont_params[n];
       }
-
+      
       // keep a record of the initial values
       std::vector<double> initv;
       model.write_array(base_rng,cont_vector,disc_vector,initv);
@@ -1003,6 +1031,111 @@ namespace pystan {
           = append_samples ? (std::fstream::out | std::fstream::app)
                            : std::fstream::out;
         sample_stream.open(args.get_sample_file().c_str(), samples_append_mode);
+      }
+
+      if (VARIATIONAL == args.get_method()) {
+        int grad_samples = args.get_ctrl_variational_grad_samples();
+        int elbo_samples = args.get_ctrl_variational_elbo_samples();
+        int max_iterations = args.get_iter();
+        double tol_rel_obj = args.get_ctrl_variational_tol_rel_obj();
+        double eta = args.get_ctrl_variational_eta();
+        bool adapt_engaged = args.get_ctrl_variational_adapt_engaged();
+        int adapt_iterations = args.get_ctrl_variational_adapt_iter();
+        int eval_elbo = args.get_ctrl_variational_eval_elbo();
+        int output_samples = args.get_ctrl_variational_output_samples();
+        if (args.get_sample_file_flag()) {
+          write_comment(sample_stream,"Sample generated by Stan (Variational Bayes)");
+          write_stan_version_as_comment(sample_stream);
+          // FIXME PyStan: to implement args.write_args_as_comment(sample_stream);
+        }
+        if (args.get_diagnostic_file_flag()) {
+          write_comment(diagnostic_stream,"Sample generated by Stan (Variational Bayes)");
+          write_stan_version_as_comment(sample_stream);
+          // FIXME PyStan: to implement args.write_args_as_comment(diagnostic_stream);
+        }
+
+        clock_t start_check = clock();
+
+        double init_log_prob;
+        Eigen::VectorXd init_grad
+          = Eigen::VectorXd::Zero(model.num_params_r());
+
+        stan::model::gradient(model, cont_params, init_log_prob,
+                              init_grad, &std::cout);
+
+        clock_t end_check = clock();
+        double deltaT
+          = static_cast<double>(end_check - start_check) / CLOCKS_PER_SEC;
+
+        std::cout << std::endl;
+        std::cout << "This is Automatic Differentiation Variational Inference.";
+        std::cout << std::endl;
+
+        std::cout << std::endl;
+        std::cout << "(EXPERIMENTAL ALGORITHM: expect frequent updates to the"
+                         << " procedure.)";
+        std::cout << std::endl;
+
+        std::cout << std::endl;
+        std::cout << "Gradient evaluation took " << deltaT
+                         << " seconds" << std::endl;
+        std::cout << "1000 iterations under these settings should take "
+                         << 1e3 * grad_samples * deltaT << " seconds." << std::endl;
+        std::cout << "Adjust your expectations accordingly!";
+        std::cout << std::endl;
+        std::cout << std::endl;
+
+        if (args.get_ctrl_variational_algorithm() == FULLRANK) {
+          if (args.get_sample_file_flag()) {
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names, true, true);
+            print_vector(names, sample_stream);
+          }
+
+          stan::variational::advi<Model,
+                                  stan::variational::normal_fullrank,
+                                  RNG_t>
+            cmd_advi(model,
+                     cont_params,
+                     base_rng,
+                     grad_samples,
+                     elbo_samples,
+                     eval_elbo,
+                     output_samples,
+                     &std::cout,
+                     &sample_stream,
+                     &diagnostic_stream);
+            cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, 
+                         max_iterations);
+        }
+
+        if (args.get_ctrl_variational_algorithm() == MEANFIELD) {
+          if (args.get_sample_file_flag()) {
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names, true, true);
+            print_vector(names, sample_stream);
+          }
+
+          stan::variational::advi<Model,
+                                  stan::variational::normal_meanfield,
+                                  RNG_t>
+            cmd_advi(model,
+                     cont_params,
+                     base_rng,
+                     grad_samples,
+                     elbo_samples,
+                     eval_elbo,
+                     output_samples,
+                     &std::cout,
+                     &sample_stream,
+                     &diagnostic_stream);
+              cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, 
+                           max_iterations);
+        }
+        holder.args = args;
+        return 0;
       }
 
       if (OPTIM == args.get_method()) { // point estimation
@@ -1069,7 +1202,8 @@ namespace pystan {
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
-                                          lp, cont_vector, disc_vector, &std::cout);
+                                                lp, cont_vector, disc_vector,
+                                                &std::cout);
             sample_stream.close();
           }
           model.write_array(base_rng,cont_vector,disc_vector, params_inr_etc);
@@ -1133,7 +1267,8 @@ namespace pystan {
 
           if (args.get_sample_file_flag()) {
             stan::services::io::write_iteration(sample_stream, model, base_rng,
-                                          lp, cont_vector, disc_vector, &std::cout);
+                                                lp, cont_vector, disc_vector,
+                                                &std::cout);
             sample_stream.close();
           }
           model.write_array(base_rng,cont_vector,disc_vector,params_inr_etc);
@@ -1193,7 +1328,7 @@ namespace pystan {
         }
         return 0;
       }
-
+      
       for (size_t i = 0; i < cont_vector.size(); i++) cont_params(i) = cont_vector[i];
 
       // method = 3 //sampling
@@ -1201,18 +1336,14 @@ namespace pystan {
         diagnostic_stream.open(args.get_diagnostic_file().c_str(), std::fstream::out);
 
       if (args.get_sample_file_flag()) {
-        write_comment(sample_stream,"Samples Generated by Stan");
-        write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
-        write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
-        write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
-        // FIXME PyStan: to implement args.write_args_as_comment(sample_stream);
+        write_comment(sample_stream,"Sample generated by Stan");
+        write_stan_version_as_comment(sample_stream);
+        // FIXME PyStan: to implement: args.write_args_as_comment(sample_stream);
       }
       if (args.get_diagnostic_file_flag()) {
-        write_comment(diagnostic_stream,"Samples Generated by Stan");
-        write_comment_property(diagnostic_stream,"stan_version_major",stan::MAJOR_VERSION);
-        write_comment_property(diagnostic_stream,"stan_version_minor",stan::MINOR_VERSION);
-        write_comment_property(diagnostic_stream,"stan_version_patch",stan::PATCH_VERSION);
-        // FIXME PyStan: to implement args.write_args_as_comment(diagnostic_stream);
+        write_comment(diagnostic_stream,"Sample generated by Stan");
+        write_stan_version_as_comment(sample_stream);
+        // FIXME PyStan: to implmenet: args.write_args_as_comment(diagnostic_stream);
       }
 
       int engine_index = 0;
@@ -1370,6 +1501,9 @@ namespace pystan {
       }
       return 0;
     }
+  }
+
+
 
   template <class Model, class RNG_t>
   class stan_fit {
@@ -1467,6 +1601,8 @@ namespace pystan {
      * Transform the parameters from its defined support
      * to unconstrained space
      *
+     * @param vars_r initial values for a chain
+     * @param vars_i initial values for a chain
      */
     std::vector<double> unconstrain_pars(vars_r_t& vars_r, vars_i_t& vars_i) {
       pystan::io::py_var_context par_context(vars_r, vars_i);
