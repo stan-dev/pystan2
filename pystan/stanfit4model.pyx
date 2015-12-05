@@ -187,14 +187,13 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
         ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
         algorithm = sampling_algo_t(args.ctrl.sampling.algorithm)
+        d["sampler_t"] = algorithm.name
         if algorithm == sampling_algo_t.NUTS:
             ctrl_d["max_treedepth"] = args.ctrl.sampling.max_treedepth
-            d["sampler_t"] = "NUTS"
         elif algorithm == sampling_algo_t.HMC:
             ctrl_d["int_time"] = args.ctrl.sampling.int_time
-            d["sampler_t"] = "HMC"
         elif algorithm == sampling_algo_t.Metropolis:
-            d["sampler_t"] = "Metropolis"
+            pass
         else:
             # included here to mirror rstan code
             pass
@@ -225,11 +224,10 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         d["refresh"] = args.ctrl.optim.refresh
         d["save_iterations"] = args.ctrl.optim.save_iterations
         algorithm = optim_algo_t(args.ctrl.optim.algorithm)
+        d["algorithm"] = algorithm.name
         if algorithm == optim_algo_t.Newton:
-            d["algorithm"] = "Newton"
             pass
         elif algorithm == optim_algo_t.LBFGS:
-            d["algorithm"] = "LBFGS"
             d["init_alpha"] = args.ctrl.optim.init_alpha
             d["tol_param"] = args.ctrl.optim.tol_param
             d["tol_obj"] = args.ctrl.optim.tol_obj
@@ -238,7 +236,6 @@ cdef dict _dict_from_stanargs(StanArgs* args):
             d["tol_rel_grad"] = args.ctrl.optim.tol_grad
             d["tol_history_size"] = args.ctrl.optim.tol_grad
         elif algorithm == optim_algo_t.BFGS:
-            d["algorithm"] = "BFGS"
             d["init_alpha"] = args.ctrl.optim.init_alpha
             d["tol_param"] = args.ctrl.optim.tol_param
             d["tol_obj"] = args.ctrl.optim.tol_obj
