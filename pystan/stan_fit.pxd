@@ -26,6 +26,9 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         Newton = 1
         BFGS = 3
         LBFGS = 4
+    ctypedef enum variational_algo_t:
+        MEANFIELD = 1
+        FULLRANK = 2
     ctypedef enum sampling_metric_t:
         UNIT_E = 1
         DIAG_E = 2
@@ -34,6 +37,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         SAMPLING = 1
         OPTIM = 2
         TEST_GRADIENT = 3
+        VARIATIONAL = 4
 
     cdef cppclass stan_fit[M, R]:
         stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) except +
@@ -88,6 +92,16 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         double tol_rel_grad
         int history_size
 
+    cdef struct variational_t:
+        int iter
+        variational_algo_t algorithm
+        int grad_samples
+        int elbo_samples
+        int eval_elbo
+        int output_samples
+        double eta_adagrad
+        double tol_rel_obj
+
     cdef struct test_grad_t:
         double epsilon # default to 1e-6, for test_grad
         double error # default to 1e-6, for test_grad
@@ -95,6 +109,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
     cdef union ctrl_t:
         sampling_t sampling
         optim_t optim
+        variational_t variational
         test_grad_t test_grad
 
     cdef cppclass StanArgs:

@@ -45,7 +45,7 @@ except ImportError:
 import pystan.chains
 import pystan._misc
 from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
-                              sampling_metric_t, stan_args_method_t)
+                              variational_algo_t, sampling_metric_t, stan_args_method_t)
 
 logger = logging.getLogger('pystan')
 
@@ -503,6 +503,8 @@ def _get_valid_stan_args(base_args=None):
         args['method'] = stan_args_method_t.OPTIM
     elif args['method'] == 'test_grad':
         args['method'] = stan_args_method_t.TEST_GRADIENT
+    elif args['method'] == 'variational':
+        args['method'] = stan_args_method_t.VARIATIONAL
     else:
         args['method'] = stan_args_method_t.SAMPLING
     args['sample_file_flag'] = True if args.get('sample_file') else False
@@ -512,7 +514,23 @@ def _get_valid_stan_args(base_args=None):
     # NB: argument named "seed" not "random_seed"
     args['random_seed'] = args.get('seed', int(time.time()))
 
-    if args['method'] == stan_args_method_t.SAMPLING:
+    if args['method'] == stan_args_method_t.VARIATIONAL:
+        # variational does not use a `control` map like sampling
+        args['ctrl'] = args.get('ctrl', dict(variational=dict()))
+        args['ctrl']['variational']['iter'] = args.get('iter', 10000)
+        args['ctrl']['variational']['grad_samples'] = args.get('grad_samples', 1)
+        args['ctrl']['variational']['elbo_samples'] = args.get('elbo_samples', 100)
+        args['ctrl']['variational']['eval_elbo'] = args.get('eval_elbo', 100)
+        args['ctrl']['variational']['output_samples'] = args.get('output_samples', 1000)
+        args['ctrl']['variational']['adapt_iter'] = args.get('adapt_iter', 50)
+        args['ctrl']['variational']['eta'] = args.get('eta', 1.0)
+        args['ctrl']['variational']['adapt_engaged'] = args.get('adapt_engaged', True)
+        args['ctrl']['variational']['tol_rel_obj'] = args.get('tol_rel_obj', 0.01)
+        if args.get('algorithm', '').lower() == 'fullrank':
+            args['ctrl']['variational']['algorithm'] = variational_algo_t.FULLRANK
+        else:
+            args['ctrl']['variational']['algorithm'] = variational_algo_t.MEANFIELD
+    elif args['method'] == stan_args_method_t.SAMPLING:
         args['ctrl'] = args.get('ctrl', dict(sampling=dict()))
         args['ctrl']['sampling']['iter'] = iter = args.get('iter', 2000)
         args['ctrl']['sampling']['warmup'] = warmup = args.get('warmup', iter // 2)

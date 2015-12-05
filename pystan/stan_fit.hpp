@@ -97,8 +97,9 @@ namespace pystan {
 
   enum sampling_algo_t { NUTS = 1, HMC = 2, Metropolis = 3, Fixed_param = 4};
   enum optim_algo_t { Newton = 1, BFGS = 3, LBFGS = 4};
+  enum variational_algo_t { MEANFIELD = 1, FULLRANK = 2};
   enum sampling_metric_t { UNIT_E = 1, DIAG_E = 2, DENSE_E = 3};
-  enum stan_args_method_t { SAMPLING = 1, OPTIM = 2, TEST_GRADIENT = 3};
+  enum stan_args_method_t { SAMPLING = 1, OPTIM = 2, TEST_GRADIENT = 3, VARIATIONAL = 4};
 
   /* Simple class to store arguments provided by Python. Mirrors RStan's stan_args.
    *
@@ -160,6 +161,16 @@ namespace pystan {
         double tol_rel_grad; // default to 1e7, for (L)BFGS
         int history_size; // default to 5, for LBFGS only
       } optim;
+      struct {
+        int iter; // default to 10000
+        variational_algo_t algorithm;  // MEANFIELD or FULLRANK
+        int grad_samples; // default to 1
+        int elbo_samples; // default to 100
+        int eval_elbo;    // default to 100
+        int output_samples; // default to 1000
+        double eta_adagrad; // default to 0.1
+        double tol_rel_obj; // default to 0.01
+      } variational;
       struct {
         double epsilon; // default to 1e-6, for test_grad
         double error;  // default to 1e-6, for test_grad
