@@ -756,3 +756,116 @@ class StanModel:
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
         return fit
+
+    def vb(self, data=None, pars=None, iter=10000,
+           seed=None, sample_file=None, verbose=False,
+           algorithm=None, **kwargs):
+        """Call Stan's variational Bayes methods.
+
+        Parameters
+        ----------
+        data : dict
+            A Python dictionary providing the data for the model. Variables
+            for Stan are stored in the dictionary as expected. Variable
+            names are the keys and the values are their associated values.
+            Stan only accepts certain kinds of values; see Notes.
+
+        pars : list of string, optional
+            A list of strings indicating parameters of interest. By default
+            all parameters specified in the model will be stored.
+
+        seed : int or np.random.RandomState, optional
+            The seed, a positive integer for random number generation. Only
+            one seed is needed when multiple chains are used, as the other
+            chain's seeds are generated from the first chain's to prevent
+            dependency among random number streams. By default, seed is
+            ``random.randint(0, MAX_UINT)``.
+
+        sample_file : string, optional
+            File name specifying where samples for *all* parameters and other
+            saved quantities will be written. If not provided, no samples
+            will be written. If the folder given is not writable, a temporary
+            directory will be used. When there are multiple chains, an underscore
+            and chain number are appended to the file name. By default do not
+            write samples to file.
+
+        iter : int, 10000 by default
+            Positive integer specifying how many iterations for each chain
+            including warmup.
+
+        algorithm : {'meanfield', 'fullrank'}
+            algorithm}{One of "meanfield" and "fullrank" indicating which
+            variational inference algorithm is used.  meanfield: mean-field
+            approximation; fullrank: full-rank covariance. The default is
+            'meanfield'.
+
+        verbose : boolean, False by default
+            Indicates whether intermediate output should be piped to the
+            console. This output may be useful for debugging.
+
+        Other optional parameters, refer to the manuals for both CmdStan
+        and Stan.
+
+        -  `iter`:  the maximum number of iterations, defaults to 10000
+        -  `grad_samples` the number of samples for Monte Carlo enumerate of
+            gradients, defaults to 1.
+        -  `elbo_samples` the number of samples for Monte Carlo estimate of ELBO
+           (objective function), defaults to 100. (ELBO stands for "the evidence
+           lower bound".)
+        -  `eta` positive stepsize weighting parameters for variational
+           inference but is ignored if adaptation is engaged, which is the case by
+           default.
+        -  `adapt_engaged` flag indicating whether to automatically adapt the
+           stepsize and defaults to True.
+        -  `tol_rel_obj`convergence tolerance on the relative norm of the objective, defaults to 0.01.
+        -  `eval_elbo`, evaluate ELBO every Nth iteration, defaults to 100
+        -  `output_samples` number of posterior samples to draw and save, defaults to 1000.
+        -  `adapt_iter`  number of iterations to adapt the stepsize if
+           `adapt_engaged` is True and ignored otherwise.
+
+        Returns
+        -------
+        fit : StanFit4Model
+            Instance containing the fitted results.
+
+        Examples
+        --------
+        >>> from pystan import StanModel
+        >>> m = StanModel(model_code='parameters {real y;} model {y ~ normal(0,1);}')
+        >>> m.vb()
+
+        """
+        if data is None:
+            data = {}
+        if warmup is None:
+            warmup = int(iter // 2)
+        algorithms = ("meanfield", "fullrank")
+        algorithm = "meanfield" if algorithm is None else algorithm
+        if algorithm not in algorithms:
+            raise ValueError("Algorithm must be one of {}".format(algorithms))
+        fit = self.fit_class(data)
+        m_pars = fit._get_param_names()
+        p_dims = fit._get_param_dims()
+
+        seed = pystan.misc._check_seed(seed)
+
+        stan_args = dict(iter=iter
+                         seed=seed,
+                         method="optim",
+                         algorithm=algorithm)
+        if sample_file is not None:
+            stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
+
+        # check that arguments in kwargs are valid
+        valid_args = {'elbo_samples', 'eta', 'adapt_engaged', 'eval_elbo',
+                      'grad_samples', 'output_samples', 'adapt_iter',
+                      'tol_rel_obj'}
+        for arg in kwargs:
+            if arg not in valid_args:
+                raise ValueError("Parameter `{}` is not recognized.".format(arg))
+
+        stan_args.update(kwargs)
+        stan_args = pystan.misc._get_valid_stan_args(stan_args)
+
+        ret, sample = fit._call_sampler(stan_args)
+        return sample
