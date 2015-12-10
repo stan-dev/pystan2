@@ -837,8 +837,6 @@ class StanModel:
         """
         if data is None:
             data = {}
-        if warmup is None:
-            warmup = int(iter // 2)
         algorithms = ("meanfield", "fullrank")
         algorithm = "meanfield" if algorithm is None else algorithm
         if algorithm not in algorithms:
@@ -849,9 +847,9 @@ class StanModel:
 
         seed = pystan.misc._check_seed(seed)
 
-        stan_args = dict(iter=iter
+        stan_args = dict(iter=iter,
                          seed=seed,
-                         method="optim",
+                         method="variational",
                          algorithm=algorithm)
         if sample_file is not None:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
