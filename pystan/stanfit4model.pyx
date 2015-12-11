@@ -170,7 +170,7 @@ cdef dict _dict_from_stanargs(StanArgs* args):
 
     method = stan_args_method_t(args.method)
     if method == stan_args_method_t.SAMPLING:
-        d["method"] = "sampling"
+        d["method"] = method.name
         d["iter"] = args.ctrl.sampling.iter
         d["warmup"] = args.ctrl.sampling.warmup
         d["thin"] = args.ctrl.sampling.thin
@@ -186,8 +186,7 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         ctrl_d["adapt_t0"] = args.ctrl.sampling.adapt_t0
         ctrl_d["stepsize"] = args.ctrl.sampling.stepsize
         ctrl_d["stepsize_jitter"] = args.ctrl.sampling.stepsize_jitter
-        algorithm = sampling_algo_t(args.ctrl.sampling.algorithm)
-        d["sampler_t"] = algorithm.name
+        d["sampler_t"] = algorithm = sampling_algo_t(args.ctrl.sampling.algorithm).name
         if algorithm == sampling_algo_t.NUTS:
             ctrl_d["max_treedepth"] = args.ctrl.sampling.max_treedepth
         elif algorithm == sampling_algo_t.HMC:
@@ -198,7 +197,7 @@ cdef dict _dict_from_stanargs(StanArgs* args):
             # included here to mirror rstan code
             pass
         if algorithm != sampling_algo_t.Metropolis:
-            metric = sampling_metric_t(args.ctrl.sampling.metric)
+            metric = sampling_metric_t(args.ctrl.sampling.metric).name
             if metric == sampling_metric_t.UNIT_E:
                 ctrl_d["metric"] = "unit_e"
                 d["sampler_t"] = d["sampler_t"] + "(unit_e)"
@@ -210,7 +209,7 @@ cdef dict _dict_from_stanargs(StanArgs* args):
                 d["sampler_t"] = d["sampler_t"] + "(dense_e)"
         d["control"] = ctrl_d
     elif method == stan_args_method_t.VARIATIONAL:
-        d["method"] = "VARIATIONAL"
+        d["method"] = method.name
         d["iter"] = args.ctrl.variational.iter
         d["grad_samples"] = args.ctrl.variational.grad_samples
         d["elbo_samples"] = args.ctrl.variational.elbo_samples
@@ -220,9 +219,11 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         d["adapt_engaged"] = args.ctrl.variational.adapt_engaged
         d["adapt_iter"] = args.ctrl.variational.adapt_iter
         d["tol_rel_obj"] = args.ctrl.variational.tol_rel_obj
-        d['algorithm'] = variational_algo_t(args.ctrl.variational.algorithm).name
+        #TODO: the following line fails for some reason, need to diagnose
+        #algorithm = variational_algo_t(args.ctrl.variational.algorithm)
+        #d['algorithm'] = algorithm.name
     elif method == stan_args_method_t.OPTIM:
-        d["method"] = "optim"
+        d["method"] = method.name
         d["iter"] = args.ctrl.optim.iter
         d["refresh"] = args.ctrl.optim.refresh
         d["save_iterations"] = args.ctrl.optim.save_iterations
