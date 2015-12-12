@@ -870,7 +870,8 @@ class StanModel:
         samples = [sample]
 
         # _organize_inits strips out lp__ (RStan does it in this method)
-        inits_used = pystan.misc._organize_inits([s['inits'] for s in samples], m_pars, p_dims)
+        # TODO GRAB THE INITIAL SAPMLES HERE
+        inits_used = pystan.misc._organize_inits([s.['inits'] for s in samples], m_pars, p_dims)
 
         random_state = np.random.RandomState(stan_args['seed'])
         chains = 1
