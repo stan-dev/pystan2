@@ -104,7 +104,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     if file is not None:
         if isinstance(file, string_types):
             try:
-                with io.open(file, 'rt', encoding='utf-8') as f:
+                with io.open(file, 'rt', encoding=charset) as f:
                     model_code = f.read()
             except:
                 logger.critical("Unable to read file specified by `file`.")
