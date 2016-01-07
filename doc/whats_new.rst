@@ -6,6 +6,11 @@
  What's New
 ============
 
+v2.9.0.0 (7. Jan 2016)
+======================
+- Update Stan source to v2.9.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.9.0>`_)
+- Bugs fixed in _chains.pyx and model.py (thanks to @stephen-hoover, Paul Kernfeld)
+
 v2.8.0.2 (6. Nov 2015)
 ======================
 - Cython 0.22 or higher requirement included on PyPI
