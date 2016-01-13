@@ -216,7 +216,7 @@ def setup_package():
             # FIXME: if header only works, no need for numpy.distutils at all
             from numpy.distutils.command import install
         except ImportError:
-            raise SystemExit("Cython>=0.19 and NumPy are required.")
+            raise SystemExit("Cython>=0.22 and NumPy are required.")
 
         metadata['ext_modules'] = cythonize(extensions)
         dist = setup(**metadata)

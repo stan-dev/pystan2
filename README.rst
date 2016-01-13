@@ -36,7 +36,7 @@ Installation
 ------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
-(version 0.19 or greater) are required. `matplotlib <http://matplotlib.org/>`_
+(version 0.22 or greater) are required. `matplotlib <http://matplotlib.org/>`_
 is optional.
 
 PyStan and the required packages may be installed from the `Python Package Index
@@ -46,7 +46,7 @@ PyStan and the required packages may be installed from the `Python Package Index
 
    pip install pystan
 
-Alternatively, if Cython (version 0.19 or greater) and NumPy are already
+Alternatively, if Cython (version 0.22 or greater) and NumPy are already
 available, PyStan may be installed from source with the following commands
 
 ::

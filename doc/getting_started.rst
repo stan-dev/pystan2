@@ -14,7 +14,7 @@ Prerequisites
 PyStan has the following dependencies:
 
 - `Python <http://python.org>`_: 2.7, >=3.3
-- `Cython <http://cython.org>`_: >=0.19
+- `Cython <http://cython.org>`_: >=0.22
 - `NumPy <http://numpy.org>`_: >=1.7
 
 PyStan also requires that a C++ compiler be available to Python during
