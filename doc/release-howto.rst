@@ -20,15 +20,29 @@
   - For example, ``git tag --sign v2.4.0.1``
   - Push tag to github ``git push --tags``
 
+
+Upload source distribution
+--------------------------
+
 - Assemble source distribution, sign it, upload to PyPI::
 
     python setup.py sdist
     twine upload --sign dist/*
 
+Upload wheels
+-------------
+
 - Build OS X wheels
-  
+
   - See https://github.com/ariddell/pystan-wheel-builder for instructions.
-  - Download, sign, and upload wheels::
+  - Sign and upload wheels::
+
+    twine upload --sign *.whl
+
+- Build Windows wheels (Python 3.5+ only)
+
+  - Appveyor builds these, download them (from "Artifacts")
+  - Sign and upload wheels::
 
     twine upload --sign *.whl
 
