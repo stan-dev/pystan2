@@ -66,6 +66,7 @@ Example
 
     import pystan
     import numpy as np
+	import matplotlib.pyplot as plt 	# Import matplotlib to show the final plot
 
     schools_code = """
     data {
@@ -104,6 +105,7 @@ Example
     # if matplotlib is installed (optional, not required), a visual summary and
     # traceplot are available
     fit.plot()
+	plt.show() 
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
     :target: https://badge.fury.io/py/pystan
