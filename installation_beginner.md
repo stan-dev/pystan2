@@ -32,6 +32,12 @@ pre-installed.
 Don't worry about Anaconda ruining your current Python installation,
 can can be easily uninstalled (described below).
 
+### Anaconda is not a requirement
+
+Anaconda is not an absolute requirement to get `pystan` to work.
+As long as you can get the necessary python dependencies installed, pystan will work.
+If you want to install Anaconda, follow the Windows, Macs, and Linux instructions below.
+
 ### Windows
 
 The anaconda installer should be able to be double-clicked and
