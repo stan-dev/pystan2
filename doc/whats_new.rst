@@ -6,6 +6,10 @@
  What's New
 ============
 
+TBD
+===
+- Sampling in ``Fixed_param`` mode now works. Thanks to @luac for the fix and @axch for the original report.
+
 v2.9.0.0 (7. Jan 2016)
 ======================
 - Update Stan source to v2.9.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.9.0>`_)

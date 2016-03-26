@@ -567,6 +567,10 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['algorithm'] = sampling_algo_t.NUTS
         elif algorithm == 'Fixed_param':
             args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Fixed_param
+            # TODO: Setting adapt_engaged to False solves the segfault reported
+            # in issue #200; find out why this hack is needed. RStan deals with
+            # the setting elsewhere.
+            ctrl_sampling['adapt_engaged'] = False
         else:
             msg = "Invalid value for parameter algorithm (found {}; " \
                 "require HMC, Metropolis, NUTS, or Fixed_param).".format(algorithm)
