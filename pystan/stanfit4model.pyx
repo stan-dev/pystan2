@@ -219,9 +219,8 @@ cdef dict _dict_from_stanargs(StanArgs* args):
         d["adapt_engaged"] = args.ctrl.variational.adapt_engaged
         d["adapt_iter"] = args.ctrl.variational.adapt_iter
         d["tol_rel_obj"] = args.ctrl.variational.tol_rel_obj
-        #TODO: the following line fails for some reason, need to diagnose
-        #algorithm = variational_algo_t(args.ctrl.variational.algorithm)
-        #d['algorithm'] = algorithm.name
+        algorithm = variational_algo_t(args.ctrl.variational.algorithm)
+        d['algorithm'] = algorithm.name
     elif method == stan_args_method_t.OPTIM:
         d["method"] = method.name
         d["iter"] = args.ctrl.optim.iter
@@ -315,7 +314,17 @@ cdef void _set_stanargs_from_dict(StanArgs* p, dict args):
         p.ctrl.optim.tol_rel_obj = args['ctrl']['optim']['tol_rel_obj']
         p.ctrl.optim.tol_rel_grad = args['ctrl']['optim']['tol_rel_grad']
         p.ctrl.optim.history_size = args['ctrl']['optim']['history_size']
-
+    elif args['method'] == stan_args_method_t.VARIATIONAL:
+        p.ctrl.variational.algorithm = args['ctrl']['variational']['algorithm'].value
+        p.ctrl.variational.iter = args['ctrl']['variational']['iter']
+        p.ctrl.variational.grad_samples = args['ctrl']['variational']['grad_samples']
+        p.ctrl.variational.elbo_samples = args['ctrl']['variational']['elbo_samples']
+        p.ctrl.variational.eval_elbo = args['ctrl']['variational']['eval_elbo']
+        p.ctrl.variational.output_samples = args['ctrl']['variational']['output_samples']
+        p.ctrl.variational.eta = args['ctrl']['variational']['eta']
+        p.ctrl.variational.adapt_engaged = args['ctrl']['variational']['adapt_engaged']
+        p.ctrl.variational.tol_rel_obj = args['ctrl']['variational']['tol_rel_obj']
+        p.ctrl.variational.adapt_iter = args['ctrl']['variational']['adapt_iter']
 
 cdef vars_r_t _dict_to_vars_r(data_r):
     """Converts a dict or OrderedDict to a C++ map of string, double pairs"""

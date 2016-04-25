@@ -567,10 +567,6 @@ def _get_valid_stan_args(base_args=None):
             args['ctrl']['sampling']['algorithm'] = sampling_algo_t.NUTS
         elif algorithm == 'Fixed_param':
             args['ctrl']['sampling']['algorithm'] = sampling_algo_t.Fixed_param
-            # TODO: Setting adapt_engaged to False solves the segfault reported
-            # in issue #200; find out why this hack is needed. RStan deals with
-            # the setting elsewhere.
-            ctrl_sampling['adapt_engaged'] = False
         else:
             msg = "Invalid value for parameter algorithm (found {}; " \
                 "require HMC, Metropolis, NUTS, or Fixed_param).".format(algorithm)
@@ -949,6 +945,9 @@ def _writable_sample_file(file, warn=True, wfun=None):
             logger.warning(wfun(dir, dir2))
         return os.path.join(dir2, os.path.basename(file))
 
+def _temp_sample_file():
+    dir = tempfile.mkdtemp()
+    return os.path.join(dir, 'output.csv')    
 
 def is_legal_stan_vname(name):
     stan_kw1 = ('for', 'in', 'while', 'repeat', 'until', 'if', 'then', 'else',

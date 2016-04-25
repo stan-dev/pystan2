@@ -758,7 +758,7 @@ class StanModel:
         return fit
 
     def vb(self, data=None, pars=None, iter=10000,
-           seed=None, sample_file=None, verbose=False,
+           seed=None, init='random', sample_file=None, verbose=False,
            algorithm=None, **kwargs):
         """Call Stan's variational Bayes methods.
 
@@ -783,11 +783,11 @@ class StanModel:
 
         sample_file : string, optional
             File name specifying where samples for *all* parameters and other
-            saved quantities will be written. If not provided, no samples
-            will be written. If the folder given is not writable, a temporary
-            directory will be used. When there are multiple chains, an underscore
-            and chain number are appended to the file name. By default do not
-            write samples to file.
+            saved quantities will be written. If not provided, samples will be
+            written to a temporary file and read back in. If the folder given is
+            not writable, a temporary directory will be used. When there are
+            multiple chains, an underscore and chain number are appended to the
+            file name. By default do not write samples to file.
 
         iter : int, 10000 by default
             Positive integer specifying how many iterations for each chain
@@ -808,18 +808,20 @@ class StanModel:
 
         -  `iter`:  the maximum number of iterations, defaults to 10000
         -  `grad_samples` the number of samples for Monte Carlo enumerate of
-            gradients, defaults to 1.
+           gradients, defaults to 1.
         -  `elbo_samples` the number of samples for Monte Carlo estimate of ELBO
            (objective function), defaults to 100. (ELBO stands for "the evidence
            lower bound".)
         -  `eta` positive stepsize weighting parameters for variational
-           inference but is ignored if adaptation is engaged, which is the case by
-           default.
+           inference but is ignored if adaptation is engaged, which is the case
+           by default.
         -  `adapt_engaged` flag indicating whether to automatically adapt the
            stepsize and defaults to True.
-        -  `tol_rel_obj`convergence tolerance on the relative norm of the objective, defaults to 0.01.
+        -  `tol_rel_obj`convergence tolerance on the relative norm of the
+           objective, defaults to 0.01.
         -  `eval_elbo`, evaluate ELBO every Nth iteration, defaults to 100
-        -  `output_samples` number of posterior samples to draw and save, defaults to 1000.
+        -  `output_samples` number of posterior samples to draw and save,
+           defaults to 1000.
         -  `adapt_iter`  number of iterations to adapt the stepsize if
            `adapt_engaged` is True and ignored otherwise.
 
@@ -845,15 +847,26 @@ class StanModel:
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
+        if isinstance(init, Number):
+            init = str(init)
+        elif isinstance(init, Callable):
+            init = init()
+        elif not isinstance(init, Iterable) and \
+                not isinstance(init, string_types):
+            raise ValueError("Wrong specification of initial values.")
+
         seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(iter=iter,
+                         init=init,
                          chain_id=1,
                          seed=seed,
                          method="variational",
                          algorithm=algorithm)
         if sample_file is not None:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
+        else:
+            stan_args['sample_file'] = pystan.misc._temp_sample_file()
 
         # check that arguments in kwargs are valid
         valid_args = {'elbo_samples', 'eta', 'adapt_engaged', 'eval_elbo',
@@ -867,37 +880,9 @@ class StanModel:
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
 
         ret, sample = fit._call_sampler(stan_args)
-        samples = [sample]
 
-        # _organize_inits strips out lp__ (RStan does it in this method)
-        # TODO GRAB THE INITIAL SAPMLES HERE
-        #inits_used = pystan.misc._organize_inits([s.['inits'] for s in samples], m_pars, p_dims)
+        # FIXME: samples.chains is an empty OrderedDict()
 
-        random_state = np.random.RandomState(stan_args['seed'])
-        chains = 1
-        output_samples = int(stan_args['ctrl']['output_samples'])
-        perm_lst = [random_state.permutation(output_samples) for _ in range(chains)]
-        fnames_oi = fit._get_param_fnames_oi()
-        n_flatnames = len(fnames_oi)
-        fit.sim = {'samples': samples,
-                   # rstan has this; name clashes with 'chains' in samples[0]['chains']
-                   'chains': len(samples),
-                   'iter': iter,
-                   'warmup': 0,
-                   'thin': 1,
-                   'n_save': [output_samples] * chains,
-                   'warmup2': [0] * chains,
-                   'permutation': perm_lst,
-                   'pars_oi': fit._get_param_names_oi(),
-                   'dims_oi': fit._get_param_dims_oi(),
-                   'fnames_oi': fnames_oi,
-                   'n_flatnames': n_flatnames}
-        fit.model_name = self.model_name
-        fit.model_pars = m_pars
-        fit.par_dims = p_dims
-        fit.mode = 0 if not kwargs.get('test_grad') else 1
-        fit.inits = inits_used
-        fit.stan_args = [stan_args]
-        fit.stanmodel = self
-        fit.date = datetime.datetime.now()
-        return fit
+        return OrderedDict([('args', sample.args),
+                            ('mean_pars', sample.mean_pars),
+                            ('samples', sample.chains)])
