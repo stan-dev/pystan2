@@ -1087,6 +1087,13 @@ namespace pystan {
         std::cout << std::endl;
         std::cout << std::endl;
 
+
+        // FIXME(AR): WIP trying to get ADVI working with new API
+        stan::interface_callbacks::writer::stream_writer message_writer(std::cout, "# ");
+        stan::interface_callbacks::writer::stream_writer parameter_writer(sample_stream);
+        stan::interface_callbacks::writer::stream_writer diagnostic_writer
+          = diagnostic_writer_factory(&diagnostic_stream, "# ");
+
         if (args.get_ctrl_variational_algorithm() == FULLRANK) {
           if (args.get_sample_file_flag()) {
             std::vector<std::string> names;
@@ -1104,12 +1111,9 @@ namespace pystan {
                      grad_samples,
                      elbo_samples,
                      eval_elbo,
-                     output_samples,
-                     &std::cout,
-                     &sample_stream,
-                     &diagnostic_stream);
-            cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, 
-                         max_iterations);
+                     output_samples);
+            cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, max_iterations,
+                         message_writer, parameter_writer, diagnostic_writer);
         }
 
         if (args.get_ctrl_variational_algorithm() == MEANFIELD) {
@@ -1129,12 +1133,9 @@ namespace pystan {
                      grad_samples,
                      elbo_samples,
                      eval_elbo,
-                     output_samples,
-                     &std::cout,
-                     &sample_stream,
-                     &diagnostic_stream);
-              cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, 
-                           max_iterations);
+                     output_samples);
+              cmd_advi.run(eta, adapt_engaged, adapt_iterations, tol_rel_obj, max_iterations,
+                           message_writer, parameter_writer, diagnostic_writer);
         }
         holder.args = args;
         return 0;
