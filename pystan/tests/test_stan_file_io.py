@@ -36,7 +36,7 @@ class TestStanFileIO(unittest.TestCase):
         code = stanc(file=temp_fn)['model_code']
         fit = stan(model_code=code, data=bernoulli_data)
         extr = fit.extract(permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
 
@@ -47,7 +47,7 @@ class TestStanFileIO(unittest.TestCase):
 
         # permuted=True
         extr = fit.extract('lp__', permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0
         extr = fit.extract('theta', permuted=True)
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
@@ -57,7 +57,7 @@ class TestStanFileIO(unittest.TestCase):
 
         fit = stan(file=temp_fn, data=bernoulli_data)
         extr = fit.extract(permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
 
@@ -68,7 +68,7 @@ class TestStanFileIO(unittest.TestCase):
 
         # permuted=True
         extr = fit.extract('lp__', permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0
         extr = fit.extract('theta', permuted=True)
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02

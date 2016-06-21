@@ -16,18 +16,18 @@ class TestESS(unittest.TestCase):
     def test_ess(self):
         sim = self.fit.sim
         ess = pystan.chains.ess(sim, 0)
-        self.assertAlmostEqual(ess, 847, delta=1)
+        self.assertAlmostEqual(ess, 1333.7, delta=1)
         ess2 = pystan.chains.ess(sim, 1)
-        self.assertAlmostEqual(ess2, 1028, delta=3)
+        self.assertAlmostEqual(ess2, 1062.4, delta=3)
 
     def test_autocovariance(self):
         sim = self.fit.sim
         chain = 0
         param = 0
         acov = pystan._chains._test_autocovariance(sim, chain, param)
-        self.assertAlmostEqual(sum(acov), -2.421734247115643)
+        self.assertAlmostEqual(sum(acov), -0.36232950982168854)
         acov = pystan._chains._test_autocovariance(sim, chain, param + 1)
-        self.assertAlmostEqual(sum(acov), -0.49158350153840447 )
+        self.assertAlmostEqual(sum(acov), -1.9305054433755608)
 
     def test_stan_functions(self):
         pystan._chains._test_stan_functions()

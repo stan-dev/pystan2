@@ -91,12 +91,12 @@ class TestBernoulli(unittest.TestCase):
     def test_bernoulli_extract(self):
         fit = self.fit
         extr = fit.extract(permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0, np.mean(extr['lp__'])
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
 
         # use __getitem__
-        assert -7.4 < np.mean(fit['lp__']) < -7.0
+        assert -7.9 < np.mean(fit['lp__']) < -7.0, np.mean(fit['lp__'])
         assert 0.1 < np.mean(fit['theta']) < 0.4
         assert 0.01 < np.var(fit['theta']) < 0.02
 
@@ -107,7 +107,7 @@ class TestBernoulli(unittest.TestCase):
 
         # permuted=True
         extr = fit.extract('lp__', permuted=True)
-        assert -7.4 < np.mean(extr['lp__']) < -7.0
+        assert -7.9 < np.mean(extr['lp__']) < -7.0
         extr = fit.extract('theta', permuted=True)
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
