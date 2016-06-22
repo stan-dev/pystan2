@@ -98,15 +98,17 @@ else:
 from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
-stan_include_dirs = ["pystan/stan/src",
-                     "pystan/stan/lib/stan_math/",
-                     "pystan/stan/lib/stan_math/lib/eigen_3.2.4",
-                     "pystan/stan/lib/stan_math/lib/boost_1.58.0"]
+stan_include_dirs = ['pystan/stan/src',
+                     'pystan/stan/lib/stan_math_2.10.0/',
+                     'pystan/stan/lib/stan_math_2.10.0/lib/eigen_3.2.8',
+                     'pystan/stan/lib/stan_math_2.10.0/lib/boost_1.60.0',
+                     'pystan/stan/lib/stan_math_2.10.0/lib/cvodes_2.8.2/include']
 stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
     ('BOOST_NO_DECLTYPE', None),
     ('BOOST_DISABLE_ASSERTS', None),
     ('EIGEN_NO_DEBUG', None),
+    ('FUSION_MAX_VECTOR_SIZE', 12),  # for parser, stan-dev/pystan#222
 ]
 extra_compile_args = [
     '-O0',
@@ -130,6 +132,7 @@ stanc_sources = [
     "pystan/stan/src/stan/lang/grammars/functions_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/indexes_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/program_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/semantic_actions_def.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_2_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/term_grammar_inst.cpp",
