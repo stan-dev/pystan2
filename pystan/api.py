@@ -301,6 +301,10 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         default interval (see the manual of (Cmd)Stan).
 
     test_grad: bool, optional
+        If `test_grad` is ``True``, Stan will not do any sampling. Instead,
+        the gradient calculation is tested and printed out and the fitted
+        StanFit4Model object is in test gradient mode.  By default, it is
+        ``False``.
 
     append_samples`: bool, optional
 
