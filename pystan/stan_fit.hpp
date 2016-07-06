@@ -231,14 +231,13 @@ namespace pystan {
     inline int get_ctrl_variational_adapt_iter() const {
       return ctrl.variational.adapt_iter;
     }
-    
     inline int get_ctrl_sampling_refresh() const {
       return ctrl.sampling.refresh;
     }
-    const inline sampling_metric_t get_ctrl_sampling_metric() const {
+    inline sampling_metric_t get_ctrl_sampling_metric() const {
       return ctrl.sampling.metric;
     }
-    const inline sampling_algo_t get_ctrl_sampling_algorithm() const {
+    inline sampling_algo_t get_ctrl_sampling_algorithm() const {
       return ctrl.sampling.algorithm;
     }
     inline int get_ctrl_sampling_warmup() const {
@@ -980,8 +979,8 @@ namespace pystan {
       {
         std::string init;
         pystan::io::py_var_context_factory context_factory(args.init_vars_r, args.init_vars_i);
-        
-        if (init_val == "0") 
+
+        if (init_val == "0")
           init = "0";
         else if (init_val == "user")
           init = "user";
@@ -1004,7 +1003,7 @@ namespace pystan {
         for (int n = 0; n < cont_params.size(); n++)
           cont_vector[n] = cont_params[n];
       }
-      
+
       // keep a record of the initial values
       std::vector<double> initv;
       model.write_array(base_rng,cont_vector,disc_vector,initv);
@@ -1013,8 +1012,8 @@ namespace pystan {
         std::cout << std::endl << "TEST GRADIENT MODE" << std::endl;
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
-        ss.str("");
 
+        stan::interface_callbacks::writer::stream_writer info(std::cout);
         int num_failed =
           stan::model::test_gradients<true,true>(model,cont_vector,disc_vector,
                                                  epsilon,error,info);
@@ -1034,6 +1033,8 @@ namespace pystan {
                            : std::fstream::out;
         sample_stream.open(args.get_sample_file().c_str(), samples_append_mode);
       }
+
+      stan::interface_callbacks::writer::stream_writer sample_writer(sample_stream, "# ");
 
       if (VARIATIONAL == args.get_method()) {
         int grad_samples = args.get_ctrl_variational_grad_samples();
@@ -1197,9 +1198,9 @@ namespace pystan {
           lbfgs._conv_opts.tolRelGrad = args.get_ctrl_optim_tol_rel_grad();
           lbfgs._conv_opts.tolAbsX    = args.get_ctrl_optim_tol_param();
           lbfgs._conv_opts.maxIts     = args.get_iter();
-          
+
           stan::interface_callbacks::writer::stream_writer sampler_writer(sample_stream);
-          
+
           stan::services::optimize::do_bfgs_optimize(model, lbfgs, base_rng,
                                                      lp, cont_vector, disc_vector,
                                                      sampler_writer, info,
@@ -1335,7 +1336,7 @@ namespace pystan {
         }
         return 0;
       }
-      
+
       for (size_t i = 0; i < cont_vector.size(); i++) cont_params(i) = cont_vector[i];
 
       // method = 3 //sampling
@@ -1379,7 +1380,7 @@ namespace pystan {
         return 0;
 
       }
-      
+
       switch (algorithm) {
          case Metropolis: engine_index = 3; break;
          case HMC: engine_index = 0; break;
@@ -1387,7 +1388,7 @@ namespace pystan {
          default: engine_index = 10000; // make it fail in the end
       }
       int sampler_select = engine_index + 10 * metric_index;
-      if (args.get_ctrl_sampling_adapt_engaged())  sampler_select += 100;      
+      if (args.get_ctrl_sampling_adapt_engaged())  sampler_select += 100;
       switch (sampler_select) {
         case 0: {
           typedef stan::mcmc::unit_e_static_hmc<Model, RNG_t> sampler_t;

@@ -271,7 +271,6 @@ class StanModel:
             ('BOOST_RESULT_OF_USE_TR1', None),
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
-            ('EIGEN_NO_DEBUG', None),
         ]
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
