@@ -248,6 +248,7 @@ class StanModel:
         nonce = abs(hash((self.model_name, time.time())))
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
         lib_dir = tempfile.mkdtemp(dir=temp_dir)
+        self.temp_dir = temp_dir
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [
             lib_dir,
@@ -364,7 +365,7 @@ class StanModel:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        lib_dir = tempfile.mkdtemp(dir=temp_dir)
+        lib_dir = tempfile.mkdtemp(dir=self.temp_dir)
         with io.open(os.path.join(lib_dir, self.module_filename), 'wb') as f:
             f.write(self.module_bytes)
         try:
