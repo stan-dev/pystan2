@@ -129,6 +129,11 @@ class StanModel:
     eigen_lib : string
         The path to a version of the Eigen C++ library to use instead of
         the one in the supplied with PyStan.
+    
+    temp_dir : string
+        The path to the temporary directory where compiled models are
+        stored during the execution. By default it is the directory
+        specified by tempfile.tempdir variable.
 
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the console.
@@ -200,7 +205,8 @@ class StanModel:
     """
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
-                 eigen_lib=None, verbose=False, obfuscate_model_name=True):
+                 eigen_lib=None, verbose=False, obfuscate_model_name=True,
+                 temp_dir=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -241,7 +247,8 @@ class StanModel:
         # module_name needs to be unique so that each model instance has its own module
         nonce = abs(hash((self.model_name, time.time())))
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
-        lib_dir = tempfile.mkdtemp()
+        lib_dir = tempfile.mkdtemp(dir=temp_dir)
+        self.temp_dir = temp_dir
         pystan_dir = os.path.dirname(__file__)
         include_dirs = [
             lib_dir,
@@ -358,7 +365,7 @@ class StanModel:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        lib_dir = tempfile.mkdtemp()
+        lib_dir = tempfile.mkdtemp(dir=self.temp_dir)
         with io.open(os.path.join(lib_dir, self.module_filename), 'wb') as f:
             f.write(self.module_bytes)
         try:
