@@ -271,7 +271,6 @@ class StanModel:
             ('BOOST_RESULT_OF_USE_TR1', None),
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
-            ('EIGEN_NO_DEBUG', None),
         ]
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
@@ -440,17 +439,19 @@ class StanModel:
         save_iterations : bool, optional
         refresh : int, optional
         init_alpha : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 0.001
+            For BFGS and LBFGS, default is 0.001
         tol_obj : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-12.
+            For BFGS and LBFGS, default is 1e-12.
         tol_grad : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, default is 1e-8.
         tol_param : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e-8.
+            For BFGS and LBFGS, default is 1e-8.
         tol_rel_grad : float, optional
-            For BFGS and LBFGS, see (Cmd)Stan manual. Default is 1e7.
+            For BFGS and LBFGS, default is 1e7.
         history_size : int, optional
-            For LBFGS, see (Cmd)Stan manual. Default is 5.
+            For LBFGS, default is 5.
+
+        Refer to the manuals for both CmdStan and Stan for more details.
 
         Examples
         --------
@@ -635,6 +636,10 @@ class StanModel:
             default interval (see the manual of Stan).
 
         test_grad: bool, optional
+            If `test_grad` is ``True``, Stan will not do any sampling. Instead,
+            the gradient calculation is tested and printed out and the fitted
+            StanFit4Model object is in test gradient mode.  By default, it is
+            ``False``.
 
         append_samples`: bool, optional
 

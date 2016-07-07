@@ -107,7 +107,6 @@ stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
     ('BOOST_NO_DECLTYPE', None),
     ('BOOST_DISABLE_ASSERTS', None),
-    ('EIGEN_NO_DEBUG', None),
     ('FUSION_MAX_VECTOR_SIZE', 12),  # for parser, stan-dev/pystan#222
 ]
 extra_compile_args = [
