@@ -77,6 +77,14 @@ class Test8Schools(unittest.TestCase):
         self.assertRaises(ValueError, fit.extract, 'theta')
         self.assertIsNotNone(fit.extract(permuted=False))
 
+    def test_8schools_bad_pars(self):
+        model = self.model
+        data = self.schools_dat
+        pars = ['mu', 'missing']  # 'missing' is not in the model
+        self.assertRaises(ValueError, model.sampling,
+                          data=data, pars=pars, iter=100)
+
+
 class TestParsLabels(unittest.TestCase):
 
     @classmethod
