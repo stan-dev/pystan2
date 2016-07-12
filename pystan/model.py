@@ -200,7 +200,8 @@ class StanModel:
     """
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
-                 eigen_lib=None, verbose=False, obfuscate_model_name=True):
+                 eigen_lib=None, verbose=False, obfuscate_model_name=True,
+                 extra_compile_args=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -274,18 +275,15 @@ class StanModel:
         ]
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
-        extra_compile_args = [
-            '-O2',
-            '-ftemplate-depth-256',
-            '-Wno-unused-function',
-            '-Wno-uninitialized',
-        ]
-
-        if platform.platform().startswith('Win'):
+        if extra_compile_args is None:
             extra_compile_args = [
-                '/EHsc',
-                '-DBOOST_DATE_TIME_NO_LIB',
+                '-O2',
+                '-ftemplate-depth-256',
+                '-Wno-unused-function',
+                '-Wno-uninitialized',
             ]
+            if platform.platform().startswith('Win'):
+                extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
