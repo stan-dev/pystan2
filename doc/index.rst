@@ -19,6 +19,7 @@ Documentation
    :maxdepth: 1
 
    getting_started
+   installation_beginner
    optimizing
    avoiding_recompilation
    differences_pystan_rstan
