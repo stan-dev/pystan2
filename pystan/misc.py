@@ -988,10 +988,7 @@ def _dict_to_rdump(data):
         if value.ndim == 0:
             s = '{} <- {}\n'.format(name, str(value))
         elif value.ndim == 1:
-            if len(value) == 1:
-                s = '{} <- {}\n'.format(name, str(value.pop()))
-            else:
-                s = '{} <-\nc({})\n'.format(name, ', '.join(str(v) for v in value))
+            s = '{} <-\nc({})\n'.format(name, ', '.join(str(v) for v in value))
         elif value.ndim > 1:
             tmpl = '{} <-\nstructure(c({}), .Dim = c({}))\n'
             # transpose value as R uses column-major
