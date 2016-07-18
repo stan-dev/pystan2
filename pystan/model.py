@@ -573,10 +573,6 @@ class StanModel:
             and chain number are appended to the file name. By default do not
             write samples to file.
 
-        diagnostic_file : str, optional
-            File name indicating where diagonstic data for all parameters
-            should be written. If not writable, a temporary directory is used.
-
         verbose : boolean, False by default
             Indicates whether intermediate output should be piped to the
             console. This output may be useful for debugging.
