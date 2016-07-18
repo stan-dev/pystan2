@@ -7,33 +7,35 @@ import pystan
 
 class TestNormalVB(unittest.TestCase):
 
+    seed = 1
+
     @classmethod
     def setUpClass(cls):
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-        cls.model = pystan.StanModel(model_code=model_code, model_name="normal1",
-                                     verbose=True, obfuscate_model_name=False)
-
-    def test_constructor(self):
-        self.assertEqual(self.model.model_name, "normal1")
-        self.assertEqual(self.model.model_cppname, "normal1")
-
-    def test_log_prob(self):
-        fit = self.model.sampling()
-        extr = fit.extract()
-        y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
-        self.assertEqual(fit.log_prob(y_last), log_prob_last)
+        cls.model = pystan.StanModel(model_code=model_code)
 
     def test_vb_default(self):
-        vbf = self.model.vb()
-        self.assertIsNotNone(vbf)
+        vbf1 = self.model.vb(seed=self.seed)
+        self.assertIsNotNone(vbf1)
+        csv_fn = vbf1['args']['sample_file'].decode('ascii')
+        with open(csv_fn) as f:
+            csv_sample1 = f.readlines()[10]
+
+        # vb run with same seed should yield identical results
+        vbf2 = self.model.vb(seed=self.seed)
+        self.assertIsNotNone(vbf2)
+        csv_fn = vbf2['args']['sample_file'].decode('ascii')
+        with open(csv_fn) as f:
+            csv_sample2 = f.readlines()[10]
+        self.assertEqual(csv_sample1, csv_sample2)
 
     def test_vb_fullrank(self):
-        vbf = self.model.vb(algorithm='fullrank')
+        vbf = self.model.vb(algorithm='fullrank', seed=self.seed)
         self.assertIsNotNone(vbf)
 
     def test_vb_sample_file(self):
         sample_file = '/tmp/vb-results.csv'
-        vbf = self.model.vb(algorithm='fullrank', sample_file=sample_file)
+        vbf = self.model.vb(algorithm='fullrank', sample_file=sample_file, seed=self.seed)
         self.assertIsNotNone(vbf)
         self.assertEqual(vbf['args']['sample_file'].decode('utf-8'), sample_file)
         self.assertTrue(os.path.exists(sample_file))
