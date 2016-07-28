@@ -6,6 +6,10 @@
  What's New
 ============
 
+V2.11.0.0 (28. July 2016)
+=========================
+- Update Stan source to v2.11.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.11.0>`_)
+
 V2.10.0.0 (18. July 2016)
 =========================
 - Update Stan source to v2.10.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.10.0>`_)
