@@ -110,8 +110,7 @@ instead of directly declaring theta as parameters. By parameterizing this way,
 the sampler will run more efficiently.
 
 In PyStan, we can also specify the Stan model using a file. For example, we can
-download the file `8schools.stan
-<https://raw.githubusercontent.com/stan-dev/pystan/develop/pystan/stan/src/models/misc/eight_schools/eight_schools.stan>`_ into
+download the file :download:`8schools.stan <8schools.stan>` into
 our working directory and use the following call to ``stan`` instead:
 
 .. code-block:: python
