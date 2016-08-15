@@ -682,7 +682,7 @@ class StanModel:
                 pars = np.asarray(pars)
                 unmatched = pars[np.invert(np.in1d(pars, m_pars))]
                 msg = "No parameter(s): {}; sampling not done."
-                raise ValueError(msg.format(', '.join(pars[unmatched])))
+                raise ValueError(msg.format(', '.join(unmatched)))
         else:
             pars = m_pars
 
