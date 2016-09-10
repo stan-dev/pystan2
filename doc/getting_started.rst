@@ -55,9 +55,15 @@ Mac OS X users encountering installation problems may wish to consult the
 Windows
 -------
 
-PyStan requires a working C++ compiler. Using PyStan with `Anaconda
-<https://store.continuum.io/cshop/anaconda/>`_ and Visual Studio 2008 is
-documented in :ref:`windows`.
+PyStan on Windows requires Python 3.5 or higher and a working C++ compiler.  If
+you have already installed Python 3.5 (or higher) and the Microsoft Visual C++
+14.0 (or higher) compiler, running ``pip install pystan`` will install PyStan.
+Note that you must specify ``n_jobs=1`` when drawing samples using Stan because
+PyStan on Windows is not currently able to use multiple processors
+simultaneously.
+
+If you need to install a C++ compiler, you will find detailed installation
+instructions in :ref:`windows`.
 
 Using PyStan
 ============

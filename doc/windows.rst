@@ -6,61 +6,61 @@
  PyStan on Windows
 ===================
 
-Caveats
-=======
+PyStan is supported under Windows with the following caveats:
 
-- PyStan on Windows does not support multiprocessing. You *must* specify
-  ``n_jobs=1`` when calling the ``stan`` function or using the ``sampling``
-  method.
+- Python 3.5 or higher must be used.
+- When drawing samples ``n_jobs=1`` must be used. (PyStan on Windows cannot use multiple processors in parallel.)
 
-Installation
-============
+PyStan requires a working C++ compiler. Configuring such a compiler is
+typically the most challenging step in getting PyStan running.
 
-Recommended method: Anaconda Python 2.7 and Visual Studio 2008 Express
-----------------------------------------------------------------------
+Installing Python
+=================
 
-Those using (or are willing to use) the Anaconda Python distribution and a free
-compiler provided by Microsoft will find installation of PyStan relatively
-painless. Instructions about downloading and configuring the compiler, Visual
-Studio 2008 Express, may be found on the Menpo wiki: `Setting up a development
-environment
-<https://github.com/menpo/menpo/wiki/%5BDevelopment-Windows%5D-Setting-up-a-development-environment>`_.
+There several ways of installing PyStan on Windows. The following instructions
+assume you have installed Python 3.5 (or higher) as packaged in the `Anaconda
+Python distribution <https://www.continuum.io/downloads#windows>`. (Make sure
+you install the Python 3 variant of Anaconda.) The Anaconda distribution is
+well-maintained and includes packages such as Numpy which PyStan requires. The
+following instructions assume that you are using Windows 7.  (`Windows 10
+disregards user choice and user privacy
+<https://www.eff.org/deeplinks/2016/08/windows-10-microsoft-blatantly-disregards-user-choice-and-privacy-deep-dive>`_.)
 
-Once you have Visual Studio 2008 installed and Anaconda's Python 2.7, you can
-install a binary version of PyStan provided by Patrick Snape with the following
-command:
+Installing a C++ Compiler
+=========================
 
-::
+This section describes how to install the Microsoft Visual C++ 14.0 compiler.
+It is likely that PyStan will work with more recent Microsoft Visual C++
+compilers as well.
 
-    conda install -c patricksnape pystan
+Navigate to the `Visual C++ Build Tools
+<http://landinghub.visualstudio.com/visual-cpp-build-tools>`_ page and click on
+"Download Visual C++ Build Tools 2015".
 
+If you encounter problems you may find the `Windows Compilers
+<https://wiki.python.org/moin/WindowsCompilers>`_ page on the Python Wiki
+useful. Note that on Windows 7 you may need to update the installed version of
+the Microsoft .NET Framework before installing the Visual C++ Build Tools.
 
-If the ``conda install`` command succeeds, PyStan is available for use. You will
-be able to ``import pystan`` from the Python interpreter.
+Installing PyStan
+=================
 
+Once you have the compiler installed, installing PyStan is easy. Open the
+application called "Command Prompt" (``cmd.exe``) and enter the following
+command::
 
-Installation from source (experimental)
----------------------------------------
+    pip install pystan
 
-*Installing PyStan from source on Windows is not currently supported. If you
-have experience compiling C++ extensions on Windows, you may find the following
-suggestions helpful. If you manage to install PyStan from source, please share
-your experiences with: stan-users@googlegroups.com*
+You can verify that everything was installed successfully by opening up the
+Python terminal (run ``python`` from a command prompt) and drawing samples from
+a very simple model::
 
-When you provide your model code to (Py)Stan, Stan generates and compiles C++
-code that corresponds to your model. In order to compile the generated C++ code,
-Stan needs a C++ compiler. Because this compiled Stan model communicates with
-Python, the compiler used *should be the same compiler that compiled Python*.
-The following instructions assume that you are using Python 2.7.x and that your
-version of Python has been compiled with Visual Studio 2008.
+    >>> import pystan
+    >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+    >>> model = pystan.StanModel(model_code=model_code)
+    >>> y = model.sampling(n_jobs=1).extract()['y']
+    >>> y.mean()  # with luck the result will be near 0
 
-In order to compile on Windows you will need to make modifications to `extra_compile_args` in
-``setup.py`` and ``pystan/model.py``. Please replace the compile options as below for Visual Studio 2008
-are:
-
-    - ``/Ox`` which turns on optimization
-    - ``/EHsc`` which turns on exceptions for boost
-    - ``-DBOOST_DATE_TIME_NO_LIB`` which solves a bug in linking boost
-
-For more information about the compiler options, please refer `Compiler Options List <https://msdn.microsoft.com/library/19z1t1wy(v=vs.120).aspx>`_.
-These flags need to be set in ``setup.py`` and in ``model.py``.
+Again, remember that using ``n_jobs=1`` when calling ``sampling`` is required
+as PyStan on Windows does not support sampling using multiple processors in
+parallel.
