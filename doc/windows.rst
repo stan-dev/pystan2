@@ -19,7 +19,7 @@ Installing Python
 
 There several ways of installing PyStan on Windows. The following instructions
 assume you have installed Python 3.5 (or higher) as packaged in the `Anaconda
-Python distribution <https://www.continuum.io/downloads#windows>`. (Make sure
+Python distribution <https://www.continuum.io/downloads#windows>`_. (Make sure
 you install the Python 3 variant of Anaconda.) The Anaconda distribution is
 well-maintained and includes packages such as Numpy which PyStan requires. The
 following instructions assume that you are using Windows 7.  (`Windows 10
