@@ -53,7 +53,7 @@ and Linux instructions below.
 Windows
 ~~~~~~~
 
-The anaconda installer should be able to be double-clicked and
+The Anaconda installer should be able to be double-clicked and
 installed. Use all of the defaults for installation except make sure to
 check Make Anaconda the default Python.
 
@@ -68,8 +68,8 @@ Linux
 ~~~~~
 
 After downloading the installer execute the associated shell script. For
-example, if the file downloaded were named ``Anaconda-2.3.0-Linux-x86_64.sh``
-you would enter ``bash Anaconda-2.3.0-Linux-x86_64.sh`` in the directory where
+example, if the file downloaded were named ``Anaconda3-4.1.1-Linux-x86_64.sh``
+you would enter ``bash Anaconda3-4.1.1-Linux-x86_64.sh`` in the directory where
 you downloaded the file.
 
 Uninstalling Anaconda
