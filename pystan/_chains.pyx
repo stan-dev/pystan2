@@ -133,22 +133,24 @@ def effective_sample_size(dict sim, int n):
         var_plus = var_plus + stan_variance(chain_mean)
 
     cdef vector[double] rho_hat_t
+    for _ in range(n_samples):
+        rho_hat_t.push_back(0)
     cdef double rho_hat = 0
+    cdef int max_t = 0
+    cdef int t = 1
     cdef vector[double] acov_t
-    cdef int t = 0
     while t < n_samples and rho_hat >= 0:
         acov_t.clear()
         for chain in range(m):
             acov_t.push_back(acov[chain][t])
         rho_hat = 1 - (mean_var - stan_mean(acov_t)) / var_plus
         if rho_hat >= 0:
-            rho_hat_t.push_back(rho_hat)
+            rho_hat_t[t] = rho_hat
+        max_t = t
         t += 1
-
     cdef double ess = m * n_samples
-    if rho_hat_t.size() > 0:
+    if max_t > 1:
         ess = ess / (1 + 2 * stan_sum(rho_hat_t))
-
     return ess
 
 
