@@ -111,6 +111,7 @@ stan_macros = [
 ]
 extra_compile_args = [
     '-Os',
+    '-std=c++11',
     '-ftemplate-depth-256',
     '-Wno-unused-function',
     '-Wno-uninitialized',

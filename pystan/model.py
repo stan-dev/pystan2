@@ -278,6 +278,7 @@ class StanModel:
         if extra_compile_args is None:
             extra_compile_args = [
                 '-O2',
+                '-std=c++11',
                 '-ftemplate-depth-256',
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
