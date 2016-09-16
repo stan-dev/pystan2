@@ -6,6 +6,12 @@
  What's New
 ============
 
+V2.12.0.0 (15. Sept 2016)
+=========================
+- Update Stan source to v2.12.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.12.0>`_)
+- #239 Fix bug in array indexing (thanks @stephen-hoover)
+- #254 FIx off-by-one error in estimated sample size calculation
+
 V2.11.0.0 (28. July 2016)
 =========================
 - Update Stan source to v2.11.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.11.0>`_)

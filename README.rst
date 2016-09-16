@@ -3,6 +3,7 @@ PyStan: The Python Interface to Stan
 
 .. image:: https://raw.githubusercontent.com/stan-dev/logos/master/logo.png
     :alt: Stan logo
+    :scale: 50 %
 
 |pypi| |travis| |appveyor|
 
