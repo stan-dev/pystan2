@@ -8,7 +8,7 @@ def ess(sim, n):
     ----------
     sim : chains
     n : int
-        Chain index starting from 0
+        Parameter index starting from 0
     """
     return _chains.effective_sample_size(sim, n)
 
@@ -20,7 +20,7 @@ def splitrhat(sim, n):
     ----------
     sim : chains
     n : int
-        Chain index starting from 0
+        Parameter index starting from 0
     """
     return _chains.split_potential_scale_reduction(sim, n)
 

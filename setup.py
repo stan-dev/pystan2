@@ -99,10 +99,10 @@ from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
 stan_include_dirs = ['pystan/stan/src',
-                     'pystan/stan/lib/stan_math_2.11.0/',
-                     'pystan/stan/lib/stan_math_2.11.0/lib/eigen_3.2.8',
-                     'pystan/stan/lib/stan_math_2.11.0/lib/boost_1.60.0',
-                     'pystan/stan/lib/stan_math_2.11.0/lib/cvodes_2.8.2/include']
+                     'pystan/stan/lib/stan_math_2.12.0/',
+                     'pystan/stan/lib/stan_math_2.12.0/lib/eigen_3.2.9',
+                     'pystan/stan/lib/stan_math_2.12.0/lib/boost_1.60.0',
+                     'pystan/stan/lib/stan_math_2.12.0/lib/cvodes_2.8.2/include']
 stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -110,7 +110,7 @@ stan_macros = [
     ('FUSION_MAX_VECTOR_SIZE', 12),  # for parser, stan-dev/pystan#222
 ]
 extra_compile_args = [
-    '-O0',
+    '-Os',
     '-ftemplate-depth-256',
     '-Wno-unused-function',
     '-Wno-uninitialized',

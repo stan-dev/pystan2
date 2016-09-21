@@ -8,7 +8,7 @@
 - Double check version number in ``pystan/__init__.py``
 - Update version in snippet in ``doc/getting_started.rst``, i.e., "wget ..."
 - Commit any changes you just made.
-- Verify building source distribution works, ``python setup.py sdist``
+- Double check that tests pass for this commit.
 - Fast-forward branch ``master`` to ``develop``.
 - Release documentation
 
@@ -20,39 +20,31 @@
   - For example, ``git tag --sign v2.4.0.1``
   - Push tag to github ``git push --tags``
 
+- Assemble source distribution::
 
-Upload source distribution
---------------------------
+  ./build_dist.sh
 
-- Assemble source distribution, sign it, upload to PyPI::
+- Upload source distribution::
 
-    python setup.py sdist
     twine upload --sign dist/*
 
-Upload wheels
--------------
+Build Wheels
+------------
 
-- Build OS X wheels
+Linux and OSX: in the ``pystan-wheels`` repo update the ``pystan`` submodule
+and bump the version in ``.travis.yml``. Push changes.
 
-  - See https://github.com/ariddell/pystan-wheel-builder for instructions.
-  - Sign and upload wheels::
+Windows: ``appveyor.yml`` in the ``pystan`` repo takes care of building Windows
+wheels.
 
-    twine upload --sign *.whl
+Upload Wheels
+---------------
 
-- Build Windows wheels (Python 3.5+ only)
-
-  - Appveyor builds these, download them (from "Artifacts")
-  - Sign and upload wheels::
-
-    twine upload --sign *.whl
+Use ``continuous_integration/upload_wheels.sh`` to download wheels and then
+upload the wheels to PyPI.
 
 After release
 =============
 
 - Checkout the ``develop`` branch
 - Update version in ``pystan/__init__.py``
-
-See also
-========
-- http://docs.astropy.org/en/v0.2/development/building_packaging.html
-- https://github.com/stefanv/scikit-image/blob/master/RELEASE.txt
