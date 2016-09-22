@@ -33,7 +33,7 @@ Stan documentation
 
 - Stan: http://mc-stan.org/
 - Stan User's Guide and Reference Manual, available at http://mc-stan.org
-- `BUGS Examples <https://github.com/stan-dev/stan/tree/master/src/models/bugs_examples>`_
+- `BUGS Examples <https://github.com/stan-dev/example-models/wiki/BUGS-Examples>`_
 
 Important links
 ---------------
