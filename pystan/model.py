@@ -752,7 +752,7 @@ class StanModel:
         return fit
 
     def vb(self, data=None, pars=None, iter=10000,
-           seed=None, init='random', sample_file=None, verbose=False,
+           seed=None, init='random', sample_file=None, diagnostic_file=None, verbose=False,
            algorithm=None, **kwargs):
         """Call Stan's variational Bayes methods.
 
@@ -782,6 +782,10 @@ class StanModel:
             not writable, a temporary directory will be used. When there are
             multiple chains, an underscore and chain number are appended to the
             file name. By default do not write samples to file.
+
+        diagnostic_file : string, optional
+            File name specifying where diagnostics for the variational fit
+            will be written.
 
         iter : int, 10000 by default
             Positive integer specifying how many iterations for each chain
@@ -863,6 +867,9 @@ class StanModel:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
         else:
             stan_args['sample_file'] = os.path.join(tempfile.mkdtemp(), 'output.csv')
+
+        if diagnostic_file is not None:
+            stan_args['diagnostic_file'] = diagnostic_file
 
         # check that arguments in kwargs are valid
         valid_args = {'elbo_samples', 'eta', 'adapt_engaged', 'eval_elbo',
