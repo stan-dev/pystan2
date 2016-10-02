@@ -35,7 +35,8 @@ Similar projects
 
 Detailed Installation Instructions
 ----------------------------------
-Detailed installation instructions can be found in the installation_beginner.md file
+Detailed installation instructions can be found in the
+`doc/installation_beginner.md <https://github.com/chendaniely/pystan/blob/develop/doc/installation_beginner.rst/>`_ file.
 
 Quick Installation
 ------------------

@@ -21,14 +21,14 @@ Prerequisite knowledge
 It is highly recommended to know what ``bash`` is and the basics of
 navigating the terminal. You can review or learn it from the `Software
 Carpentry <http://software-carpentry.org/>`__ bash lesson here:
-http://swcarpentry.github.io/shell-novice/. Lessons 1 - 3 are proabably
-the most important.
+http://swcarpentry.github.io/shell-novice/.
+
+Lessons 1 - 3 are proabably the most important.
 
 Installing Python
 -----------------
 
-The easiest way to install Python is to use the
-`https://store.continuum.io/cshop/anaconda/ <Anaconda>`__ distribution
+The easiest way to install Python is to use the Anaconda distribution
 of python. It can be downloaded here: http://continuum.io/downloads.
 
 This is because PyStan (and many python tools) require packages (aka
@@ -99,4 +99,3 @@ install the latest version of PyStan using ``pip``. To do so:
 
 -  Open a terminal
 -  type ``pip install pystan``
-
