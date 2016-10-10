@@ -312,6 +312,12 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Argument `refresh` can be used to control how to indicate the progress
         during sampling (i.e. show the progress every \code{refresh} iterations).
         By default, `refresh` is `max(iter/10, 1)`.
+        
+    obfuscate_model_name : boolean, optional
+        `obfuscate_model_name` is only valid if `fit` is None. True by default.
+        If False the model name in the generated C++ code will not be made
+        unique by the insertion of randomly generated characters.
+        Generally it is recommended that this parameter be left as True. 
 
     Examples
     --------
@@ -364,15 +370,16 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         data = {}
     if warmup is None:
         warmup = int(iter // 2)
+    obfuscate_model_name = kwargs.pop("obfuscate_model_name", True)
     if fit is not None:
         m = fit.stanmodel
     else:
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
-                      verbose=verbose)
+                      obfuscate_model_name=obfuscate_model_name, verbose=verbose)
     # check that arguments in kwargs are valid
     valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",
-                  "refresh", "control", "obfuscate_model_name"}
+                  "refresh", "control"}
     for arg in kwargs:
         if arg not in valid_args:
             raise ValueError("Parameter `{}` is not recognized.".format(arg))
