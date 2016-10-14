@@ -948,8 +948,7 @@ namespace pystan {
       if (args.get_method() == TEST_GRADIENT) {
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
-        std::stringstream ss;
-        stan::callbacks::stream_writer sample_writer(ss);
+        stan::callbacks::stream_writer sample_writer(std::cout);
         return_code = stan::services::diagnose::diagnose(model,
                                                          *init_context_ptr,
                                                          random_seed, id,
@@ -959,10 +958,76 @@ namespace pystan {
                                                          info,
                                                          init_writer,
                                                          sample_writer);
-        std::cout << ss.str() << std::endl;
         holder.num_failed = return_code;
         holder.test_grad = true;
         holder.inits = init_writer.x();
+      }
+      if (args.get_method() == OPTIM) {
+        value sample_writer;
+        bool save_iterations = args.get_ctrl_optim_save_iterations();
+        int num_iterations = args.get_iter();
+        if (args.get_ctrl_optim_algorithm() == Newton) {
+          return_code
+            = stan::services::optimize::newton(model, *init_context_ptr,
+                                               random_seed, id, init_radius,
+                                               num_iterations,
+                                               save_iterations,
+                                               interrupt, info,
+                                               init_writer, sample_writer);
+        }
+        if (args.get_ctrl_optim_algorithm() == BFGS) {
+          double init_alpha = args.get_ctrl_optim_init_alpha();
+          double tol_obj= args.get_ctrl_optim_tol_obj();
+          double tol_rel_obj = args.get_ctrl_optim_tol_rel_obj();
+          double tol_grad = args.get_ctrl_optim_tol_grad();
+          double tol_rel_grad = args.get_ctrl_optim_tol_rel_grad();
+          double tol_param = args.get_ctrl_optim_tol_param();
+          int refresh = args.get_ctrl_optim_refresh();
+          return_code
+            = stan::services::optimize::bfgs(model, *init_context_ptr,
+                                             random_seed, id, init_radius,
+                                             init_alpha,
+                                             tol_obj,
+                                             tol_rel_obj,
+                                             tol_grad,
+                                             tol_rel_grad,
+                                             tol_param,
+                                             num_iterations,
+                                             save_iterations,
+                                             refresh,
+                                             interrupt, info,
+                                             init_writer, sample_writer);
+        }
+        if (args.get_ctrl_optim_algorithm() == LBFGS) {
+          int history_size = args.get_ctrl_optim_history_size();
+          double init_alpha = args.get_ctrl_optim_init_alpha();
+          double tol_obj= args.get_ctrl_optim_tol_obj();
+          double tol_rel_obj = args.get_ctrl_optim_tol_rel_obj();
+          double tol_grad = args.get_ctrl_optim_tol_grad();
+          double tol_rel_grad = args.get_ctrl_optim_tol_rel_grad();
+          double tol_param = args.get_ctrl_optim_tol_param();
+          int refresh = args.get_ctrl_optim_refresh();
+          return_code
+            = stan::services::optimize::lbfgs(model, *init_context_ptr,
+                                              random_seed, id, init_radius,
+                                              history_size,
+                                              init_alpha,
+                                              tol_obj,
+                                              tol_rel_obj,
+                                              tol_grad,
+                                              tol_rel_grad,
+                                              tol_param,
+                                              num_iterations,
+                                              save_iterations,
+                                              refresh,
+                                              interrupt, info,
+                                              init_writer, sample_writer);
+        }
+        std::vector<double> params = sample_writer.x();
+        double lp = params.front();
+        params.erase(params.begin());
+        holder.par = params;
+        holder.value = lp;
       }
 
       
