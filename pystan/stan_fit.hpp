@@ -898,6 +898,17 @@ namespace pystan {
     // }
 
 
+    /**
+     * @tparam Model
+     * @tparam RNG
+     *
+     * @param args: the instance that wraps the arguments passed for sampling.
+     * @param model: the model instance.
+     * @param holder[out]: the object to hold all the information returned to Python.
+     * @param qoi_idx: the indexes for all parameters of interest.
+     * @param fnames_oi: the parameter names of interest.
+     * @param base_rng: the boost RNG instance.
+     */
     template <class Model, class RNG_t>
     int command(StanArgs& args, Model& model, StanHolder& holder,
                 const std::vector<size_t>& qoi_idx,
@@ -1336,6 +1347,46 @@ namespace pystan {
 
         delete sample_writer_ptr;
       }
+      if (args.get_method() == VARIATIONAL) {
+        int grad_samples = args.get_ctrl_variational_grad_samples();
+        int elbo_samples = args.get_ctrl_variational_elbo_samples();
+        int max_iterations = args.get_iter();
+        double tol_rel_obj = args.get_ctrl_variational_tol_rel_obj();
+        double eta = args.get_ctrl_variational_eta();
+        bool adapt_engaged = args.get_ctrl_variational_adapt_engaged();
+        int adapt_iterations = args.get_ctrl_variational_adapt_iter();
+        int eval_elbo = args.get_ctrl_variational_eval_elbo();
+        int output_samples = args.get_ctrl_variational_output_samples();
+
+        stan::callbacks::stream_writer sample_writer(sample_stream, "# ");
+        args.write_args_as_comment(sample_stream); // this is necessary for read_stan_csv
+        
+        if (args.get_ctrl_variational_algorithm() == FULLRANK) {
+          return_code = stan::services::experimental::advi
+            ::fullrank(model, *init_context_ptr,
+                       random_seed, id, init_radius,
+                       grad_samples, elbo_samples,
+                       max_iterations, tol_rel_obj, eta,
+                       adapt_engaged, adapt_iterations,
+                       eval_elbo, output_samples,
+                       interrupt, info, init_writer,
+                       sample_writer, diagnostic_writer);
+        } else {
+          return_code = stan::services::experimental::advi
+            ::meanfield(model, *init_context_ptr,
+                        random_seed, id, init_radius,
+                        grad_samples, elbo_samples,
+                        max_iterations, tol_rel_obj, eta,
+                        adapt_engaged, adapt_iterations,
+                        eval_elbo, output_samples,
+                        interrupt, info, init_writer,
+                        sample_writer, diagnostic_writer);
+        }
+        //holder = Rcpp::List::create(Rcpp::_["samples"] = R_NilValue);
+        holder.args = args;
+        //holder.attr("inits") = init_writer.x();
+      }
+      
       delete init_context_ptr;
       return return_code;
     }
