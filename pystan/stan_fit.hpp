@@ -669,188 +669,6 @@ namespace pystan {
       }
     };
 
-    // in:  model, s, sampler_ptr
-    // out: sample_writer_size, diagnostic_writer_size
-    template <class Model>
-    void calculate_sizes(Model& model,
-                         stan::mcmc::sample& s,
-                         stan::mcmc::base_mcmc* sampler_ptr,
-                         size_t& sample_writer_size,
-                         size_t& sample_writer_offset,
-                         std::vector<std::string>& sample_names,
-                         std::vector<std::string>& sampler_names,
-                         std::vector<std::string>& model_constrained_param_names,
-                         std::vector<std::string>& model_unconstrained_param_names,
-                         std::vector<std::string>& sampler_diagnostic_names) {
-      s.get_sample_param_names(sample_names);
-
-      sampler_ptr->get_sampler_param_names(sampler_names);
-
-      model.constrained_param_names(model_constrained_param_names, true, true);
-
-      model.unconstrained_param_names(model_unconstrained_param_names, false, false);
-
-      sampler_ptr->get_sampler_diagnostic_names(model_unconstrained_param_names,
-                                                sampler_diagnostic_names);
-
-      sample_writer_size = sample_names.size() + sampler_names.size()
-        + model_constrained_param_names.size();
-      sample_writer_offset = sample_names.size() + sampler_names.size();
-    }
-
-    // template <class Model, class RNG_t>
-    // void execute_sampling(StanArgs& args, Model& model, StanHolder& holder,
-    //                       stan::mcmc::base_mcmc* sampler_ptr,
-    //                       stan::mcmc::sample& s,
-    //                       const std::vector<size_t>& qoi_idx,
-    //                       std::vector<double>& initv,
-    //                       std::fstream& sample_stream,
-    //                       std::fstream& diagnostic_stream,
-    //                       const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
-    //   size_t sample_writer_size, sample_writer_offset;
-    //   std::vector<std::string> sample_names;
-    //   std::vector<std::string> sampler_names;
-    //   std::vector<std::string> model_constrained_param_names;
-    //   std::vector<std::string> model_unconstrained_param_names;
-    //   std::vector<std::string> sampler_diagnostic_names;
-    //   pystan::calculate_sizes(model, s, sampler_ptr,
-    //                          sample_writer_size,
-    //                          sample_writer_offset,
-    //                          sample_names,
-    //                          sampler_names,
-    //                          model_constrained_param_names,
-    //                          model_unconstrained_param_names,
-    //                          sampler_diagnostic_names);
-
-
-    //   pystan_sample_writer sample_writer
-    //     = sample_writer_factory(&sample_stream, "# ",
-    //                               sample_writer_size,
-    //                               args.get_ctrl_sampling_iter_save(),
-    //                               args.get_ctrl_sampling_iter_save() - args.get_ctrl_sampling_iter_save_wo_warmup(),
-    //                               sample_writer_offset,
-    //                               qoi_idx);
-
-    //   std::stringstream ss;
-    //   stan::interface_callbacks::writer::stream_writer info(ss);
-    //   stan::interface_callbacks::writer::stream_writer err(std::cerr);
-
-    //   stan::interface_callbacks::writer::stream_writer diagnostic_writer
-    //     = diagnostic_writer_factory(&diagnostic_stream, "# ");
-    //   stan::interface_callbacks::writer::stream_writer message_writer(std::cout, "# ");
-    //   stan::services::sample::mcmc_writer<Model,
-    //                                       pystan_sample_writer,
-    //                                       stan::interface_callbacks::writer::stream_writer,
-    //                                       stan::interface_callbacks::writer::stream_writer>
-    //     writer(sample_writer, diagnostic_writer, message_writer);
-
-    //   if (!args.get_append_samples()) {
-    //     writer.write_sample_names(s, sampler_ptr, model);
-    //     writer.write_diagnostic_names(s, sampler_ptr, model);
-    //   }
-
-    //   // Warm-Up
-    //   clock_t start = clock();
-
-    //   std::string prefix = "";
-    //   ss.str("");
-    //   ss << " (Chain " << args.get_chain_id() << ")" << std::endl;
-    //   std::string suffix = ss.str();
-    //   PyErr_CheckSignals_Functor interruptCallback;
-
-    //   stan::services::mcmc::warmup<Model, RNG_t,
-    //                                PyErr_CheckSignals_Functor>
-    //     (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
-    //      args.get_ctrl_sampling_thin(),
-    //      args.get_ctrl_sampling_refresh(), args.get_ctrl_sampling_save_warmup(),
-    //      writer,
-    //      s,
-    //      model,
-    //      base_rng,
-    //      prefix,
-    //      suffix,
-    //      std::cout,
-    //      interruptCallback,
-    //      info,
-    //      err);
-
-    //   clock_t end = clock();
-    //   double warmDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-    //   std::string adaptation_info;
-    //   if (args.get_ctrl_sampling_adapt_engaged()) {
-    //     ss.str("");
-    //     dynamic_cast<stan::mcmc::base_adapter*>(sampler_ptr)->disengage_adaptation();
-    //     writer.write_adapt_finish(sampler_ptr);
-    //     adaptation_info = ss.str();
-    //     adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
-    //   }
-
-    //   // Sampling
-    //   start = clock();
-
-    //   stan::services::mcmc::sample<Model, RNG_t,
-    //                                PyErr_CheckSignals_Functor>
-    //     (sampler_ptr, args.get_ctrl_sampling_warmup(), args.get_iter() - args.get_ctrl_sampling_warmup(),
-    //      args.get_ctrl_sampling_thin(),
-    //      args.get_ctrl_sampling_refresh(), true,
-    //      writer,
-    //      s,
-    //      model,
-    //      base_rng,
-    //      prefix,
-    //      suffix,
-    //      std::cout,
-    //      interruptCallback,
-    //      info,
-    //      err);
-
-    //   end = clock();
-    //   double sampleDeltaT = (double)(end - start) / CLOCKS_PER_SEC;
-
-    //   writer.write_timing(warmDeltaT, sampleDeltaT);
-
-    //   double mean_lp(0);
-    //   std::vector<double> mean_pars;
-    //   mean_pars.resize(initv.size(), 0);
-
-    //   if (args.get_ctrl_sampling_iter_save_wo_warmup() > 0) {
-    //     double inverse_saved = 1.0 / args.get_ctrl_sampling_iter_save_wo_warmup();
-    //     mean_lp = sample_writer.sum_.sum()[0] * inverse_saved;
-    //     for (size_t n = 0; n < mean_pars.size(); n++) {
-    //       mean_pars[n] = sample_writer.sum_.sum()[sample_writer_offset + n] * inverse_saved;
-    //     }
-    //   }
-
-    //   if (args.get_sample_file_flag()) {
-    //     std::cout << "Sample of chain "
-    //                      << args.get_chain_id()
-    //                      << " is written to file " << args.get_sample_file() << "."
-    //                      << std::endl;
-    //     sample_stream.close();
-    //   }
-    //   if (args.get_diagnostic_file_flag())
-    //     diagnostic_stream.close();
-
-    //   holder.chains = sample_writer.values_.x();
-    //   holder.test_grad = false;
-    //   holder.args = args;
-    //   holder.inits = initv;
-    //   holder.mean_pars = mean_pars;
-    //   holder.mean_lp__ = mean_lp;
-    //   holder.adaptation_info = adaptation_info;
-
-    //   std::vector<std::vector<double> > slst(sample_writer.sampler_values_.x().begin()+1,
-    //                   sample_writer.sampler_values_.x().end());
-    //   std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
-    //   slst_names.insert(slst_names.end(), sampler_names.begin(), sampler_names.end());
-
-    //   holder.sampler_params = slst;
-    //   holder.sampler_param_names = slst_names;
-
-    //   holder.chain_names = fnames_oi;
-    // }
-
-
     /**
      * @tparam Model
      * @tparam RNG
@@ -909,7 +727,8 @@ namespace pystan {
       if (args.get_method() == TEST_GRADIENT) {
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
-        stan::callbacks::stream_writer sample_writer(std::cout);
+
+        stan::callbacks::noop_writer sample_writer;
         return_code = stan::services::diagnose::diagnose(model,
                                                          *init_context_ptr,
                                                          random_seed, id,
@@ -1312,7 +1131,7 @@ namespace pystan {
         int output_samples = args.get_ctrl_variational_output_samples();
 
         stan::callbacks::stream_writer sample_writer(sample_stream, "# ");
-        args.write_args_as_comment(sample_stream); // this is necessary for read_stan_csv
+        //args.write_args_as_comment(sample_stream); // this is necessary for read_stan_csv
         
         if (args.get_ctrl_variational_algorithm() == FULLRANK) {
           return_code = stan::services::experimental::advi
@@ -1337,7 +1156,7 @@ namespace pystan {
         }
         //holder = Rcpp::List::create(Rcpp::_["samples"] = R_NilValue);
         holder.args = args;
-        //holder.attr("inits") = init_writer.x();
+        holder.mean_pars = init_writer.x();
       }
       
       delete init_context_ptr;
