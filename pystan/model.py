@@ -12,8 +12,6 @@ if PY2:
 else:
     from collections.abc import Callable, Iterable
 import datetime
-import importlib
-import imp
 import io
 import itertools
 import logging
@@ -45,12 +43,13 @@ logger = logging.getLogger('pystan')
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""
-    if hasattr(importlib, 'find_loader'):
-        # Python 3
-        loader = importlib.find_loader(module_name, [module_path])
-        return loader.load_module()
+    if sys.version_info >= (3,0):
+        import pyximport
+        pyximport.install()
+        sys.path.append(module_path)
+        return __import__(module_name)
     else:
-        # Python 2.7
+        import imp
         module_info = imp.find_module(module_name, [module_path])
         return imp.load_module(module_name, *module_info)
 
