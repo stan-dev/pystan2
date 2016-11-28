@@ -86,7 +86,7 @@ if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
             )).intersection(sys.argv)) > 0:
     import setuptools
     extra_setuptools_args = dict(
-        install_requires=['Cython >= 0.22', 'numpy >= 1.7'],
+        install_requires=['Cython>=0.22,<0.25', 'numpy >= 1.7'],
         zip_safe=False, # the package can run out of an .egg file
         include_package_data=True,
     )
