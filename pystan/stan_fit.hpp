@@ -669,6 +669,19 @@ namespace pystan {
       }
     };
 
+    template <class Model>
+    std::vector<double> unconstrained_to_constrained(Model& model,
+                                                     unsigned int random_seed,
+                                                     unsigned int id,
+                                                     const std::vector<double>& params) {
+      std::vector<int> params_i;
+      std::vector<double> constrained_params;
+      boost::ecuyer1988 rng = stan::services::util::rng(random_seed, id);
+      model.write_array(rng, const_cast<std::vector<double>&>(params), params_i,
+                        constrained_params);
+      return constrained_params;
+    }
+    
     /**
      * @tparam Model
      * @tparam RNG
@@ -740,7 +753,8 @@ namespace pystan {
                                                          sample_writer);
         holder.num_failed = return_code;
         holder.test_grad = true;
-        holder.inits = init_writer.x();
+        holder.inits = unconstrained_to_constrained(model, random_seed, id,
+                                                    init_writer.x());
       }
       if (args.get_method() == OPTIM) {
         value sample_writer;
@@ -1080,7 +1094,8 @@ namespace pystan {
         holder.chains = sample_writer_ptr->values_.x();
         holder.test_grad = false;
         holder.args = args;
-        holder.inits = init_writer.x();
+        holder.inits = unconstrained_to_constrained(model, random_seed, id,
+                                                    init_writer.x());
         holder.mean_pars = mean_pars;
         holder.mean_lp__ = mean_lp;
 
@@ -1156,7 +1171,8 @@ namespace pystan {
         }
         //holder = Rcpp::List::create(Rcpp::_["samples"] = R_NilValue);
         holder.args = args;
-        holder.mean_pars = init_writer.x();
+        holder.mean_pars = unconstrained_to_constrained(model, random_seed, id,
+                                                        init_writer.x());
       }
       
       delete init_context_ptr;
