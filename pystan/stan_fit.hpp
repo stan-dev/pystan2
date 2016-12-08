@@ -830,7 +830,6 @@ namespace pystan {
         init_context_ptr.reset(new io::py_var_context(args.init_vars_r, args.init_vars_i));
       else
         init_context_ptr.reset(new stan::io::empty_var_context());
-
       std::vector<std::string> constrained_param_names;
       model.constrained_param_names(constrained_param_names);
       value init_writer;
@@ -1014,7 +1013,6 @@ namespace pystan {
                                          *sample_writer_ptr, diagnostic_writer);
             }
           } else if (args.get_ctrl_sampling_metric() == DIAG_E) {
-            
             if (!args.get_ctrl_sampling_adapt_engaged()) {
               return_code = stan::services::sample
                 ::hmc_nuts_diag_e(model, *init_context_ptr,
@@ -1504,8 +1502,12 @@ namespace pystan {
 
     int call_sampler(StanArgs& args, StanHolder& holder) {
       int ret;
-      ret = command(args, model_, holder, names_oi_tidx_,
-                    fnames_oi_, base_rng);
+      try {
+        ret = command(args, model_, holder, names_oi_tidx_,
+                      fnames_oi_, base_rng);
+      } catch (std::domain_error const& e) {
+        throw std::runtime_error(e.what());
+      }
       if (ret != 0) {
         throw std::runtime_error("Something went wrong after call_sampler.");
       }
