@@ -1505,7 +1505,7 @@ namespace pystan {
       try {
         ret = command(args, model_, holder, names_oi_tidx_,
                       fnames_oi_, base_rng);
-      } catch (std::domain_error const& e) {
+      } catch (std::exception const& e) {
         throw std::runtime_error(e.what());
       }
       if (ret != 0) {
