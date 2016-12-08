@@ -61,6 +61,35 @@ namespace pystan {
   enum sampling_metric_t { UNIT_E = 1, DIAG_E = 2, DENSE_E = 3};
   enum stan_args_method_t { SAMPLING = 1, OPTIM = 2, TEST_GRADIENT = 3, VARIATIONAL = 4};
 
+  /* functions from RStan's stan_args.hpp */
+
+  void write_comment(std::ostream& o) {
+    o << "#" << std::endl;
+  }
+
+  template <typename M>
+  void write_comment(std::ostream& o, const M& msg) {
+    o << "# " << msg << std::endl;
+  }
+
+  template <typename K, typename V>
+  void write_comment_property(std::ostream& o, const K& key, const V& val) {
+    o << "# " << key << "=" << val << std::endl;
+  }
+  
+  /**
+   * Find the index of an element in a vector.
+   * @param v the vector in which an element are searched.
+   * @param e the element that we are looking for.
+   * @return If e is in v, return the index (0 to size - 1);
+   *  otherwise, return the size.
+   */
+
+  template <class T, class T2>
+  size_t find_index(const std::vector<T>& v, const T2& e) {
+    return std::distance(v.begin(), std::find(v.begin(), v.end(), T(e)));
+  }
+
   /* Simple class to store arguments provided by Python. Mirrors RStan's stan_args.
    *
    * Apart from the StanArgs class all the functionality found in RStan's
@@ -313,7 +342,88 @@ namespace pystan {
     const std::string& get_init() const {
       return init;
     }
+     
+    void write_args_as_comment(std::ostream& ostream) const {
+      write_comment_property(ostream,"init",init);
+      write_comment_property(ostream,"enable_random_init",enable_random_init);
+      write_comment_property(ostream,"seed",random_seed);
+      write_comment_property(ostream,"chain_id",chain_id);
+      write_comment_property(ostream,"iter",get_iter());
+      switch (method) {
+        case VARIATIONAL:
+          write_comment_property(ostream,"grad_samples", ctrl.variational.grad_samples);
+          write_comment_property(ostream,"elbo_samples", ctrl.variational.elbo_samples);
+          write_comment_property(ostream,"output_samples", ctrl.variational.output_samples);
+          write_comment_property(ostream,"eval_elbo", ctrl.variational.eval_elbo);
+          write_comment_property(ostream,"eta", ctrl.variational.eta);
+          write_comment_property(ostream,"tol_rel_obj", ctrl.variational.tol_rel_obj);
+          switch (ctrl.variational.algorithm) {
+            case MEANFIELD: write_comment_property(ostream,"algorithm", "meanfield"); break;
+            case FULLRANK: write_comment_property(ostream,"algorithm", "fullrank"); break;
+          }
+          break;
+        case SAMPLING:
+          write_comment_property(ostream,"warmup",ctrl.sampling.warmup);
+          write_comment_property(ostream,"save_warmup",ctrl.sampling.save_warmup);
+          write_comment_property(ostream,"thin",ctrl.sampling.thin);
+          write_comment_property(ostream,"refresh",ctrl.sampling.refresh);
+          write_comment_property(ostream,"stepsize",ctrl.sampling.stepsize);
+          write_comment_property(ostream,"stepsize_jitter",ctrl.sampling.stepsize_jitter);
+          write_comment_property(ostream,"adapt_engaged",ctrl.sampling.adapt_engaged);
+          write_comment_property(ostream,"adapt_gamma",ctrl.sampling.adapt_gamma);
+          write_comment_property(ostream,"adapt_delta",ctrl.sampling.adapt_delta);
+          write_comment_property(ostream,"adapt_kappa",ctrl.sampling.adapt_kappa);
+          write_comment_property(ostream,"adapt_t0",ctrl.sampling.adapt_t0);
+          switch (ctrl.sampling.algorithm) {
+            case NUTS:
+              write_comment_property(ostream,"max_treedepth",ctrl.sampling.max_treedepth);
+              switch (ctrl.sampling.metric) {
+                case UNIT_E: write_comment_property(ostream,"sampler_t","NUTS(unit_e)"); break;
+                case DIAG_E: write_comment_property(ostream,"sampler_t","NUTS(diag_e)"); break;
+                case DENSE_E: write_comment_property(ostream,"sampler_t","NUTS(dense_e)"); break;
+              }
+              break;
+            case HMC: write_comment_property(ostream,"sampler_t", "HMC");
+                      write_comment_property(ostream,"int_time", ctrl.sampling.int_time);
+                      break;
+            case Metropolis: write_comment_property(ostream,"sampler_t", "Metropolis"); break;
+            case Fixed_param: write_comment_property(ostream, "sampler_t", "Fixed_param"); break;
+            default: break;
+          }
+          break;
 
+        case OPTIM:
+          write_comment_property(ostream,"refresh",ctrl.optim.refresh);
+          write_comment_property(ostream,"save_iterations",ctrl.optim.save_iterations);
+          switch (ctrl.optim.algorithm) {
+            case Newton: write_comment_property(ostream,"algorithm", "Newton"); break;
+            case BFGS: write_comment_property(ostream,"algorithm", "BFGS");
+                       write_comment_property(ostream,"init_alpha", ctrl.optim.init_alpha);
+                       write_comment_property(ostream,"tol_obj", ctrl.optim.tol_obj);
+                       write_comment_property(ostream,"tol_grad", ctrl.optim.tol_grad);
+                       write_comment_property(ostream,"tol_param", ctrl.optim.tol_param);
+                       write_comment_property(ostream,"tol_rel_obj", ctrl.optim.tol_rel_obj);
+                       write_comment_property(ostream,"tol_rel_grad", ctrl.optim.tol_rel_grad);
+                       break;
+            case LBFGS: write_comment_property(ostream,"algorithm", "LBFGS");
+                       write_comment_property(ostream,"init_alpha", ctrl.optim.init_alpha);
+                       write_comment_property(ostream,"tol_obj", ctrl.optim.tol_obj);
+                       write_comment_property(ostream,"tol_grad", ctrl.optim.tol_grad);
+                       write_comment_property(ostream,"tol_param", ctrl.optim.tol_param);
+                       write_comment_property(ostream,"tol_rel_obj", ctrl.optim.tol_rel_obj);
+                       write_comment_property(ostream,"tol_rel_grad", ctrl.optim.tol_rel_grad);
+                       write_comment_property(ostream,"history_size", ctrl.optim.history_size);
+                       break;
+          }
+        case TEST_GRADIENT: break;
+      }
+      if (sample_file_flag)
+        write_comment_property(ostream,"sample_file",sample_file);
+      if (diagnostic_file_flag)
+        write_comment_property(ostream,"diagnostic_file",diagnostic_file);
+      write_comment_property(ostream,"append_samples",append_samples);
+      write_comment(ostream);
+    }
   };
 
   /* simple class to store data for Python */
@@ -336,36 +446,7 @@ namespace pystan {
   };
 
 
-    /* functions from RStan's stan_args.hpp */
-
-    void write_comment(std::ostream& o) {
-      o << "#" << std::endl;
-    }
-
-    template <typename M>
-    void write_comment(std::ostream& o, const M& msg) {
-      o << "# " << msg << std::endl;
-    }
-
-    template <typename K, typename V>
-    void write_comment_property(std::ostream& o, const K& key, const V& val) {
-      o << "# " << key << "=" << val << std::endl;
-    }
-
-    /**
-     * Find the index of an element in a vector.
-     * @param v the vector in which an element are searched.
-     * @param e the element that we are looking for.
-     * @return If e is in v, return the index (0 to size - 1);
-     *  otherwise, return the size.
-     */
-
-    template <class T, class T2>
-    size_t find_index(const std::vector<T>& v, const T2& e) {
-      return std::distance(v.begin(), std::find(v.begin(), v.end(), T(e)));
-    }
-
-    /* the following mirrors RStan's stan_fit.hpp */
+  /* the following mirrors RStan's stan_fit.hpp */
   namespace {
     /**
      *@tparam T The type by which we use for dimensions. T could be say size_t
