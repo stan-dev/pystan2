@@ -935,11 +935,12 @@ namespace pystan {
         size_t sample_writer_offset;
 
         int num_warmup = args.get_ctrl_sampling_warmup();
-        int num_samples = args.get_ctrl_sampling_iter_save_wo_warmup();
+        int num_samples = args.get_iter() - num_warmup;
         int num_thin = args.get_ctrl_sampling_thin();
         bool save_warmup = args.get_ctrl_sampling_save_warmup();
         int refresh = args.get_ctrl_sampling_refresh();
         int num_iter_save = args.get_ctrl_sampling_iter_save();
+        int num_warmup_save = num_iter_save - args.get_ctrl_sampling_iter_save_wo_warmup();
 
         if (args.get_ctrl_sampling_algorithm() == Fixed_param) {
           sampler_names.resize(0);
@@ -949,7 +950,7 @@ namespace pystan {
                                                     sampler_names.size(),
                                                     constrained_param_names.size(),
                                                     num_iter_save,
-                                                    num_warmup,
+                                                    num_warmup_save,
                                                     qoi_idx);
           return_code
             = stan::services::sample::fixed_param(model, *init_context_ptr,
@@ -975,7 +976,7 @@ namespace pystan {
                                                     sampler_names.size(),
                                                     constrained_param_names.size(),
                                                     num_iter_save,
-                                                    num_warmup,
+                                                    num_warmup_save,
                                                     qoi_idx);
 
           double stepsize = args.get_ctrl_sampling_stepsize();
@@ -1082,7 +1083,7 @@ namespace pystan {
                                                     sampler_names.size(),
                                                     constrained_param_names.size(),
                                                     num_iter_save,
-                                                    num_warmup,
+                                                    num_warmup_save,
                                                     qoi_idx);
 
           double stepsize = args.get_ctrl_sampling_stepsize();
