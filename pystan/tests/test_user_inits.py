@@ -73,10 +73,12 @@ class TestUserInits(unittest.TestCase):
         """
         data = self.data
         # NOTE: we are only specifying 'mu' and not 'sigma'
-        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(RuntimeError, "sigma missing"):
+        # This behavior works now.
+        try:
             pystan.stan(model_code=model_code, iter=10, chains=1, seed=2,
                         data=data, init=[dict(mu=4)], warmup=0)
+        except RuntimeError:
+            self.fail("pystan.stan() raised RuntimeError on partial init")
 
 
 class TestUserInitsMatrix(unittest.TestCase):

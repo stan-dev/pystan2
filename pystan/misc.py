@@ -141,7 +141,7 @@ def _format_number(num, n_signif_figures, max_width):
     """
     if max_width < 6:
         raise NotImplementedError("Guaranteed formatting in fewer than 6 characters not supported.")
-    if math.isnan(num):
+    if math.isnan(num) or math.isinf(num):
         return str(num)
     # add 0.5 to prevent log(0) errors; only affects n_digits calculation for num > 0
     n_digits = lambda num: math.floor(math.log10(abs(num) + 0.5)) + 1
