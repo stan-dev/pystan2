@@ -948,6 +948,7 @@ def _writable_sample_file(file, warn=True, wfun=None):
     if wfun is None:
         wfun = lambda x, y: '"{}" is not writable; use "{}" instead'.format(x, y)
     dir = os.path.dirname(file)
+    dir = os.getcwd() if dir == '' else dir
     if os.access(dir, os.W_OK):
         return file
     else:
