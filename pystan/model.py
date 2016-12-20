@@ -554,7 +554,7 @@ class StanModel:
 
         algorithm : {"NUTS", "HMC", "Fixed_param"}, optional
             One of algorithms that are implemented in Stan such as the No-U-Turn
-            sampler (NUTS, Hoffman and Gelman 2011), static HMC, or ``Fixed_param``.
+            sampler (Default, NUTS, Hoffman and Gelman 2011), static HMC, or ``Fixed_param``.
 
         init : {0, '0', 'random', function returning dict, list of dict}, optional
             Specifies how initial parameter values are chosen: 0 or '0'
