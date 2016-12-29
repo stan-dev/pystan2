@@ -247,10 +247,10 @@ class StanModel:
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.12.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.12.0", "lib", "eigen_3.2.9"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.12.0", "lib", "boost_1.60.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.12.0", "lib", "cvodes_2.8.2", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "eigen_3.2.9"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "boost_1.62.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "cvodes_2.9.0", "include"),
             np.get_include(),
         ]
 

@@ -86,7 +86,7 @@ if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
             )).intersection(sys.argv)) > 0:
     import setuptools
     extra_setuptools_args = dict(
-        install_requires=['Cython>=0.22,<0.25', 'numpy >= 1.7'],
+        install_requires=['Cython>=0.22,!=0.25.1', 'numpy >= 1.7'],
         zip_safe=False, # the package can run out of an .egg file
         include_package_data=True,
     )
@@ -99,10 +99,10 @@ from distutils.errors import CCompilerError, DistutilsError
 from distutils.extension import Extension
 
 stan_include_dirs = ['pystan/stan/src',
-                     'pystan/stan/lib/stan_math_2.12.0/',
-                     'pystan/stan/lib/stan_math_2.12.0/lib/eigen_3.2.9',
-                     'pystan/stan/lib/stan_math_2.12.0/lib/boost_1.60.0',
-                     'pystan/stan/lib/stan_math_2.12.0/lib/cvodes_2.8.2/include']
+                     'pystan/stan/lib/stan_math_2.14.0/',
+                     'pystan/stan/lib/stan_math_2.14.0/lib/eigen_3.2.9',
+                     'pystan/stan/lib/stan_math_2.14.0/lib/boost_1.62.0',
+                     'pystan/stan/lib/stan_math_2.14.0/lib/cvodes_2.9.0/include']
 stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
     ('BOOST_NO_DECLTYPE', None),
