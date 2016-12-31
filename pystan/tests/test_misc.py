@@ -141,6 +141,10 @@ class TestMisc(unittest.TestCase):
         np.testing.assert_equal(misc._format_number(9.94598693e-01, 2, 6), '0.99')
         np.testing.assert_equal(misc._format_number(-9.94598693e-01, 2, 6), '-0.99')
 
+    def test_format_number_inf(self):
+        np.testing.assert_equal(misc._format_number_si(float('inf'), 2), 'inf')
+        np.testing.assert_equal(misc._format_number_si(float('-inf'), 2), '-inf')
+
     def test_array_to_table(self):
         rownames = np.array(['alpha', 'beta[0]', 'beta[1]', 'beta[2]', 'beta[3]', 'sigma', 'lp__'])
         colnames = ('mean', 'se_mean', 'sd', '2.5%', '25%', '50%', '75%', '97.5%', 'n_eff', 'Rhat')
