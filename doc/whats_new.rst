@@ -6,6 +6,13 @@
  What's New
 ============
 
+V2.14.0.0 (1. Jan 2017)
+=========================
+- Update Stan source to v2.14.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.14.0>`_),
+  includes important fix to the default sampling algorithm (NUTS). All users are encouraged to upgrade.
+- Several documentation and minor bug fixes (thanks @ahartikainen, @jrings, @nesanders)
+- New OpenPGP signing key for use with PyPI. Key fingerprint is C3542448245BEC68F43070E4CCB669D9761F0CAC.
+
 V2.12.0.0 (15. Sept 2016)
 =========================
 - Update Stan source to v2.12.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.12.0>`_)
