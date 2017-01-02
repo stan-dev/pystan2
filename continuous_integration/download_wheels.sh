@@ -70,5 +70,4 @@ for py_tag in cp35; do
 done
 
 cd ..
-echo "wheels now need to be uploaded to PyPI using a command such as:"
-echo "twine upload --sign wheels/*.whl"
+echo "wheels have been downloaded into wheels/"
