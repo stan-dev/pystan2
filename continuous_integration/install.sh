@@ -16,11 +16,11 @@ fi
 
 # use Anaconda to get compiled versions of scipy and numpy,
 # modified from https://gist.github.com/dan-blanchard/7045057
-if [[ $TRAVIS_OS_NAME == 'linux' ]]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
-if [[ $TRAVIS_OS_NAME == 'osx' ]]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-MacOSX-x86_64.sh -O miniconda.sh; fi
+if [[ $TRAVIS_OS_NAME == 'linux' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O miniconda.sh; fi
+if [[ $TRAVIS_OS_NAME == 'osx' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-MacOSX-x86_64.sh -O miniconda.sh; fi
 chmod +x miniconda.sh
 ./miniconda.sh -b
-export PATH=$HOME/miniconda/bin:$PATH
+export PATH=$HOME/miniconda3/bin:$PATH
 # Update conda itself
 conda update --yes --quiet conda
 PYTHON_VERSION_MAJOR=${TRAVIS_PYTHON_VERSION:0:1}

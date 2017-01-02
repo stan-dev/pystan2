@@ -16,6 +16,7 @@ env:
   - TRAVIS_PYTHON_VERSION=3.3
   - TRAVIS_PYTHON_VERSION=3.4
   - TRAVIS_PYTHON_VERSION=3.5
+  - TRAVIS_PYTHON_VERSION=3.6
 notifications:
   email:
     recipients:
