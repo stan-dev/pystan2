@@ -44,11 +44,26 @@ for py_tag in cp34 cp35; do
   wheel_url="${RACKSPACE_URL}/${wheel_name}"
   echo "downloading: $wheel_name"
   curl -f -O $wheel_url
+
   wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$MANYLINUX1_TAIL32"
   wheel_url="${RACKSPACE_URL}/${wheel_name}"
   echo "downloading: $wheel_name"
   curl -f -O $wheel_url
+
   wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$MANYLINUX1_TAIL64"
+  wheel_url="${RACKSPACE_URL}/${wheel_name}"
+  echo "downloading: $wheel_name"
+  curl -f -O $wheel_url
+done
+
+# windows only
+for py_tag in cp35; do
+  wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$WIN_TAIL32"
+  wheel_url="${RACKSPACE_URL}/${wheel_name}"
+  echo "downloading: $wheel_name"
+  curl -f -O $wheel_url
+
+  wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$WIN_TAIL64"
   wheel_url="${RACKSPACE_URL}/${wheel_name}"
   echo "downloading: $wheel_name"
   curl -f -O $wheel_url
