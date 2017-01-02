@@ -57,7 +57,7 @@ for py_tag in cp34 cp35; do
 done
 
 # windows only
-for py_tag in cp35; do
+for py_tag in cp35 cp36; do
   wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$WIN_TAIL32"
   wheel_url="${RACKSPACE_URL}/${wheel_name}"
   echo "downloading: $wheel_name"
