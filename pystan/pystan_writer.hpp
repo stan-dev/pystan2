@@ -13,27 +13,12 @@ namespace pystan {
   public:
     value() { }
 
-    void operator()(const std::string& key, double value) { }
-
-    void operator()(const std::string& key, int value) { }
-
-    void operator()(const std::string& key, const std::string& value) { }
-
-    void operator()(const std::string& key, const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key, const double* values,
-                    int n_rows, int n_cols) { }
-
-    void operator()(const std::vector<std::string>& names) { }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     void operator()(const std::vector<double>& x) {
       x_ = x;
     }
-
-    void operator()(const std::string& message) { }
-
-    void operator()() { }
 
     const std::vector<double> x() const {
       return x_;
@@ -64,24 +49,8 @@ namespace pystan {
         M_ = x_[0].size();
     }
 
-    void operator()(const std::string& key,
-                    double value) { }
-
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { }
-
-    void operator()(const std::vector<std::string>& names) { }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     void operator()(const std::vector<double>& x) {
       if (N_ != x.size())
@@ -93,11 +62,6 @@ namespace pystan {
         x_[n][m_] = x[n];
       m_++;
     }
-
-    void operator()() { }
-
-    void operator()(const std::string& message) { }
-
 
     const std::vector<InternalVector>& x() const {
       return x_;
@@ -140,25 +104,8 @@ namespace pystan {
                                   "elements out of range");
     }
 
-    void operator()(const std::string& key,
-                    double value) { }
-
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { }
-
-    void operator()(const std::vector<std::string>& names) {
-    }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     void operator()(const std::vector<double>& state) {
       if (state.size() != N_)
@@ -168,10 +115,6 @@ namespace pystan {
         tmp[n] = state[filter_[n]];
       values_(tmp);
     }
-
-    void operator()(const std::string& message) { }
-
-    void operator()() { }
 
     const std::vector<InternalVector>& x() {
       return values_.x();
@@ -186,31 +129,8 @@ namespace pystan {
     sum_values(const size_t N, const size_t skip)
       : N_(N), m_(0), skip_(skip), sum_(N_, 0.0) { }
 
-
-    void operator()(const std::string& key,
-                    double value) { }
-
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { }
-
-    /**
-     * Do nothing with std::string vector
-     *
-     * @param names
-     */
-    void operator()(const std::vector<std::string>& names) { }
-
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     /**
      * Add values to cumulative sum
@@ -227,20 +147,6 @@ namespace pystan {
       }
       m_++;
     }
-
-
-    /**
-     * Do nothing with a string.
-     *
-     * @param x string to print with prefix in front
-     */
-    void operator()(const std::string& message) { }
-
-    /**
-     * Do nothing
-     *
-     */
-    void operator()() { }
 
     const std::vector<double>& sum() const {
       return sum_;
@@ -272,27 +178,8 @@ namespace pystan {
       : writer_(stream, prefix) {
     }
 
-    void operator()(const std::string& key, double value) {
-      writer_(key, value);
-    }
-
-    void operator()(const std::string& key, int value) {
-      writer_(key, value);
-    }
-
-    void operator()(const std::string& key, const std::string& value) {
-      writer_(key, value);
-    }
-
-    void operator()(const std::string& key, const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key, const double* values,
-                    int n_rows, int n_cols) { }
-
-    void operator()(const std::vector<std::string>& names) { }
-
-    void operator()(const std::vector<double>& x) { }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     void operator()(const std::string& message) {
       writer_(message);
@@ -319,84 +206,6 @@ namespace pystan {
                          sum_values sum)
       : csv_(csv), comment_writer_(comment_writer),
         values_(values), sampler_values_(sampler_values), sum_(sum) { }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value A double value
-     */
-    void operator()(const std::string& key, double value) {
-      csv_(key, value);
-      comment_writer_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
-    }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value An integer value
-     */
-    void operator()(const std::string& key, int value) {
-      csv_(key, value);
-      comment_writer_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
-    }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value A string
-     */
-    void operator()(const std::string& key, const std::string& value) {
-      csv_(key, value);
-      comment_writer_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
-    }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] values A double array, typically used with
-     *   contiguous Eigen vectors
-     * @param[in] n_values Length of the array
-     */
-    void operator()(const std::string& key, const double* values,
-                    int n_values)  {
-      csv_(key, values, n_values);
-      comment_writer_(key, values, n_values);
-      values_(key, values, n_values);
-      sampler_values_(key, values, n_values);
-      sum_(key, values, n_values);
-    }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] values A double array assumed to represent a 2d
-     *   matrix stored in column major order, typically used with
-     *   contiguous Eigen matrices
-     * @param[in] n_rows Rows
-     * @param[in] n_cols Columns
-     */
-    void operator()(const std::string& key, const double* values,
-                    int n_rows, int n_cols) {
-      csv_(key, values, n_rows, n_cols);
-      comment_writer_(key, values, n_rows, n_cols);
-      values_(key, values, n_rows, n_cols);
-      sampler_values_(key, values, n_rows, n_cols);
-      sum_(key, values, n_rows, n_cols);
-    }
 
     /**
      * Writes a set of names.

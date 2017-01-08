@@ -37,6 +37,7 @@
 #include <stan/services/sample/hmc_static_unit_e_adapt.hpp>
 #include <stan/services/experimental/advi/fullrank.hpp>
 #include <stan/services/experimental/advi/meanfield.hpp>
+#include <stan/services/util/create_rng.hpp>
 
 #include "py_var_context.hpp"
 #include "Python.h"
@@ -755,7 +756,7 @@ namespace pystan {
                                                      const std::vector<double>& params) {
       std::vector<int> params_i;
       std::vector<double> constrained_params;
-      boost::ecuyer1988 rng = stan::services::util::rng(random_seed, id);
+      boost::ecuyer1988 rng = stan::services::util::create_rng(random_seed, id);
       model.write_array(rng, const_cast<std::vector<double>&>(params), params_i,
                         constrained_params);
       return constrained_params;
