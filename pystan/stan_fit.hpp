@@ -15,9 +15,7 @@
 #include <boost/random/uniform_real_distribution.hpp>
 
 #include <stan/callbacks/interrupt.hpp>
-#include <stan/callbacks/noop_interrupt.hpp>
 #include <stan/callbacks/writer.hpp>
-#include <stan/callbacks/noop_writer.hpp>
 #include <stan/callbacks/stream_writer.hpp>
 #include <stan/io/empty_var_context.hpp>
 #include <stan/services/diagnose/diagnose.hpp>
@@ -76,7 +74,7 @@ namespace pystan {
   void write_comment_property(std::ostream& o, const K& key, const V& val) {
     o << "# " << key << "=" << val << std::endl;
   }
-  
+
   /**
    * Find the index of an element in a vector.
    * @param v the vector in which an element are searched.
@@ -342,7 +340,7 @@ namespace pystan {
     const std::string& get_init() const {
       return init;
     }
-     
+
     void write_args_as_comment(std::ostream& ostream) const {
       write_comment_property(ostream,"init",init);
       write_comment_property(ostream,"enable_random_init",enable_random_init);
@@ -762,7 +760,7 @@ namespace pystan {
                         constrained_params);
       return constrained_params;
     }
-    
+
     /**
      * @tparam Model
      * @tparam RNG
@@ -833,18 +831,18 @@ namespace pystan {
       std::vector<std::string> constrained_param_names;
       model.constrained_param_names(constrained_param_names);
       value init_writer;
-        
+
       int return_code = stan::services::error_codes::CONFIG;
 
       unsigned int random_seed = args.get_random_seed();
       unsigned int id = args.get_chain_id();
       double init_radius = args.get_init_radius();
-      
+
       if (args.get_method() == TEST_GRADIENT) {
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
 
-        stan::callbacks::noop_writer sample_writer;
+        stan::callbacks::writer sample_writer;
         return_code = stan::services::diagnose::diagnose(model,
                                                          *init_context_ptr,
                                                          random_seed, id,
@@ -969,7 +967,7 @@ namespace pystan {
           sampler_names[3] = "divergent__";
           sampler_names[4] = "energy__";
           sample_writer_offset = sample_names.size() + sampler_names.size();
-                    
+
           sample_writer_ptr = sample_writer_factory(&sample_stream,
                                                     comment_stream, "# ",
                                                     sample_names.size(),
@@ -1001,7 +999,7 @@ namespace pystan {
               unsigned int init_buffer = args.get_ctrl_sampling_adapt_init_buffer();
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
-              
+
               return_code = stan::services::sample
                 ::hmc_nuts_dense_e_adapt(model, *init_context_ptr,
                                          random_seed, id, init_radius,
@@ -1031,7 +1029,7 @@ namespace pystan {
               unsigned int init_buffer = args.get_ctrl_sampling_adapt_init_buffer();
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
-              
+
               return_code = stan::services::sample
                 ::hmc_nuts_diag_e_adapt(model, *init_context_ptr,
                                         random_seed, id, init_radius,
@@ -1058,7 +1056,7 @@ namespace pystan {
               double gamma = args.get_ctrl_sampling_adapt_gamma();
               double kappa = args.get_ctrl_sampling_adapt_kappa();
               double t0 = args.get_ctrl_sampling_adapt_t0();
-              
+
               return_code = stan::services::sample
                 ::hmc_nuts_unit_e_adapt(model, *init_context_ptr,
                                         random_seed, id, init_radius,
@@ -1076,7 +1074,7 @@ namespace pystan {
           sampler_names[1] = "int_time__";
           sampler_names[2] = "energy__";
           sample_writer_offset = sample_names.size() + sampler_names.size();
-          
+
           sample_writer_ptr = sample_writer_factory(&sample_stream,
                                                     comment_stream, "# ",
                                                     sample_names.size(),
@@ -1089,7 +1087,7 @@ namespace pystan {
           double stepsize = args.get_ctrl_sampling_stepsize();
           double stepsize_jitter = args.get_ctrl_sampling_stepsize_jitter();
           double int_time = args.get_ctrl_sampling_int_time();
-          
+
           if (args.get_ctrl_sampling_metric() == DENSE_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
               return_code = stan::services::sample
@@ -1119,7 +1117,7 @@ namespace pystan {
                                            init_buffer, term_buffer, window,
                                            interrupt, info, err, init_writer,
                                            *sample_writer_ptr, diagnostic_writer);
-              
+
             }
           } else if (args.get_ctrl_sampling_metric() == DIAG_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
@@ -1218,20 +1216,20 @@ namespace pystan {
           end = comments.find("seconds", start + 1);
           std::stringstream ss(comments.substr(start, end));
           ss >> warmDeltaT;
-    
+
           start = comments.find("# ", end) + strlen("# ");
           end = comments.find("seconds (Sampling)", start + 1);
           ss.str(comments.substr(start, end));
           ss >> sampleDeltaT;
         }
         holder.adaptation_info = adaptation_info;
-        
+
         std::vector<std::vector<double> > slst(sample_writer_ptr->sampler_values_.x().begin()+1,
                                                sample_writer_ptr->sampler_values_.x().end());
-        
+
         std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
         slst_names.insert(slst_names.end(), sampler_names.begin(), sampler_names.end());
-        holder.sampler_params = slst;        
+        holder.sampler_params = slst;
         holder.sampler_param_names = slst_names;
         holder.chain_names = fnames_oi;
 
