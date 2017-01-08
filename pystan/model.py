@@ -884,4 +884,4 @@ class StanModel:
 
         logger.warning('Automatic Differentiation Variational Inference (ADVI) is an EXPERIMENTAL ALGORITHM.')
         logger.warning('ADVI samples may be found on the filesystem in the file `{}`'.format(sample.args['sample_file'].decode('utf8')))
-        return OrderedDict([('args', sample.args), ('mean_pars', sample.mean_pars)])
+        return OrderedDict([('args', sample.args), ('inits', sample.inits), ('sampler_params', sample.sampler_params), ('sampler_param_names', sample.sampler_param_names), ('mean_pars', sample.mean_pars)])

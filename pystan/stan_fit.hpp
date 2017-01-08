@@ -1248,7 +1248,15 @@ namespace pystan {
         int eval_elbo = args.get_ctrl_variational_eval_elbo();
         int output_samples = args.get_ctrl_variational_output_samples();
 
-        stan::callbacks::stream_writer sample_writer(sample_stream, "# ");
+        pystan_sample_writer *sample_writer_ptr
+          = sample_writer_factory(&sample_stream,
+                                  comment_stream, "# ",
+                                  1,
+                                  0,
+                                  constrained_param_names.size(),
+                                  output_samples + 1,
+                                  0,
+                                  qoi_idx);
 
         if (args.get_ctrl_variational_algorithm() == FULLRANK) {
           return_code = stan::services::experimental::advi
@@ -1259,7 +1267,7 @@ namespace pystan {
                        adapt_engaged, adapt_iterations,
                        eval_elbo, output_samples,
                        interrupt, info, init_writer,
-                       sample_writer, diagnostic_writer);
+                       *sample_writer_ptr, diagnostic_writer);
         } else {
           return_code = stan::services::experimental::advi
             ::meanfield(model, *init_context_ptr,
@@ -1269,12 +1277,21 @@ namespace pystan {
                         adapt_engaged, adapt_iterations,
                         eval_elbo, output_samples,
                         interrupt, info, init_writer,
-                        sample_writer, diagnostic_writer);
+                        *sample_writer_ptr, diagnostic_writer);
         }
-        //holder = Rcpp::List::create(Rcpp::_["samples"] = R_NilValue);
+        std::vector<std::vector<double> > slst(sample_writer_ptr->values_.x().begin(),
+                                               sample_writer_ptr->values_.x().end());
+        std::vector<double> mean_pars(slst.size() - 1);
+        for (size_t n = 0; n < mean_pars.size(); ++n)
+          mean_pars[n] = slst[n][0];
+
+        holder.sampler_params = slst;
+        holder.sampler_param_names = constrained_param_names;
+        holder.mean_pars = mean_pars;
         holder.args = args;
-        holder.mean_pars = unconstrained_to_constrained(model, random_seed, id,
-                                                        init_writer.x());
+        holder.inits = unconstrained_to_constrained(model, random_seed, id,
+                                                    init_writer.x());
+        delete sample_writer_ptr;
       }
       init_context_ptr.reset();
       return return_code;
