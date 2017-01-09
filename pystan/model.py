@@ -76,10 +76,8 @@ def _map_parallel(function, args, n_jobs):
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
-        pool = multiprocessing.Pool(processes=n_jobs)
-        map_result = pool.map(function, args)
-        pool.close()
-        pool.join()
+        with multiprocessing.Pool(processes=n_jobs) as pool:
+            map_result = pool.map(function, args)
     else:
         map_result = list(map(function, args))
     return map_result
