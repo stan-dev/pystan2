@@ -1,14 +1,32 @@
 #ifndef PYSTAN__PYSTAN_WRITER_HPP
 #define PYSTAN__PYSTAN_WRITER_HPP
 
-#include <stan/interface_callbacks/writer/base_writer.hpp>
-#include <stan/interface_callbacks/writer/stream_writer.hpp>
+#include <stan/callbacks/writer.hpp>
+#include <stan/callbacks/stream_writer.hpp>
 
 namespace pystan {
 
+  class value : public stan::callbacks::writer {
+  private:
+    std::vector<double> x_;
+
+  public:
+    value() { }
+
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
+
+    void operator()(const std::vector<double>& x) {
+      x_ = x;
+    }
+
+    const std::vector<double> x() const {
+      return x_;
+    }
+  };
+
   template <class InternalVector>
-  class values
-    : public stan::interface_callbacks::writer::base_writer {
+  class values : public stan::callbacks::writer {
   private:
     size_t m_;
     size_t N_;
@@ -31,24 +49,8 @@ namespace pystan {
         M_ = x_[0].size();
     }
 
-    void operator()(const std::string& key,
-                    double value) { }
-
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { } 
-        
-    void operator()(const std::vector<std::string>& names) { }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     void operator()(const std::vector<double>& x) {
       if (N_ != x.size())
@@ -60,20 +62,14 @@ namespace pystan {
         x_[n][m_] = x[n];
       m_++;
     }
-    
-    void operator()() { }
-
-    void operator()(const std::string& message) { }
-    
 
     const std::vector<InternalVector>& x() const {
       return x_;
     }
   };
-  
+
   template <class InternalVector>
-  class filtered_values
-    : public stan::interface_callbacks::writer::base_writer {
+  class filtered_values : public stan::callbacks::writer {
   private:
     size_t N_, M_, N_filter_;
     std::vector<size_t> filter_;
@@ -108,26 +104,9 @@ namespace pystan {
                                   "elements out of range");
     }
 
-    void operator()(const std::string& key,
-                    double value) { }
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { } 
-
-    void operator()(const std::vector<std::string>& names) {
-    }
-    
     void operator()(const std::vector<double>& state) {
       if (state.size() != N_)
         throw std::length_error("vector provided does not "
@@ -137,17 +116,12 @@ namespace pystan {
       values_(tmp);
     }
 
-    void operator()(const std::string& message) { }
-
-    void operator()() { }
-
     const std::vector<InternalVector>& x() {
       return values_.x();
     }
   };
 
-  class sum_values
-    : public stan::interface_callbacks::writer::base_writer {
+  class sum_values : public stan::callbacks::writer {
   public:
     explicit sum_values(const size_t N)
       : N_(N), m_(0), skip_(0), sum_(N_, 0.0) { }
@@ -155,31 +129,8 @@ namespace pystan {
     sum_values(const size_t N, const size_t skip)
       : N_(N), m_(0), skip_(skip), sum_(N_, 0.0) { }
 
-
-    void operator()(const std::string& key,
-                    double value) { }
-    
-    void operator()(const std::string& key,
-                    int value) { }
-
-    void operator()(const std::string& key,
-                    const std::string& value) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_values) { }
-
-    void operator()(const std::string& key,
-                    const double* values,
-                    int n_rows, int n_cols) { } 
-        
-    /**
-     * Do nothing with std::string vector
-     *
-     * @param names
-     */
-    void operator()(const std::vector<std::string>& names) { }
-
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
 
     /**
      * Add values to cumulative sum
@@ -196,20 +147,6 @@ namespace pystan {
       }
       m_++;
     }
-
-
-    /**
-     * Do nothing with a string.
-     *
-     * @param x string to print with prefix in front
-     */
-    void operator()(const std::string& message) { }
-
-    /**
-     * Do nothing
-     *
-     */
-    void operator()() { }
 
     const std::vector<double>& sum() const {
       return sum_;
@@ -233,100 +170,42 @@ namespace pystan {
     std::vector<double> sum_;
   };
 
-  
-
-  class pystan_sample_writer
-    : public stan::interface_callbacks::writer::base_writer {
+  class comment_writer : public stan::callbacks::writer {
+  private:
+    stan::callbacks::stream_writer writer_;
   public:
-    typedef stan::interface_callbacks::writer::stream_writer CsvWriter;
-    typedef filtered_values<std::vector<double> > FilteredValuesWriter;
-    typedef sum_values SumValuesWriter;
-
-    CsvWriter csv_;
-    FilteredValuesWriter values_;
-    FilteredValuesWriter sampler_values_;
-    SumValuesWriter sum_;
-
-    pystan_sample_writer(CsvWriter csv, FilteredValuesWriter values, FilteredValuesWriter sampler_values, SumValuesWriter sum)
-      : csv_(csv), values_(values), sampler_values_(sampler_values), sum_(sum) { }
-
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value A double value
-     */
-    void operator()(const std::string& key,
-                    double value) {
-      csv_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
+    comment_writer(std::ostream& stream, const std::string& prefix = "")
+      : writer_(stream, prefix) {
     }
 
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value An integer value
-     */
-    void operator()(const std::string& key,
-                    int value) {
-      csv_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
+    // deals with name hiding in C++
+    using stan::callbacks::writer::operator();
+
+    void operator()(const std::string& message) {
+      writer_(message);
     }
 
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] value A string
-     */
-    void operator()(const std::string& key,
-                    const std::string& value) {
-      csv_(key, value);
-      values_(key, value);
-      sampler_values_(key, value);
-      sum_(key, value);
+    void operator()() {
+      writer_();
     }
+  };
 
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] values A double array, typically used with
-     *   contiguous Eigen vectors
-     * @param[in] n_values Length of the array
-     */
-    void operator()(const std::string& key,
-                            const double* values,
-                            int n_values)  {
-      csv_(key, values, n_values);
-      values_(key, values, n_values);
-      sampler_values_(key, values, n_values);
-      sum_(key, values, n_values);
-    }
 
-    /**
-     * Writes a key, value pair.
-     *
-     * @param[in] key A string
-     * @param[in] values A double array assumed to represent a 2d
-     *   matrix stored in column major order, typically used with
-     *   contiguous Eigen matrices
-     * @param[in] n_rows Rows
-     * @param[in] n_cols Columns
-     */
-    void operator()(const std::string& key,
-                            const double* values,
-                            int n_rows, int n_cols) {
-      csv_(key, values, n_rows, n_cols);
-      values_(key, values, n_rows, n_cols);
-      sampler_values_(key, values, n_rows, n_cols);
-      sum_(key, values, n_rows, n_cols);
-    }
+  class pystan_sample_writer : public stan::callbacks::writer {
+  public:
+    stan::callbacks::stream_writer csv_;
+    comment_writer comment_writer_;
+    filtered_values<std::vector<double> > values_;
+    filtered_values<std::vector<double> > sampler_values_;
+    sum_values sum_;
+
+    pystan_sample_writer(stan::callbacks::stream_writer csv,
+                         comment_writer comment_writer,
+                         filtered_values<std::vector<double> > values,
+                         filtered_values<std::vector<double> > sampler_values,
+                         sum_values sum)
+      : csv_(csv), comment_writer_(comment_writer),
+        values_(values), sampler_values_(sampler_values), sum_(sum) { }
 
     /**
      * Writes a set of names.
@@ -335,6 +214,7 @@ namespace pystan {
      */
     void operator()(const std::vector<std::string>& names) {
       csv_(names);
+      comment_writer_(names);
       values_(names);
       sampler_values_(names);
       sum_(names);
@@ -347,19 +227,10 @@ namespace pystan {
      */
     void operator()(const std::vector<double>& state) {
       csv_(state);
+      comment_writer_(state);
       values_(state);
       sampler_values_(state);
       sum_(state);
-    }
-
-    /**
-     * Writes blank input.
-     */
-    void operator()() {
-      csv_();
-      values_();
-      sampler_values_();
-      sum_();
     }
 
     /**
@@ -369,11 +240,22 @@ namespace pystan {
      */
     void operator()(const std::string& message) {
       csv_(message);
+      comment_writer_(message);
       values_(message);
       sampler_values_(message);
       sum_(message);
     }
 
+    /**
+     * Writes blank input.
+     */
+    void operator()() {
+      csv_();
+      comment_writer_();
+      values_();
+      sampler_values_();
+      sum_();
+    }
   };
 
   /**
@@ -381,12 +263,17 @@ namespace pystan {
      @param      M    number of iterations to be saved
      @param      warmup    number of warmup iterations to be saved
   */
-
-  pystan_sample_writer
-  sample_writer_factory(std::ostream *o, const std::string prefix,
-                        const size_t N, const size_t M, const size_t warmup,
-                        const size_t offset,
+  pystan_sample_writer*
+  sample_writer_factory(std::ostream *csv_fstream,
+                        std::ostream& comment_stream,
+                        const std::string& prefix,
+                        size_t N_sample_names, size_t N_sampler_names,
+                        size_t N_constrained_param_names,
+                        size_t N_iter_save, size_t warmup,
                         const std::vector<size_t>& qoi_idx) {
+    size_t N = N_sample_names + N_sampler_names + N_constrained_param_names;
+    size_t offset = N_sample_names + N_sampler_names;
+
     std::vector<size_t> filter(qoi_idx);
     std::vector<size_t> lp;
     for (size_t n = 0; n < filter.size(); n++)
@@ -401,21 +288,14 @@ namespace pystan {
     for (size_t n = 0; n < offset; n++)
       filter_sampler_values[n] = n;
 
-    stan::interface_callbacks::writer::stream_writer csv(*o, prefix);
-    filtered_values<std::vector<double> > values(N, M, filter);
-    filtered_values<std::vector<double> > sampler_values(N, M, filter_sampler_values);
+    stan::callbacks::stream_writer csv(*csv_fstream, prefix);
+    comment_writer comments(comment_stream, prefix);
+    filtered_values<std::vector<double> > values(N, N_iter_save, filter);
+    filtered_values<std::vector<double> > sampler_values(N, N_iter_save, filter_sampler_values);
     sum_values sum(N, warmup);
 
-    return pystan_sample_writer(csv, values, sampler_values, sum);
-  }
-
-  stan::interface_callbacks::writer::stream_writer
-  diagnostic_writer_factory(std::ostream *o, const std::string prefix) {
-    stan::interface_callbacks::writer::stream_writer csv(*o, prefix);
-    return csv;
+    return new pystan_sample_writer(csv, comments, values, sampler_values, sum);
   }
 
 }
-
-
 #endif

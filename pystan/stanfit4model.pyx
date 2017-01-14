@@ -314,6 +314,9 @@ cdef void _set_stanargs_from_dict(StanArgs* p, dict args):
         p.ctrl.optim.tol_rel_obj = args['ctrl']['optim']['tol_rel_obj']
         p.ctrl.optim.tol_rel_grad = args['ctrl']['optim']['tol_rel_grad']
         p.ctrl.optim.history_size = args['ctrl']['optim']['history_size']
+    elif args['method'] == stan_args_method_t.TEST_GRADIENT:
+        p.ctrl.test_grad.epsilon = args['ctrl']['test_grad']['epsilon']
+        p.ctrl.test_grad.error = args['ctrl']['test_grad']['error']
     elif args['method'] == stan_args_method_t.VARIATIONAL:
         p.ctrl.variational.algorithm = args['ctrl']['variational']['algorithm'].value
         p.ctrl.variational.iter = args['ctrl']['variational']['iter']

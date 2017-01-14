@@ -245,10 +245,10 @@ class StanModel:
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "eigen_3.2.9"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "boost_1.62.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math_2.14.0", "lib", "cvodes_2.9.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.2.9"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.62.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "cvodes_2.9.0", "include"),
             np.get_include(),
         ]
 
@@ -884,4 +884,4 @@ class StanModel:
 
         logger.warning('Automatic Differentiation Variational Inference (ADVI) is an EXPERIMENTAL ALGORITHM.')
         logger.warning('ADVI samples may be found on the filesystem in the file `{}`'.format(sample.args['sample_file'].decode('utf8')))
-        return OrderedDict([('args', sample.args), ('mean_pars', sample.mean_pars)])
+        return OrderedDict([('args', sample.args), ('inits', sample.inits), ('sampler_params', sample.sampler_params), ('sampler_param_names', sample.sampler_param_names), ('mean_pars', sample.mean_pars)])

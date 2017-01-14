@@ -141,7 +141,7 @@ def _format_number(num, n_signif_figures, max_width):
     """
     if max_width < 6:
         raise NotImplementedError("Guaranteed formatting in fewer than 6 characters not supported.")
-    if math.isnan(num):
+    if math.isnan(num) or math.isinf(num):
         return str(num)
     # add 0.5 to prevent log(0) errors; only affects n_digits calculation for num > 0
     n_digits = lambda num: math.floor(math.log10(abs(num) + 0.5)) + 1
@@ -639,7 +639,12 @@ def _get_valid_stan_args(base_args=None):
 
     args['init_radius'] = args.get('init_r', 2.0)
     if (args['init_radius'] <= 0):
-        args['init'] = "0".encode('ascii')
+        args['init'] = b"0"
+
+    # 0 initialization requires init_radius = 0
+    if (args['init'] == b"0" or args['init'] == 0):
+        args['init_radius'] = 0.0
+
     args['enable_random_init'] = args.get('enable_random_init', True)
     # RStan calls validate_args() here
     return args
@@ -943,6 +948,7 @@ def _writable_sample_file(file, warn=True, wfun=None):
     if wfun is None:
         wfun = lambda x, y: '"{}" is not writable; use "{}" instead'.format(x, y)
     dir = os.path.dirname(file)
+    dir = os.getcwd() if dir == '' else dir
     if os.access(dir, os.W_OK):
         return file
     else:
