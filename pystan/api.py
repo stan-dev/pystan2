@@ -112,15 +112,16 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         else:
             model_code = file.read()
 
-    # bytes, going into C++ code
+    # Encode model name as bytes, to pass to C++ code.
+    # Also used in model name hash.
     model_code_bytes = model_code.encode('ascii')
 
     if obfuscate_model_name:
         # Make the model name depend on the code.
-        model_name = (
-            model_name + '_' +
-            hashlib.md5(model_code_bytes).hexdigest())
+        code_hash = hashlib.md5(model_code_bytes).hexdigest()
+        model_name = model_name + '_' + code_hash
 
+    # Now that we have the final model name, encode it also.
     model_name_bytes = model_name.encode('ascii')
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
