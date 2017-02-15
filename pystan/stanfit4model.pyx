@@ -718,6 +718,12 @@ cdef class StanFit4Model:
         m = np.row_stack([mean_pars, mean_lp__])
         return m
 
+    def constrain_pars(self, np.ndarray[double, ndim=1, mode="c"] upar not None):
+        """Transform parameters from unconstrained space to defined support"""
+        cdef vector[double] constrained
+        constrained = self.thisptr.constrain_pars(upar)
+        return np.asarray(constrained)
+
     def unconstrain_pars(self, par):
         """Transform parameters from defined support to unconstrained space"""
         cdef vector[double] unconstrained
