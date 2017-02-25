@@ -113,7 +113,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
             model_code = file.read()
 
     # bytes, going into C++ code
-    model_code_bytes = model_code.encode('ascii')
+    model_code_bytes = model_code.encode('ascii', 'replace')
 
     if obfuscate_model_name:
         # Make the model name depend on the code.
