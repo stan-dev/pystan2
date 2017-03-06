@@ -11,6 +11,6 @@ def stanc(bytes model_stancode, bytes model_name):
     cdef PyStancResult result
     c_stanc(model_stancode, model_name, result)
     return {'status': result.status,
-            'msg': result.msg.decode('ascii'),
+            'msg': result.msg.decode('utf-8'),
             'model_cppname': result.model_cppname.decode('ascii'),
             'cppcode': result.cppcode.decode('ascii')}
