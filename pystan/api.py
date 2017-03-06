@@ -10,7 +10,7 @@ import logging
 import hashlib
 
 import pystan._api  # stanc wrapper
-from pystan._compat import string_types
+from pystan._compat import string_types, PY2
 from pystan.model import StanModel
 
 logger = logging.getLogger('pystan')
@@ -125,7 +125,11 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
     if result['status'] == -1:  # EXCEPTION_RC is -1
-        error_msg = "Failed to parse Stan model '{}'. Error message:\n{}".format(model_name, result['msg'])
+        msg = result['msg']
+        if PY2:
+            # fix problem with unicode in error message in PY2
+            msg = msg.encode('ascii', 'replace')
+        error_msg = "Failed to parse Stan model '{}'. Error message:\n{}".format(model_name, msg)
         raise ValueError(error_msg)
     elif result['status'] == 0:  # SUCCESS_RC is 0
         logger.debug("Successfully parsed Stan model '{}'.".format(model_name))
