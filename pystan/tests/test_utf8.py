@@ -33,7 +33,7 @@ class TestUTF8(unittest.TestCase):
         model_code = u'parameters {real ö;\n} model {ö ~ normal(0,1);}'
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
         if PY2:
-            with assertRaisesRegex(UnicodeDecodeError, "'ascii' codec can't encode characters in position .*"):
+            with assertRaisesRegex(UnicodeDecodeError, "'ascii' codec can't decode byte .*"):
                 stanc(model_code=model_code)
         else:
             with assertRaisesRegex(ValueError, 'Failed to parse Stan model .*'):
