@@ -1,7 +1,6 @@
 import unittest
 
 from pystan import stanc, StanModel
-from pystan._compat import PY2
 
 
 class TestUTF8(unittest.TestCase):
@@ -32,9 +31,5 @@ class TestUTF8(unittest.TestCase):
     def test_utf8_inprogramcode(self):
         model_code = u'parameters {real ö;\n} model {ö ~ normal(0,1);}'
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        if PY2:
-            with assertRaisesRegex(UnicodeDecodeError, "'ascii' codec can't decode byte .*"):
-                stanc(model_code=model_code)
-        else:
-            with assertRaisesRegex(ValueError, 'Failed to parse Stan model .*'):
-                stanc(model_code=model_code)
+        with assertRaisesRegex(ValueError, 'Failed to parse Stan model .*'):
+            stanc(model_code=model_code)
