@@ -1,7 +1,7 @@
 import unittest
 
 from pystan import stanc, StanModel
-
+from pystan._compat import PY2
 
 class TestUTF8(unittest.TestCase):
     
