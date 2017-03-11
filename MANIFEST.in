@@ -16,8 +16,9 @@ prune pystan/stan/src/python
 prune pystan/stan/src/test
 
 # unused parts of the stan math source
-prune pystan/stan/lib/stan_math/doxygen
-prune pystan/stan/lib/stan_math/make
-prune pystan/stan/lib/stan_math/test
-prune pystan/stan/lib/stan_math/lib/cpplint_4.45
-prune pystan/stan/lib/stan_math/lib/gtest_1.7.0
+prune pystan/stan/lib/stan_math*/doc
+prune pystan/stan/lib/stan_math*/doxygen
+prune pystan/stan/lib/stan_math*/lib/cpplint_*
+prune pystan/stan/lib/stan_math*/lib/gtest_*
+prune pystan/stan/lib/stan_math*/make
+prune pystan/stan/lib/stan_math*/test
