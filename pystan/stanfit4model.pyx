@@ -520,13 +520,14 @@ cdef class StanFit4Model:
         Parameters
         ----------
         pars : {str, sequence of str}
-            parameter (or quantile) name(s)
+           parameter (or quantile) name(s). If `permuted` is False,
+           `pars` is ignored.
         permuted : bool
-            If True, returned samples are permuted. All chains are merged and
-            warmup samples are discarded.
+           If True, returned samples are permuted. All chains are
+           merged and warmup samples are discarded.
         inc_warmup : bool
-           If True, warmup samples are kept; otherwise they are discarded. If
-           `permuted` is True, `inc_warmup` is ignored.
+           If True, warmup samples are kept; otherwise they are
+           discarded. If `permuted` is True, `inc_warmup` is ignored.
 
         Returns
         -------
