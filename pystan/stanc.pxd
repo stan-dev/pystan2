@@ -15,4 +15,4 @@ cdef extern from "stanc.hpp":
         string msg
         string model_cppname
         string cppcode
-    int stanc(string& model_stancode, string& model_name, PyStancResult&)
+    int stanc(string& model_stancode, string& model_name, bool allow_undefined, PyStancResult&)

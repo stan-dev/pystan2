@@ -24,7 +24,7 @@ std::string stan_version() {
   return stan_version;
 }
 
-int stanc(std::string model_stancode, std::string model_name, PyStancResult& result) {
+int stanc(std::string model_stancode, std::string model_name, bool allow_undefined, PyStancResult& result) {
   static const int SUCCESS_RC = 0;
   static const int EXCEPTION_RC = -1;
   static const int PARSE_FAIL_RC = -2;
@@ -43,7 +43,7 @@ int stanc(std::string model_stancode, std::string model_name, PyStancResult& res
   std::istringstream in(mcode_);
   try {
     bool valid_model
-      = stan::lang::compile(&std::cerr,in,out,mname_);
+      = stan::lang::compile(&std::cerr,in,out,mname_,allow_undefined);
     if (!valid_model) {
       result.status = PARSE_FAIL_RC;
       return PARSE_FAIL_RC;

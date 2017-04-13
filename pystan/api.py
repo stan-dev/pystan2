@@ -17,7 +17,7 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obfuscate_model_name=True):
+          verbose=False, obfuscate_model_name=True, allow_undefined=False):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -49,6 +49,10 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         If False the model name in the generated C++ code will not be made
         unique by the insertion of randomly generated characters.
         Generally it is recommended that this parameter be left as True.
+
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
 
     Returns
     -------
@@ -123,7 +127,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
     model_name_bytes = model_name.encode('ascii')
 
-    result = pystan._api.stanc(model_code_bytes, model_name_bytes)
+    result = pystan._api.stanc(model_code_bytes, model_name_bytes, allow_undefined)
     if result['status'] == -1:  # EXCEPTION_RC is -1
         msg = result['msg']
         if PY2:
@@ -143,7 +147,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=None, algorithm=None, control=None, sample_file=None,
          diagnostic_file=None, verbose=False, boost_lib=None,
-         eigen_lib=None, n_jobs=-1, **kwargs):
+         eigen_lib=None, n_jobs=-1, allow_undefined=False, **kwargs):
     """Fit a model using Stan.
 
     Parameters
@@ -285,6 +289,10 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Sample in parallel. If -1 all CPUs are used. If 1, no parallel
         computing code is used at all, which is useful for debugging.
 
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
+
     Returns
     -------
 
@@ -316,12 +324,12 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Argument `refresh` can be used to control how to indicate the progress
         during sampling (i.e. show the progress every \code{refresh} iterations).
         By default, `refresh` is `max(iter/10, 1)`.
-        
+
     obfuscate_model_name : boolean, optional
         `obfuscate_model_name` is only valid if `fit` is None. True by default.
         If False the model name in the generated C++ code will not be made
         unique by the insertion of randomly generated characters.
-        Generally it is recommended that this parameter be left as True. 
+        Generally it is recommended that this parameter be left as True.
 
     Examples
     --------
@@ -380,7 +388,8 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     else:
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
-                      obfuscate_model_name=obfuscate_model_name, verbose=verbose)
+                      obfuscate_model_name=obfuscate_model_name, verbose=verbose,
+                      allow_undefined=allow_undefined)
     # check that arguments in kwargs are valid
     valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",
                   "refresh", "control"}
