@@ -6,11 +6,11 @@
 # This file is licensed under Version 3.0 of the GNU General Public
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
+from libcpp cimport bool
 from pystan.stanc cimport PyStancResult, stanc as c_stanc
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-
 
 def stanc(bytes model_stancode, bytes model_name,
           bool allow_undefined, bytes filename,
