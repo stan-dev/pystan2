@@ -666,8 +666,7 @@ def _check_seed(seed):
                 warnings.warn("`seed` may not be negative")
                 seed = None
             elif seed > MAX_UINT:
-                warnings.warn("`seed` is too large; max is {}".format(MAX_UINT))
-                seed = None
+                raise ValueError('`seed` is too large; max is {}'.format(MAX_UINT))
     elif isinstance(seed, np.random.RandomState):
         seed = seed.randint(0, MAX_UINT)
     elif seed is not None:
