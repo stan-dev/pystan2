@@ -16,7 +16,7 @@ class TestStanfit(unittest.TestCase):
             real x;
         }
         model {
-            lp__ <- 1 / log(x);
+            target += 1 / log(x);
         }
         """
         sm = StanModel(model_code=code)
