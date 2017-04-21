@@ -72,13 +72,9 @@ class TestUserInits(unittest.TestCase):
         }
         """
         data = self.data
-        # NOTE: we are only specifying 'mu' and not 'sigma'
-        # This behavior works now.
-        try:
-            pystan.stan(model_code=model_code, iter=10, chains=1, seed=2,
-                        data=data, init=[dict(mu=4)], warmup=0)
-        except RuntimeError:
-            self.fail("pystan.stan() raised RuntimeError on partial init")
+        # NOTE: we are only specifying 'mu' and not 'sigma' (partial inits)
+        fit = pystan.stan(model_code=model_code, iter=10, chains=1, seed=2, data=data, init=[dict(mu=4)], warmup=0)
+        self.assertIsNotNone(fit)
 
 
 class TestUserInitsMatrix(unittest.TestCase):
