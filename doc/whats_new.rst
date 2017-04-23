@@ -6,9 +6,11 @@
  What's New
 ============
 
-TBA (TBA)
-=========
-- TBA
+v2.15.0.0 (21. Apr 2017)
+========================
+- Update Stan source to v2.15.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.15.0>`_)
+- Allow UTF-8 comments in Stan Program code. Thanks to @ahartikainen
+- Expose constrain_pars method, thanks to Lars Mescheder.
 
 V2.14.0.0 (1. Jan 2017)
 =========================
