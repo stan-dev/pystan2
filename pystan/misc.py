@@ -359,7 +359,7 @@ def _split_data(data):
     # map<string, pair<vector<int>, vector<size_t>>> so prepare
     # them accordingly.
     for k, v in data.items():
-        if np.issubdtype(np.asarray(v).dtype, int):
+        if np.issubdtype(np.asarray(v).dtype, np.integer):
             data_i.update({k.encode('utf-8'): np.asarray(v, dtype=int)})
         elif np.issubdtype(np.asarray(v).dtype, float):
             data_r.update({k.encode('utf-8'): np.asarray(v, dtype=float)})
