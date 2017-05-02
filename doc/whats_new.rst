@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.15.0.1 (2. May 2017)
+========================
+- Python 2.7 compatibility fix (#332). Thanks to @monga for the report.
+
 v2.15.0.0 (21. Apr 2017)
 ========================
 - Update Stan source to v2.15.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.15.0>`_)
