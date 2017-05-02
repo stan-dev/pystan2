@@ -34,7 +34,8 @@ fingerprint C3542448245BEC68F43070E4CCB669D9761F0CAC.*
 If ``twine`` prompts for a username and password abort the process with
 Control-C and enter your PyPI credentials in ``$HOME/.pypirc``. (For more
 details see the Python documention on `the .pypirc file
-<https://docs.python.org/3/distutils/packageindex.html#pypirc>`_.)
+<https://docs.python.org/3/distutils/packageindex.html#pypirc>`_.) Alternatively,
+one can set the environment variables ``TWINE_USERNAME`` and ``TWINE_PASSWORD``.
 
 Build Wheels
 ------------
