@@ -7,6 +7,13 @@
 *The release signing key for PyStan was created on 2017-01-01 and has
 fingerprint C3542448245BEC68F43070E4CCB669D9761F0CAC.*
 
+All steps except those described in "Tag Release" should be performed on a
+server with a high-bandwidth connection to the Internet. About 1000MiB worth of
+data will be uploaded to PyPi.
+
+Tag Release
+===========
+
 - Update release notes, ``doc/whats_new.rst``.
 - Double check version number in ``pystan/__init__.py``
 - Update version in snippet in ``doc/getting_started.rst``, i.e., "wget ..."
@@ -23,22 +30,15 @@ fingerprint C3542448245BEC68F43070E4CCB669D9761F0CAC.*
   - For example, ``git tag --sign v2.4.0.1``
   - Push tag to github ``git push --tags``
 
-- Assemble source distribution::
+Build source distribution
+=========================
+
+Assemble source distribution::
 
     ./build_dist.sh
 
-- Sign and upload source distribution::
-
-    twine upload --sign --identity C3542448245BEC68F43070E4CCB669D9761F0CAC dist/*.tar.gz
-
-If ``twine`` prompts for a username and password abort the process with
-Control-C and enter your PyPI credentials in ``$HOME/.pypirc``. (For more
-details see the Python documention on `the .pypirc file
-<https://docs.python.org/3/distutils/packageindex.html#pypirc>`_.) Alternatively,
-one can set the environment variables ``TWINE_USERNAME`` and ``TWINE_PASSWORD``.
-
 Build Wheels
-------------
+============
 
 Linux and OSX: in the ``pystan-wheels`` repo update the ``pystan`` submodule
 and bump the version in ``.travis.yml``. Push changes.
@@ -56,31 +56,46 @@ After the wheels have finished building, download them from the Rackspace
 storage bucket.
 
 Use ``continuous_integration/download_wheels.sh`` to download all wheels into
-the directory ``wheels/``.
+the directory ``dist/``.
 
-Sign Wheels
------------
+Upload Source Distribution and Wheels to PyPI
+=============================================
 
 *NOTE: EXPERIMENTAL*
 
-As uploading wheels may take a long time on a low-bandwidth connection, it
-makes sense to sign all the wheels before uploading them::
+- Sign source distribution and wheels::
 
-    for whl in wheels/*.whl; do
+    for tarball in dist/*.tar.gz; do
+        gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$tarball"
+    done
+
+    for whl in dist/*.whl; do
         gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$whl"
     done
 
-Upload Wheels
+- Upload source distribution and wheels::
+
+    twine upload --skip-existing dist/*.tar.gz dist/*.tar.gz.asc
+    twine upload --skip-existing dist/*.whl dist/*.whl.asc
+
+If ``twine`` prompts for a username and password abort the process with
+Control-C and enter your PyPI credentials in ``$HOME/.pypirc``. (For more
+details see the Python documention on `the .pypirc file
+<https://docs.python.org/3/distutils/packageindex.html#pypirc>`_.) Alternatively,
+one can set the environment variables ``TWINE_USERNAME`` and ``TWINE_PASSWORD``.
+
+Uploading wheels may take a long time on a low-bandwidth connection.
+
+Post-release Tasks
+==================
+
+Update Source
 -------------
 
-*NOTE: EXPERIMENTAL*
-
-At this point, all the wheels have been signed. They only need to be uploaded
-to PyPI.
-
-::
-
-    twine upload wheels/*.whl wheels/*.whl.asc
+- Checkout the ``develop`` branch.
+- Update version in ``pystan/__init__.py`` to ``<n.n.n.n+1>dev``.
+- Add placeholder for next release in ``doc/whats_new.rst``.
+- Commit changes and push ``develop``.
 
 Update Stan Website
 -------------------
@@ -89,7 +104,6 @@ Update the Stan website with the new PyStan version information. The version
 number in the following file needs to be incremented::
 
     https://github.com/stan-dev/stan-dev.github.io/blob/master/citations/index.md
-
 
 Make Release Announcement
 -------------------------
@@ -105,10 +119,8 @@ PyStan 2.14.0.0 (subject is "pystan 2.14.0.0 released on PyPI")::
 
     http://pystan.readthedocs.io/en/latest/whats_new.html
 
-After release
-=============
 
-- Checkout the ``develop`` branch.
-- Update version in ``pystan/__init__.py`` to ``<n.n.n.n>dev``.
-- Add placeholder for next release in ``doc/whats_new.rst``.
-- Commit changes and push ``develop``.
+TODO
+====
+
+- Automate this entire process.
