@@ -1,0 +1,2 @@
+append_col; np.hstack
+append_row; np.vstack
