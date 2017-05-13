@@ -491,6 +491,11 @@ cdef class StanFit4Model:
         ---------
         pars : {str, sequence of str}
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
 
         Note
         ----
@@ -510,6 +515,11 @@ cdef class StanFit4Model:
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
         """
         # FIXME: for now plot and traceplot do the same thing
         return self.plot(pars, dtypes=dtypes)
@@ -528,6 +538,9 @@ cdef class StanFit4Model:
         inc_warmup : bool
            If True, warmup samples are kept; otherwise they are
            discarded. If `permuted` is True, `inc_warmup` is ignored.
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
 
         Returns
         -------
