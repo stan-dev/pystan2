@@ -484,7 +484,7 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None):
+    def plot(self, pars=None, dtypes={}):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -501,9 +501,9 @@ cdef class StanFit4Model:
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        return pystan.plots.traceplot(self, pars)
+        return pystan.plots.traceplot(self, pars, dtypes)
 
-    def traceplot(self, pars=None):
+    def traceplot(self, pars=None, dtypes={}):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -512,9 +512,9 @@ cdef class StanFit4Model:
             parameter name(s); by default use all parameters of interest
         """
         # FIXME: for now plot and traceplot do the same thing
-        return self.plot(pars)
+        return self.plot(pars, dtypes=dtypes)
 
-    def extract(self, pars=None, permuted=True, inc_warmup=False):
+    def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes={}):
         """Extract samples in different forms for different parameters.
 
         Parameters
@@ -567,7 +567,10 @@ cdef class StanFit4Model:
             for par in pars:
                 sss = [pystan.misc._get_kept_samples(p, self.sim)
                        for p in tidx[par]]
-                s = {par: np.column_stack(sss)}
+                ss = np.column_stack(sss)
+                if par in dtypes.keys():
+                    ss = ss.astype(dtypes[par])
+                s = {par: ss}
                 extracted.update(s)
                 par_idx = self.sim['pars_oi'].index(par)
                 par_dim = self.sim['dims_oi'][par_idx]
