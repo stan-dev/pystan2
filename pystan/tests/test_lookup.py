@@ -9,18 +9,12 @@ class TestLookup(unittest.TestCase):
         cbind_err = pystan.lookup("R.cbindd")["StanFunction"]
         cbind_2 = pystan.lookup("R.cbind", 1.0)["StanFunction"]
         hstack_2 = pystan.lookup("numpy.hstack", 1.0)["StanFunction"]
-        cbind_npd = pystan.lookup("R.cbind",
-                                  use_pandas=False)["StanFunction"]
-        hstack_npd = pystan.lookup("numpy.hstack",
-                                   use_pandas=False)["StanFunction"]
         for i in range(len(cbind)):
             self.assertEqual(cbind[i], "append_col")
             self.assertEqual(cbind[i], hstack[i])
             self.assertEqual(cbind[i], cbind_err[i])
             self.assertEqual(cbind[i], cbind_2[i])
             self.assertEqual(cbind[i], hstack_2[i])
-            self.assertEqual(cbind[i], cbind_npd[i])
-            self.assertEqual(cbind[i], hstack_npd[i])
         normal = pystan.lookup("scipy.stats.norm")["StanFunction"]
         for i in range(len(normal)):
             self.assertEqual("normal", normal[i][:6])

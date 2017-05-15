@@ -13,12 +13,12 @@ import io
 lookuptable = None
 stanftable = None
 
-def lookup(name, min_similarity_ratio=.75, use_pandas=True):
+def lookup(name, min_similarity_ratio=.75):
     """
     Look up for a Stan function with similar functionality to a Python
     function (or even an R function, see examples). If the function is
     not present on the lookup table, then attempts to find similar one
-    and prints the results.
+    and prints the results. This function requires package `pandas`.
 
     Parameters
     -----------
@@ -29,12 +29,6 @@ def lookup(name, min_similarity_ratio=.75, use_pandas=True):
         function will attempt to find similar names using
         `difflib.SequenceMatcher.ratio()`, and then results with
         calculated ratio below `min_similarity_ratio` will be discarded.
-    use_pandas : bool
-        If True and `pandas` is available, will return a `pandas`
-        object.
-        If True and `pandas` is not available, will return a structured
-        `numpy` array.
-        If False, will return a structured `numpy` array.
 
     Examples
     ---------
@@ -51,7 +45,8 @@ def lookup(name, min_similarity_ratio=.75, use_pandas=True):
 
     Returns
     ---------
-    See argument `use_pandas`.
+    A pandas.core.frame.DataFrame if exact or at least one similar
+    result is found, None otherwise.
     """
     if lookuptable is None:
         build()
@@ -85,12 +80,11 @@ def lookup(name, min_similarity_ratio=.75, use_pandas=True):
     if not len(entries):
         return "Found no equivalent Stan function available for " + name
 
-    if not use_pandas:
-        return entries
     try:
         import pandas as pd
     except ImportError:
-        return entries
+        raise ImportError('Package pandas is require to use this '
+                          'function.')
 
     return pd.DataFrame(entries)
 
