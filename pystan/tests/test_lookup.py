@@ -1,18 +1,31 @@
 import unittest
 import numpy as np
 import pystan
-import re
 
 class TestLookup(unittest.TestCase):
     def test_lookup(self):
         cbind = pystan.lookup("R.cbind")["StanFunction"]
         hstack = pystan.lookup("numpy.hstack")["StanFunction"]
+        cbind_err = pystan.lookup("R.cbindd")["StanFunction"]
+        cbind_2 = pystan.lookup("R.cbind", 1.0)["StanFunction"]
+        hstack_2 = pystan.lookup("numpy.hstack", 1.0)["StanFunction"]
+        cbind_npd = pystan.lookup("R.cbind",
+                                  use_pandas=False)["StanFunction"]
+        hstack_npd = pystan.lookup("numpy.hstack",
+                                   use_pandas=False)["StanFunction"]
         for i in range(len(cbind)):
-            self.assertEqual(str(cbind[i]), "append_col")
+            self.assertEqual(cbind[i], "append_col")
             self.assertEqual(cbind[i], hstack[i])
+            self.assertEqual(cbind[i], cbind_err[i])
+            self.assertEqual(cbind[i], cbind_2[i])
+            self.assertEqual(cbind[i], hstack_2[i])
+            self.assertEqual(cbind[i], cbind_npd[i])
+            self.assertEqual(cbind[i], hstack_npd[i])
         normal = pystan.lookup("scipy.stats.norm")["StanFunction"]
         for i in range(len(normal)):
-          self.assertTrue(re.fullmatch(r"^normal.*", normal[i]))
+            self.assertEqual("normal", normal[i][:6])
         poisson = pystan.lookup("scipy.stats.poisson")["StanFunction"]
         for i in range(len(poisson)):
-          self.assertTrue(re.fullmatch(r"^poisson.*", poisson[i]))
+            self.assertEqual("poisson", poisson[i][:7])
+        wrongf = pystan.lookup("someverycrazyfunctionyouwontfind", 1.0)
+        self.assertTrue(wrongf is None)

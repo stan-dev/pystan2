@@ -13,23 +13,31 @@ import io
 lookuptable = None
 stanftable = None
 
-def lookup(name, similarity_ratio=.75):
+def lookup(name, min_similarity_ratio=.75, use_pandas=True):
     """
     Look up for a Stan function with similar functionality to a Python
-    function or an R function. If the function is not present on the
-    lookup table, then attempts to find similar one and prints the
-    results. For better display quality of the results, pandas library
-    should be installed (although it will work without it).
+    function (or even an R function, see examples). If the function is
+    not present on the lookup table, then attempts to find similar one
+    and prints the results.
 
     Parameters
-    ----------
+    -----------
     name : str
-        Function name to look for.
-    similarity_ratio : float
-        Similarity .
+        Name of the function one wants to look for.
+    min_similarity_ratio : float
+        In case no exact match is found on the lookup table, the
+        function will attempt to find similar names using
+        `difflib.SequenceMatcher.ratio()`, and then results with
+        calculated ratio below `min_similarity_ratio` will be discarded.
+    use_pandas : bool
+        If True and `pandas` is available, will return a `pandas`
+        object.
+        If True and `pandas` is not available, will return a structured
+        `numpy` array.
+        If False, will return a structured `numpy` array.
 
     Examples
-    --------
+    ---------
     #Look up for a Stan function similar to scipy.stats.skewnorm
     lookup("scipy.stats.skewnorm")
     #Look up for a Stan function similar to R dnorm
@@ -40,19 +48,23 @@ def lookup(name, similarity_ratio=.75):
     lookup("lpmfs")
     #List Stan log cumulative density functions
     lookup("lcdfs")
+
+    Returns
+    ---------
+    See argument `use_pandas`.
     """
     if lookuptable is None:
         build()
     if name not in lookuptable.keys():
         from difflib import SequenceMatcher
         from operator import itemgetter
-        print(name + " not avaible in lookup table")
+        print("No match for " + name + " in the lookup table.")
 
         lkt_keys = list(lookuptable.keys())
         mapfunction = lambda x: SequenceMatcher(a=name, b=x).ratio()
         similars = list(map(mapfunction, lkt_keys))
         similars = zip(range(len(similars)), similars)
-        similars = list(filter(lambda x: x[1] > similarity_ratio,
+        similars = list(filter(lambda x: x[1] >= min_similarity_ratio,
                                similars))
         similars = sorted(similars, key=itemgetter(1))
 
@@ -61,16 +73,20 @@ def lookup(name, similarity_ratio=.75):
             for i in range(len(similars)):
                 print(lkt_keys[similars[i][0]] + " ===> with similary "
                       "ratio of " + str(round(similars[i][1], 3)) + "")
-            print("For the most similar one we have:")
+            print("Will return results for entry"
+                  " " + lkt_keys[similars[i][0]] + " "
+                  "(which is the most similar entry found).")
             return lookup(lkt_keys[similars[i][0]])
         else:
-            print("And no similar entry found. You may try to raise the"
-                  "parameter similarity_ratio")
+            print("And no similar entry found. You may try to decrease"
+                  "the min_similarity_ratio parameter.")
         return
     entries = stanftable[lookuptable[name]]
     if not len(entries):
         return "Found no equivalent Stan function available for " + name
 
+    if not use_pandas:
+        return entries
     try:
         import pandas as pd
     except ImportError:
