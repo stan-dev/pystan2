@@ -39,7 +39,7 @@ package manager (that also plays nicely with ``pip``) called ``conda``,
 and comes with many of the data analytics packages and dependencies
 pre-installed.
 
-Don't worry about Anaconda ruining your current Python installation, can
+Don't worry about Anaconda ruining your current Python installation, it
 can be easily uninstalled (described below).
 
 Anaconda is not a requirement
