@@ -220,7 +220,12 @@ class StanModel:
             raise ValueError("stanc_ret lacks one or more of the keys: "
                              "{}".format(str(stanc_ret_keys)))
         elif stanc_ret['status'] != 0:  # success == 0
-            raise ValueError("stanc_ret is not a successfully returned "
+	    if (file==None and os.path.exists(model_code)):
+	      raise ValueError("stanc_ret is not a successfully returned "
+			    "dictionary from stanc.  Have you passed "
+			    "a stan code filename as model_code?")
+	    else:
+	      raise ValueError("stanc_ret is not a successfully returned "
                              "dictionary from stanc.")
         self.model_cppname = stanc_ret['model_cppname']
         self.model_name = stanc_ret['model_name']
