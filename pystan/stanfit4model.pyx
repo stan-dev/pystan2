@@ -484,7 +484,7 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None, dtypes={}):
+    def plot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -508,7 +508,7 @@ cdef class StanFit4Model:
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
         return pystan.plots.traceplot(self, pars, dtypes)
 
-    def traceplot(self, pars=None, dtypes={}):
+    def traceplot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -524,7 +524,7 @@ cdef class StanFit4Model:
         # FIXME: for now plot and traceplot do the same thing
         return self.plot(pars, dtypes=dtypes)
 
-    def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes={}):
+    def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
 
         Parameters
@@ -558,12 +558,16 @@ cdef class StanFit4Model:
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logging.warn("`inc_warmup` ignored when `permuted` is True.")
+        if dtypes is None and permuted is False:
+            logging.warn("`dtypes` ignored when `permuted` is False.")
 
         if pars is None:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
+        if dtypes is None:
+            dtypes = {}
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)
