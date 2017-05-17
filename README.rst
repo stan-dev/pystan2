@@ -100,8 +100,8 @@ Example
                    'y': [28,  8, -3,  7, -1,  1, 18, 12],
                    'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
-    fit = pystan.stan(model_code=schools_code, data=schools_dat,
-                      iter=1000, chains=4)
+    sm = pystan.StanModel(model_code=schools_code)
+    fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
 
     print(fit)
 
@@ -111,7 +111,7 @@ Example
     # if matplotlib is installed (optional, not required), a visual summary and
     # traceplot are available
     fit.plot()
-    plt.show() 
+    plt.show()
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
     :target: https://badge.fury.io/py/pystan
