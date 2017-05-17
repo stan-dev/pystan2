@@ -116,7 +116,7 @@ available.
     import pickle
     from hashlib import md5
 
-    def stan_cache(model_code, model_name=None, **kwargs):
+    def StanModel_cache(model_code, model_name=None, **kwargs):
         """Use just as you would `stan`"""
         code_hash = md5(model_code.encode('ascii')).hexdigest()
         if model_name is None:
@@ -131,14 +131,16 @@ available.
                 pickle.dump(sm, f)
         else:
             print("Using cached StanModel")
-        return sm.sampling(**kwargs)
+        return sm
 
     # with same model_code as before
     data = dict(N=10, y=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-    fit = stan_cache(model_code=model_code, data=data)
+    sm = StanModel_cache(model_code=model_code)
+    fit = sm.sampling(data=data)
     print(fit)
 
     new_data = dict(N=6, y=[0, 0, 0, 0, 0, 1])
     # the cached copy of the model will be used
-    fit2 = stan_cache(model_code=model_code, data=new_data)
+    sm = StanModel_cache(model_code=model_code)
+    fit2 = sm.sampling(data=new_data)
     print(fit2)
