@@ -11,7 +11,7 @@ whenever possible. If the same model is going to be used repeatedly, we would
 like to compile it just once. The following demonstrates how to reuse a model in
 different scripts and between interactive Python sessions.
 
-**Within sessions** you can avoid recompiling a model in two ways. The simplest
+**Within sessions** you can avoid recompiling a model in two ways. The first
 method is to reuse a fit object in the call to ``stan``. For example,
 
 .. code-block:: python
@@ -45,8 +45,10 @@ method is to reuse a fit object in the call to ``stan``. For example,
     fit2 = stan(fit=fit, data=new_data)
     print(fit2)
 
-Alternatively, we can compile the model once using the ``StanModel`` class and
-then sample from the model using the ``sampling`` method.
+However, calling ``pystan.stan`` is deprecated and will soon be removed from
+PyStan. The recommended method is to compile the model once using the
+``StanModel`` class and then sample from the model using the ``sampling``
+method.
 
 .. code-block:: python
 

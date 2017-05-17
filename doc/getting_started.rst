@@ -6,7 +6,8 @@
  Getting started
 =================
 
-PyStan is the `Python <http://python.org>`_ interface for `Stan <http://mc-stan.org/>`_.
+PyStan is the `Python <http://python.org>`_ interface for
+`Stan <http://mc-stan.org/>`_.
 
 Prerequisites
 =============
@@ -108,8 +109,8 @@ which studied coaching effects from eight schools.
                    'y': [28,  8, -3,  7, -1,  1, 18, 12],
                    'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
-    fit = pystan.stan(model_code=schools_code, data=schools_dat,
-                      iter=1000, chains=4)
+    sm = pystan.StanModel(model_code=schools_code)
+    fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
 
 In this model, we let ``theta`` be transformed parameters of ``mu`` and ``eta``
 instead of directly declaring theta as parameters. By parameterizing this way,
@@ -121,17 +122,16 @@ our working directory and use the following call to ``stan`` instead:
 
 .. code-block:: python
 
-    fit1 = pystan.stan(file='8schools.stan', data=schools_dat, iter=1000, chains=4)
+    sm = pystan.StanModel(file='8schools.stan')
+    fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
 
-Once a model is fitted, we can use the fitted result as an input to the model
-with other data or settings. This saves us time compiling the C++ code for the
-model. By specifying the parameter ``fit`` for the ``stan`` function, we can fit
-the model again. For example, if we want to sample more iterations, we proceed
-as follows:
+Once a model is compiled, we can use the StanModel object multiple times.
+This saves us time compiling the C++ code for the model. For example, if we
+want to sample more iterations, we proceed as follows:
 
 .. code-block:: python
 
-    fit2 = pystan.stan(fit=fit1, data=schools_dat, iter=10000, chains=4)
+    fit2 = sm.sampling(data=schools_dat, iter=10000, chains=4)
 
 The object ``fit``, returned from function ``stan`` stores samples from the
 posterior distribution. The ``fit`` object has a number of methods, including
@@ -154,7 +154,8 @@ parameters of interest, or just an array.
 
     print(fit)
 
-If `matplotlib <http://matplotlib.org/>`_ and `scipy <http://http://www.scipy.org/>`_ are installed, a visual summary may
+If `matplotlib <http://matplotlib.org/>`_ and
+`scipy <http://http://www.scipy.org/>`_ are installed, a visual summary may
 also be displayed using the ``plot()`` method.
 
 .. code-block:: python
