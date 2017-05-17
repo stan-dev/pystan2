@@ -158,7 +158,8 @@ extensions = [
 
 
 ## package data
-package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv']
+package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv',
+                     'lookuptable/*.txt']
 
 # get every file under pystan/stan/src and pystan/stan/lib
 stan_files_all = sum(
