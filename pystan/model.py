@@ -269,6 +269,45 @@ class StanModel:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
+        ## cvodes sources
+
+        # cvodes sources are complied and linked together with the Stan model
+        # extension module. This is not ideal. In theory, build_clib could be
+        # used to build a library once and models would be complied and then
+        # linked with this library. This would save 7 or more seconds from every build.
+        # But such a strategy is frustrated by the
+        # lack of ``install_clib`` functionality in Python's distutils.
+        #
+        # TODO: numpy provides install_clib functionality, use that.
+        cvodes_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math_2.15.0', 'lib', 'cvodes_2.9.0', 'src')
+        cvodes_sources = [
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodea.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodea_io.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_band.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_bandpre.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_bbdpre.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_dense.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_diag.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_direct.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_io.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_sparse.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spbcgs.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spgmr.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spils.c'),
+            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_sptfqmr.c'),
+            os.path.join(cvodes_src_path, 'nvec_ser', 'nvector_serial.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_band.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_dense.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_direct.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_iterative.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_math.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_nvector.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_spbcgs.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_spgmr.c'),
+            os.path.join(cvodes_src_path, 'sundials', 'sundials_sptfqmr.c'),
+        ]
+
         stan_macros = [
             ('BOOST_RESULT_OF_USE_TR1', None),
             ('BOOST_NO_DECLTYPE', None),
@@ -289,7 +328,7 @@ class StanModel:
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
                               language="c++",
-                              sources=[pyx_file],
+                              sources=[pyx_file] + cvodes_sources,
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args)
