@@ -135,6 +135,14 @@ class StanModel:
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging.
 
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
+
+    includes : list, None by default
+        If not None, the elements of this list will be assumed to be the
+        names of custom C++ header files that should be included.
+
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
 
@@ -202,7 +210,8 @@ class StanModel:
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
                  eigen_lib=None, verbose=False, obfuscate_model_name=True,
-                 extra_compile_args=None):
+                 extra_compile_args=None,
+                 allow_undefined=False, includes=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -210,7 +219,8 @@ class StanModel:
                                          model_code=model_code,
                                          model_name=model_name,
                                          verbose=verbose,
-                                         obfuscate_model_name=obfuscate_model_name)
+                                         obfuscate_model_name=obfuscate_model_name,
+                                         allow_undefined=allow_undefined)
 
         if not isinstance(stanc_ret, dict):
             raise ValueError("stanc_ret must be an object returned by stanc.")
@@ -257,6 +267,15 @@ class StanModel:
         ]
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
+        if includes is not None:
+            code = ""
+            for fn in includes:
+                code += "#include \"{0}\"\n".format(os.path.abspath(fn))
+            # ind = self.model_cppcode.index("class {0} : public prob_grad".format(self.model_cppname))
+            ind = self.model_cppcode.index("static int current_statement_begin__;")
+            self.model_cppcode = "\n".join([
+                self.model_cppcode[:ind], code, self.model_cppcode[ind:]
+            ])
         with io.open(model_cpp_file, 'w', encoding='utf-8') as outfile:
             outfile.write(self.model_cppcode)
 
