@@ -3,10 +3,10 @@ import logging
 logger = logging.getLogger('pystan')
 
 
-def traceplot(fit, pars, **kwargs):
+def traceplot(fit, pars, dtypes, **kwargs):
     """
-    Use pymc's traceplot to display parameters. 
-    
+    Use pymc's traceplot to display parameters.
+
     Additional arguments are passed to pymc.plots.traceplot.
     """
     # FIXME: eventually put this in the StanFit object
@@ -16,4 +16,4 @@ def traceplot(fit, pars, **kwargs):
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
-    return plots.traceplot(fit.extract(), pars, **kwargs)
+    return plots.traceplot(fit.extract(dtypes=dtypes), pars, **kwargs)

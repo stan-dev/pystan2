@@ -484,13 +484,18 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None):
+    def plot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
 
         Note
         ----
@@ -501,20 +506,25 @@ cdef class StanFit4Model:
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        return pystan.plots.traceplot(self, pars)
+        return pystan.plots.traceplot(self, pars, dtypes)
 
-    def traceplot(self, pars=None):
+    def traceplot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
         """
         # FIXME: for now plot and traceplot do the same thing
-        return self.plot(pars)
+        return self.plot(pars, dtypes=dtypes)
 
-    def extract(self, pars=None, permuted=True, inc_warmup=False):
+    def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
 
         Parameters
@@ -528,6 +538,9 @@ cdef class StanFit4Model:
         inc_warmup : bool
            If True, warmup samples are kept; otherwise they are
            discarded. If `permuted` is True, `inc_warmup` is ignored.
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
 
         Returns
         -------
@@ -545,12 +558,16 @@ cdef class StanFit4Model:
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logging.warn("`inc_warmup` ignored when `permuted` is True.")
+        if dtypes is None and permuted is False:
+            logging.warn("`dtypes` ignored when `permuted` is False.")
 
         if pars is None:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
+        if dtypes is None:
+            dtypes = {}
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)
@@ -567,7 +584,10 @@ cdef class StanFit4Model:
             for par in pars:
                 sss = [pystan.misc._get_kept_samples(p, self.sim)
                        for p in tidx[par]]
-                s = {par: np.column_stack(sss)}
+                ss = np.column_stack(sss)
+                if par in dtypes.keys():
+                    ss = ss.astype(dtypes[par])
+                s = {par: ss}
                 extracted.update(s)
                 par_idx = self.sim['pars_oi'].index(par)
                 par_dim = self.sim['dims_oi'][par_idx]
