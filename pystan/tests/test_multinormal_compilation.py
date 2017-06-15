@@ -21,7 +21,7 @@ class TestMultiNormalCompilation(unittest.TestCase):
           vector[M] x;
         }
         model {
-          y ~ multi_normal(y2 + A * x, Sigma);
+          y ~ multi_normal(A * x, Sigma);
         }"""
         cls.model = StanModel(model_code=model_code)
 
