@@ -81,6 +81,7 @@ test_script:
   - "cd empty_folder"
   - "SET JOBLIB_MULTIPROCESSING=0"
   - "python -c \"import nose; nose.main()\" -s pystan.tests.test_basic:TestNormal"
+  - "python -c \"import nose; nose.main()\" pystan.tests.test_multinormal_compilation:TestMultiNormalCompilation"
   # Move back to the project folder
   - "cd .."
 
