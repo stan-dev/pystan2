@@ -6,6 +6,10 @@
  What's New
 ============
 
+v2.17.0.0 (TBD)
+===============
+- ...
+
 v2.16.0.0 (22. June 2017)
 ========================
 - Update Stan source to v2.16.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.16.0>`_),
