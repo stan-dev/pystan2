@@ -28,10 +28,10 @@ class TestArgs(unittest.TestCase):
         model = self.model
         fit = model.sampling(iter=100)
         
-        summary_full = fit.summary()
-        summary_one_par1 = fit.summary(pars='z')
-        summary_one_par2 = fit.summary(pars=['z'])
-        summary_pars = fit.summary(pars=['x', 'y'])
+        summary_full = pystan.misc.stansummary(fit)
+        summary_one_par1 = pystan.misc.stansummary(fit, pars='z')
+        summary_one_par2 = pystan.misc.stansummary(fit, pars=['z'])
+        summary_pars = pystan.misc.stansummary(fit, pars=['x', 'y'])
         
         assertNotEqual(summary_full, summary_one_par1)
         assertNotEqual(summary_full, summary_one_par2)
