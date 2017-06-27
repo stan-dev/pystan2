@@ -50,7 +50,7 @@ from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
 logger = logging.getLogger('pystan')
 
 
-def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
+def stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
         if fit.mode == 1:
             return "Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(fit.model_name)
@@ -76,6 +76,11 @@ def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits
                                s['summary_colnames'], digits_summary)
         return header + body + footer
 
+def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
+    # warning added in PyStan 2.17.0
+    warnings.warn('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
+                  'Use `stansummary` instead.', DeprecationWarning)
+    return stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2)
 
 def _array_to_table(arr, rownames, colnames, n_digits):
     """Print an array with row and column names
