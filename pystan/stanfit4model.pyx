@@ -614,10 +614,10 @@ cdef class StanFit4Model:
 
     def __unicode__(self):
         # for Python 2.x
-        return pystan.misc._print_stanfit(self)
+        return pystan.misc.stansummary(self)
 
     def __str__(self):
-        s = pystan.misc._print_stanfit(self)
+        s = pystan.misc.stansummary(self)
         return s.encode('utf-8') if PY2 else s
 
     def __repr__(self):
