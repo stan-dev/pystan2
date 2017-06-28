@@ -36,7 +36,6 @@ class TestArgs(unittest.TestCase):
         self.assertNotEqual(summary_full, summary_one_par1)
         self.assertNotEqual(summary_full, summary_one_par2)
         self.assertNotEqual(summary_full, summary_pars)
-        self.assertNotEqual(summary_one_par1, summary_one_par2)
         self.assertNotEqual(summary_one_par1, summary_pars)
         self.assertNotEqual(summary_one_par2, summary_pars)
         
