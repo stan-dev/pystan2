@@ -9,7 +9,7 @@ from pystan._compat import PY2
 class TestArgs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        model_code = 'parameters {real x;real y;real z;} model {x ~ normal(0,1);y ~ normal(0,1);z ~ normal(0,1)}'
+        model_code = 'parameters {real x;real y;real z;} model {x ~ normal(0,1);y ~ normal(0,1);z ~ normal(0,1);}'
         cls.model = pystan.StanModel(model_code=model_code)
 
     def test_control(self):
