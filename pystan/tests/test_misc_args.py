@@ -33,11 +33,11 @@ class TestArgs(unittest.TestCase):
         summary_one_par2 = pystan.misc.stansummary(fit, pars=['z'])
         summary_pars = pystan.misc.stansummary(fit, pars=['x', 'y'])
         
-        assertNotEqual(summary_full, summary_one_par1)
-        assertNotEqual(summary_full, summary_one_par2)
-        assertNotEqual(summary_full, summary_pars)
-        assertNotEqual(summary_one_par1, summary_one_par2)
-        assertNotEqual(summary_one_par1, summary_pars)
-        assertNotEqual(summary_one_par2, summary_pars)
+        self.assertNotEqual(summary_full, summary_one_par1)
+        self.assertNotEqual(summary_full, summary_one_par2)
+        self.assertNotEqual(summary_full, summary_pars)
+        self.assertNotEqual(summary_one_par1, summary_one_par2)
+        self.assertNotEqual(summary_one_par1, summary_pars)
+        self.assertNotEqual(summary_one_par2, summary_pars)
         
-        assertEqual(summary_one_par1, summary_one_par2)
+        self.assertEqual(summary_one_par1, summary_one_par2)
