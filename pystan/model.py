@@ -150,6 +150,10 @@ class StanModel:
         If not None, the elements of this list will be assumed to be the
         names of custom C++ header files that should be included.
 
+    include_dirs : list, None by default
+        If not None, the directories in this list are added to the search
+        path of the compiler.
+
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
 
@@ -220,7 +224,7 @@ class StanModel:
                  model_code=None, stanc_ret=None, include_paths=None,
                  boost_lib=None, eigen_lib=None, verbose=False,
                  obfuscate_model_name=True, extra_compile_args=None,
-                 allow_undefined=False, includes=None):
+                 allow_undefined=False, include_dirs=None, includes=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -266,7 +270,9 @@ class StanModel:
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
         lib_dir = tempfile.mkdtemp()
         pystan_dir = os.path.dirname(__file__)
-        include_dirs = [
+        if include_dirs is None:
+            include_dirs = []
+        include_dirs += [
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
@@ -281,8 +287,7 @@ class StanModel:
         if includes is not None:
             code = ""
             for fn in includes:
-                code += "#include \"{0}\"\n".format(os.path.abspath(fn))
-            # ind = self.model_cppcode.index("class {0} : public prob_grad".format(self.model_cppname))
+                code += "#include \"{0}\"\n".format(fn)
             ind = self.model_cppcode.index("static int current_statement_begin__;")
             self.model_cppcode = "\n".join([
                 self.model_cppcode[:ind], code, self.model_cppcode[ind:]
