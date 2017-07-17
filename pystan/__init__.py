@@ -9,6 +9,7 @@ import logging
 from pystan.api import stanc, stan
 from pystan.misc import read_rdump, stan_rdump
 from pystan.model import StanModel
+from pystan.lookup import lookup
 
 logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
@@ -16,4 +17,4 @@ if len(logger.handlers) == 1:
     logging.basicConfig(level=logging.INFO)
 
 # following PEP 386
-__version__ = "2.14.0.1dev"
+__version__ = '2.16.0.0'

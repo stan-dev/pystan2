@@ -6,9 +6,24 @@
  What's New
 ============
 
-TBA (TBA)
-=========
-- TBA
+v2.16.0.0 (22. June 2017)
+========================
+- Update Stan source to v2.16.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.16.0>`_),
+- Ari Hartikainen (Aalto University) @ahartikainen joins the Stan development team. 🎉
+- Added ``pystan.lookup`` (contributed by Marco Inacio, @randommm)
+- NOTE: Stan v2.16.0 is the final release which will not require a C++11 compatible compiler. Future
+  releases will require a C+11 compatible compiler. The vast majority of users have a compatible
+  compiler.
+
+v2.15.0.1 (2. May 2017)
+========================
+- Python 2.7 compatibility fix (#332). Thanks to @monga for the report.
+
+v2.15.0.0 (21. Apr 2017)
+========================
+- Update Stan source to v2.15.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.15.0>`_)
+- Allow UTF-8 comments in Stan Program code. Thanks to @ahartikainen
+- Expose constrain_pars method, thanks to Lars Mescheder.
 
 V2.14.0.0 (1. Jan 2017)
 =========================

@@ -86,3 +86,13 @@ class TestExtract(unittest.TestCase):
         ss = fit.extract(inc_warmup=True, permuted=False)
         self.assertEqual(ss.shape, (1000, 4, 9))
         self.assertTrue((~np.isnan(ss)).all())
+
+    def test_extract_dtype(self):
+        dtypes = {"alpha": np.int, "beta": np.int}
+        ss = self.fit.extract(dtypes = dtypes)
+        alpha = ss['alpha']
+        beta = ss['beta']
+        lp__ = ss['lp__']
+        self.assertEqual(alpha.dtype, np.dtype(np.int))
+        self.assertEqual(beta.dtype, np.dtype(np.int))
+        self.assertEqual(lp__.dtype, np.dtype(np.float))

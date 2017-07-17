@@ -15,7 +15,7 @@ import datetime
 import io
 import itertools
 import logging
-from numbers import Number
+import numbers
 import os
 import platform
 import shutil
@@ -76,8 +76,12 @@ def _map_parallel(function, args, n_jobs):
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
-        with multiprocessing.Pool(processes=n_jobs) as pool:
+        try:
+            pool = multiprocessing.Pool(processes=n_jobs)
             map_result = pool.map(function, args)
+        finally:
+            pool.close()
+            pool.join()
     else:
         map_result = list(map(function, args))
     return map_result
@@ -262,7 +266,7 @@ class StanModel:
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.2.9"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.62.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "cvodes_2.9.0", "include"),
             np.get_include(),
@@ -496,7 +500,7 @@ class StanModel:
         del m_pars[idx_of_lp]
         del p_dims[idx_of_lp]
 
-        if isinstance(init, Number):
+        if isinstance(init, numbers.Number):
             init = str(init)
         elif isinstance(init, Callable):
             init = init()
@@ -681,6 +685,8 @@ class StanModel:
             data = {}
         if warmup is None:
             warmup = int(iter // 2)
+        if not all(isinstance(arg, numbers.Integral) for arg in (iter, thin, warmup)):
+            raise ValueError('only integer values allowed as `iter`, `thin`, and `warmup`.')
         algorithms = ("NUTS", "HMC", "Fixed_param")  # , "Metropolis")
         algorithm = "NUTS" if algorithm is None else algorithm
         if algorithm not in algorithms:
@@ -868,7 +874,7 @@ class StanModel:
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
-        if isinstance(init, Number):
+        if isinstance(init, numbers.Number):
             init = str(init)
         elif isinstance(init, Callable):
             init = init()

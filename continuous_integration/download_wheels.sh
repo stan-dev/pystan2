@@ -18,8 +18,9 @@ MANYLINUX1_TAIL32="manylinux1_i686.whl"
 MANYLINUX1_TAIL64="manylinux1_x86_64.whl"
 MACOS_TAIL64="macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl"
 
-mkdir -p wheels
-cd wheels
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+mkdir -p "$DIR/../dist"
+pushd "$DIR/../dist" > /dev/null
 rm -rf *.whl
 
 for py_tag in cp27; do
@@ -69,5 +70,5 @@ for py_tag in cp35 cp36; do
   curl -f -O $wheel_url
 done
 
-cd ..
-echo "wheels have been downloaded into wheels/"
+popd
+echo "wheels have been downloaded into dist/"

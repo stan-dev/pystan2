@@ -359,7 +359,7 @@ def _split_data(data):
     # map<string, pair<vector<int>, vector<size_t>>> so prepare
     # them accordingly.
     for k, v in data.items():
-        if np.issubdtype(np.asarray(v).dtype, int):
+        if np.issubdtype(np.asarray(v).dtype, np.integer):
             data_i.update({k.encode('utf-8'): np.asarray(v, dtype=int)})
         elif np.issubdtype(np.asarray(v).dtype, float):
             data_r.update({k.encode('utf-8'): np.asarray(v, dtype=float)})
@@ -666,8 +666,7 @@ def _check_seed(seed):
                 warnings.warn("`seed` may not be negative")
                 seed = None
             elif seed > MAX_UINT:
-                warnings.warn("`seed` is too large; max is {}".format(MAX_UINT))
-                seed = None
+                raise ValueError('`seed` is too large; max is {}'.format(MAX_UINT))
     elif isinstance(seed, np.random.RandomState):
         seed = seed.randint(0, MAX_UINT)
     elif seed is not None:

@@ -45,7 +45,11 @@ class TestMisc(unittest.TestCase):
         self.assertEqual(misc._check_seed(10.5), 10)
         self.assertTrue(is_valid_seed(misc._check_seed(np.random.RandomState())))
         self.assertTrue(is_valid_seed(misc._check_seed(-1)))
-        self.assertTrue(is_valid_seed(misc._check_seed(MAX_UINT + 1)))
+
+    def test_check_seed_gt_max_uint(self):
+        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
+        with assertRaisesRegex(ValueError, '`seed` is too large'):
+            misc._check_seed(MAX_UINT + 1)
 
     def test_stan_rdump(self):
         data = OrderedDict(x=1, y=0, z=[1, 2, 3], Phi=np.array([[1, 2], [3, 4]]))

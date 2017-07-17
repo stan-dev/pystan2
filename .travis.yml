@@ -1,6 +1,7 @@
 # language is set to c to work around travis ci bug
 # https://github.com/travis-ci/travis-ci/issues/2312
 language: c
+dist: trusty
 sudo: false
 os:
   - linux

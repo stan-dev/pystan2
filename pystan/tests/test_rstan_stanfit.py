@@ -16,12 +16,11 @@ class TestStanfit(unittest.TestCase):
             real x;
         }
         model {
-            lp__ <- 1 / log(x);
+            target += 1 / log(x);
         }
         """
         sm = StanModel(model_code=code)
-        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(RuntimeError, ''):
+        with self.assertRaises(RuntimeError):
             sm.sampling(init='0', iter=1, chains=1)
 
     def test_grad_log(self):

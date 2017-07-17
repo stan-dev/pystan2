@@ -5,7 +5,7 @@ PyStan: The Python Interface to Stan
     :alt: Stan logo
     :scale: 50 %
 
-|pypi| |travis| |appveyor|
+|pypi| |travis| |appveyor| |zenodo|
 
 **PyStan** provides a Python interface to Stan, a package for Bayesian inference
 using the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
@@ -100,8 +100,8 @@ Example
                    'y': [28,  8, -3,  7, -1,  1, 18, 12],
                    'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
-    fit = pystan.stan(model_code=schools_code, data=schools_dat,
-                      iter=1000, chains=4)
+    sm = pystan.StanModel(model_code=schools_code)
+    fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
 
     print(fit)
 
@@ -111,7 +111,7 @@ Example
     # if matplotlib is installed (optional, not required), a visual summary and
     # traceplot are available
     fit.plot()
-    plt.show() 
+    plt.show()
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
     :target: https://badge.fury.io/py/pystan
@@ -124,3 +124,6 @@ Example
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/stan-dev/pystan?branch=master
     :target: https://ci.appveyor.com/project/ariddell/pystan/branch/master
     :alt: appveyor-ci build status
+.. |zenodo| image:: https://zenodo.org/badge/10256919.svg
+    :target: https://zenodo.org/badge/latestdoi/10256919
+    :alt: zenodo citation DOI 
