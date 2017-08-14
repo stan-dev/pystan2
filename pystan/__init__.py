@@ -7,7 +7,7 @@
 import logging
 
 from pystan.api import stanc, stan
-from pystan.misc import read_rdump, stan_rdump
+from pystan.misc import read_rdump, stan_rdump, stansummary
 from pystan.model import StanModel
 from pystan.lookup import lookup
 
