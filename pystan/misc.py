@@ -52,7 +52,7 @@ logger = logging.getLogger('pystan')
 
 def stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
     """
-    Summary statistics table.
+    Summary statistic table.
     
     Parameters
     ----------
