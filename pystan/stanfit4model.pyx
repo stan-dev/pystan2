@@ -629,7 +629,7 @@ cdef class StanFit4Model:
     
     def stansummary(self, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
         """
-        Summary statistics table.
+        Summary statistic table.
 
         Parameters
         ----------
