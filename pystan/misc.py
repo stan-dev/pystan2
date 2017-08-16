@@ -80,7 +80,7 @@ def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits
     # warning added in PyStan 2.17.0
     warnings.warn('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
                   'Use `stansummary` instead.', DeprecationWarning)
-    return stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2)
+    return stansummary(fit, pars=pars, probs=probs, digits_summary=digits_summary)
 
 def _array_to_table(arr, rownames, colnames, n_digits):
     """Print an array with row and column names
