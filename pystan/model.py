@@ -26,11 +26,19 @@ import time
 import warnings
 
 import distutils
-from distutils.core import Extension
+
+try:
+    # MSVC 2017 support (setuptools >= 34.4.0)
+    from setuptools import Extension
+except ImportError:
+    from distutils.core import Extension
 
 import Cython
 from Cython.Build.Inline import _get_build_extension
 from Cython.Build.Dependencies import cythonize
+
+# GCC detection
+import subprocess
 
 import numpy as np
 
@@ -134,7 +142,12 @@ class StanModel:
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging.
-
+    
+    compiler : string, None by default
+        Only for Windows. Choose compiler type. 
+        - for GCC use 'gcc' or 'mingw32', 
+        - for Microsoft Visual C++ use 'msvc'
+    
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
 
@@ -202,7 +215,7 @@ class StanModel:
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, boost_lib=None,
                  eigen_lib=None, verbose=False, obfuscate_model_name=True,
-                 extra_compile_args=None):
+                 extra_compile_args=None, compiler=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -274,6 +287,10 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
+        
+        # create here to allow compiler injection on Windows
+        build_extension = _get_build_extension()
+        
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
@@ -284,7 +301,25 @@ class StanModel:
                 '-Wno-uninitialized',
             ]
             if platform.platform().startswith('Win'):
-                extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
+                # sanitize input
+                if compiler == 'gcc':
+                    compiler = 'mingw32'
+                # inject the compiler kw
+                if compiler is not None:
+                    build_extension.compiler = compiler
+                # inject gcc (mingw32) if found else use msvc
+                elif build_extension.compiler is None:
+                    # run subprocess without output
+                    with open(os.devnull, 'w') as DEVNULL:
+                        try:
+                            subprocess.call(["gcc", "--version"], stdout=DEVNULL)
+                        except FileNotFoundError:
+                            build_extension.compiler = "msvc"
+                        else:
+                            build_extension.compiler = "mingw32"
+                
+                if build_extension.compiler == "msvc":
+                    extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
@@ -295,7 +330,7 @@ class StanModel:
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
-        build_extension = _get_build_extension()
+        
         build_extension.extensions = cythonize([extension],
                                                include_path=cython_include_dirs,
                                                quiet=not verbose)
