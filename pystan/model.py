@@ -143,7 +143,7 @@ class StanModel:
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging.
-    
+
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
 
@@ -283,7 +283,6 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
-        
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
