@@ -101,7 +101,7 @@ from distutils.extension import Extension
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
-                     'pystan/stan/lib/stan_math/lib/boost_1.62.0',
+                     'pystan/stan/lib/stan_math/lib/boost_1.64.0',
                      'pystan/stan/lib/stan_math/lib/cvodes_2.9.0/include']
 stan_macros = [
     ('BOOST_RESULT_OF_USE_TR1', None),
