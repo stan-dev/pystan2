@@ -26,16 +26,7 @@ import time
 import warnings
 
 import distutils
-from distutils import ccompiler
-
-if ccompiler.get_default_compiler() == 'msvc':
-    try:
-        # MSVC 2017 support (setuptools >= 34.4.0)
-        from setuptools import Extension
-    except ImportError:
-        from distutils.core import Extension
-else:
-    from distutils.core import Extension
+from distutils.core import Extension
 
 import Cython
 from Cython.Build.Inline import _get_build_extension
@@ -283,6 +274,8 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
+        
+        build_extension = _get_build_extension()
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
@@ -292,7 +285,7 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
             ]
-            if platform.platform().startswith('Win') and ccompiler.get_default_compiler() == 'msvc':
+            if platform.platform().startswith('Win') and build_extension.compiler == 'msvc':
                 extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
@@ -304,7 +297,7 @@ class StanModel:
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
-        build_extension = _get_build_extension()
+        
         build_extension.extensions = cythonize([extension],
                                                include_path=cython_include_dirs,
                                                quiet=not verbose)
