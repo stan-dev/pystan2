@@ -285,7 +285,7 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
             ]
-            if platform.platform().startswith('Win') and build_extension.compiler == 'msvc':
+            if platform.platform().startswith('Win') and build_extension.compiler in (None, 'msvc'):
                 extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
