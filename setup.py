@@ -118,7 +118,7 @@ extra_compile_args = [
 
 if platform.platform().startswith('Win'):
     from Cython.Build.Inline import _get_build_extension
-    if _get_build_extension().compiler == 'msvc':
+    if _get_build_extension().compiler in (None, 'msvc'):
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
