@@ -274,6 +274,8 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
+        
+        build_extension = _get_build_extension()
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
@@ -283,7 +285,7 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
             ]
-            if platform.platform().startswith('Win'):
+            if platform.platform().startswith('Win') and build_extension.compiler in (None, 'msvc'):
                 extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
@@ -295,7 +297,7 @@ class StanModel:
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
-        build_extension = _get_build_extension()
+        
         build_extension.extensions = cythonize([extension],
                                                include_path=cython_include_dirs,
                                                quiet=not verbose)
