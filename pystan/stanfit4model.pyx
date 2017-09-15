@@ -614,10 +614,10 @@ cdef class StanFit4Model:
 
     def __unicode__(self):
         # for Python 2.x
-        return pystan.misc._print_stanfit(self)
+        return pystan.misc.stansummary(self)
 
     def __str__(self):
-        s = pystan.misc._print_stanfit(self)
+        s = pystan.misc.stansummary(self)
         return s.encode('utf-8') if PY2 else s
 
     def __repr__(self):
@@ -626,7 +626,46 @@ cdef class StanFit4Model:
     def __getitem__(self, key):
         extr = self.extract(pars=(key,))
         return extr[key]
+    
+    def stansummary(self, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
+        """
+        Summary statistic table.
 
+        Parameters
+        ----------
+        fit : StanFit4Model object
+        pars : str or sequence of str, optional
+            Parameter names. By default use all parameters
+        probs : sequence of float, optional
+            Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+        digits_summary : int, optional
+            Number of significant digits. By default, 2
+        Returns
+        -------
+        summary : string
+            Table includes mean, se_mean, sd, probs_0, ..., probs_n, n_eff and Rhat.
+
+        Examples
+        --------
+        >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        >>> m = StanModel(model_code=model_code, model_name="example_model")
+        >>> fit = m.sampling()
+        >>> print(fit.stansummary())
+        Inference for Stan model: example_model.
+        4 chains, each with iter=2000; warmup=1000; thin=1; 
+        post-warmup draws per chain=1000, total post-warmup draws=4000.
+
+               mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
+        y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0
+        lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0
+
+        Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
+        For each parameter, n_eff is a crude measure of effective sample size,
+        and Rhat is the potential scale reduction factor on split chains (at 
+        convergence, Rhat=1).
+        """
+        return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
+    
     def summary(self, pars=None, probs=None):
         return pystan.misc._summary(self, pars, probs)
 
