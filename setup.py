@@ -104,9 +104,10 @@ stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/lib/boost_1.64.0',
                      'pystan/stan/lib/stan_math/lib/cvodes_2.9.0/include']
 stan_macros = [
-    ('BOOST_RESULT_OF_USE_TR1', None),
-    ('BOOST_NO_DECLTYPE', None),
     ('BOOST_DISABLE_ASSERTS', None),
+    ('BOOST_NO_DECLTYPE', None),
+    ('BOOST_PHOENIX_NO_VARIADIC_EXPRESSION', None),  # needed for stanc
+    ('BOOST_RESULT_OF_USE_TR1', None),
     ('FUSION_MAX_VECTOR_SIZE', 12),  # for parser, stan-dev/pystan#222
 ]
 extra_compile_args = [
