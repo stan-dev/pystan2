@@ -1371,9 +1371,9 @@ namespace pystan {
       return true;
     }
 
-    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) :
+    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i, unsigned int random_seed) :
       data_(vars_r, vars_i),
-      model_(data_, &std::cout),
+      model_(data_, random_seed, &std::cout),
       base_rng(static_cast<boost::uint32_t>(std::time(0))),
       names_(get_param_names(model_)),
       dims_(get_param_dims(model_)),

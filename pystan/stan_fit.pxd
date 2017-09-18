@@ -40,7 +40,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         VARIATIONAL = 4
 
     cdef cppclass stan_fit[M, R]:
-        stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) except +
+        stan_fit(vars_r_t& vars_r, vars_i_t& vars_i, uint random_seed) except +
         bool update_param_oi(vector[string] pars)
         vector[double] unconstrain_pars(vars_r_t& vars_r, vars_i_t& vars_i)
         vector[double] constrain_pars(vector[double]& params_r) except +
