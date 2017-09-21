@@ -468,8 +468,8 @@ class StanModel:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
         if data is None:
             data = {}
-
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -485,8 +485,6 @@ class StanModel:
         elif not isinstance(init, Iterable) and \
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
-
-        seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(init=init,
                          seed=seed,
@@ -670,7 +668,8 @@ class StanModel:
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
 
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -848,7 +847,8 @@ class StanModel:
         algorithm = "meanfield" if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
@@ -859,8 +859,6 @@ class StanModel:
         elif not isinstance(init, Iterable) and \
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
-
-        seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(iter=iter,
                          init=init,
