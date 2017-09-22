@@ -107,7 +107,7 @@ Install `libpython` and `m2w64-toolchain` packages::
     conda install libpython
     conda install -c msys2 m2w64-toolchain
     
-In `PYTHONPATH\Lib\distutils` create `distutils.cfg` with text editor (e.g. `notepad`, `notepad++`) and add the following lines::
+In `PYTHONPATH\\Lib\\distutils` create `distutils.cfg` with text editor (e.g. `notepad`, `notepad++`) and add the following lines::
 
     [build]
     mingw32
