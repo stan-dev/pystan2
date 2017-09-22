@@ -10,9 +10,12 @@ PyStan is supported under Windows with the following caveats:
 
 - Python 3.5 or higher must be used.
 - When drawing samples ``n_jobs=1`` must be used. (PyStan on Windows cannot use multiple processors in parallel.)
+- Vectorized functions are not supported with MSVC (see GCC section)
 
 PyStan requires a working C++ compiler. Configuring such a compiler is
 typically the most challenging step in getting PyStan running.
+
+
 
 Installing Python
 =================
@@ -64,3 +67,57 @@ a very simple model::
 Again, remember that using ``n_jobs=1`` when calling ``sampling`` is required
 as PyStan on Windows does not support sampling using multiple processors in
 parallel.
+
+
+GCC on Windows
+==============
+
+For full support of vectorized functions, the user must use GCC compiler. 
+
+Supported GCC compilers
+
+- Python 2.7 and <=3.4 : mingw32
+- Python 3.5=< : `MSYS2 mingw-w64`
+
+For mingw32 installation see
+http://docs.cython.org/en/latest/src/tutorial/appendix.html
+or with conda use
+
+    conda install mingw32 libpython
+
+Setting up mingw-w64 on Windows
+===============================
+
+Install Python with either Anaconda or Miniconda 
+
+- Anaconda https://www.anaconda.com/download/
+- Miniconda https://conda.io/miniconda.html
+
+Create an virtual conda-environment [OPTIONAL]
+
+    conda create -n stan_env python=3.6
+
+Activate conda-env [OPTIONAL]
+
+    activate stan_env
+ 
+Install `libpython` and `m2w64-toolchain` packages
+
+    conda install libpython
+    
+    conda install -c msys2 m2w64-toolchain
+    
+In `PYTHONPATH\Lib\distutils` create `distutils.cfg` with text editor (e.g. notepad, notepad++) and add the following lines
+
+    [build]
+    mingw32
+    
+To find the correct `distutils` path, run `python`
+
+    >>> import distutils
+    >>> print(distutils.__file__)
+
+Finally, install other packages
+
+    conda install numpy matplotlib
+    pip install pystan
