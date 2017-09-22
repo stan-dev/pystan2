@@ -81,7 +81,8 @@ Supported GCC compilers
 
 For mingw32 installation see
 http://docs.cython.org/en/latest/src/tutorial/appendix.html
-or with conda use
+
+or with conda use::
 
     conda install mingw32 libpython
 
@@ -93,32 +94,30 @@ Install Python with either Anaconda or Miniconda
 - Anaconda https://www.anaconda.com/download/
 - Miniconda https://conda.io/miniconda.html
 
-Create an virtual conda-environment [OPTIONAL]
+Create an virtual conda-environment [OPTIONAL]::
 
     conda create -n stan_env python=3.6
 
-Activate conda-env [OPTIONAL]
+Activate conda-env [OPTIONAL]::
 
     activate stan_env
  
-Install `libpython` and `m2w64-toolchain` packages
+Install `libpython` and `m2w64-toolchain` packages::
 
     conda install libpython
-    
     conda install -c msys2 m2w64-toolchain
     
-In `PYTHONPATH\Lib\distutils` create `distutils.cfg` with text editor (e.g. notepad, notepad++) and add the following lines
+In `PYTHONPATH\Lib\distutils` create `distutils.cfg` with text editor (e.g. `notepad`, `notepad++`) and add the following lines::
 
     [build]
-    
     mingw32
     
-To find the correct `distutils` path, run `python`
+To find the correct `distutils` path, run `python`::
 
     >>> import distutils
     >>> print(distutils.__file__)
 
-Finally, install other packages
+Finally, install other packages::
 
-    conda install numpy matplotlib
+    conda install numpy matplotlib  
     pip install pystan
