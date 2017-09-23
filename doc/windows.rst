@@ -15,7 +15,7 @@ PyStan is supported under Windows with the following caveats:
 PyStan requires a working C++ compiler. Configuring such a compiler is
 typically the most challenging step in getting PyStan running.
 
-Due to problems with MSVC template deduction, functions with containing Boost library (Matrix) are failing. Currently, no fix is known for this problem, other than to change the compiler to GCC.
+Due to problems with MSVC template deduction, functions with Boost library (Matrix) are failing. Currently, no fix is known for this problem, other than to change the compiler to GCC.
 
 
 Installing Python
