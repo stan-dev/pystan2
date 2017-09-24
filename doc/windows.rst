@@ -120,5 +120,5 @@ To find the correct `distutils` path, run `python`::
 
 Finally, install other packages::
 
-    conda install numpy matplotlib  
+    conda install numpy cython matplotlib  
     pip install pystan
