@@ -11,8 +11,7 @@ whenever possible. If the same model is going to be used repeatedly, we would
 like to compile it just once. The following demonstrates how to reuse a model in
 different scripts and between interactive Python sessions.
 
-**Within sessions** you can avoid recompiling a model in two ways. The first
-method is to reuse a fit object in the call to ``stan``. For example,
+**Within sessions** you can avoid recompiling a model by reusing the `StanModel` instance:
 
 .. code-block:: python
 
@@ -34,32 +33,17 @@ method is to reuse a fit object in the call to ``stan``. For example,
         }
     """
 
-    data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
-
-.. code-block:: python
-
-    fit = stan(model_code=model_code, data=data)
-    print(fit)
-
-    new_data = dict(N=6, y=[0, 0, 0, 0, 0, 1])
-    fit2 = stan(fit=fit, data=new_data)
-    print(fit2)
-
-However, calling ``pystan.stan`` is deprecated and will soon be removed from
-PyStan. The recommended method is to compile the model once using the
-``StanModel`` class and then sample from the model using the ``sampling``
-method.
 
 .. code-block:: python
 
     from pystan import StanModel
 
-    # using the same model as before
     data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
     sm = StanModel(model_code=model_code)
     fit = sm.sampling(data=data)
     print(fit)
 
+    # reuse model with new data
     new_data = dict(N=6, y=[0, 0, 0, 0, 0, 1])
     fit2 = sm.sampling(data=new_data)
     print(fit2)
@@ -107,7 +91,7 @@ Automatically reusing models
 
 For those who miss using variables across sessions in R, it is not difficult to
 write a function that automatically saves a copy of every model that gets
-compiled using ``stan`` and opportunistically loads a copy of a model if one is
+compiled and opportunistically loads a copy of a model if one is
 available.
 
 .. code-block:: python

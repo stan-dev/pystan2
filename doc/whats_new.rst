@@ -9,6 +9,8 @@
 v2.17.0.0 (TBD)
 ===============
 - ...
+- Marked ``pystan.stan`` as deprecated. It will be removed in version 3.0. Please compile and use a
+  Stan program as two separate steps.
 
 v2.16.0.0 (22. June 2017)
 ========================
