@@ -43,10 +43,10 @@ dependencies, then issue the commands:
 
 ::
 
-   wget https://pypi.python.org/packages/source/p/pystan/pystan-2.16.0.0.tar.gz
+   wget https://pypi.python.org/packages/source/p/pystan/pystan-2.17.0.0.tar.gz
    # alternatively, use curl, or a web browser
-   tar zxvf pystan-2.16.0.0.tar.gz
-   cd pystan-2.16.0.0
+   tar zxvf pystan-2.17.0.0.tar.gz
+   cd pystan-2.17.0.0
    python setup.py install
    cd ..  # change out of the source directory before importing pystan
 
