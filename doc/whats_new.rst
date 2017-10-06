@@ -6,11 +6,16 @@
  What's New
 ============
 
-v2.17.0.0 (TBD)
-===============
-- ...
-- Marked ``pystan.stan`` as deprecated. It will be removed in version 3.0. Please compile and use a
+v2.17.0.0 (6. Oct 2017)
+=======================
+- Update Stan source to v2.17.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.17.0>`_),
+- Added ``pystan.stansummary`` function. Patch by @ahartikainen.
+- Marked ``pystan.stan`` as deprecated. It will be removed in version 3.0.  Please compile and use a
   Stan program as two separate steps.
+- Reminder: Consider using Python 3.5 or higher. In a future release, Python 3.4 wheels will no longer be
+  built.
+- Reminder: Stan v2.16.0 is the final release which will not require a C++11 compatible compiler. Future
+  releases will require a C++11 compatible compiler. (This does not affect most users.)
 
 v2.16.0.0 (22. June 2017)
 ========================
