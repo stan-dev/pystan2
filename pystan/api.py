@@ -5,12 +5,13 @@
 # License. See LICENSE for a text of the license.
 #-----------------------------------------------------------------------------
 
+import hashlib
 import io
 import logging
-import hashlib
+import warnings
 
 import pystan._api  # stanc wrapper
-from pystan._compat import string_types
+from pystan._compat import string_types, PY2
 from pystan.model import StanModel
 
 logger = logging.getLogger('pystan')
@@ -113,7 +114,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
             model_code = file.read()
 
     # bytes, going into C++ code
-    model_code_bytes = model_code.encode('ascii')
+    model_code_bytes = model_code.encode('utf-8')
 
     if obfuscate_model_name:
         # Make the model name depend on the code.
@@ -125,7 +126,11 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
     if result['status'] == -1:  # EXCEPTION_RC is -1
-        error_msg = "Failed to parse Stan model '{}'. Error message:\n{}".format(model_name, result['msg'])
+        msg = result['msg']
+        if PY2:
+            # fix problem with unicode in error message in PY2
+            msg = msg.encode('ascii', 'replace')
+        error_msg = "Failed to parse Stan model '{}'. Error message:\n{}".format(model_name, msg)
         raise ValueError(error_msg)
     elif result['status'] == 0:  # SUCCESS_RC is 0
         logger.debug("Successfully parsed Stan model '{}'.".format(model_name))
@@ -141,6 +146,10 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          diagnostic_file=None, verbose=False, boost_lib=None,
          eigen_lib=None, n_jobs=-1, **kwargs):
     """Fit a model using Stan.
+
+    The `pystan.stan` function was deprecated in version 2.17 and will be
+    removed in version 3.0. Compiling and using a Stan Program (e.g., for
+    drawing samples) should be done in separate steps.
 
     Parameters
     ----------
@@ -364,6 +373,8 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     ...     return dict(mu=1, sigma=4, z=np.random.normal(size=(3, 2)), alpha=1 + chain_id)
     >>> exfit1 = stan(model_code=excode, init=initfun2)
     """
+    warnings.warn('pystan.stan was deprecated in version 2.17 and will be removed in version 3.0. '
+                  'Compile and use a Stan program in separate steps.', DeprecationWarning)
     # NOTE: this is a thin wrapper for other functions. Error handling occurs
     # elsewhere.
     if data is None:

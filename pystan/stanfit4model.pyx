@@ -388,7 +388,7 @@ def _call_sampler(data, args, pars_oi=None):
     cdef stan_fit[$model_cppname, ecuyer1988] *fitptr
     cdef vars_r_t vars_r = _dict_to_vars_r(data_r)
     cdef vars_i_t vars_i = _dict_to_vars_i(data_i)
-    fitptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
+    fitptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i, argsptr.random_seed)
     if not fitptr:
         raise MemoryError("Couldn't allocate space for stan_fit.")
     # Implementation note: there is an extra stan_fit instance associated
@@ -434,6 +434,7 @@ cdef class StanFit4Model:
 
     # attributes populated by methods of StanModel
     cdef public data  # dict or OrderedDict
+    cdef public random_seed
     cdef public dict sim
     cdef public model_name
     cdef public model_pars
@@ -448,18 +449,20 @@ cdef class StanFit4Model:
         # __cinit__ must be callable with no arguments for unpickling
         cdef vars_r_t vars_r
         cdef vars_i_t vars_i
-        if len(args) == 1:
-            data = args[0]
+        if len(args) == 2:
+            data, random_seed = args
             data_r, data_i = pystan.misc._split_data(data)
             # NB: dictionary keys must be byte strings
             vars_r = _dict_to_vars_r(data_r)
             vars_i = _dict_to_vars_i(data_i)
-            self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i)
+            # TODO: the random seed needs to be known by StanFit4Model
+            self.thisptr = new stan_fit[$model_cppname, ecuyer1988](vars_r, vars_i, <unsigned int> random_seed)
             if not self.thisptr:
                 raise MemoryError("Couldn't allocate space for stan_fit.")
 
-    def __init__(self, data):
+    def __init__(self, data, random_seed):
         self.data = data
+        self.random_seed = random_seed
 
     def __dealloc__(self):
         del self.thisptr
@@ -480,17 +483,22 @@ cdef class StanFit4Model:
                "The relevant StanModel instance must be pickled along with this fit object.\n"
                "When unpickling the StanModel must be unpickled first.")
         warnings.warn(msg)
-        return (StanFit4Model, (self.data,), self.__getstate__(), None, None)
+        return (StanFit4Model, (self.data, self.random_seed), self.__getstate__(), None, None)
 
     # public methods
 
-    def plot(self, pars=None):
+    def plot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
 
         Note
         ----
@@ -501,32 +509,41 @@ cdef class StanFit4Model:
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        return pystan.plots.traceplot(self, pars)
+        return pystan.plots.traceplot(self, pars, dtypes)
 
-    def traceplot(self, pars=None):
+    def traceplot(self, pars=None, dtypes=None):
         """Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
         """
         # FIXME: for now plot and traceplot do the same thing
-        return self.plot(pars)
+        return self.plot(pars, dtypes=dtypes)
 
-    def extract(self, pars=None, permuted=True, inc_warmup=False):
+    def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
 
         Parameters
         ----------
         pars : {str, sequence of str}
-            parameter (or quantile) name(s)
+           parameter (or quantile) name(s). If `permuted` is False,
+           `pars` is ignored.
         permuted : bool
-            If True, returned samples are permuted. All chains are merged and
-            warmup samples are discarded.
+           If True, returned samples are permuted. All chains are
+           merged and warmup samples are discarded.
         inc_warmup : bool
-           If True, warmup samples are kept; otherwise they are discarded. If
-           `permuted` is True, `inc_warmup` is ignored.
+           If True, warmup samples are kept; otherwise they are
+           discarded. If `permuted` is True, `inc_warmup` is ignored.
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
 
         Returns
         -------
@@ -543,13 +560,17 @@ cdef class StanFit4Model:
         """
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
-            logging.warn("`inc_warmup` ignored when `permuted` is True.")
+            logging.warning("`inc_warmup` ignored when `permuted` is True.")
+        if dtypes is None and permuted is False:
+            logging.warning("`dtypes` ignored when `permuted` is False.")
 
         if pars is None:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
+        if dtypes is None:
+            dtypes = {}
 
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)
@@ -566,7 +587,10 @@ cdef class StanFit4Model:
             for par in pars:
                 sss = [pystan.misc._get_kept_samples(p, self.sim)
                        for p in tidx[par]]
-                s = {par: np.column_stack(sss)}
+                ss = np.column_stack(sss)
+                if par in dtypes.keys():
+                    ss = ss.astype(dtypes[par])
+                s = {par: ss}
                 extracted.update(s)
                 par_idx = self.sim['pars_oi'].index(par)
                 par_dim = self.sim['dims_oi'][par_idx]
@@ -593,10 +617,10 @@ cdef class StanFit4Model:
 
     def __unicode__(self):
         # for Python 2.x
-        return pystan.misc._print_stanfit(self)
+        return pystan.misc.stansummary(self)
 
     def __str__(self):
-        s = pystan.misc._print_stanfit(self)
+        s = pystan.misc.stansummary(self)
         return s.encode('utf-8') if PY2 else s
 
     def __repr__(self):
@@ -605,7 +629,46 @@ cdef class StanFit4Model:
     def __getitem__(self, key):
         extr = self.extract(pars=(key,))
         return extr[key]
+    
+    def stansummary(self, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
+        """
+        Summary statistic table.
 
+        Parameters
+        ----------
+        fit : StanFit4Model object
+        pars : str or sequence of str, optional
+            Parameter names. By default use all parameters
+        probs : sequence of float, optional
+            Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+        digits_summary : int, optional
+            Number of significant digits. By default, 2
+        Returns
+        -------
+        summary : string
+            Table includes mean, se_mean, sd, probs_0, ..., probs_n, n_eff and Rhat.
+
+        Examples
+        --------
+        >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        >>> m = StanModel(model_code=model_code, model_name="example_model")
+        >>> fit = m.sampling()
+        >>> print(fit.stansummary())
+        Inference for Stan model: example_model.
+        4 chains, each with iter=2000; warmup=1000; thin=1; 
+        post-warmup draws per chain=1000, total post-warmup draws=4000.
+
+               mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
+        y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0
+        lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0
+
+        Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
+        For each parameter, n_eff is a crude measure of effective sample size,
+        and Rhat is the potential scale reduction factor on split chains (at 
+        convergence, Rhat=1).
+        """
+        return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
+    
     def summary(self, pars=None, probs=None):
         return pystan.misc._summary(self, pars, probs)
 

@@ -18,6 +18,7 @@ Documentation
 .. toctree::
    :maxdepth: 1
 
+   whats_new
    getting_started
    installation_beginner
    optimizing
@@ -26,7 +27,6 @@ Documentation
    api
    conversion
    windows
-   whats_new
 
 Stan documentation
 ------------------
@@ -46,6 +46,7 @@ Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
+- emcee: http://dan.iel.fm/emcee/current/
 
 Indices and tables
 ------------------

@@ -100,13 +100,14 @@ from distutils.extension import Extension
 
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
-                     'pystan/stan/lib/stan_math/lib/eigen_3.2.9',
-                     'pystan/stan/lib/stan_math/lib/boost_1.62.0',
+                     'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
+                     'pystan/stan/lib/stan_math/lib/boost_1.64.0',
                      'pystan/stan/lib/stan_math/lib/cvodes_2.9.0/include']
 stan_macros = [
-    ('BOOST_RESULT_OF_USE_TR1', None),
-    ('BOOST_NO_DECLTYPE', None),
     ('BOOST_DISABLE_ASSERTS', None),
+    ('BOOST_NO_DECLTYPE', None),
+    ('BOOST_PHOENIX_NO_VARIADIC_EXPRESSION', None),  # needed for stanc
+    ('BOOST_RESULT_OF_USE_TR1', None),
     ('FUSION_MAX_VECTOR_SIZE', 12),  # for parser, stan-dev/pystan#222
 ]
 extra_compile_args = [
@@ -117,10 +118,12 @@ extra_compile_args = [
 ]
 
 if platform.platform().startswith('Win'):
-    extra_compile_args = [
-        '/EHsc',
-        '-DBOOST_DATE_TIME_NO_LIB',
-    ]
+    from Cython.Build.Inline import _get_build_extension
+    if _get_build_extension().compiler in (None, 'msvc'):
+        extra_compile_args = [
+            '/EHsc',
+            '-DBOOST_DATE_TIME_NO_LIB',
+        ]
 
 
 stanc_sources = [
@@ -158,7 +161,8 @@ extensions = [
 
 
 ## package data
-package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv']
+package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv',
+                     'lookuptable/*.txt']
 
 # get every file under pystan/stan/src and pystan/stan/lib
 stan_files_all = sum(

@@ -15,8 +15,9 @@
 #include <boost/random/uniform_real_distribution.hpp>
 
 #include <stan/callbacks/interrupt.hpp>
-#include <stan/callbacks/writer.hpp>
+#include <stan/callbacks/stream_logger.hpp>
 #include <stan/callbacks/stream_writer.hpp>
+#include <stan/callbacks/writer.hpp>
 #include <stan/io/empty_var_context.hpp>
 #include <stan/services/diagnose/diagnose.hpp>
 #include <stan/services/optimize/bfgs.hpp>
@@ -782,8 +783,8 @@ namespace pystan {
           && args.get_ctrl_sampling_algorithm() != Fixed_param)
         throw std::runtime_error("Must use algorithm=\"Fixed_param\" for "
                                  "model that has no parameters.");
-      stan::callbacks::stream_writer info(std::cout);
-      stan::callbacks::stream_writer err(std::cerr);
+      stan::callbacks::stream_logger logger(std::cout, std::cout, std::cout,
+                                            std::cerr, std::cerr);
 
       PyErr_CheckSignals_Functor interrupt;
 
@@ -850,7 +851,7 @@ namespace pystan {
                                                          init_radius,
                                                          epsilon, error,
                                                          interrupt,
-                                                         info,
+                                                         logger,
                                                          init_writer,
                                                          sample_writer);
         holder.num_failed = return_code;
@@ -868,7 +869,7 @@ namespace pystan {
                                                random_seed, id, init_radius,
                                                num_iterations,
                                                save_iterations,
-                                               interrupt, info,
+                                               interrupt, logger,
                                                init_writer, sample_writer);
         }
         if (args.get_ctrl_optim_algorithm() == BFGS) {
@@ -891,7 +892,7 @@ namespace pystan {
                                              num_iterations,
                                              save_iterations,
                                              refresh,
-                                             interrupt, info,
+                                             interrupt, logger,
                                              init_writer, sample_writer);
         }
         if (args.get_ctrl_optim_algorithm() == LBFGS) {
@@ -916,7 +917,7 @@ namespace pystan {
                                               num_iterations,
                                               save_iterations,
                                               refresh,
-                                              interrupt, info,
+                                              interrupt, logger,
                                               init_writer, sample_writer);
         }
         std::vector<double> params = sample_writer.x();
@@ -958,7 +959,7 @@ namespace pystan {
                                                   num_thin,
                                                   refresh,
                                                   interrupt,
-                                                  info, err, init_writer,
+                                                  logger, init_writer,
                                                   *sample_writer_ptr, diagnostic_writer);
         } else if (args.get_ctrl_sampling_algorithm() == NUTS) {
           sampler_names.resize(5);
@@ -990,7 +991,7 @@ namespace pystan {
                                    num_warmup, num_samples,
                                    num_thin, save_warmup, refresh,
                                    stepsize, stepsize_jitter, max_depth,
-                                   interrupt, info, err, init_writer,
+                                   interrupt, logger, init_writer,
                                    *sample_writer_ptr, diagnostic_writer);
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
@@ -1009,7 +1010,7 @@ namespace pystan {
                                          stepsize, stepsize_jitter, max_depth,
                                          delta, gamma, kappa,
                                          t0, init_buffer, term_buffer, window,
-                                         interrupt, info, err, init_writer,
+                                         interrupt, logger, init_writer,
                                          *sample_writer_ptr, diagnostic_writer);
             }
           } else if (args.get_ctrl_sampling_metric() == DIAG_E) {
@@ -1020,7 +1021,7 @@ namespace pystan {
                                   num_warmup, num_samples,
                                   num_thin, save_warmup, refresh,
                                   stepsize, stepsize_jitter, max_depth,
-                                  interrupt, info, err, init_writer,
+                                  interrupt, logger, init_writer,
                                   *sample_writer_ptr, diagnostic_writer);
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
@@ -1039,7 +1040,7 @@ namespace pystan {
                                         stepsize, stepsize_jitter, max_depth,
                                         delta, gamma, kappa,
                                         t0, init_buffer, term_buffer, window,
-                                        interrupt, info, err, init_writer,
+                                        interrupt, logger, init_writer,
                                         *sample_writer_ptr, diagnostic_writer);
             }
           } else if (args.get_ctrl_sampling_metric() == UNIT_E) {
@@ -1050,7 +1051,7 @@ namespace pystan {
                                   num_warmup, num_samples,
                                   num_thin, save_warmup, refresh,
                                   stepsize, stepsize_jitter, max_depth,
-                                  interrupt, info, err, init_writer,
+                                  interrupt, logger, init_writer,
                                   *sample_writer_ptr, diagnostic_writer);
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
@@ -1065,7 +1066,7 @@ namespace pystan {
                                         num_thin, save_warmup, refresh,
                                         stepsize, stepsize_jitter, max_depth,
                                         delta, gamma, kappa, t0,
-                                        interrupt, info, err, init_writer,
+                                        interrupt, logger, init_writer,
                                         *sample_writer_ptr, diagnostic_writer);
             }
           }
@@ -1097,7 +1098,7 @@ namespace pystan {
                                      num_warmup, num_samples,
                                      num_thin, save_warmup, refresh,
                                      stepsize, stepsize_jitter, int_time,
-                                     interrupt, info, err, init_writer,
+                                     interrupt, logger, init_writer,
                                      *sample_writer_ptr, diagnostic_writer);
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
@@ -1116,7 +1117,7 @@ namespace pystan {
                                            stepsize, stepsize_jitter, int_time,
                                            delta, gamma, kappa, t0,
                                            init_buffer, term_buffer, window,
-                                           interrupt, info, err, init_writer,
+                                           interrupt, logger, init_writer,
                                            *sample_writer_ptr, diagnostic_writer);
 
             }
@@ -1128,7 +1129,7 @@ namespace pystan {
                                     num_warmup, num_samples,
                                     num_thin, save_warmup, refresh,
                                     stepsize, stepsize_jitter, int_time,
-                                    interrupt, info, err, init_writer,
+                                    interrupt, logger, init_writer,
                                     *sample_writer_ptr, diagnostic_writer);
 
             } else {
@@ -1148,7 +1149,7 @@ namespace pystan {
                                           stepsize, stepsize_jitter, int_time,
                                           delta, gamma, kappa, t0,
                                           init_buffer, term_buffer, window,
-                                          interrupt, info, err, init_writer,
+                                          interrupt, logger, init_writer,
                                           *sample_writer_ptr, diagnostic_writer);
             }
           } else if (args.get_ctrl_sampling_metric() == UNIT_E) {
@@ -1159,7 +1160,7 @@ namespace pystan {
                                     num_warmup, num_samples,
                                     num_thin, save_warmup, refresh,
                                     stepsize, stepsize_jitter, int_time,
-                                    interrupt, info, err, init_writer,
+                                    interrupt, logger, init_writer,
                                     *sample_writer_ptr, diagnostic_writer);
 
             } else  {
@@ -1175,7 +1176,7 @@ namespace pystan {
                             num_thin, save_warmup, refresh,
                             stepsize, stepsize_jitter, int_time,
                             delta, gamma, kappa, t0,
-                            interrupt, info, err, init_writer,
+                            interrupt, logger, init_writer,
                             *sample_writer_ptr, diagnostic_writer);
             }
           }
@@ -1265,7 +1266,7 @@ namespace pystan {
                        max_iterations, tol_rel_obj, eta,
                        adapt_engaged, adapt_iterations,
                        eval_elbo, output_samples,
-                       interrupt, info, init_writer,
+                       interrupt, logger, init_writer,
                        *sample_writer_ptr, diagnostic_writer);
         } else {
           return_code = stan::services::experimental::advi
@@ -1275,7 +1276,7 @@ namespace pystan {
                         max_iterations, tol_rel_obj, eta,
                         adapt_engaged, adapt_iterations,
                         eval_elbo, output_samples,
-                        interrupt, info, init_writer,
+                        interrupt, logger, init_writer,
                         *sample_writer_ptr, diagnostic_writer);
         }
         std::vector<std::vector<double> > slst(sample_writer_ptr->values_.x().begin(),
@@ -1370,9 +1371,9 @@ namespace pystan {
       return true;
     }
 
-    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i) :
+    stan_fit(vars_r_t& vars_r, vars_i_t& vars_i, unsigned int random_seed) :
       data_(vars_r, vars_i),
-      model_(data_, &std::cout),
+      model_(data_, random_seed, &std::cout),
       base_rng(static_cast<boost::uint32_t>(std::time(0))),
       names_(get_param_names(model_)),
       dims_(get_param_dims(model_)),

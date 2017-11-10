@@ -15,7 +15,7 @@ import datetime
 import io
 import itertools
 import logging
-from numbers import Number
+import numbers
 import os
 import platform
 import shutil
@@ -76,8 +76,12 @@ def _map_parallel(function, args, n_jobs):
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
-        with multiprocessing.Pool(processes=n_jobs) as pool:
+        try:
+            pool = multiprocessing.Pool(processes=n_jobs)
             map_result = pool.map(function, args)
+        finally:
+            pool.close()
+            pool.join()
     else:
         map_result = list(map(function, args))
     return map_result
@@ -246,8 +250,8 @@ class StanModel:
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.2.9"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.62.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.64.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "cvodes_2.9.0", "include"),
             np.get_include(),
         ]
@@ -270,6 +274,8 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
+        
+        build_extension = _get_build_extension()
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
@@ -279,7 +285,7 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
             ]
-            if platform.platform().startswith('Win'):
+            if platform.platform().startswith('Win') and build_extension.compiler in (None, 'msvc'):
                 extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
 
         distutils.log.set_verbosity(verbose)
@@ -291,7 +297,7 @@ class StanModel:
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
-        build_extension = _get_build_extension()
+        
         build_extension.extensions = cythonize([extension],
                                                include_path=cython_include_dirs,
                                                quiet=not verbose)
@@ -462,8 +468,8 @@ class StanModel:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
         if data is None:
             data = {}
-
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -472,15 +478,13 @@ class StanModel:
         del m_pars[idx_of_lp]
         del p_dims[idx_of_lp]
 
-        if isinstance(init, Number):
+        if isinstance(init, numbers.Number):
             init = str(init)
         elif isinstance(init, Callable):
             init = init()
         elif not isinstance(init, Iterable) and \
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
-
-        seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(init=init,
                          seed=seed,
@@ -657,12 +661,15 @@ class StanModel:
             data = {}
         if warmup is None:
             warmup = int(iter // 2)
+        if not all(isinstance(arg, numbers.Integral) for arg in (iter, thin, warmup)):
+            raise ValueError('only integer values allowed as `iter`, `thin`, and `warmup`.')
         algorithms = ("NUTS", "HMC", "Fixed_param")  # , "Metropolis")
         algorithm = "NUTS" if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
 
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
 
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
@@ -840,19 +847,18 @@ class StanModel:
         algorithm = "meanfield" if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
-        fit = self.fit_class(data)
+        seed = pystan.misc._check_seed(seed)
+        fit = self.fit_class(data, seed)
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
-        if isinstance(init, Number):
+        if isinstance(init, numbers.Number):
             init = str(init)
         elif isinstance(init, Callable):
             init = init()
         elif not isinstance(init, Iterable) and \
                 not isinstance(init, string_types):
             raise ValueError("Wrong specification of initial values.")
-
-        seed = pystan.misc._check_seed(seed)
 
         stan_args = dict(iter=iter,
                          init=init,

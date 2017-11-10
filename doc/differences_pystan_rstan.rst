@@ -66,15 +66,15 @@ Python:
     fit = model.sampling(data=data)
 
     with open('model.pkl', 'wb') as f:
-        pickle.dump(model, f)
+        pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     # load it at some future point
-
     with open('model.pkl', 'rb') as f:
         model = pickle.load(f)
 
     # run with different data
     fit = model.sampling(data=dict(N=5, y=[1, 1, 0, 1, 0]))
+
 
 R:
 
@@ -86,3 +86,7 @@ R:
     save(model, file='model.rdata')
 
 See also :ref:`avoiding-recompilation`.
+
+If you are saving a large amount of data with ``pickle.dump``, be sure to use
+the highest protocol version available. Earlier versions are limited in the
+amount of data they can save in a single file.

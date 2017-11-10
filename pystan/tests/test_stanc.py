@@ -17,9 +17,10 @@ class TestStanc(unittest.TestCase):
     def test_stanc_exception(self):
         model_code = 'parameters {real z;} model {z ~ no_such_distribution();}'
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(ValueError, 'Distribution .* not found\.'):
+        # distribution not found error
+        with assertRaisesRegex(ValueError, r'Probability function must end in _lpdf or _lpmf\. Found'):
             stanc(model_code=model_code)
-        with assertRaisesRegex(ValueError, 'Distribution .* not found\.'):
+        with assertRaisesRegex(ValueError, r'Probability function must end in _lpdf or _lpmf\. Found'):
             StanModel(model_code=model_code)
 
     def test_stanc_exception_semicolon(self):

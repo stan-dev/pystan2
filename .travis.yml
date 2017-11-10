@@ -1,6 +1,7 @@
 # language is set to c to work around travis ci bug
 # https://github.com/travis-ci/travis-ci/issues/2312
 language: c
+dist: trusty
 sudo: false
 os:
   - linux
@@ -12,11 +13,14 @@ compiler:
   - clang
   - gcc
 env:
-  - TRAVIS_PYTHON_VERSION=2.7
-  - TRAVIS_PYTHON_VERSION=3.3
-  - TRAVIS_PYTHON_VERSION=3.4
-  - TRAVIS_PYTHON_VERSION=3.5
-  - TRAVIS_PYTHON_VERSION=3.6
+  - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.4 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.4 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
 notifications:
   email:
     recipients:
@@ -24,4 +28,4 @@ notifications:
     on_success: change
     on_failure: always
 install: source continuous_integration/install.sh
-script: bash continuous_integration/test_script.sh
+script: bash continuous_integration/test_script.sh --exclude="$TESTS_EXCLUDE_RE"

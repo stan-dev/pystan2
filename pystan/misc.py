@@ -50,39 +50,74 @@ from pystan.constants import (MAX_UINT, sampling_algo_t, optim_algo_t,
 logger = logging.getLogger('pystan')
 
 
+def stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
+    """
+    Summary statistic table.
+    
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    pars : str or sequence of str, optional
+        Parameter names. By default use all parameters
+    probs : sequence of float, optional
+        Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+    digits_summary : int, optional
+        Number of significant digits. By default, 2
+
+    Returns
+    -------
+    summary : string
+        Table includes mean, se_mean, sd, probs_0, ..., probs_n, n_eff and Rhat.
+    
+    Examples
+    --------
+    >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+    >>> m = StanModel(model_code=model_code, model_name="example_model")
+    >>> fit = m.sampling()
+    >>> print(stansummary(fit))
+    Inference for Stan model: example_model.
+    4 chains, each with iter=2000; warmup=1000; thin=1; 
+    post-warmup draws per chain=1000, total post-warmup draws=4000.
+    
+           mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
+    y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0
+    lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0
+    
+    Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
+    For each parameter, n_eff is a crude measure of effective sample size,
+    and Rhat is the potential scale reduction factor on split chains (at 
+    convergence, Rhat=1).
+    """
+    if fit.mode == 1:
+        return "Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name)
+    elif fit.mode == 2:
+        return "Stan model '{}' does not contain samples.".format(fit.model_name)
+
+    n_kept = [s - w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    header = "Inference for Stan model: {}.\n".format(fit.model_name)
+    header += "{} chains, each with iter={}; warmup={}; thin={}; \n"
+    header = header.format(fit.sim['chains'], fit.sim['iter'], fit.sim['warmup'],
+                           fit.sim['thin'], sum(n_kept))
+    header += "post-warmup draws per chain={}, total post-warmup draws={}.\n\n"
+    header = header.format(n_kept[0], sum(n_kept))
+    footer = "\n\nSamples were drawn using {} at {}.\n"\
+        "For each parameter, n_eff is a crude measure of effective sample size,\n"\
+        "and Rhat is the potential scale reduction factor on split chains (at \n"\
+        "convergence, Rhat=1)."
+    sampler = fit.sim['samples'][0]['args']['sampler_t']
+    date = fit.date.strftime('%c')  # %c is locale's representation
+    footer = footer.format(sampler, date)
+    s = _summary(fit, pars, probs)
+    body = _array_to_table(s['summary'], s['summary_rownames'],
+                           s['summary_colnames'], digits_summary)
+    return header + body + footer
+
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
-        if fit.mode == 1:
-            return "Stan model '{}' is of mode 'test_grad';\n"\
-                   "sampling is not conducted.".format(fit.model_name)
-        elif fit.mode == 2:
-            return "Stan model '{}' does not contain samples.".format(fit.model_name)
-        if pars is None:
-            pars = fit.sim['pars_oi']
-            fnames = fit.sim['fnames_oi']
-        else:
-            # FIXME: does this case ever occur?
-            # need a way of getting fnames matching specified pars
-            raise NotImplementedError
-
-        n_kept = [s - w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
-        header = "Inference for Stan model: {}.\n".format(fit.model_name)
-        header += "{} chains, each with iter={}; warmup={}; thin={}; \n"
-        header = header.format(fit.sim['chains'], fit.sim['iter'], fit.sim['warmup'],
-                               fit.sim['thin'], sum(n_kept))
-        header += "post-warmup draws per chain={}, total post-warmup draws={}.\n\n"
-        header = header.format(n_kept[0], sum(n_kept))
-        footer = "\n\nSamples were drawn using {} at {}.\n"\
-            "For each parameter, n_eff is a crude measure of effective sample size,\n"\
-            "and Rhat is the potential scale reduction factor on split chains (at \n"\
-            "convergence, Rhat=1)."
-        sampler = fit.sim['samples'][0]['args']['sampler_t']
-        date = fit.date.strftime('%c')  # %c is locale's representation
-        footer = footer.format(sampler, date)
-        s = _summary(fit, pars, probs)
-        body = _array_to_table(s['summary'], s['summary_rownames'],
-                               s['summary_colnames'], digits_summary)
-        return header + body + footer
-
+    # warning added in PyStan 2.17.0
+    warnings.warn('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
+                  'Use `stansummary` instead.', DeprecationWarning)
+    return stansummary(fit, pars=pars, probs=probs, digits_summary=digits_summary)
 
 def _array_to_table(arr, rownames, colnames, n_digits):
     """Print an array with row and column names
@@ -359,7 +394,7 @@ def _split_data(data):
     # map<string, pair<vector<int>, vector<size_t>>> so prepare
     # them accordingly.
     for k, v in data.items():
-        if np.issubdtype(np.asarray(v).dtype, int):
+        if np.issubdtype(np.asarray(v).dtype, np.integer):
             data_i.update({k.encode('utf-8'): np.asarray(v, dtype=int)})
         elif np.issubdtype(np.asarray(v).dtype, float):
             data_r.update({k.encode('utf-8'): np.asarray(v, dtype=float)})
@@ -666,8 +701,7 @@ def _check_seed(seed):
                 warnings.warn("`seed` may not be negative")
                 seed = None
             elif seed > MAX_UINT:
-                warnings.warn("`seed` is too large; max is {}".format(MAX_UINT))
-                seed = None
+                raise ValueError('`seed` is too large; max is {}'.format(MAX_UINT))
     elif isinstance(seed, np.random.RandomState):
         seed = seed.randint(0, MAX_UINT)
     elif seed is not None:

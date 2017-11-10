@@ -88,6 +88,11 @@ class TestBernoulli(unittest.TestCase):
         with assertRaisesRegex(RuntimeError, 'variable does not exist'):
             fit = self.model.sampling(data=bad_data)
 
+    def test_bernoulli_sampling_invalid_argument(self):
+        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
+        with assertRaisesRegex(ValueError, 'only integer values allowed'):
+            self.model.sampling(thin=2.0, data=self.bernoulli_data)
+
     def test_bernoulli_extract(self):
         fit = self.fit
         extr = fit.extract(permuted=True)
