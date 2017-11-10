@@ -65,6 +65,9 @@ install:
   - "%CMD_IN_ENV% pip install -r ./continuous_integration/appveyor/requirements.txt"
   - "%CMD_IN_ENV% pip install -r requirements.txt"
   - "%CMD_IN_ENV% pip install -r test-requirements.txt"
+  - "conda install -c conda-forge libpython"
+  - "conda install -c msys2 m2w64-toolchain"
+  - "%CMD_IN_ENV% python ./continuous_integration/appveyor/add_distutils_cfg.py"
   # build the wheel and install it
   - "%CMD_IN_ENV% python setup.py bdist_wheel bdist_wininst"
   - ps: "ls dist"
