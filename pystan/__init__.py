@@ -17,4 +17,4 @@ if len(logger.handlers) == 1:
     logging.basicConfig(level=logging.INFO)
 
 # following PEP 386
-__version__ = '2.17.0.0'
+__version__ = '2.17.1.0'
