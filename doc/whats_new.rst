@@ -6,6 +6,12 @@
  What's New
 ============
 
+v2.17.1.0 (16. Jan 2018)
+========================
+- Update Stan source to v2.17.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.17.1>`_) (bugfix release)
+- Remove deprecation warnings (Thanks to Alexander Rudiuk)
+- Drop testing of Python 3.4.
+
 v2.17.0.0 (6. Oct 2017)
 =======================
 - Update Stan source to v2.17.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.17.0>`_),
