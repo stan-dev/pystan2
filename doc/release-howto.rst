@@ -67,18 +67,13 @@ Upload Source Distribution and Wheels to PyPI
 
 - Sign source distribution and wheels::
 
-    for tarball in dist/*.tar.gz; do
-        gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$tarball"
-    done
-
-    for whl in dist/*.whl; do
-        gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$whl"
+    for fn in dist/*{.tar.gz,.whl}; do
+        gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$fn"
     done
 
 - Upload source distribution and wheels::
 
-    python3 -m twine upload --skip-existing dist/*.tar.gz dist/*.tar.gz.asc
-    python3 -m twine upload --skip-existing dist/*.whl dist/*.whl.asc
+    python3 -m twine upload --skip-existing dist/*{.tar.gz,.whl,.asc}
 
 If ``twine`` prompts for a username and password abort the process with
 Control-C and enter your PyPI credentials in ``$HOME/.pypirc``. (For more
@@ -102,18 +97,11 @@ Update Source
 Update Conda-Forge
 ------------------
 
-Update the repository at https://github.com/conda-forge/pystan-feedstock
+Update the repository at https://github.com/conda-forge/pystan-feedstock by
+editing ``recipe/meta.yaml`` and submitting a pull request.
 
-You will need the sha256 of the tarball. Calculate it by hand or find it at
+You will need the sha256 of the tarball. Calculate it by hand (with ``sha256sum``) or find it at
 https://pypi.org/project/pystan/#files after uploading the tarball.
-
-Update Stan Website
--------------------
-
-Update the Stan website with the new PyStan version information. The version
-number in the following file needs to be incremented::
-
-    https://github.com/stan-dev/stan-dev.github.io/blob/master/citations/index.md
 
 Make Release Announcement
 -------------------------
