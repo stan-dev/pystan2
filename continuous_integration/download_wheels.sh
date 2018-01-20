@@ -5,10 +5,6 @@ IFS=$'\n\t'
 
 
 RACKSPACE_URL=https://d36102825770f036e7f0-25e1da3ee193e97cce4726db07962f5d.ssl.cf5.rackcdn.com/
-if [ "`which twine`" == "" ]; then
-    echo "twine not on path; need to pip install twine?"
-    exit 1
-fi
 PACKAGE=pystan
 VERSION=$(git tag --sort version:refname | grep -v rc | tail -1 | sed 's/^v//')
 WHEEL_HEAD="${PACKAGE}-${VERSION}"
@@ -40,7 +36,7 @@ for py_tag in cp27; do
   done
 done
 
-for py_tag in cp34 cp35 cp36; do
+for py_tag in cp35 cp36; do
   wheel_name="$WHEEL_HEAD-$py_tag-${py_tag}m-$MACOS_TAIL64"
   wheel_url="${RACKSPACE_URL}/${wheel_name}"
   echo "downloading: $wheel_name"
