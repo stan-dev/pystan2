@@ -53,7 +53,7 @@ class TestMcmcChains(unittest.TestCase):
         lst = self.lst
         for i in range(4, len(n_eff)):
             ess = pystan.chains.ess(lst, i)
-            self.assertAlmostEqual(ess, n_eff[i], delta=1)
+            self.assertAlmostEqual(ess, n_eff[i], delta=.01)
 
     def test_rhat(self):
 
