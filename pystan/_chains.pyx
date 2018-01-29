@@ -142,6 +142,7 @@ def effective_sample_size(dict sim, int n):
     for chain in range(m):
         acov_t.push_back(acov[chain][1])
     cdef double rho_hat_even = 1
+    rho_hat_t[0] = rho_hat_even
     cdef double rho_hat_odd = 1 - (mean_var - stan_mean(acov_t)) / var_plus
     rho_hat_t[1] = rho_hat_odd
     # Geyer's initial positive sequence
@@ -152,6 +153,7 @@ def effective_sample_size(dict sim, int n):
         for chain in range(m):
             acov_t.push_back(acov[chain][t + 1])
         rho_hat_even = 1 - (mean_var - stan_mean(acov_t)) / var_plus
+        acov_t.clear()
         for chain in range(m):
             acov_t.push_back(acov[chain][t + 2])
         rho_hat_odd = 1 - (mean_var - stan_mean(acov_t)) / var_plus
@@ -168,7 +170,7 @@ def effective_sample_size(dict sim, int n):
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
     cdef double ess = m * n_samples
-    ess = ess / (1 + 2 * stan_sum(rho_hat_t))
+    ess = ess / (-1 + 2 * stan_sum(rho_hat_t))
     return ess
 
 
