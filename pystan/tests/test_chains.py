@@ -8,23 +8,25 @@ import pystan
 import pystan.chains
 
 
-class TestChains(unittest.TestCase):
-    # REF: runit.test.chains.R
-
+class TestMcmcChains(unittest.TestCase):
+    # REF: stan/src/test/unit/mcmc/chains_test.cpp
     @classmethod
     def setUpClass(cls):
         testdata_path = os.path.join(os.path.dirname(__file__), 'data')
-        f1 = os.path.join(testdata_path, 'blocker1.csv')
-        f2 = os.path.join(testdata_path, 'blocker2.csv')
+        f1 = os.path.join(testdata_path, 'blocker.1.csv')
+        f2 = os.path.join(testdata_path, 'blocker.2.csv')
 
         # read csv using numpy
-        c1 = np.loadtxt(f1, skiprows=21, delimiter=',')[:, 2:]
-        c1_colnames = open(f1, 'r').readlines()[20].strip().split(',')[2:]
-        c2 = np.loadtxt(f2, skiprows=21, delimiter=',')[:, 2:]
-        c2_colnames = open(f2, 'r').readlines()[20].strip().split(',')[2:]
+        c1 = np.loadtxt(f1, skiprows=41, delimiter=',')[:, 4:]
+        c1_colnames = open(f1, 'r').readlines()[36].strip().split(',')[4:]
+        np.testing.assert_equal(c1_colnames[0], 'd')
+        c2 = np.loadtxt(f2, skiprows=41, delimiter=',')[:, 4:]
+        c2_colnames = open(f2, 'r').readlines()[36].strip().split(',')[4:]
         np.testing.assert_equal(c1_colnames, c2_colnames)
+        np.testing.assert_equal(len(c1_colnames), c1.shape[1])
 
         n_samples = len(c1)
+        np.testing.assert_equal(n_samples, 1000)
 
         c1 = OrderedDict((k, v) for k, v in zip(c1_colnames, c1.T))
         c2 = OrderedDict((k, v) for k, v in zip(c2_colnames, c2.T))
@@ -34,71 +36,55 @@ class TestChains(unittest.TestCase):
                        warmup=0, warmup2=[0, 0], chains=2, n_flatnames=len(c1))
 
     def test_essnrhat(self):
+        n_eff = [
+            466.099,136.953,1170.390,541.256,
+            518.051,589.244,764.813,688.294,
+            323.777,502.892,353.823,588.142,
+            654.336,480.914,176.978,182.649,
+            642.389,470.949,561.947,581.187,
+            446.389,397.641,338.511,678.772,
+            1442.250,837.956,869.865,951.124,
+            619.336,875.805,233.260,786.568,
+            910.144,231.582,907.666,747.347,
+            720.660,195.195,944.547,767.271,
+            723.665,1077.030,470.903,954.924,
+            497.338,583.539,697.204,98.421
+        ]
         lst = self.lst
-        ess = pystan.chains.ess(lst, 2)
-        self.assertAlmostEqual(ess, 13.0778, delta=1)
-        ess2 = pystan.chains.ess(lst, 45)
-        self.assertAlmostEqual(ess2, 43.0242, delta=3)
+        for i in range(4, len(n_eff)):
+            ess = pystan.chains.ess(lst, i)
+            self.assertAlmostEqual(ess, n_eff[i], delta=1)
 
     def test_rhat(self):
+
+        r_hat = [
+            1.00718, 1.00473, 0.999203, 1.00061, 1.00378,
+            1.01031, 1.00173, 1.0045, 1.00111, 1.00337,
+            1.00546, 1.00105, 1.00558, 1.00463, 1.00534,
+            1.01244, 1.00174, 1.00718, 1.00186, 1.00554,
+            1.00436, 1.00147, 1.01017, 1.00162, 1.00143,
+            1.00058, 0.999221, 1.00012, 1.01028, 1.001,
+            1.00305, 1.00435, 1.00055, 1.00246, 1.00447,
+            1.0048, 1.00209, 1.01159, 1.00202, 1.00077,
+            1.0021, 1.00262, 1.00308, 1.00197, 1.00246,
+            1.00085, 1.00047, 1.00735
+        ]
+
         lst = self.lst
-        rhat = pystan.chains.splitrhat(lst, 2)
-        self.assertAlmostEqual(rhat, 1.187, delta=0.001)
-        rhat2 = pystan.chains.splitrhat(lst, 45)
-        self.assertAlmostEqual(rhat2, 1.03715, delta=0.001)
+        for i in range(4, len(r_hat)):
+            rhat = pystan.chains.splitrhat(lst, i)
+            self.assertAlmostEqual(rhat, r_hat[i], delta=0.001)
+
+
+class TestRhatZero(unittest.TestCase):
 
     def test_rhat_zero(self):
         model_code = """
           parameters { real x; }
-          transformed parameters { real y; y <- 0.0; }
+          transformed parameters { real y; y = 0.0; }
           model {x ~ normal(0, 1);}
           """
         model = pystan.StanModel(model_code=model_code)
         fit = model.sampling()
         rhat = pystan.chains.splitrhat(fit.sim, 1)
         self.assertTrue(math.isnan(rhat))
-
-
-class TestChainsNormal(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        testdata_path = os.path.join(os.path.dirname(__file__), 'data')
-        f1 = os.path.join(testdata_path, 'normal1.csv')
-        f2 = os.path.join(testdata_path, 'normal2.csv')
-
-        # samples drawn using Stan 2.11.0
-        # read csv using numpy
-        c1 = np.loadtxt(f1, skiprows=42, delimiter=',')[:, 2:]
-        c1_colnames = open(f1, 'r').readlines()[37].strip().split(',')[2:]
-        c2 = np.loadtxt(f2, skiprows=42, delimiter=',')[:, 2:]
-        c2_colnames = open(f2, 'r').readlines()[37].strip().split(',')[2:]
-        np.testing.assert_equal(c1_colnames, c2_colnames)
-
-        assert len(c1) == len(c2) == 40, (len(c1), len(c2))
-        y_index = c1_colnames.index('y')
-        y_mean = np.concatenate([c1[:, y_index], c2[:, y_index]]).mean()
-        np.testing.assert_almost_equal(y_mean, -0.05038095325)
-
-        n_samples = len(c1)
-
-        c1 = OrderedDict((k, v) for k, v in zip(c1_colnames, c1.T))
-        c2 = OrderedDict((k, v) for k, v in zip(c2_colnames, c2.T))
-
-        cls.lst = dict(fnames_oi=c1_colnames, samples=[{'chains': c1}, {'chains': c2}],
-                       n_save=np.repeat(n_samples, 2), permutation=None,
-                       warmup=0, warmup2=[0, 0], chains=2, n_flatnames=len(c1))
-
-
-    def test_essnrhat(self):
-        lst = self.lst
-        param_index = lst['fnames_oi'].index('y')
-        assert param_index == 5
-        ess = pystan.chains.ess(lst, param_index)
-        self.assertAlmostEqual(ess, 53.7651, delta=1)
-
-    def test_rhat(self):
-        lst = self.lst
-        param_index = lst['fnames_oi'].index('y')
-        rhat = pystan.chains.splitrhat(lst, param_index)
-        self.assertAlmostEqual(rhat, 9.9254714e-01, delta=0.000001)
