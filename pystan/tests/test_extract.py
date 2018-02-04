@@ -67,6 +67,13 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(ss['beta'].shape, (num_samples, 4, 2))
         self.assertTrue((~np.isnan(ss['beta'])).all())
         
+    def test_extract_permuted_false_inc_warmup(self):
+        fit = self.fit
+        ss = fit.extract(inc_warmup=True, permuted=False)
+        num_samples = fit.sim['iter']
+        self.assertEqual(ss.shape, (num_samples, 4, 9))
+        self.assertTrue((~np.isnan(ss)).all())
+    
     def test_extract_thin(self):
         sm = self.sm
         fit = sm.sampling(chains=4, iter=2000, thin=2)
