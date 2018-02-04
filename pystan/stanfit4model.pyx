@@ -566,7 +566,7 @@ cdef class StanFit4Model:
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logging.warning("`inc_warmup` ignored when `permuted` is True.")
-        if (dtypes is not None) and (permuted is False) and (pars is None):
+        if dtypes is not None and permuted is False and pars is None:
             logging.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
         pars_original = pars
