@@ -53,13 +53,27 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(ss.shape, (num_samples, 4, 9))
         self.assertTrue((~np.isnan(ss)).all())
 
+    def test_extract_permuted_false_pars(self):
+        fit = self.fit
+        ss = fit.extract(pars=['beta'], permuted=False)
+        num_samples = fit.sim['iter'] - fit.sim['warmup']
+        self.assertEqual(ss['beta'].shape, (num_samples, 4, 2))
+        self.assertTrue((~np.isnan(ss['beta'])).all())
+
+    def test_extract_permuted_false_pars_inc_warmup(self):
+        fit = self.fit
+        ss = fit.extract(pars=['beta'], inc_warmup=True, permuted=False)
+        num_samples = fit.sim['iter']
+        self.assertEqual(ss['beta'].shape, (num_samples, 4, 2))
+        self.assertTrue((~np.isnan(ss['beta'])).all())
+        
     def test_extract_permuted_false_inc_warmup(self):
         fit = self.fit
         ss = fit.extract(inc_warmup=True, permuted=False)
         num_samples = fit.sim['iter']
         self.assertEqual(ss.shape, (num_samples, 4, 9))
         self.assertTrue((~np.isnan(ss)).all())
-
+    
     def test_extract_thin(self):
         sm = self.sm
         fit = sm.sampling(chains=4, iter=2000, thin=2)
@@ -96,3 +110,15 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(alpha.dtype, np.dtype(np.int))
         self.assertEqual(beta.dtype, np.dtype(np.int))
         self.assertEqual(lp__.dtype, np.dtype(np.float))
+        
+    def test_extract_dtype_permuted_false(self):
+        dtypes = {"alpha": np.int, "beta": np.int}
+        pars = ['alpha', 'beta', 'lp__']
+        ss = self.fit.extract(pars=pars, dtypes = dtypes, permuted=False)
+        alpha = ss['alpha']
+        beta = ss['beta']
+        lp__ = ss['lp__']
+        self.assertEqual(alpha.dtype, np.dtype(np.int))
+        self.assertEqual(beta.dtype, np.dtype(np.int))
+        self.assertEqual(lp__.dtype, np.dtype(np.float))
+

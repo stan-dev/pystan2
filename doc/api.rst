@@ -40,7 +40,7 @@ a number of methods.
 
       This is currently an alias for the `traceplot` method.
 
-   .. py:method:: extract(pars=None, permuted=True, inc_warmup=False)
+   .. py:method:: extract(pars=None, permuted=True, inc_warmup=False, dtypes=None)
 
       Extract samples in different forms for different parameters.
 
@@ -54,6 +54,10 @@ a number of methods.
       inc_warmup : bool
          If True, warmup samples are kept; otherwise they are discarded. If
          `permuted` is True, `inc_warmup` is ignored.
+      dtypes : dict
+         datatype of parameter(s).
+         If nothing is passed, np.float will be used for all parameters.
+
 
       Returns
 
@@ -61,11 +65,71 @@ a number of methods.
       If `permuted` is True, return dictionary with samples for each
       parameter (or other quantity) named in `pars`.
 
-      If `permuted` is False, an array is returned. The first dimension of
+      If `permuted` is False and `pars` is None, an array is returned. The first dimension of
       the array is for the iterations; the second for the number of chains;
       the third for the parameters. Vectors and arrays are expanded to one
       parameter (a scalar) per cell, with names indicating the third dimension.
       Parameters are listed in the same order as `model_pars` and `flatnames`.
+
+      If `permuted` is False and `pars` is not None, return dictionary with samples for each
+      parameter (or other quantity) named in `pars`. The first dimension of
+      the sample array is for the iterations; the second for the number of chains;
+      the rest for the parameters. Parameters are listed in the same order as `pars`.
+
+   .. py:method:: stansummary(pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2)
+   
+      Summary statistic table.
+      Parameters
+      ----------
+      pars : str or sequence of str, optional
+         Parameter names. By default use all parameters
+      probs : sequence of float, optional
+         Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+      digits_summary : int, optional
+         Number of significant digits. By default, 2
+      Returns
+      -------
+      summary : string
+         Table includes mean, se_mean, sd, probs_0, ..., probs_n, n_eff and Rhat.
+      Examples
+      --------
+      >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'  
+      >>> m = StanModel(model_code=model_code, model_name="example_model")  
+      >>> fit = m.sampling()  
+      >>> print(fit.stansummary())  
+      Inference for Stan model: example_model.  
+      4 chains, each with iter=2000; warmup=1000; thin=1;  
+      post-warmup draws per chain=1000, total post-warmup draws=4000.  
+             mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat  
+      y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0  
+      lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0  
+      Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.  
+      For each parameter, n_eff is a crude measure of effective sample size,  
+      and Rhat is the potential scale reduction factor on split chains (at  
+      convergence, Rhat=1).
+
+   .. py:method:: summary(pars=None, probs=None)
+      
+      Summarize samples (compute mean, SD, quantiles) in all chains.
+      REF: stanfit-class.R summary method
+      Parameters
+      ----------
+      fit : StanFit4Model object
+      pars : str or sequence of str, optional
+         Parameter names. By default use all parameters
+      probs : sequence of float, optional
+         Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+      Returns
+      -------
+      summaries : OrderedDict of array
+         Array indexed by 'summary' has dimensions (num_params, num_statistics).
+         Parameters are unraveled in *row-major order*. Statistics include: mean,
+         se_mean, sd, probs_0, ..., probs_n, n_eff, and Rhat. Array indexed by
+         'c_summary' breaks down the statistics by chain and has dimensions
+         (num_params, num_statistics_c_summary, num_chains). Statistics for
+         `c_summary` are the same as for `summary` with the exception that
+         se_mean, n_eff, and Rhat are absent. Row names and column names are
+         also included in the OrderedDict.
 
    .. py:method:: log_prob(upar, adjust_transform=True, gradient=False)
 
@@ -146,8 +210,12 @@ a number of methods.
           if parameters of interest include non-scalar parameters. An additional
           column for mean lp__ is also included.
 
+   .. py:method:: constrain_pars(np.ndarray[double, ndim=1, mode="c"] upar not None)
+      
+      Transform parameters from unconstrained space to defined support
+   
    .. py:method:: unconstrain_pars(par)
-
+       
       Transform parameters from defined support to unconstrained space
 
    .. py:method:: get_seed()
@@ -155,3 +223,7 @@ a number of methods.
    .. py:method:: get_inits()
 
    .. py:method:: get_stancode()
+   
+   .. py:property:: flatnames
+   
+   

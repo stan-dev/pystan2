@@ -551,19 +551,25 @@ cdef class StanFit4Model:
         If `permuted` is True, return dictionary with samples for each
         parameter (or other quantity) named in `pars`.
 
-        If `permuted` is False, an array is returned. The first dimension of
+        If `permuted` is False and `pars` is None, an array is returned. The first dimension of
         the array is for the iterations; the second for the number of chains;
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
         Parameters are listed in the same order as `model_pars` and `flatnames`.
+        
+        If `permuted` is False and `pars` is not None, return dictionary with samples for each
+        parameter (or other quantity) named in `pars`. The first dimension of
+        the sample array is for the iterations; the second for the number of chains;
+        the rest for the parameters. Parameters are listed in the same order as `pars`.
 
         """
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logging.warning("`inc_warmup` ignored when `permuted` is True.")
-        if dtypes is None and permuted is False:
-            logging.warning("`dtypes` ignored when `permuted` is False.")
+        if dtypes is not None and permuted is False and pars is None:
+            logging.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
+        pars_original = pars
         if pars is None:
             pars = self.sim['pars_oi']
         elif isinstance(pars, string_types):
@@ -601,7 +607,33 @@ cdef class StanFit4Model:
                 extracted[par] = extracted[par].reshape(newdim, order='F')
                 # squeeze dim for scalar params, e.g., (4000,1) into (4000,)
                 if len(newdim) == 2 and newdim[1] == 1:
-                   extracted[par] = np.squeeze(extracted[par])
+                    extracted[par] = np.squeeze(extracted[par])
+        elif pars_original is not None:
+            n_chains = self.sim['chains']
+            extracted = collections.OrderedDict()
+            for par in pars:
+                extracted_par = []
+                for n in tidx[par]:
+                    chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
+                    n_save = self.sim['n_save'][0]
+                    if not inc_warmup:
+                        n_save = n_save - self.sim['warmup2'][0]
+                    samples = np.column_stack(chains)
+                    extracted_par.append(samples[:, :, np.newaxis])
+                extracted_par = np.dstack(extracted_par)
+                if par in dtypes.keys():
+                    extracted_par = extracted_par.astype(dtypes[par])
+                extracted[par] = extracted_par
+                par_idx = self.sim['pars_oi'].index(par)
+                par_dim = self.sim['dims_oi'][par_idx]
+                # scalars have dim [], otherwise as one would expect
+                par_dim = [1] if par_dim == [] else par_dim
+                newdim = [n_save, n_chains] + par_dim
+                # order='F' means column-major order
+                extracted[par] = extracted[par].reshape(newdim, order='F')
+                # squeeze dim for scalar params, e.g., (1000,4,1) into (1000,4)
+                if len(newdim) == 3 and newdim[2] == 1:
+                    extracted[par] = np.squeeze(extracted[par])
         else:
             extracted = []
             for n in range(len(self.sim['fnames_oi'])):
@@ -636,7 +668,6 @@ cdef class StanFit4Model:
 
         Parameters
         ----------
-        fit : StanFit4Model object
         pars : str or sequence of str, optional
             Parameter names. By default use all parameters
         probs : sequence of float, optional
@@ -670,6 +701,26 @@ cdef class StanFit4Model:
         return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
     
     def summary(self, pars=None, probs=None):
+        """Summarize samples (compute mean, SD, quantiles) in all chains.
+        REF: stanfit-class.R summary method
+        Parameters
+        ----------
+        pars : str or sequence of str, optional
+            Parameter names. By default use all parameters
+        probs : sequence of float, optional
+            Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+        Returns
+        -------
+        summaries : OrderedDict of array
+            Array indexed by 'summary' has dimensions (num_params, num_statistics).
+            Parameters are unraveled in *row-major order*. Statistics include: mean,
+            se_mean, sd, probs_0, ..., probs_n, n_eff, and Rhat. Array indexed by
+            'c_summary' breaks down the statistics by chain and has dimensions
+            (num_params, num_statistics_c_summary, num_chains). Statistics for
+            `c_summary` are the same as for `summary` with the exception that
+            se_mean, n_eff, and Rhat are absent. Row names and column names are
+            also included in the OrderedDict.
+        """
         return pystan.misc._summary(self, pars, probs)
 
     def log_prob(self, upar, adjust_transform=True, gradient=False):
