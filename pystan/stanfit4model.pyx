@@ -668,7 +668,6 @@ cdef class StanFit4Model:
 
         Parameters
         ----------
-        fit : StanFit4Model object
         pars : str or sequence of str, optional
             Parameter names. By default use all parameters
         probs : sequence of float, optional
@@ -702,6 +701,26 @@ cdef class StanFit4Model:
         return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
     
     def summary(self, pars=None, probs=None):
+        """Summarize samples (compute mean, SD, quantiles) in all chains.
+        REF: stanfit-class.R summary method
+        Parameters
+        ----------
+        pars : str or sequence of str, optional
+            Parameter names. By default use all parameters
+        probs : sequence of float, optional
+            Quantiles. By default, (0.025, 0.25, 0.5, 0.75, 0.975)
+        Returns
+        -------
+        summaries : OrderedDict of array
+            Array indexed by 'summary' has dimensions (num_params, num_statistics).
+            Parameters are unraveled in *row-major order*. Statistics include: mean,
+            se_mean, sd, probs_0, ..., probs_n, n_eff, and Rhat. Array indexed by
+            'c_summary' breaks down the statistics by chain and has dimensions
+            (num_params, num_statistics_c_summary, num_chains). Statistics for
+            `c_summary` are the same as for `summary` with the exception that
+            se_mean, n_eff, and Rhat are absent. Row names and column names are
+            also included in the OrderedDict.
+        """
         return pystan.misc._summary(self, pars, probs)
 
     def log_prob(self, upar, adjust_transform=True, gradient=False):
