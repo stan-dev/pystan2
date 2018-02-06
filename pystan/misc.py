@@ -1140,8 +1140,7 @@ def to_dataframe(fit, pars=None, dtypes=None):
     Parameters
     ----------
     pars : {str, sequence of str}
-       parameter (or quantile) name(s). If `permuted` is False,
-       `pars` is ignored.
+       parameter (or quantile) name(s). 
     dtypes : dict
         datatype of parameter(s).
         If nothing is passed, np.float will be used for all parameters.
@@ -1187,6 +1186,10 @@ def to_dataframe(fit, pars=None, dtypes=None):
         if ss.shape[1] == 1:
             df[par] = ss
         else:
+            par_flatnames = [
+            flatname for flatname in fit.flatnames if flatname.startswith(par)
+            ]
             for idx in np.arange(ss.shape[1]):
-                df[par + '_{}'.format(idx)] = ss[:,idx]
+                column_name = par_flatnames[idx].replace('[','_').replace(',','_').replace(']','')
+                df[column_name] = ss[:,idx]
     return df
