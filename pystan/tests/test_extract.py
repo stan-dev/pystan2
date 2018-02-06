@@ -121,3 +121,38 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(alpha.dtype, np.dtype(np.int))
         self.assertEqual(beta.dtype, np.dtype(np.int))
         self.assertEqual(lp__.dtype, np.dtype(np.float))
+
+  def test_to_dataframe(self):
+        ss = self.fit.extract(permuted=True)
+        alpha = ss['alpha']
+        beta = ss['beta']
+        lp__ = ss['lp__']
+        df = self.fit.to_dataframe()
+        self.assertEqual(df.shape, (4000,9))
+        for idx in range(2):
+            for jdx in range(3):
+                name = 'alpha_{}_{}'.format(idx,jdx)
+                assert_series_equal(df[name],pd.Series(alpha[:,idx,jdx],name=name))
+        for idx in range(2):
+            name = 'beta_{}'.format(idx)
+            assert_series_equal(df[name],pd.Series(beta[:,idx],name=name))
+        assert_series_equal(df['lp__'],pd.Series(lp__,name='lp__'))
+        ss = self.fit.extract(permuted=True)
+        alpha = ss['alpha']
+        beta = ss['beta']
+        lp__ = ss['lp__']
+        # Test pars argument
+        df = self.fit.to_dataframe(pars='alpha')
+        self.assertEqual(df.shape, (4000,6))
+        for idx in range(2):
+            for jdx in range(3):
+                name = 'alpha_{}_{}'.format(idx,jdx)
+                assert_series_equal(df[name],pd.Series(alpha[:,idx,jdx],name=name))
+        # Test pars and dtype argument
+        df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int})
+        alpha_int = ss['alpha'].astype(np.int)
+        self.assertEqual(df.shape, (4000,6))
+        for idx in range(2):
+            for jdx in range(3):
+                name = 'alpha_{}_{}'.format(idx,jdx)
+                assert_series_equal(df[name],pd.Series(alpha_int[:,idx,jdx],name=name))
