@@ -1134,16 +1134,23 @@ def read_rdump(filename):
         d[name.strip()] = _rdump_value_to_numpy(value.strip())
     return d
 
-def to_dataframe(fit, pars=None, dtypes=None):
+def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False):
     """Extract samples as a pandas dataframe for different parameters.
 
     Parameters
     ----------
     pars : {str, sequence of str}
-       parameter (or quantile) name(s). 
+       parameter (or quantile) name(s).
+    permuted : bool
+       If True, returned samples are permuted. All chains are
+       merged and warmup samples are discarded.
     dtypes : dict
         datatype of parameter(s).
         If nothing is passed, np.float will be used for all parameters.
+    inc_warmup : bool
+       If True, warmup samples are kept; otherwise they are
+       discarded. If `permuted` is True, `inc_warmup` is ignored.
+
 
     Returns
     -------
@@ -1154,6 +1161,10 @@ def to_dataframe(fit, pars=None, dtypes=None):
         import pandas as pd
     except ImportError:
         raise ImportError("Pandas module not found. You can install pandas with: pip install pandas")
+    if inc_warmup is True and permuted is True:
+        logging.warning("`inc_warmup` ignored when `permuted` is True.")
+    if dtypes is not None and permuted is False and pars is None:
+        logging.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
     fit._verify_has_samples()
 
@@ -1175,21 +1186,50 @@ def to_dataframe(fit, pars=None, dtypes=None):
 
     n_kept = [s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
 
-    df = pd.DataFrame(index = np.arange(np.sum(n_kept)))
+    df = pd.DataFrame()
+    if permuted:
+        for par in pars:
+            sss = [pystan.misc._get_kept_samples(p, fit.sim)
+                   for p in tidx[par]]
+            ss = np.column_stack(sss)
+            if par in dtypes.keys():
+                ss = ss.astype(dtypes[par])
+            if ss.shape[1] == 1:
+                df[par] = ss
+            else:
+                par_flatnames = [
+                flatname for flatname in fit.flatnames if flatname.startswith(par)
+                ]
+                for idx in np.arange(ss.shape[1]):
+                    column_name = par_flatnames[idx].replace('[','_').replace(',','_').replace(']','')
+                    # Use Stan 1-based indexing for column name strings
+                    column_name = ''.join([str(int(n)+1)  if n.isdigit() else n for n in column_name])
+                    df[column_name] = ss[:,idx]
+    else:
+        n_save = fit.sim['n_save'][0]
+        if not inc_warmup:
+            n_save = n_save - fit.sim['warmup2'][0]
+        chain_count = fit.sim['chains']+1
+        df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
+        df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
+        divergent = []
+        energy = []
+        treedepth = []
 
-    for par in pars:
-        sss = [pystan.misc._get_kept_samples(p, fit.sim)
-               for p in tidx[par]]
-        ss = np.column_stack(sss)
-        if par in dtypes.keys():
-            ss = ss.astype(dtypes[par])
-        if ss.shape[1] == 1:
-            df[par] = ss
-        else:
-            par_flatnames = [
-            flatname for flatname in fit.flatnames if flatname.startswith(par)
-            ]
-            for idx in np.arange(ss.shape[1]):
-                column_name = par_flatnames[idx].replace('[','_').replace(',','_').replace(']','')
-                df[column_name] = ss[:,idx]
+        for n in range(0,chain_count-1):
+            divergent.append(fit.get_sampler_params()[n]['divergent__'][-n_save:].astype(bool))
+            energy.append(fit.get_sampler_params()[n]['energy__'][-n_save:].astype(float))
+            treedepth.append(fit.get_sampler_params()[n]['treedepth__'][-n_save:].astype(int))
+
+        df['divergent__'] = np.hstack(divergent)
+        df['energy__'] = np.hstack(energy)
+        df['treedepth__'] = np.hstack(treedepth)
+
+        for n in range(len(fit.sim['fnames_oi'])):
+            chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
+            samples = np.array(chains).T
+            column_name = fit.sim['fnames_oi'][n].replace('[','_').replace(',','_').replace(']','')
+            # Use Stan 1-based indexing for column name strings
+            column_name = ''.join([str(int(n)+1)  if n.isdigit() else n for n in column_name])
+            df[column_name] = samples.T.flatten()
     return df

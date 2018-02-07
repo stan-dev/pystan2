@@ -556,7 +556,7 @@ cdef class StanFit4Model:
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
         Parameters are listed in the same order as `model_pars` and `flatnames`.
-        
+
         If `permuted` is False and `pars` is not None, return dictionary with samples for each
         parameter (or other quantity) named in `pars`. The first dimension of
         the sample array is for the iterations; the second for the number of chains;
@@ -859,7 +859,7 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
-    def to_dataframe(self, pars=None, dtypes=None):
+    def to_dataframe(self, pars=None, permuted=True, dtypes=None, inc_warmup=False):
         """Extract samples as a pandas dataframe for different parameters.
 
         Parameters
@@ -867,6 +867,12 @@ cdef class StanFit4Model:
         pars : {str, sequence of str}
            parameter (or quantile) name(s). If `permuted` is False,
            `pars` is ignored.
+        permuted : bool
+           If True, returned samples are permuted. All chains are
+           merged and warmup samples are discarded.
+        inc_warmup : bool
+           If True, warmup samples are kept; otherwise they are
+           discarded. If `permuted` is True, `inc_warmup` is ignored.
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
@@ -876,7 +882,7 @@ cdef class StanFit4Model:
         df : pandas dataframe
 
         """
-        return pystan.misc.to_dataframe(self, pars, dtypes)
+        return pystan.misc.to_dataframe(self, pars, permuted, dtypes, inc_warmup)
 
 
     # FIXME: when this is a normal Python class one can use @property instead
