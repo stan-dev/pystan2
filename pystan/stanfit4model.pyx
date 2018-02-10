@@ -859,7 +859,7 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
-    def to_dataframe(self, pars=None, permuted=True, dtypes=None, inc_warmup=False):
+    def to_dataframe(self, pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True):
         """Extract samples as a pandas dataframe for different parameters.
 
         Parameters
@@ -870,19 +870,22 @@ cdef class StanFit4Model:
         permuted : bool
            If True, returned samples are permuted. All chains are
            merged and warmup samples are discarded.
+        dtypes : dict
+		    datatype of parameter(s).
+			If nothing is passed, np.float will be used for all parameters.
         inc_warmup : bool
            If True, warmup samples are kept; otherwise they are
            discarded. If `permuted` is True, `inc_warmup` is ignored.
-        dtypes : dict
-            datatype of parameter(s).
-            If nothing is passed, np.float will be used for all parameters.
+        diagnostics : bool
+	       If True, include MCMC diagnostics in dataframe.
+           If `permuted` is True, `diagnostics` is ignored.
 
         Returns
         -------
         df : pandas dataframe
 
         """
-        return pystan.misc.to_dataframe(self, pars, permuted, dtypes, inc_warmup)
+        return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics)
 
 
     # FIXME: when this is a normal Python class one can use @property instead

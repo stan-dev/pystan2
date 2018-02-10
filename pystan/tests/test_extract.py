@@ -133,10 +133,10 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(df.shape, (4000,9))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx,jdx)
+                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
                 assert_series_equal(df[name],pd.Series(alpha[:,idx,jdx],name=name))
         for idx in range(2):
-            name = 'beta_{}'.format(idx)
+            name = 'beta_{}'.format(idx+1)
             assert_series_equal(df[name],pd.Series(beta[:,idx],name=name))
         assert_series_equal(df['lp__'],pd.Series(lp__,name='lp__'))
         ss = self.fit.extract(permuted=True)
@@ -165,7 +165,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe()
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,14))
+        self.assertEqual(df.shape, (num_samples*num_chains,9))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -211,7 +211,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe()
         num_samples = fit.sim['iter']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,14))
+        self.assertEqual(df.shape, (num_samples*num_chains,9))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -237,6 +237,77 @@ class TestExtract(unittest.TestCase):
                 assert_array_equal(
                 df.chain_idx.values[n*num_samples:(n+1)*num_samples],
                 np.arange(1,num_samples+1,dtype=np.int)
+                )
+                assert_array_equal(
+                df.divergent__.values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n]['divergent__'][-num_samples:].astype(bool)
+                )
+                assert_array_equal(
+                df.energy__.values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n]['energy__'][-num_samples:]
+                )
+                assert_array_equal(
+                df.treedepth__.values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n]['treedepth__'][-num_samples:].astype(int)
+                )
+    def test_to_dataframe_permuted_false_diagnostics_false(self):
+        fit = self.fit
+        ss = fit.extract(permuted=False)
+        df = fit.to_dataframe(permuted=False,diagnostics=False)
+        num_samples = fit.sim['iter'] - fit.sim['warmup']
+        num_chains = fit.sim['chains']
+        self.assertEqual(df.shape, (num_samples*num_chains,11))
+        alpha_index = 0
+        for jdx in range(3):
+            for idx in range(2):
+                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                for n in range(1,num_chains+1):
+                    assert_array_equal(
+                    df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
+                    )
+                alpha_index += 1
+        for idx in range(2):
+            name = 'beta_{}'.format(idx+1)
+            for n in range(1,num_chains+1):
+                assert_array_equal(
+                df[name].loc[df.chain == n].values,ss[:,n-1,6+idx]
+                )
+            for n in range(1,num_chains+1):
+                assert_array_equal(df.loc[df.chain == n,'lp__'].values,ss[:,n-1,-1])
+            for n in range(num_chains):
+                assert_array_equal(
+                df.chain.values[n*num_samples:(n+1)*num_samples],
+                (n+1)*np.ones(num_samples,dtype=np.int)
+                )
+                assert_array_equal(
+                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples +1,dtype=np.int)
+                )
+                
+    def test_to_dataframe_permuted_false_pars(self):
+        fit = self.fit
+        ss = fit.extract(permuted=False)
+        df = fit.to_dataframe(permuted=False,pars='alpha')
+        num_samples = fit.sim['iter'] - fit.sim['warmup']
+        num_chains = fit.sim['chains']
+        self.assertEqual(df.shape, (num_samples*num_chains,11))
+        alpha_index = 0
+        for jdx in range(3):
+            for idx in range(2):
+                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                for n in range(1,num_chains+1):
+                    assert_array_equal(
+                    df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
+                    )
+                alpha_index += 1
+            for n in range(num_chains):
+                assert_array_equal(
+                df.chain.values[n*num_samples:(n+1)*num_samples],
+                (n+1)*np.ones(num_samples,dtype=np.int)
+                )
+                assert_array_equal(
+                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples +1,dtype=np.int)
                 )
                 assert_array_equal(
                 df.divergent__.values[n*num_samples:(n+1)*num_samples],
