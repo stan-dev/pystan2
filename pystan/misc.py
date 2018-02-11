@@ -1217,18 +1217,13 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
         df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
         df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
         if diagnostics == True:
-            divergent = []
-            energy = []
-            treedepth = []
-
-            for n in range(0,chain_count-1):
-                divergent.append(fit.get_sampler_params()[n]['divergent__'][-n_save:].astype(bool))
-                energy.append(fit.get_sampler_params()[n]['energy__'][-n_save:].astype(float))
-                treedepth.append(fit.get_sampler_params()[n]['treedepth__'][-n_save:].astype(int))
-
-            df['divergent__'] = np.hstack(divergent)
-            df['energy__'] = np.hstack(energy)
-            df['treedepth__'] = np.hstack(treedepth)
+            diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
+            for diag, diag_dtype in diagnostic_type.items():
+                diag_list = []
+                for n in range(0,chain_count-1):
+                    diag_list.append(fit.get_sampler_params()[n][diag + '__'][-n_save:].astype(diag_dtype))
+                df[diag + '__'] = np.hstack(diag_list)
         
         for n in range(len(fit.sim['fnames_oi'])):
             par = fit.sim['fnames_oi'][n]

@@ -134,38 +134,34 @@ class TestExtract(unittest.TestCase):
         for idx in range(2):
             for jdx in range(3):
                 name = 'alpha_{}_{}'.format(idx+1,jdx+1)
-                assert_series_equal(df[name],pd.Series(alpha[:,idx,jdx],name=name))
+                assert_array_equal(df[name].values,alpha[:,idx,jdx])
         for idx in range(2):
             name = 'beta_{}'.format(idx+1)
-            assert_series_equal(df[name],pd.Series(beta[:,idx],name=name))
-        assert_series_equal(df['lp__'],pd.Series(lp__,name='lp__'))
-        ss = self.fit.extract(permuted=True)
-        alpha = ss['alpha']
-        beta = ss['beta']
-        lp__ = ss['lp__']
+            assert_array_equal(df[name].values,beta[:,idx])
+        assert_array_equal(df['lp__'].values,lp__)
         # Test pars argument
         df = self.fit.to_dataframe(pars='alpha')
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx,jdx)
-                assert_series_equal(df[name],pd.Series(alpha[:,idx,jdx],name=name))
+                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                assert_array_equal(df[name].values,alpha[:,idx,jdx])
         # Test pars and dtype argument
         df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int})
         alpha_int = ss['alpha'].astype(np.int)
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx,jdx)
-                assert_series_equal(df[name],pd.Series(alpha_int[:,idx,jdx],name=name))
+                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                assert_array_equal(df[name].values,alpha_int[:,idx,jdx])
 
     def test_to_dataframe_permuted_false_inc_warmup_false(self):
         fit = self.fit
         ss = fit.extract(permuted=False)
-        df = fit.to_dataframe()
+        df = fit.to_dataframe(permuted=False)
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,9))
+        self.assertEqual(df.shape, (num_samples*num_chains,17))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -183,35 +179,30 @@ class TestExtract(unittest.TestCase):
                 )
             for n in range(1,num_chains+1):
                 assert_array_equal(df.loc[df.chain == n,'lp__'].values,ss[:,n-1,-1])
-            for n in range(num_chains):
-                assert_array_equal(
+        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
+        for n in range(num_chains):
+            assert_array_equal(
                 df.chain.values[n*num_samples:(n+1)*num_samples],
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
-                assert_array_equal(
+            assert_array_equal(
                 df.chain_idx.values[n*num_samples:(n+1)*num_samples],
                 np.arange(1,num_samples +1,dtype=np.int)
                 )
+            for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(
-                df.divergent__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['divergent__'][-num_samples:].astype(bool)
-                )
-                assert_array_equal(
-                df.energy__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['energy__'][-num_samples:]
-                )
-                assert_array_equal(
-                df.treedepth__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['treedepth__'][-num_samples:].astype(int)
+                df[diag+'__'].values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n][diag+'__'][-num_samples:].astype(diag_type)
                 )
 
     def test_to_dataframe_permuted_false_inc_warmup_true(self):
         fit = self.fit
         ss = fit.extract(permuted=False, inc_warmup = True)
-        df = fit.to_dataframe()
+        df = fit.to_dataframe(permuted=False,inc_warmup=True)
         num_samples = fit.sim['iter']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,9))
+        self.assertEqual(df.shape, (num_samples*num_chains,17))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -229,26 +220,22 @@ class TestExtract(unittest.TestCase):
                 )
             for n in range(1,num_chains+1):
                 assert_array_equal(df.loc[df.chain == n,'lp__'].values,ss[:,n-1,-1])
-            for n in range(num_chains):
-                assert_array_equal(
-                df.chain.values[n*2000:(n+1)*num_samples],
+			
+        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
+        for n in range(num_chains):
+            assert_array_equal(
+                df.chain.values[n*num_samples:(n+1)*num_samples],
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
-                assert_array_equal(
+            assert_array_equal(
                 df.chain_idx.values[n*num_samples:(n+1)*num_samples],
-                np.arange(1,num_samples+1,dtype=np.int)
+                np.arange(1,num_samples +1,dtype=np.int)
                 )
+            for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(
-                df.divergent__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['divergent__'][-num_samples:].astype(bool)
-                )
-                assert_array_equal(
-                df.energy__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['energy__'][-num_samples:]
-                )
-                assert_array_equal(
-                df.treedepth__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['treedepth__'][-num_samples:].astype(int)
+                df[diag+'__'].values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n][diag+'__'][-num_samples:].astype(diag_type)
                 )
     def test_to_dataframe_permuted_false_diagnostics_false(self):
         fit = self.fit
@@ -290,7 +277,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe(permuted=False,pars='alpha')
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,11))
+        self.assertEqual(df.shape, (num_samples*num_chains,14))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -300,24 +287,19 @@ class TestExtract(unittest.TestCase):
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
                     )
                 alpha_index += 1
-            for n in range(num_chains):
-                assert_array_equal(
+        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
+        for n in range(num_chains):
+            assert_array_equal(
                 df.chain.values[n*num_samples:(n+1)*num_samples],
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
-                assert_array_equal(
+            assert_array_equal(
                 df.chain_idx.values[n*num_samples:(n+1)*num_samples],
                 np.arange(1,num_samples +1,dtype=np.int)
                 )
+            for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(
-                df.divergent__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['divergent__'][-num_samples:].astype(bool)
-                )
-                assert_array_equal(
-                df.energy__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['energy__'][-num_samples:]
-                )
-                assert_array_equal(
-                df.treedepth__.values[n*num_samples:(n+1)*num_samples],
-                fit.get_sampler_params()[n]['treedepth__'][-num_samples:].astype(int)
+                df[diag+'__'].values[n*num_samples:(n+1)*num_samples],
+                fit.get_sampler_params()[n][diag+'__'][-num_samples:].astype(diag_type)
                 )
