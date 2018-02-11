@@ -6,24 +6,30 @@ import warnings
 # Diagnostics modified from Betancourt's stan_utility.py module
 
 def check_div(fit, verbose = True):
-    """Check transitions that ended with a divergence
+    """Check for transitions that ended with a divergence
 
-    This function returns True if there are no problems with divergent
-    transitions and False otherwise.
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then a
+        diagnostic message is printed only if there are divergent
+        transitions. If it is an integer greater than 1, then extra
+        diagnostic messages are printed.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then a diagnostic message is printed only if there are
-    divergent transitions.
+    Returns
+    -------
+    bool
+        ``True`` if there are no problems with divergent transitions
+        and ``False`` otherwise.
 
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
-
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Raises
+    ------
+    ValueError
+        If ``fit`` has no information about divergent transitions.
 
     """
 
@@ -66,25 +72,35 @@ def check_div(fit, verbose = True):
         
 
 def check_treedepth(fit, verbose = True):
-    """Check transitions that ended prematurely due to maximum tree depth limit
+    """Check for transitions that ended prematurely due to maximum tree
+    depth limit
 
-    This function returns True if there are no problems with tree
-    depth and False otherwise.
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then a
+        diagnostic message is printed only if there are transitions
+        that ended ended prematurely due to maximum tree depth
+        limit. If it is an integer greater than 1, then extra
+        diagnostic messages are printed.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then a diagnostic message is printed only if there are
-    transitions that ended ended prematurely due to maximum tree depth
-    limit.
 
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
+    Returns
+    -------
+    bool
+        ``True`` if there are no problems with tree depth and
+        ``False`` otherwise.
 
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Raises
+    ------
+    ValueError
+        If ``fit`` has no information about tree depth. This could
+        happen if ``fit`` was generated from a sampler other than
+        NUTS.
 
     """
 
@@ -122,22 +138,29 @@ def check_treedepth(fit, verbose = True):
 def check_energy(fit, verbose = True):
     """Checks the energy Bayesian fraction of missing information (E-BFMI)
 
-    This function returns True if there are no problems with E-BFMI
-    and False otherwise.
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then a
+        diagnostic message is printed only if there is low E-BFMI in
+        one or more chains. If it is an integer greater than 1, then
+        extra diagnostic messages are printed.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then diagnostic messages are printed only if there is low
-    E-BFMI in one or more chains.
 
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
+    Returns
+    -------
+    bool
+        ``True`` if there are no problems with E-BFMI and ``False``
+        otherwise.
 
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Raises
+    ------
+    ValueError
+        If ``fit`` has no information about E-BFMI.
 
     """
 
@@ -176,22 +199,31 @@ def check_energy(fit, verbose = True):
 def check_n_eff(fit, verbose = True):
     """Checks the effective sample size per iteration
 
-    This function returns True if there are no problems with effective
-    sample size.
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then a
+        diagnostic message is printed only if there are effective
+        sample sizes that appear pathologically low. If it is an
+        integer greater than 1, then extra diagnostic messages are
+        printed.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then diagnostic messages are printed only if there are
-    effective sample sizes that appear pathologically low.
 
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
+    Returns
+    -------
+    bool
+        ``True`` if there are no problems with effective sample size
+        and ``False`` otherwise.
 
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Raises
+    ------
+    ValueError
+        If the output of ``fit.summary()`` has no information about
+        effective sample size (i.e., n_eff).
 
     """
 
@@ -227,24 +259,32 @@ def check_n_eff(fit, verbose = True):
             print('n_eff / iter below 0.001 indicates that the effective sample size has likely been overestimated')
 
 def check_rhat(fit, verbose = True):
-    """Checks the potential scale reduction factors
+    """Checks the potential scale reduction factors, i.e., Rhat values
 
-    This function returns True if there are no problems with Rhat, the
-    potential scale reduction factor
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then a
+        diagnostic message is printed only if there are Rhat values
+        too far from 1. If ``verbose`` is an integer greater than 1,
+        then extra diagnostic messages are printed.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then diagnostic messages are printed only if there are Rhat
-    values too far from 1.
 
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
+    Returns
+    -------
+    bool
+        ``True`` if there are no problems with with Rhat and ``False``
+        otherwise.
 
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Raises
+    ------
+    ValueError
+        If the output of ``fit.summary()`` has no information about
+        Rhat.
 
     """
     
@@ -286,28 +326,28 @@ def check_rhat(fit, verbose = True):
 def check_MCMC_diagnostics(fit, verbose = True):
     """Checks all MCMC diagnostics
 
-    This function returns a dictionary where each key returns a
-    diagnostic check, and the value associated with each key is a
-    Boolean value that is True if the check passed and False
-    otherwise.
+    Parameters
+    ----------
+    fit : StanFit4Model object
+    verbose : bool or int, optional
+        If ``verbose`` is ``False`` or a nonpositive integer, no
+        diagnostic messages are printed, and only the return value of
+        the function conveys diagnostic information. If it is ``True``
+        (the default) or an integer greater than zero, then diagnostic
+        messages are printed only for diagnostic checks that fail. If
+        ``verbose`` is an integer greater than 1, then extra
+        diagnostic messages are printed.
 
-    Possible valid keys are 'n_eff', 'Rhat', 'divergence',
-    'treedepth', and 'energy', though which keys are available will
-    depend upon the sampling algorithm used.
-    
-    Optional argument "verbose" is either a Boolean or an integral
-    value.
 
-    If "verbose" is True (the default) or an integer greater than
-    zero, then diagnostic messages are printed only if there are Rhat
-    values too far from 1.
-
-    If "verbose" is greater than 1, then extra diagnostic messages are
-    printed.
-
-    If "verbose" is False or zero, no diagnostic messages are
-    printed, and only the return value of the function conveys
-    diagnostic information.
+    Returns
+    -------
+    out_dict : dict
+        A dictionary where each key is the name of a diagnostic check,
+        and the value associated with each key is a Boolean value that
+        is True if the check passed and False otherwise.  Possible
+        valid keys are 'n_eff', 'Rhat', 'divergence', 'treedepth', and
+        'energy', though which keys are available will depend upon the
+        sampling algorithm used.
 
     """
 
@@ -347,34 +387,3 @@ def check_MCMC_diagnostics(fit, verbose = True):
             print('Skipping check of E-BFMI (energy)')
 
     return out_dict
-
-def _by_chain(unpermuted_extraction):
-    num_chains = len(unpermuted_extraction[0])
-    result = [[] for _ in range(num_chains)]
-    for c in range(num_chains):
-        for i in range(len(unpermuted_extraction)):
-            result[c].append(unpermuted_extraction[i][c])
-    return numpy.array(result)
-
-def _shaped_ordered_params(fit):
-    ef = fit.extract(permuted=False, inc_warmup=False) # flattened, unpermuted, by (iteration, chain)
-    ef = _by_chain(ef)
-    ef = ef.reshape(-1, len(ef[0][0]))
-    ef = ef[:, 0:len(fit.flatnames)] # drop lp__
-    shaped = {}
-    idx = 0
-    for dim, param_name in zip(fit.par_dims, fit.extract().keys()):
-        length = int(numpy.prod(dim))
-        shaped[param_name] = ef[:,idx:idx + length]
-        shaped[param_name].reshape(*([-1] + dim))
-        idx += length
-    return shaped
-
-def partition_div(fit):
-    """ Returns parameter arrays separated into divergent and non-divergent transitions"""
-    sampler_params = fit.get_sampler_params(inc_warmup=False)
-    div = numpy.concatenate([x['divergent__'] for x in sampler_params]).astype('int')
-    params = _shaped_ordered_params(fit)
-    nondiv_params = dict((key, params[key][div == 0]) for key in params)
-    div_params = dict((key, params[key][div == 1]) for key in params)
-    return nondiv_params, div_params
