@@ -305,6 +305,8 @@ def check_n_eff(fit, verbose = True):
         if verbosity > 0:
             logger.warning('n_eff / iter below 0.001 indicates that the effective sample size has likely been overestimated')
 
+        return False
+
 def check_rhat(fit, verbose = True):
     """Checks the potential scale reduction factors, i.e., Rhat values
 
