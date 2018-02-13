@@ -487,7 +487,7 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None, dtypes=None):
+    def plot(self, pars=None, dtypes=None, type='trace', **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -499,19 +499,24 @@ cdef class StanFit4Model:
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        type : str
+            choose plot: {'trace', 'forest', 'parcoords'}
 
-        Note
-        ----
-        This is currently an alias for the `traceplot` method.
         """
         if pars is None:
             pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
+        if type.lower() in ('trace', 'traceplot'):
+            return pystan.plots.traceplot(fit, pars, dtypes=dtypes, **kwargs)
+        elif type.lower() in ('forest', 'forestplot'):
+            return pystan.plots.forestplot(fit, pars, dtypes=dtypes, **kwargs)
+        elif type.lower() in ('parcoords'):
+            return pystan.plots.parcoords(fit, pars, **kwargs)
         return pystan.plots.traceplot(self, pars, dtypes)
 
-    def traceplot(self, pars=None, dtypes=None):
+    def traceplot(self, pars=None, dtypes=None, **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -524,8 +529,33 @@ cdef class StanFit4Model:
             If np.int is specified, the histogram will be visualized, not but
             kde.
         """
-        # FIXME: for now plot and traceplot do the same thing
-        return self.plot(pars, dtypes=dtypes)
+        return self.plot(pars, dtypes=dtypes, type='trace', **kwargs)
+    
+    def forestplot(self, pars=None, dtypes=None, **kwargs):
+        """Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
+        """
+        return self.plot(pars, dtypes=dtypes, type='forest', **kwargs)
+
+    def parcoords(self, pars=None, **kwargs):
+        """Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
+        """
+        dtypes = kwargs.pop('dtypes', None)
+        return self.plot(pars, dtypes=dtypes, type='parcoords', **kwargs)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
