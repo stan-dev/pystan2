@@ -509,12 +509,13 @@ cdef class StanFit4Model:
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
         if type.lower() in ('trace', 'traceplot'):
-            return pystan.plots.traceplot(fit, pars, dtypes=dtypes, **kwargs)
+            return pystan.plots.traceplot(self, pars, dtypes=dtypes, **kwargs)
         elif type.lower() in ('forest', 'forestplot'):
-            return pystan.plots.forestplot(fit, pars, dtypes=dtypes, **kwargs)
+            return pystan.plots.forestplot(self, pars, dtypes=dtypes, **kwargs)
         elif type.lower() in ('parcoords'):
-            return pystan.plots.parcoords(fit, pars, **kwargs)
-        return pystan.plots.traceplot(self, pars, dtypes)
+            return pystan.plots.parcoords(self, pars, **kwargs)
+        else:
+            raise ValueError("Incorrect plot type: use {'trace', 'forest', 'parcoords'}")
 
     def traceplot(self, pars=None, dtypes=None, **kwargs):
         """Visualize samples from posterior distributions
