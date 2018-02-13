@@ -52,8 +52,8 @@ class TestStanFileIO(unittest.TestCase):
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
         extr = fit.extract('theta', permuted=False)
-        assert extr.shape == (1000, 4, 2)
-        assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
+        assert extr['theta'].shape == (1000, 4)
+        assert 0.1 < np.mean(extr['theta'][:, 0]) < 0.4
 
         fit = stan(file=temp_fn, data=bernoulli_data)
         extr = fit.extract(permuted=True)
@@ -73,7 +73,7 @@ class TestStanFileIO(unittest.TestCase):
         assert 0.1 < np.mean(extr['theta']) < 0.4
         assert 0.01 < np.var(extr['theta']) < 0.02
         extr = fit.extract('theta', permuted=False)
-        assert extr.shape == (1000, 4, 2)
-        assert 0.1 < np.mean(extr[:, 0, 0]) < 0.4
+        assert extr['theta'].shape == (1000, 4)
+        assert 0.1 < np.mean(extr['theta'][:, 0]) < 0.4
 
         os.remove(temp_fn)
