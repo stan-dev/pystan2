@@ -82,6 +82,7 @@ cdef vector[double] autocovariance(dict sim, int k, int n):
     return acov
 
 
+@cython.cdivision(True)
 def effective_sample_size(dict sim, int n):
     """
     Return the effective sample size for the specified parameter

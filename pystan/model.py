@@ -756,6 +756,8 @@ class StanModel:
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
 
+        # If problems are found in the fit, this will print diagnostic
+        # messages.
         throwaway = pystan.diagnostics.check_MCMC_diagnostics(fit)
         
         return fit
