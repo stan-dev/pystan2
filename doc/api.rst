@@ -226,4 +226,28 @@ a number of methods.
    
    .. py:property:: flatnames
    
-   
+   .. py:method:: to_dataframe(pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True)
+
+      Extract samples as a pandas datafriame for different parameters.
+
+      Parameters
+      ----------
+      pars : {str, sequence of str}
+         parameter (or quantile) name(s). If `permuted` is False,
+         `pars` is ignored.
+      permuted : bool
+         If True, returned samples are permuted. All chains are
+         merged and warmup samples are discarded.
+      dtypes : dict
+         datatype of parameter(s).
+         If nothing is passed, np.float will be used for all parameters.
+      inc_warmup : bool
+         If True, warmup samples are kept; otherwise they are
+         discarded. If `permuted` is True, `inc_warmup` is ignored.
+      diagnostics : bool
+         If True, include MCMC diagnostics in dataframe.
+         If `permuted` is True, `diagnostics` is ignored.
+
+      Returns
+      -------
+      df : pandas dataframe

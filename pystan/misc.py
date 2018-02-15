@@ -1199,7 +1199,7 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
             if par in dtypes.keys():
                 ss = ss.astype(dtypes[par])
             if ss.shape[1] == 1:
-                df[par] = ss
+                df[par] = ss[:,0]
             else:
                 par_flatnames = [
                 flatname for flatname in fit.flatnames if flatname.startswith(par)
