@@ -36,6 +36,7 @@ import numpy as np
 
 import pystan.api
 import pystan.misc
+import pystan.diagnostics
 
 logger = logging.getLogger('pystan')
 
@@ -754,6 +755,11 @@ class StanModel:
         fit.stan_args = args_list
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
+
+        # If problems are found in the fit, this will print diagnostic
+        # messages.
+        throwaway = pystan.diagnostics.check_MCMC_diagnostics(fit)
+        
         return fit
 
     def vb(self, data=None, pars=None, iter=10000,
