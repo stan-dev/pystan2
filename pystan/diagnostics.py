@@ -42,7 +42,7 @@ def check_div(fit, verbose = True, per_chain = False):
     sampler_params = fit.get_sampler_params(inc_warmup=False)
 
     try:
-        divergent = np.column_stack([y['divergent__'] for y in sampler_params])
+        divergent = np.column_stack([y['divergent__'].astype(bool) for y in sampler_params])
     except:
         raise ValueError('Cannot access divergence information from fit object')
 
@@ -53,6 +53,10 @@ def check_div(fit, verbose = True, per_chain = False):
     if n > 0:
 
         if verbosity > 0:
+            
+            N = divergent.size
+            logger.warning('{} of {} iterations ended '.format(n, N) +
+                           'with a divergence ({}%).'.format(100 * n / N))
 
             if per_chain:
                 chain_len, num_chains = divergent.shape
@@ -63,12 +67,7 @@ def check_div(fit, verbose = True, per_chain = False):
                                                                                      n_for_chains[chain_num],
                                                                                      chain_len) +
                                        'with a divergence ({}%).'.format(100 * n_for_chains[chain_num] /
-                                                                         chain_len))
-            else:
-                N = divergent.size
-                logger.warning('{} of {} iterations ended '.format(n, N) +
-                               'with a divergence ({}%).'.format(100 * n / N))
-                
+                                                                         chain_len))                
 
             try:
                 adapt_delta = fit.stan_args[0]['ctrl']['sampling']['adapt_delta']
@@ -129,12 +128,12 @@ def check_treedepth(fit, verbose = True, per_chain = False):
     sampler_params = fit.get_sampler_params(inc_warmup=False)
 
     try:    
-        depths = np.column_stack([y['treedepth__'] for y in sampler_params])
+        depths = np.column_stack([y['treedepth__'].astype(int) for y in sampler_params])
     except:
         raise ValueError('Cannot access tree depth information from fit object')
 
     try:
-        max_treedepth = fit.stan_args[0]['ctrl']['sampling']['max_treedepth']
+        max_treedepth = int(fit.stan_args[0]['ctrl']['sampling']['max_treedepth'])
     except:
         raise ValueError('Cannot obtain value of max_treedepth from fit object')
 
@@ -144,6 +143,10 @@ def check_treedepth(fit, verbose = True, per_chain = False):
     
     if n > 0:
         if verbosity > 0:
+            N = depths.size
+            logger.warning(('{} of {} iterations saturated the maximum tree depth of {}'
+                                + ' ({}%)').format(n, N, max_treedepth, 100 * n / N))
+
             if per_chain:
                 chain_len, num_chains = depths.shape
 
@@ -154,12 +157,7 @@ def check_treedepth(fit, verbose = True, per_chain = False):
                                                                               chain_len) +
                                        'the maximum tree depth of {} ({}%).'.format(max_treedepth,
                                                                                     100 * n_for_chains[chain_num] /
-                                                                                    chain_len))
-            else:
-                N = depths.size
-                logger.warning(('{} of {} iterations saturated the maximum tree depth of {}'
-                                + ' ({}%)').format(n, N, max_treedepth, 100 * n / N))
-
+                                                                                    chain_len))        
             
             logger.warning('Run again with max_treedepth larger than {}'.format(max_treedepth) +
                            ' to avoid saturation')
