@@ -161,7 +161,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe(permuted=False)
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,17))
+        self.assertEqual(df.shape, (num_samples*num_chains,18))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -250,7 +250,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe(permuted=False,diagnostics=False)
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,11))
+        self.assertEqual(df.shape, (num_samples*num_chains,12))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
@@ -277,14 +277,14 @@ class TestExtract(unittest.TestCase):
                 df.chain_idx.values[n*num_samples:(n+1)*num_samples],
                 np.arange(1,num_samples +1,dtype=np.int)
                 )
-                
+
     def test_to_dataframe_permuted_false_pars(self):
         fit = self.fit
         ss = fit.extract(permuted=False)
         df = fit.to_dataframe(permuted=False,pars='alpha')
         num_samples = fit.sim['iter'] - fit.sim['warmup']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,14))
+        self.assertEqual(df.shape, (num_samples*num_chains,15))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
