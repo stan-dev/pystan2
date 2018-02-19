@@ -202,7 +202,7 @@ class TestExtract(unittest.TestCase):
         df = fit.to_dataframe(permuted=False,inc_warmup=True)
         num_samples = fit.sim['iter']
         num_chains = fit.sim['chains']
-        self.assertEqual(df.shape, (num_samples*num_chains,17))
+        self.assertEqual(df.shape, (num_samples*num_chains,18))
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
