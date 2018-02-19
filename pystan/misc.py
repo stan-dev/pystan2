@@ -1216,8 +1216,17 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
         chain_count = fit.sim['chains']+1
         df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
         df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
+		# Specify whether row is from warmup, 0 means not in warmup
+        df['warmup'] = 0
+        # Modify this below if sample is from warmup
+        if inc_warmup:
+            for n in range(0,chain_count-1):
+                df.loc[
+                n*fit.sim['n_save'][n]:
+                n*fit.sim['n_save'][n]+fit.sim['warmup2'][n]-1,'warmup'
+                ] = 1 
         if diagnostics == True:
-            diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+            diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
 			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
             for diag, diag_dtype in diagnostic_type.items():
                 diag_list = []
