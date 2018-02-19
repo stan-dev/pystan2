@@ -556,7 +556,7 @@ cdef class StanFit4Model:
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
         Parameters are listed in the same order as `model_pars` and `flatnames`.
-        
+
         If `permuted` is False and `pars` is not None, return dictionary with samples for each
         parameter (or other quantity) named in `pars`. The first dimension of
         the sample array is for the iterations; the second for the number of chains;
@@ -661,7 +661,7 @@ cdef class StanFit4Model:
     def __getitem__(self, key):
         extr = self.extract(pars=(key,))
         return extr[key]
-    
+
     def stansummary(self, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
         """
         Summary statistic table.
@@ -686,7 +686,7 @@ cdef class StanFit4Model:
         >>> fit = m.sampling()
         >>> print(fit.stansummary())
         Inference for Stan model: example_model.
-        4 chains, each with iter=2000; warmup=1000; thin=1; 
+        4 chains, each with iter=2000; warmup=1000; thin=1;
         post-warmup draws per chain=1000, total post-warmup draws=4000.
 
                mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
@@ -695,11 +695,11 @@ cdef class StanFit4Model:
 
         Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
         For each parameter, n_eff is a crude measure of effective sample size,
-        and Rhat is the potential scale reduction factor on split chains (at 
+        and Rhat is the potential scale reduction factor on split chains (at
         convergence, Rhat=1).
         """
         return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
-    
+
     def summary(self, pars=None, probs=None):
         """Summarize samples (compute mean, SD, quantiles) in all chains.
         REF: stanfit-class.R summary method
@@ -859,6 +859,35 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
+    def to_dataframe(self, pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True):
+        """Extract samples as a pandas dataframe for different parameters.
+
+        Parameters
+        ----------
+        pars : {str, sequence of str}
+           parameter (or quantile) name(s). If `permuted` is False,
+           `pars` is ignored.
+        permuted : bool
+           If True, returned samples are permuted. All chains are
+           merged and warmup samples are discarded.
+        dtypes : dict
+		    datatype of parameter(s).
+			If nothing is passed, np.float will be used for all parameters.
+        inc_warmup : bool
+           If True, warmup samples are kept; otherwise they are
+           discarded. If `permuted` is True, `inc_warmup` is ignored.
+        diagnostics : bool
+	       If True, include MCMC diagnostics in dataframe.
+           If `permuted` is True, `diagnostics` is ignored.
+
+        Returns
+        -------
+        df : pandas dataframe
+
+        """
+        return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics)
+
+
     # FIXME: when this is a normal Python class one can use @property instead
     # of this special Cython syntax.
     property flatnames:
@@ -870,6 +899,7 @@ cdef class StanFit4Model:
             names = [n.encode('ascii') for n in self.model_pars]
             get_all_flatnames(names, self.par_dims, fnames, col_major=True)
             return [n.decode('ascii') for n in fnames]
+
 
     # "private" Python methods
 
