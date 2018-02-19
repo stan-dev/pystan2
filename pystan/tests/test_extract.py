@@ -179,7 +179,7 @@ class TestExtract(unittest.TestCase):
                 )
             for n in range(1,num_chains+1):
                 assert_array_equal(df.loc[df.chain == n,'lp__'].values,ss[:,n-1,-1])
-        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+        diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
 			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
         for n in range(num_chains):
             assert_array_equal(
@@ -220,8 +220,15 @@ class TestExtract(unittest.TestCase):
                 )
             for n in range(1,num_chains+1):
                 assert_array_equal(df.loc[df.chain == n,'lp__'].values,ss[:,n-1,-1])
-			
-        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+                assert_array_equal(df.loc[
+                (n-1)*fit.sim['n_save'][n-1]:
+                (n-1)*fit.sim['n_save'][n-1]+fit.sim['warmup2'][n-1]-1,'warmup'].values,
+                np.ones(fit.sim['warmup2'][n-1]))
+                assert_array_equal(df.loc[
+                (n-1)*fit.sim['n_save'][n-1]+fit.sim['warmup2'][n-1]:
+                (n)*fit.sim['n_save'][n-1]-1,'warmup'].values,
+                np.zeros(fit.sim['warmup2'][n-1]))
+        diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
 			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
         for n in range(num_chains):
             assert_array_equal(
@@ -287,7 +294,7 @@ class TestExtract(unittest.TestCase):
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
                     )
                 alpha_index += 1
-        diagnostic_type = {'divergent':bool,'energy':float,'treedepth':int,
+        diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
 			                'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
         for n in range(num_chains):
             assert_array_equal(
