@@ -1206,8 +1206,6 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
                 ]
                 for idx in np.arange(ss.shape[1]):
                     column_name = par_flatnames[idx].replace('[','_').replace(',','_').replace(']','')
-                    # Use Stan 1-based indexing for column name strings
-                    column_name = ''.join([str(int(n)+1)  if n.isdigit() else n for n in column_name])
                     df[column_name] = ss[:,idx]
     else:
         n_save = fit.sim['n_save'][0]
@@ -1240,7 +1238,5 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
                 chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
                 samples = np.array(chains).T
                 column_name = fit.sim['fnames_oi'][n].replace('[','_').replace(',','_').replace(']','')
-                # Use Stan 1-based indexing for column name strings
-                column_name = ''.join([str(int(n)+1)  if n.isdigit() else n for n in column_name])
                 df[column_name] = samples.T.flatten()
     return df
