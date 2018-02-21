@@ -758,8 +758,8 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        throwaway = pystan.diagnostics.check_MCMC_diagnostics(fit)
-        
+        pystan.diagnostics.check_mcmc_diagnostics(fit)  # noqa
+
         return fit
 
     def vb(self, data=None, pars=None, iter=10000,
