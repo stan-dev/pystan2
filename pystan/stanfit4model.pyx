@@ -487,11 +487,13 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None, dtypes=None, type='trace', **kwargs):
+    def plot(self, kind='trace', pars=None, dtypes=None, **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
         ---------
+        kind : str
+            choose plot: {'trace', 'forest', 'mcmc_parcoord'}
         pars : {str, sequence of str}
             parameter name(s); by default use all parameters of interest
         dtypes : dict
@@ -499,8 +501,6 @@ cdef class StanFit4Model:
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
-        type : str
-            choose plot: {'trace', 'forest', 'parcoords'}
 
         """
         if pars is None:
@@ -512,12 +512,12 @@ cdef class StanFit4Model:
             return pystan.plots.traceplot(self, pars, dtypes=dtypes, **kwargs)
         elif type.lower() in ('forest', 'forestplot'):
             return pystan.plots.forestplot(self, pars, dtypes=dtypes, **kwargs)
-        elif type.lower() in ('parcoords'):
+        elif type.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
             return pystan.plots.parcoords(self, pars, **kwargs)
         else:
-            raise ValueError("Incorrect plot type: use {'trace', 'forest', 'parcoords'}")
+            raise ValueError("Incorrect plot type: use {'trace', 'forest', 'mcmc_parcoord'}")
 
-    def traceplot(self, pars=None, dtypes=None, **kwargs):
+    def plot_traceplot(self, pars=None, dtypes=None, **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -530,9 +530,9 @@ cdef class StanFit4Model:
             If np.int is specified, the histogram will be visualized, not but
             kde.
         """
-        return self.plot(pars, dtypes=dtypes, type='trace', **kwargs)
+        return self.plot(kind='trace', pars=pars, dtypes=dtypes, **kwargs)
     
-    def forestplot(self, pars=None, dtypes=None, **kwargs):
+    def plot_forestplot(self, pars=None, dtypes=None, **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -545,9 +545,9 @@ cdef class StanFit4Model:
             If np.int is specified, the histogram will be visualized, not but
             kde.
         """
-        return self.plot(pars, dtypes=dtypes, type='forest', **kwargs)
+        return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
 
-    def parcoords(self, pars=None, **kwargs):
+    def plot_mcmc_parcoord(self, pars=None, **kwargs):
         """Visualize samples from posterior distributions
 
         Parameters
@@ -556,7 +556,7 @@ cdef class StanFit4Model:
             parameter name(s); by default use all parameters of interest
         """
         dtypes = kwargs.pop('dtypes', None)
-        return self.plot(pars, dtypes=dtypes, type='parcoords', **kwargs)
+        return self.plot(kind='mcmc_parcoord', pars=pars, dtypes=dtypes, **kwargs)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
