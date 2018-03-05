@@ -237,6 +237,8 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
         Maximum number of bins for histogram function, ignored if density==False.
     inc_warmup : bool, optional, default False
         Include warmup.
+    overlap : float, optional, default 0.98
+        Overlap density plots.
 
     Yields
     ------

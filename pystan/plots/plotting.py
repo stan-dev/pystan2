@@ -487,6 +487,8 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
         Maximum number of bins for histogram function, ignored if density==False.
     inc_warmup : bool, optional, default False
         Include warmup.
+    overlap : float, optional, default 0.98
+        Overlap density plots.
 
     Returns
     -------
@@ -522,7 +524,8 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
             n += 1
 
     # create figure object
-    figsize = kwargs.pop('figsize', (6, max(4.5, n)))
+    overlap = float(kwargs.get('overlap', 1))
+    figsize = kwargs.pop('figsize', (6, max(4.5, n/overlap)))
     fig, ax = plt.subplots(1, 1, figsize=figsize)
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
