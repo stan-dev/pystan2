@@ -487,22 +487,30 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, kind='trace', pars=None, dtypes=None, **kwargs):
+    def plot(self, pars=None, dtypes=None, kind='trace', **kwargs):
         """plot(kind='trace', pars=None, dtypes=None, **kwargs)
-        
+
         Visualize samples from posterior distributions
 
         Parameters
         ---------
-        kind : str
-            choose plot: {'trace', 'forest', 'mcmc_parcoord'}
         pars : {str, sequence of str}
-            parameter name(s); by default use all parameters of interest
+            parameter name(s); by default use all parameters of interest.
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        kind : str
+            choose plot: {'trace', 'forest', 'mcmc_parcoord'}
+
+        Returns
+        -------
+        fig : Figure instance
+        axes : ndarray of Axes instances or Axes instance
 
         """
         if pars is None:
@@ -521,47 +529,176 @@ cdef class StanFit4Model:
 
     def plot_traceplot(self, pars=None, dtypes=None, **kwargs):
         """plot_traceplot(pars=None, dtypes=None, **kwargs)
-        
-        Visualize samples from posterior distributions
+
+        Use traceplot to visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        kde_dict: dictionary, optional
+            Dictionary appended for kde plots as kwargs.
+        hist_dict: dictionary, optional
+            Dictionary appended for histogram plots as kwargs.
+        split_pars : bool, optional
+            If True plot each parameter including vector and matrix components in their own axis.
+        density : bool, optional
+            If False don't plot kde or histograms. Plots histogram if dtype for parameter is int.
+        statistic : bool or str or list of dictionaries, optional
+            If True, statistic = mean.
+            If str, `{'mean', 'median'}`
+            Add statistic line for the density plot. Statistic function (key='func') is popped out.
+            The rest of the dictionary is appended to ax.plot.
+            E.g. `[{'func' : np.mean, 'lw' : 1}]`.
+            Use `functools.partial` if statistic funtion needs parameters.
+        force : bool, optional
+            If force is True then plot large number of parameters.
+        figsize : tuple, optional
+            Given in inches.
+        fill : bool, optional
+            Fill the density plot.
+        fill_dict : dict, optional
+            Keywords appended to `fill_between` plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        color : str or tuple, optional
+            Default color used for the plotting.
+            Is overwrited if kde_dict or hist_dict contains color keyword.
+            Overwrites cmap.
+        cmap : str or colormap object
+            Color lines based on the colormap.
+            Uses 0.5 for scalars
+            else `np.linspace(0,1,n)` where n is the vector count
+        c_kde : int, optional
+            Constant for the kde function, ignored if density==False
+        nbins : int, optional
+            Maximum number of bins for histogram function, ignored if density is False.
+        inc_warmup : bool, optional, default False
+            Include warmup
+
+        Returns
+        -------
+        fig : Figure instance
+        axes : ndarray of Axes instances
         """
         return self.plot(kind='trace', pars=pars, dtypes=dtypes, **kwargs)
-    
+
     def plot_forestplot(self, pars=None, dtypes=None, **kwargs):
         """plot_forestplot(pars=None, dtypes=None, **kwargs)
-        
+
         Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        kde_dict: dictionary, optional
+            Dictionary appended for kde plots as kwargs.
+        hist_dict: dictionary, optional
+            Dictionary appended for histogram plots as kwargs.
+        statistic : bool or str or list of dictionaries, optional
+            If True, statistic = mean.
+            If str, {'mean', 'median'}
+            Add statistic line for the density plot. Statistic function (key='func') is popped out.
+            The rest of the dictionary is appended to plt.plot.
+            E.g. [{'func' : np.mean, 'lw' : 1}].
+            Use functools.partial if statistic funtion needs parameters.
+        force : bool, optional
+            If force is True then plot large number of parameters.
+        legend : bool, optional
+            Add legend for the plot.
+        figsize : tuple, optional
+            Given in inches.
+        fill : bool, optional
+            Fill the density plot.
+        fill_dict : dict, optional
+            Keywords appended to `fill_between` plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        color : str or tuple, optional
+            Default color used for the plotting.
+            Is overwrited if kde_dict or hist_dict contains color keyword.
+            Overwrites cmap.
+        cmap : str or colormap object
+            Color lines based on the colormap.
+            Uses 0.5 for scalars
+            else `np.linspace(0,1,n)` where n is the vector count
+        c_kde : int, optional
+            Constant for the kde function, ignored if density==False.
+        nbins : int, optional
+            Maximum number of bins for histogram function, ignored if density==False.
+        inc_warmup : bool, optional, default False
+            Include warmup.
+
+        Returns
+        -------
+        fig : Figure instance
+        ax : Axes instances
         """
         return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
 
     def plot_mcmc_parcoord(self, pars=None, **kwargs):
         """plot_mcmc_parcoord(pars=None, **kwargs)
-        
+
         Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+        transform : str or function, optional
+            If str, {'min'
+            Function to transform data.
+            Must return data in original shape.
+        divergence : bool or str or cmap, optional
+            If True or non-empty dictionary plot divergent samples independently.
+            If divergence is a color, color divergent samples correspondingly.
+            If divergence is a cmap (str, function), color divergent samples correspondingly.
+        cmap : str or function, optional
+            Color samples based on the index (order) with chosen colormap
+        color : str, tuple, optional
+            Color samples based on the one color.
+        alpha : float, optional
+            Alpha value used for the data
+        lw : float or int, optional
+            Linewidth for the data.
+        alpha_div : float, optional
+            Alpha value used for the divergent data
+        lw_div : float or int, optional
+            Linewidth for the divergent data.
+        label : str, optional
+            Add label for the plot
+        figsize : tuple, optional
+            Given in inches.
+        legend : bool, optional
+            Add legend for the plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        inc_warmup : bool, optional
+
+        Returns
+        -------
+        fig : Figure instance
+        ax : Axes instances
         """
         dtypes = kwargs.pop('dtypes', None)
         return self.plot(kind='mcmc_parcoord', pars=pars, dtypes=dtypes, **kwargs)
@@ -595,7 +732,7 @@ cdef class StanFit4Model:
         the third for the parameters. Vectors and arrays are expanded to one
         parameter (a scalar) per cell, with names indicating the third dimension.
         Parameters are listed in the same order as `model_pars` and `flatnames`.
-        
+
         If `permuted` is False and `pars` is not None, return dictionary with samples for each
         parameter (or other quantity) named in `pars`. The first dimension of
         the sample array is for the iterations; the second for the number of chains;
@@ -700,7 +837,7 @@ cdef class StanFit4Model:
     def __getitem__(self, key):
         extr = self.extract(pars=(key,))
         return extr[key]
-    
+
     def stansummary(self, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
         """
         Summary statistic table.
@@ -725,7 +862,7 @@ cdef class StanFit4Model:
         >>> fit = m.sampling()
         >>> print(fit.stansummary())
         Inference for Stan model: example_model.
-        4 chains, each with iter=2000; warmup=1000; thin=1; 
+        4 chains, each with iter=2000; warmup=1000; thin=1;
         post-warmup draws per chain=1000, total post-warmup draws=4000.
 
                mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
@@ -734,11 +871,11 @@ cdef class StanFit4Model:
 
         Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
         For each parameter, n_eff is a crude measure of effective sample size,
-        and Rhat is the potential scale reduction factor on split chains (at 
+        and Rhat is the potential scale reduction factor on split chains (at
         convergence, Rhat=1).
         """
         return pystan.misc.stansummary(fit=self, pars=pars, probs=probs, digits_summary=digits_summary)
-    
+
     def summary(self, pars=None, probs=None):
         """Summarize samples (compute mean, SD, quantiles) in all chains.
         REF: stanfit-class.R summary method

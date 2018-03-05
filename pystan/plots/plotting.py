@@ -16,9 +16,9 @@ def plot_hist(hist, edges, ax, fill, fill_dict, zero_level=None, **kwargs):
     edges : ndarray
     ax : Axes instance
         Axis to plot on.
-    fill : bool 
+    fill : bool
         Fill the histogram with color.
-    fill_dict : dict 
+    fill_dict : dict
         If fill==True, append to `fill_between` function.
     zero_level: float, optional
         Value used as a zero level, default is 0.
@@ -33,6 +33,7 @@ def plot_hist(hist, edges, ax, fill, fill_dict, zero_level=None, **kwargs):
         zero_level = 0
     #remove unique keyword
     unique = kwargs.pop('unique', False)
+    # prepare x and y values for plt.step
     x_hist = edges-(edges[1]-edges[0])/2
     x_hist = np.r_[x_hist[0], x_hist, x_hist[-1]]
     y_hist = np.r_[zero_level,hist[0],hist,zero_level]
@@ -54,8 +55,9 @@ def plot_hist(hist, edges, ax, fill, fill_dict, zero_level=None, **kwargs):
                 continue
             if value is not None:
                 kwargs[key] = value
-
+    # use ax.step function to plot histogram
     hist_plot, = ax.step(x_hist, y_hist, **kwargs)
+    # fill the histogram face
     if fill:
         fill_dict = deepcopy(fill_dict)
 
@@ -92,7 +94,7 @@ def plot_kde(x, y, ax, fill, fill_dict, zero_level=None, **kwargs):
     ax : Axes instance
         Axis to plot on.
     fill : bool
-        Fill the kde with color. 
+        Fill the kde with color.
     fill_dict : dict
         If fill == True, append to `fill_between` function.
     zero_level: float, optional
@@ -127,6 +129,7 @@ def plot_kde(x, y, ax, fill, fill_dict, zero_level=None, **kwargs):
 
     # plot edge
     kde_plot, = ax.plot(x, y, **kwargs)
+    # fill density face
     if fill and not unique:
         fill_dict = deepcopy(fill_dict)
 
@@ -173,18 +176,21 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
         Value used as a zero level, default is 0.
     method:
         If method == 'hist' or 'histogram' use correct height for the statistic.
-        
+
     Returns
     -------
     ax : Axes instance
     """
+    # transform copied dict
     plot_dict = plot_dict.copy()
+    # get function used for the plot
     statistic_func = plot_dict.pop('func')
+    # set defaults
     for key, item in {'c' : 'k', 'lw' : 2}.items():
         if key not in plot_dict:
             plot_dict[key] = item
     statistic = statistic_func(vec)
-    # find height
+    # find statistic height from density
     loc_x_max = (density_x > statistic).argmax()
     loc_x_min = loc_x_max - 1
     x_max = density_x[loc_x_max]
@@ -194,6 +200,7 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
     # weighted average
     w = (x_max - statistic) / (x_max - x_min)
     height = w * y_min + (1-w) * y_max
+    # special case for step function
     if method in ('hist', 'histogram'):
         height = y_min
     # plot statistic
@@ -210,6 +217,9 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
     fit : StanFit4Model object
     pars : tuple, optional
         Parameters used for the plotting.
+        Accepts also sampler params:
+            {'accept_stat__', 'stepsize__', 'treedepth__',
+             'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
     dtypes : dict, optional
         Dictionary containing parameters as keys and transform-functions as values.
     kde_dict: dictionary, optional
@@ -222,11 +232,11 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         If False don't plot kde or histograms. Plots histogram if dtype for parameter is int.
     statistic : bool or str or list of dictionaries, optional
         If True, statistic = mean.
-        If str, {'mean', 'median'}
+        If str, `{'mean', 'median'}`
         Add statistic line for the density plot. Statistic function (key='func') is popped out.
-        The rest of the dictionary is appended to plt.plot.
-        E.g. [{'func' : np.mean, 'lw' : 1}].
-        Use functools.partial if statistic funtion needs parameters.
+        The rest of the dictionary is appended to ax.plot.
+        E.g. `[{'func' : np.mean, 'lw' : 1}]`.
+        Use `functools.partial` if statistic funtion needs parameters.
     force : bool, optional
         If force is True then plot large number of parameters.
     figsize : tuple, optional
@@ -237,10 +247,20 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         Keywords appended to `fill_between` plot.
     tight_layout : bool, optional
         Padding is set to 0.5.
+    color : str or tuple, optional
+        Default color used for the plotting.
+        Is overwrited if kde_dict or hist_dict contains color keyword.
+        Overwrites cmap.
     cmap : str or colormap object
         Color lines based on the colormap.
         Uses 0.5 for scalars
         else `np.linspace(0,1,n)` where n is the vector count
+    c_kde : int, optional
+        Constant for the kde function, ignored if density==False
+    nbins : int, optional
+        Maximum number of bins for histogram function, ignored if density is False.
+    inc_warmup : bool, optional, default False
+        Include warmup
 
     Returns
     -------
@@ -252,31 +272,39 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
+
     if pars is None:
         pars = fit.model_pars
     elif isinstance(pars, string_types):
         pars = [pars]
-
+    # create kde and hist dictionaries
     if kde_dict is None:
         kde_dict = {}
-
+    else:
+        kde_dict = deepcopy(kde_dict)
     if hist_dict is None:
         hist_dict = {}
-    
-    # number of rows
+    else:
+        hist_dict = deepcopy(hist_dict)
+    sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__',\
+                      'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+    # calculate the number of rows
+    # if split_pars -> plot samples individually
     split_pars = kwargs.pop('split_pars', False)
     if not split_pars:
         n = len(pars)
     else:
-        # skip lp__
         model_pars = fit.model_pars
         n = 0
         for parameter in pars:
-            par_index = model_pars.index(parameter)
-            par_dims = fit.par_dims[par_index]
-            if len(par_dims) == 0:
-                par_dims = [1]
-            n += np.multiply.reduce(par_dims)
+            if parameter not in sampler_params:
+                par_index = model_pars.index(parameter)
+                par_dims = fit.par_dims[par_index]
+                if len(par_dims) == 0:
+                    par_dims = [1]
+                n += np.multiply.reduce(par_dims)
+            else:
+                n += 1
     # number of columns
     # define if density is plotted
     density = kwargs.pop('density', True)
@@ -302,13 +330,17 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
     fill_dict = kwargs.pop('fill_dict', dict())
-    
     tight_layout = kwargs.pop('tight_layout', True)
-    
+    # set colors
+    color = kwargs.get('color', None)
+    if 'color' not in kde_dict:
+        kde_dict['color'] = color
+    if 'color' not in hist_dict:
+        hist_dict['color'] = color
     cmap = kwargs.get('cmap', None)
     cmap_dict = dict()
     if cmap is not None and isinstance(cmap, string_types):
-        cmap = plt.cm.get_cmap(cmap)    
+        cmap = plt.cm.get_cmap(cmap)
         if not split_pars:
             for parameter in pars:
                 par_index = fit.model_pars.index(parameter)
@@ -320,7 +352,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         else:
             for parameter in pars:
                 cmap_dict[parameter] = np.array([cmap(0.5)])
-    
+
     statistic = kwargs.pop('statistic', False)
     if isinstance(statistic, int) and statistic:
         statistic = [{'func' : np.mean}]
@@ -334,7 +366,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         for i, statistic_dict in enumerate(statistic):
             if 'color' not in statistic_dict:
                 statistic[i]['color'] = statistic_color
-    
+
     # use this if split_pars is False, else use i
     ax_row = 0
     last_parameter = ''
@@ -345,6 +377,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         else:
             # update row
             if i == 0:
+                # set default colorcycle if cmap defined
                 if parameter in cmap_dict:
                     axes[ax_row, density_col].set_prop_cycle(color=cmap_dict[parameter])
                     axes[ax_row, trace_col].set_prop_cycle(color=cmap_dict[parameter])
@@ -359,13 +392,15 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
                     if legend:
                         axes[ax_row, density_col].set_legend()
                     ax_row += 1
+                    # set default colorcycle if cmap defined
                     if parameter in cmap_dict:
                         axes[ax_row, density_col].set_prop_cycle(color=cmap_dict[parameter])
                         axes[ax_row, trace_col].set_prop_cycle(color=cmap_dict[parameter])
                     last_parameter = parameter
-        
+
         if 'kde' in traceplot_dict:
             plot_kde(*traceplot_dict['kde'], ax=axes[ax_row, density_col], fill=fill, fill_dict=fill_dict, **kde_dict)
+            # plot all statistics
             if statistic:
                 for statistic_dict in statistic:
                     _plot_statistic_for_density(traceplot_dict['kde'][0],\
@@ -375,6 +410,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
                                                 plot_dict=statistic_dict, zero_level=0)
         elif 'hist' in traceplot_dict:
             plot_hist(*traceplot_dict['hist'], ax=axes[ax_row, density_col], fill=fill, fill_dict=fill_dict, **hist_dict)
+            #plot all statistic
             if statistic:
                 for statistic_dict in statistic:
                     edges = traceplot_dict['hist'][1]
@@ -409,6 +445,9 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
     fit : StanFit4Model object
     pars : tuple, optional
         Parameters for the plotting
+        Accepts also sampler params:
+            {'accept_stat__', 'stepsize__', 'treedepth__',
+             'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
     dtypes : dict, optional
         Dictionary containing parameters as a key value and transform-functions as values.
     kde_dict: dictionary, optional
@@ -434,6 +473,20 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
         Keywords appended to `fill_between` plot.
     tight_layout : bool, optional
         Padding is set to 0.5.
+    color : str or tuple, optional
+        Default color used for the plotting.
+        Is overwrited if kde_dict or hist_dict contains color keyword.
+        Overwrites cmap.
+    cmap : str or colormap object
+        Color lines based on the colormap.
+        Uses 0.5 for scalars
+        else `np.linspace(0,1,n)` where n is the vector count
+    c_kde : int, optional
+        Constant for the kde function, ignored if density==False.
+    nbins : int, optional
+        Maximum number of bins for histogram function, ignored if density==False.
+    inc_warmup : bool, optional, default False
+        Include warmup.
 
     Returns
     -------
@@ -449,24 +502,25 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
         pars = fit.model_pars
     elif isinstance(pars, string_types):
         pars = [pars]
-
     if kde_dict is None:
         kde_dict = {}
-
     if hist_dict is None:
         hist_dict = {}
-
+    sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__',\
+                      'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
     # number of rows
-    # skip lp__
     model_pars = fit.model_pars
     n = 0
     for parameter in pars:
-        par_index = model_pars.index(parameter)
-        par_dims = fit.par_dims[par_index]
-        if len(par_dims) == 0:
-            par_dims = [1]
-        n += np.multiply.reduce(par_dims)
-    
+        if parameter not in sampler_params:
+            par_index = model_pars.index(parameter)
+            par_dims = fit.par_dims[par_index]
+            if len(par_dims) == 0:
+                par_dims = [1]
+            n += np.multiply.reduce(par_dims)
+        else:
+            n += 1
+
     # create figure object
     figsize = kwargs.pop('figsize', (6, max(4.5, n)))
     fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -474,7 +528,12 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
     fill = kwargs.pop('fill', True)
     fill_dict = kwargs.pop('fill_dict', dict())
     tight_layout = kwargs.pop('tight_layout', True)
-    
+    # set colors
+    color = kwargs.get('color', None)
+    if 'color' not in kde_dict:
+        kde_dict['color'] = color
+    if 'color' not in hist_dict:
+        hist_dict['color'] = color
     cmap = kwargs.get('cmap', None)
     if cmap is not None:
         if isinstance(cmap, string_types):
@@ -486,7 +545,7 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
             ax.set_prop_cycle(color=[cmap(0.5)])
         else:
             ax.set_prop_cycle(color=cmap(np.linspace(0,1,n)))
-    
+    # set statistic
     statistic = kwargs.pop('statistic', False)
     if isinstance(statistic, int) and statistic:
         statistic = [{'func' : np.mean}]
@@ -505,19 +564,14 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
     height_list = []
     for row, forestplot_dict in enumerate(forestplot_data(fit, pars, dtypes, **kwargs)):
         parameter = forestplot_dict['par']
-
         # update row
         if row == 0:
             last_parameter = parameter
         else:
             last_parameter = parameter
-         
-            
         if 'hist' in forestplot_dict:
-            
             hist, edges = forestplot_dict['hist']
             hist = hist - row
-
             # zorder
             if 'zorder' not in hist_dict:
                 zorder = 30+row
@@ -537,7 +591,6 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
                                                 plot_dict=statistic_dict, zero_level=-row,\
                                                 method='hist')
         else:
-                                  
             x_kde, y_kde = forestplot_dict['kde']
             y_kde = y_kde - row
             # zorder
@@ -555,14 +608,11 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
                                                 forestplot_dict['vec'],\
                                                 ax,\
                                                 plot_dict=statistic_dict, zero_level=-row)
-
         name_list.append(forestplot_dict['name'])
         height_list.append(-row)
-
     # update axis labels
     ax.set_yticks(height_list)
     ax.set_yticklabels(name_list)
-
     if legend:
         ax.legend()
     if tight_layout:
@@ -578,8 +628,15 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     fit : StanFit4Model object
     pars : tuple, optional
         Parameters for the plotting
+        Accepts also sampler params:
+            {'accept_stat__', 'stepsize__', 'treedepth__',
+             'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
     transform : str or function, optional
-        If str, {'min'
+        If str, use {'minmax', 'standard'}
+            minmax = (arr - min) / (max - min)
+            standard = (arr - mean) / std
+        If function, transform data with tranform-function.
+            E.g. function=np.log, arr = np.log(arr)
         Function to transform data.
         Must return data in original shape.
     divergence : bool or str or cmap, optional
@@ -606,6 +663,7 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
         Add legend for the plot.
     tight_layout : bool, optional
         Padding is set to 0.5.
+    inc_warmup : bool, optional
 
     Returns
     -------
@@ -621,33 +679,25 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
         pars = fit.model_pars
     elif isinstance(pars, string_types):
         pars = [pars]
-
     # create figure
     figsize = kwargs.pop('figsize', (6, 4))
     fig, ax = plt.subplots(1, 1, figsize=figsize)
-
     legend = kwargs.pop('legend', True if bool(divergence) else False)
-
     tight_layout = kwargs.pop('tight_layout', True)
-
     cmap = kwargs.pop('cmap', None)
     color = kwargs.pop('color', kwargs.pop('c', None))
-
     alpha = kwargs.pop('alpha', 0.5)
     lw = kwargs.pop('lw', kwargs.get('linewidth', 1))
-
     alpha_div = kwargs.pop('alpha_div', 1)
     lw_div = kwargs.pop('lw_div', lw)
-
     label = kwargs.pop('label', 'Non-divergent')
-
     names, data, data_div = mcmc_parcoord_data(fit, pars=pars, \
                             transform=transform, divergence=bool(divergence))
     # run parallel coordinates plot in one-step
     if cmap is None:
         if color is None:
             color = 'k'
-        ax.plot(data, c=color, alpha=alpha, lw=lw, **kwargs)
+        ax.plot(data, c=color, alpha=alpha, lw=lw, label='non-divergent', **kwargs)
     # run line by line
     else:
         n = data.shape[1]
@@ -656,8 +706,10 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
         else:
             colors = cmap(np.linspace(0,1,n))
         # non-divergent samples
+        label = 'non-divergent'
         for i, _data in enumerate(data.T):
-            ax.plot(_data, c=colors[i], alpha=alpha, lw=lw, **kwargs)
+            ax.plot(_data, c=colors[i], alpha=alpha, lw=lw, label=label, **kwargs)
+            label = '_nolegend_'
     if divergence and len(data_div):
         n_div = data_div.shape[1]
         # set colors / cmap
@@ -669,18 +721,14 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
             divergence = divergence(np.linspace(0,1,n_div))
         elif isinstance(divergence, str):
             divergence = [divergence]*n_div
+        label = 'divergent'
         for i, _data in enumerate(data_div.T):
-            if i == 0:
-                label = 'Divergent'
-            else:
-                label = '_no_legend_'
             ax.plot(_data, c=divergence[i], alpha=alpha_div, lw=lw_div, label=label, **kwargs)
-
+            label = '_no_legend_'
     if legend:
         ax.legend()
     if tight_layout:
         fig.tight_layout(pad=0.5)
     ax.set_xticks(np.arange(len(names)))
     ax.set_xticklabels(names, rotation=90)
-
     return fig, ax

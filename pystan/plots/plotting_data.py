@@ -152,12 +152,19 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
             kde, kde data, optional
     """
     # TODO: Add option to plot chains independently
-    # This can be done with np.ndindex tricks
     c_kde = kwargs.get('c_kde', 1)
     nbins = kwargs.get('nbins', None)
     inc_warmup = kwargs.get('inc_warmup', False)
+    sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__', \
+                      'n_leapfrog__', 'divergent__', 'energy__'}
     for par in pars:
-        vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
+        if par in sampler_params:
+            n_save = fit.sim['n_save'][0]
+            if inc_warmup:
+                n_save = n_save - fit.sim['warmup']
+            vecs = np.concatenate([sp['par'][-n_save:] for sp in fit.get_sampler_params()])
+        else:
+            vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
         nchains = fit.sim['chains']
         if nchains == 1:
             if len(vecs.shape) == 1:
@@ -170,10 +177,8 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
             par_dims = vecs.shape[2:]
         # reshape and translate for plotting
         vecs = vecs.reshape([vecs.shape[0]*vecs.shape[1]]+list(par_dims), order='F').T
-        
         # limits as min-max for each vec
         limits = None
-        
         m = np.multiply.reduce(par_dims)
         indices = np.c_[np.unravel_index(np.arange(m), par_dims, order='F')]
         # This loop creates name instead of `fit.flatnames`.
@@ -226,7 +231,7 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
         Dictionary containing parameters as a key value and transform-function value.
     split_pars : bool, optional, default False
         If True plot each parameter including vector and matrix components in their own axis.
-    c : int, optional
+    c_kde : int, optional
         Constant for the kde function, ignored if density==False.
     nbins : int, optional
         Maximum number of bins for histogram function, ignored if density==False.
@@ -245,12 +250,20 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
     """
     # TODO: Add option to plot chains independently
     # This can be done with np.ndindex tricks
-    c = kwargs.get('c', 1)
+    c_kde = kwargs.get('c_kde', 1)
     nbins = kwargs.get('nbins', None)
     inc_warmup = kwargs.get('inc_warmup', False)
+    sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__', \
+                      'n_leapfrog__', 'divergent__', 'energy__'}
     overlap = kwargs.get('overlap', 0.98)
     for par in pars:
-        vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
+        if par in sampler_params:
+            n_save = fit.sim['n_save'][0]
+            if inc_warmup:
+                n_save = n_save - fit.sim['warmup']
+            vecs = np.concatenate([sp['par'][-n_save:] for sp in fit.get_sampler_params()])
+        else:
+            vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
         nchains = fit.sim['chains']
         if nchains == 1:
             if len(vecs.shape) == 1:
@@ -277,7 +290,6 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
             else:
                 # add 1 for the index
                 name = "{}[{}]".format(par, ",".join(map(str, idx+1)))
-
             if isinstance(vec[0], (int, np.integer, np.uint)):
                 if is_unique:
                     hist, edges = np.array([1]), vec[0] + np.array([-0.5, 0.5])
@@ -292,7 +304,7 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
                 if is_unique:
                     x_kde, y_kde = np.array([vec[0], vec[0]]), np.array([0,1])
                 else:
-                    x_kde, y_kde = kde_data(vec, limits, c=c)
+                    x_kde, y_kde = kde_data(vec, limits, c=c_kde)
                 yield {'par': par,
                        'name' : name,
                        'vec' : vec,
@@ -323,11 +335,19 @@ def mcmc_parcoord_data(fit, pars, divergence=False, **kwargs):
         List contains = (names, data, divergent data (if divergence is True)).
     """
     inc_warmup = kwargs.pop('inc_warmup', False)
+    sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__', \
+                      'n_leapfrog__', 'divergent__', 'energy__'}
     vectors = []
     names = []
     transform = kwargs.pop('transform', None)
     for par in pars:
-        vecs = fit.extract(pars=par, permuted=False, inc_warmup=inc_warmup)[par]
+        if par in sampler_params:
+            n_save = fit.sim['n_save'][0]
+            if inc_warmup:
+                n_save = n_save - fit.sim['warmup']
+            vecs = np.concatenate([sp['par'][-n_save:] for sp in fit.get_sampler_params()])
+        else:
+            vecs = fit.extract(pars=par, permuted=False, inc_warmup=inc_warmup)[par]
         par_dims = vecs.shape[2:]
         if not par_dims:
             vecs = np.expand_dims(vecs, -1)
