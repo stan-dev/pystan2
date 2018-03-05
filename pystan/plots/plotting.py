@@ -5,20 +5,21 @@ import numpy as np
 from pystan._compat import string_types
 from copy import deepcopy
 
-from .plots_data import hist_data, kde_data, traceplot_data, forestplot_data, parcoords_data
+from .plotting_data import hist_data, kde_data, traceplot_data, forestplot_data, mcmc_parcoord_data
 
-def plot_hist(hist, edges, fill, ax, zero_level=None, **kwargs):
+def plot_hist(hist, edges, ax, fill, fill_dict, zero_level=None, **kwargs):
     """Function to plot histogram
 
     Parameters
     ----------
     hist : ndarray
     edges : ndarray
-    fill : bool or dict
-        Fill the histogram with color. If fill is a dict instance
-        its keywords add appended to `fill_between` function.
     ax : Axes instance
         Axis to plot on.
+    fill : bool 
+        Fill the histogram with color.
+    fill_dict : dict 
+        If fill==True, append to `fill_between` function.
     zero_level: float, optional
         Value used as a zero level, default is 0.
     kwargs:
@@ -56,10 +57,7 @@ def plot_hist(hist, edges, fill, ax, zero_level=None, **kwargs):
 
     hist_plot, = ax.step(x_hist, y_hist, **kwargs)
     if fill:
-        if not isinstance(fill, dict):
-            fill = dict()
-        else:
-            fill = deepcopy(fill)
+        fill_dict = deepcopy(fill_dict)
 
         default_dict = {
             'color' : hist_plot.get_color(),
@@ -70,32 +68,33 @@ def plot_hist(hist, edges, fill, ax, zero_level=None, **kwargs):
         # set default values
         for key, value in default_dict.items():
             if isinstance(key, tuple):
-                if any(key_ in fill for key_ in key):
+                if any(key_ in fill_dict for key_ in key):
                     continue
                 if value is not None:
-                    fill[key[0]] = value
+                    fill_dict[key[0]] = value
             else:
-                if key in fill:
+                if key in fill_dict:
                     continue
                 if value is not None:
-                    fill[key] = value
+                    fill_dict[key] = value
 
         # plot face
-        ax.fill_between(x_hist, y_hist, zero_level, step="pre", **fill)
+        ax.fill_between(x_hist, y_hist, zero_level, step="pre", **fill_dict)
     return ax
 
-def plot_kde(x, y, fill, ax, zero_level=None, **kwargs):
+def plot_kde(x, y, ax, fill, fill_dict, zero_level=None, **kwargs):
     """Function to plot kernel density estimation
 
     Parameters
     ----------
     x : ndarray
     y : ndarray
-    fill : bool or dict
-        Fill the histogram with color. If fill is a dict instance
-        its keywords add appended to `fill_between` function.
     ax : Axes instance
         Axis to plot on.
+    fill : bool
+        Fill the kde with color. 
+    fill_dict : dict
+        If fill == True, append to `fill_between` function.
     zero_level: float, optional
         Value used as a zero level, default is 0.
     kwargs:
@@ -129,10 +128,7 @@ def plot_kde(x, y, fill, ax, zero_level=None, **kwargs):
     # plot edge
     kde_plot, = ax.plot(x, y, **kwargs)
     if fill and not unique:
-        if not isinstance(fill, dict):
-            fill = dict()
-        else:
-            fill = deepcopy(fill)
+        fill_dict = deepcopy(fill_dict)
 
         default_dict = {
             'color' : kde_plot.get_color(),
@@ -143,18 +139,18 @@ def plot_kde(x, y, fill, ax, zero_level=None, **kwargs):
         # set default values
         for key, value in default_dict.items():
             if isinstance(key, tuple):
-                if any(key_ in fill for key_ in key):
+                if any(key_ in fill_dict for key_ in key):
                     continue
                 if value is not None:
-                    fill[key[0]] = value
+                    fill_dict[key[0]] = value
             else:
-                if key in fill:
+                if key in fill_dict:
                     continue
                 if value is not None:
-                    fill[key] = value
+                    fill_dict[key] = value
 
         # plot face
-        ax.fill_between(x, y, zero_level, **fill)
+        ax.fill_between(x, y, zero_level, **fill_dict)
     return ax
 
 def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_level=0, method=None):
@@ -177,7 +173,7 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
         Value used as a zero level, default is 0.
     method:
         If method == 'hist' or 'histogram' use correct height for the statistic.
-
+        
     Returns
     -------
     ax : Axes instance
@@ -205,7 +201,7 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
     return ax
 
 
-def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **kwargs):
+def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwargs):
     """
     Use traceplot to display parameters.
 
@@ -216,9 +212,9 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
         Parameters used for the plotting.
     dtypes : dict, optional
         Dictionary containing parameters as keys and transform-functions as values.
-    kde_kwargs: dictionary, optional
+    kde_dict: dictionary, optional
         Dictionary appended for kde plots as kwargs.
-    hist_kwargs: dictionary, optional
+    hist_dict: dictionary, optional
         Dictionary appended for histogram plots as kwargs.
     split_pars : bool, optional
         If True plot each parameter including vector and matrix components in their own axis.
@@ -237,8 +233,14 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
         Given in inches.
     fill : bool, optional
         Fill the density plot.
+    fill_dict : dict, optional
+        Keywords appended to `fill_between` plot.
     tight_layout : bool, optional
         Padding is set to 0.5.
+    cmap : str or colormap object
+        Color lines based on the colormap.
+        Uses 0.5 for scalars
+        else `np.linspace(0,1,n)` where n is the vector count
 
     Returns
     -------
@@ -255,19 +257,26 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
     elif isinstance(pars, string_types):
         pars = [pars]
 
-    if kde_kwargs is None:
-        kde_kwargs = {}
+    if kde_dict is None:
+        kde_dict = {}
 
-    if hist_kwargs is None:
-        hist_kwargs = {}
-
+    if hist_dict is None:
+        hist_dict = {}
+    
     # number of rows
     split_pars = kwargs.pop('split_pars', False)
     if not split_pars:
         n = len(pars)
     else:
         # skip lp__
-        n = len(fit.sim['n_flatnames'])-1
+        model_pars = fit.model_pars
+        n = 0
+        for parameter in pars:
+            par_index = model_pars.index(parameter)
+            par_dims = fit.par_dims[par_index]
+            if len(par_dims) == 0:
+                par_dims = [1]
+            n += np.multiply.reduce(par_dims)
     # number of columns
     # define if density is plotted
     density = kwargs.pop('density', True)
@@ -288,12 +297,30 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
             logger.critical(err_msg)
             raise ValueError(err_msg)
     # create figure object
-    figsize = kwargs.pop('figsize', (6, max(4.5, 2.5*n)))
+    figsize = kwargs.pop('figsize', (6, max(4.5, 1.5*n)))
     fig, axes = plt.subplots(n, m, figsize=figsize, squeeze=False)
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
+    fill_dict = kwargs.pop('fill_dict', dict())
+    
     tight_layout = kwargs.pop('tight_layout', True)
-
+    
+    cmap = kwargs.get('cmap', None)
+    cmap_dict = dict()
+    if cmap is not None and isinstance(cmap, string_types):
+        cmap = plt.cm.get_cmap(cmap)    
+        if not split_pars:
+            for parameter in pars:
+                par_index = fit.model_pars.index(parameter)
+                par_dims = fit.par_dims[par_index]
+                if len(par_dims) == 0:
+                    cmap_dict[parameter] = np.array([cmap(0.5)])
+                else:
+                    cmap_dict[parameter] = cmap(np.linspace(0,1,np.multiply.reduce(par_dims)))
+        else:
+            for parameter in pars:
+                cmap_dict[parameter] = np.array([cmap(0.5)])
+    
     statistic = kwargs.pop('statistic', False)
     if isinstance(statistic, int) and statistic:
         statistic = [{'func' : np.mean}]
@@ -302,6 +329,12 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
             statistic = [{'func' : np.mean}]
         elif statistic == 'median':
             statistic = [{'func' : np.median}]
+    statistic_color = kwargs.pop('statistic_color', 'k')
+    if statistic:
+        for i, statistic_dict in enumerate(statistic):
+            if 'color' not in statistic_dict:
+                statistic[i]['color'] = statistic_color
+    
     # use this if split_pars is False, else use i
     ax_row = 0
     last_parameter = ''
@@ -312,6 +345,9 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
         else:
             # update row
             if i == 0:
+                if parameter in cmap_dict:
+                    axes[ax_row, density_col].set_prop_cycle(color=cmap_dict[parameter])
+                    axes[ax_row, trace_col].set_prop_cycle(color=cmap_dict[parameter])
                 last_parameter = parameter
             else:
                 if parameter != last_parameter:
@@ -323,9 +359,13 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
                     if legend:
                         axes[ax_row, density_col].set_legend()
                     ax_row += 1
+                    if parameter in cmap_dict:
+                        axes[ax_row, density_col].set_prop_cycle(color=cmap_dict[parameter])
+                        axes[ax_row, trace_col].set_prop_cycle(color=cmap_dict[parameter])
                     last_parameter = parameter
+        
         if 'kde' in traceplot_dict:
-            plot_kde(*traceplot_dict['kde'], fill=fill, ax=axes[ax_row, density_col], **kde_kwargs)
+            plot_kde(*traceplot_dict['kde'], ax=axes[ax_row, density_col], fill=fill, fill_dict=fill_dict, **kde_dict)
             if statistic:
                 for statistic_dict in statistic:
                     _plot_statistic_for_density(traceplot_dict['kde'][0],\
@@ -334,7 +374,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
                                                 axes[ax_row, density_col],\
                                                 plot_dict=statistic_dict, zero_level=0)
         elif 'hist' in traceplot_dict:
-            plot_hist(*traceplot_dict['hist'], fill=fill, ax=axes[ax_row, density_col], **hist_kwargs)
+            plot_hist(*traceplot_dict['hist'], ax=axes[ax_row, density_col], fill=fill, fill_dict=fill_dict, **hist_dict)
             if statistic:
                 for statistic_dict in statistic:
                     edges = traceplot_dict['hist'][1]
@@ -360,7 +400,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
         fig.tight_layout(pad=0.5)
     return fig, axes
 
-def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **kwargs):
+def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwargs):
     """
     Use forestplot to display parameters.
 
@@ -371,9 +411,9 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
         Parameters for the plotting
     dtypes : dict, optional
         Dictionary containing parameters as a key value and transform-functions as values.
-    kde_kwargs: dictionary, optional
+    kde_dict: dictionary, optional
         Dictionary appended for kde plots as kwargs.
-    hist_kwargs: dictionary, optional
+    hist_dict: dictionary, optional
         Dictionary appended for histogram plots as kwargs.
     statistic : bool or str or list of dictionaries, optional
         If True, statistic = mean.
@@ -390,6 +430,8 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
         Given in inches.
     fill : bool, optional
         Fill the density plot.
+    fill_dict : dict, optional
+        Keywords appended to `fill_between` plot.
     tight_layout : bool, optional
         Padding is set to 0.5.
 
@@ -408,30 +450,43 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
     elif isinstance(pars, string_types):
         pars = [pars]
 
-    if kde_kwargs is None:
-        kde_kwargs = {}
+    if kde_dict is None:
+        kde_dict = {}
 
-    if hist_kwargs is None:
-        hist_kwargs = {}
+    if hist_dict is None:
+        hist_dict = {}
 
     # number of rows
-    n = fit.sim['n_flatnames']-1
-
-    # raise an exception if too many subplots
-    force = kwargs.pop('force', False)
-    if not force:
-        if n > 15:
-            err_msg = "Too many subplots: (row={},col={})->total={},"\
-                      " please use 'force' keyword to force"\
-                      " enable plotting".format(n, m, n*m)
-            logger.critical(err_msg)
-            raise ValueError(err_msg)
+    # skip lp__
+    model_pars = fit.model_pars
+    n = 0
+    for parameter in pars:
+        par_index = model_pars.index(parameter)
+        par_dims = fit.par_dims[par_index]
+        if len(par_dims) == 0:
+            par_dims = [1]
+        n += np.multiply.reduce(par_dims)
+    
     # create figure object
-    figsize = kwargs.pop('figsize', (6, max(4.5, 1.5*n)))
+    figsize = kwargs.pop('figsize', (6, max(4.5, n)))
     fig, ax = plt.subplots(1, 1, figsize=figsize)
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
+    fill_dict = kwargs.pop('fill_dict', dict())
     tight_layout = kwargs.pop('tight_layout', True)
+    
+    cmap = kwargs.get('cmap', None)
+    if cmap is not None:
+        if isinstance(cmap, string_types):
+            if cmap not in plt.cm.cmap_d.keys():
+                logger.warning("cmap was not recognized. Using viridis")
+                cmap = 'viridis'
+            cmap = plt.cm.get_cmap(cmap)
+        if n == 1:
+            ax.set_prop_cycle(color=[cmap(0.5)])
+        else:
+            ax.set_prop_cycle(color=cmap(np.linspace(0,1,n)))
+    
     statistic = kwargs.pop('statistic', False)
     if isinstance(statistic, int) and statistic:
         statistic = [{'func' : np.mean}]
@@ -440,28 +495,35 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
             statistic = [{'func' : np.mean}]
         elif statistic == 'median':
             statistic = [{'func' : np.median}]
+    statistic_color = kwargs.pop('statistic_color', 'k')
+    if statistic:
+        for i, statistic_dict in enumerate(statistic):
+            if 'color' not in statistic_dict:
+                statistic[i]['color'] = statistic_color
     last_parameter = ''
     name_list = []
     height_list = []
     for row, forestplot_dict in enumerate(forestplot_data(fit, pars, dtypes, **kwargs)):
         parameter = forestplot_dict['par']
 
-
         # update row
         if row == 0:
             last_parameter = parameter
         else:
             last_parameter = parameter
+         
+            
         if 'hist' in forestplot_dict:
+            
             hist, edges = forestplot_dict['hist']
             hist = hist - row
 
             # zorder
-            if 'zorder' not in hist_kwargs:
+            if 'zorder' not in hist_dict:
                 zorder = 30+row
             else:
-                zorder = hist_kwargs.pop('zorder')
-            plot_hist(hist, edges, fill=fill, ax=ax, zero_level=-row, zorder=zorder, **hist_kwargs)
+                zorder = hist_dict.pop('zorder')
+            plot_hist(hist, edges, ax=ax, fill=fill, fill_dict=fill_dict, zero_level=-row, zorder=zorder, **hist_dict)
             if statistic:
                 x_hist = edges-(edges[1]-edges[0])/2
                 y_hist = hist
@@ -475,14 +537,15 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
                                                 plot_dict=statistic_dict, zero_level=-row,\
                                                 method='hist')
         else:
+                                  
             x_kde, y_kde = forestplot_dict['kde']
             y_kde = y_kde - row
             # zorder
-            if 'zorder' not in kde_kwargs:
+            if 'zorder' not in kde_dict:
                 zorder = 30+row
             else:
-                zorder = kde_kwargs.pop('zorder')
-            plot_kde(x_kde, y_kde, fill=fill, ax=ax, zero_level=-row, zorder=zorder, **kde_kwargs)
+                zorder = kde_dict.pop('zorder')
+            plot_kde(x_kde, y_kde, ax=ax, fill=fill, fill_dict=fill_dict, zero_level=-row, zorder=zorder, **kde_dict)
             if statistic:
                 for statistic_dict in statistic:
                     statistic_dict = statistic_dict.copy()

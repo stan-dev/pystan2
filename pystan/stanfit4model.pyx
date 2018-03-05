@@ -488,7 +488,9 @@ cdef class StanFit4Model:
     # public methods
 
     def plot(self, kind='trace', pars=None, dtypes=None, **kwargs):
-        """Visualize samples from posterior distributions
+        """plot(kind='trace', pars=None, dtypes=None, **kwargs)
+        
+        Visualize samples from posterior distributions
 
         Parameters
         ---------
@@ -508,17 +510,19 @@ cdef class StanFit4Model:
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        if type.lower() in ('trace', 'traceplot'):
+        if kind.lower() in ('trace', 'traceplot'):
             return pystan.plots.traceplot(self, pars, dtypes=dtypes, **kwargs)
-        elif type.lower() in ('forest', 'forestplot'):
+        elif kind.lower() in ('forest', 'forestplot'):
             return pystan.plots.forestplot(self, pars, dtypes=dtypes, **kwargs)
-        elif type.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
-            return pystan.plots.parcoords(self, pars, **kwargs)
+        elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
+            return pystan.plots.mcmc_parcoord(self, pars, **kwargs)
         else:
             raise ValueError("Incorrect plot type: use {'trace', 'forest', 'mcmc_parcoord'}")
 
     def plot_traceplot(self, pars=None, dtypes=None, **kwargs):
-        """Visualize samples from posterior distributions
+        """plot_traceplot(pars=None, dtypes=None, **kwargs)
+        
+        Visualize samples from posterior distributions
 
         Parameters
         ---------
@@ -533,7 +537,9 @@ cdef class StanFit4Model:
         return self.plot(kind='trace', pars=pars, dtypes=dtypes, **kwargs)
     
     def plot_forestplot(self, pars=None, dtypes=None, **kwargs):
-        """Visualize samples from posterior distributions
+        """plot_forestplot(pars=None, dtypes=None, **kwargs)
+        
+        Visualize samples from posterior distributions
 
         Parameters
         ---------
@@ -548,7 +554,9 @@ cdef class StanFit4Model:
         return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
 
     def plot_mcmc_parcoord(self, pars=None, **kwargs):
-        """Visualize samples from posterior distributions
+        """plot_mcmc_parcoord(pars=None, **kwargs)
+        
+        Visualize samples from posterior distributions
 
         Parameters
         ---------

@@ -170,12 +170,10 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
             par_dims = vecs.shape[2:]
         # reshape and translate for plotting
         vecs = vecs.reshape([vecs.shape[0]*vecs.shape[1]]+list(par_dims), order='F').T
-        if split_pars:
-            limits = None
-        elif limits == 'min-max':
-            limits = vecs.min(), vecs.max()
-        else:
-            limits = None
+        
+        # limits as min-max for each vec
+        limits = None
+        
         m = np.multiply.reduce(par_dims)
         indices = np.c_[np.unravel_index(np.arange(m), par_dims, order='F')]
         # This loop creates name instead of `fit.flatnames`.
