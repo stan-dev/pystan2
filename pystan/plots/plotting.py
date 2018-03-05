@@ -30,6 +30,8 @@ def plot_hist(hist, edges, fill, ax, zero_level=None, **kwargs):
     """
     if zero_level is None:
         zero_level = 0
+    #remove unique keyword
+    unique = kwargs.pop('unique', False)
     x_hist = edges-(edges[1]-edges[0])/2
     x_hist = np.r_[x_hist[0], x_hist, x_hist[-1]]
     y_hist = np.r_[zero_level,hist[0],hist,zero_level]
@@ -105,7 +107,7 @@ def plot_kde(x, y, fill, ax, zero_level=None, **kwargs):
     """
     if zero_level is None:
         zero_level = 0
-
+    unique = kwargs.pop('unique', False)
     default_dict = {
         ('lw', 'linewidth') : 2,
         ('c', 'color') : None,
@@ -126,7 +128,7 @@ def plot_kde(x, y, fill, ax, zero_level=None, **kwargs):
 
     # plot edge
     kde_plot, = ax.plot(x, y, **kwargs)
-    if fill:
+    if fill and not unique:
         if not isinstance(fill, dict):
             fill = dict()
         else:
@@ -279,7 +281,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, **
     # raise an exception if too many subplots
     force = kwargs.pop('force', False)
     if not force:
-        if n > 15:
+        if n > 20:
             err_msg = "Too many subplots: (row={},col={})->total={},"\
                       " please use 'force' keyword to force"\
                       " enable plotting".format(n, m, n*m)
@@ -504,9 +506,9 @@ def forestplot(fit, pars=None, dtypes=None, kde_kwargs=None, hist_kwargs=None, *
         fig.tight_layout(pad=0.5)
     return fig, ax
 
-def parcoords(fit, pars=None, transform=None, divergence=None, **kwargs):
+def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     """
-    parcoords-plot enable simultaneous examinations of multiple dimensions.
+    mcmc_parcoord-plot enable simultaneous examinations of multiple dimensions.
 
     Parameters
     ----------
@@ -576,7 +578,7 @@ def parcoords(fit, pars=None, transform=None, divergence=None, **kwargs):
 
     label = kwargs.pop('label', 'Non-divergent')
 
-    names, data, data_div = parcoords_data(fit, pars=pars, \
+    names, data, data_div = mcmc_parcoord_data(fit, pars=pars, \
                             transform=transform, divergence=bool(divergence))
     # run parallel coordinates plot in one-step
     if cmap is None:

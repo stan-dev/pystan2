@@ -12,17 +12,17 @@ def hist_data(vec, limits=None, nbins=None):
     ----------
     vec : ndarray
     limits: tuple, optional
-        left and right limits for the bins
+        Left and right limits for the bins. Default is min-max.
     nbins : int, optional
-        number of bins used in the calculation. Minimum bin width equals 1
-        due to specialization for integer data
+        Number of bins used in the calculation. Minimum bin width equals 1
+        due to specialization for integer data. Default is `max(10, min(n//10, 100))`.
 
     Returns
     -------
     hist : ndarray
-        density values for the bins
+        Density values for the bins.
     edges : ndarray
-        bin edges
+        Bin edges.
     """
     n = len(vec)
     if limits is not None:
@@ -41,9 +41,9 @@ def gaussian(n, sig):
     Parameters
     ----------
     n : int
-        number of kernel points
+        Number of kernel points.
     sig : float
-        width of the kernel
+        Width of the kernel.
 
     Returns
     -------
@@ -64,7 +64,7 @@ def fftconvolve(grid, kernel):
     Returns
     -------
     grid : ndarray
-        grid convolved with kernel
+        Grid convolved with the kernel.
     """
     shape1 = grid.shape[0]
     shape2 = kernel.shape[0]
@@ -85,16 +85,16 @@ def kde_data(vec, limits=None, c=1):
     ----------
     vec : ndarray
     limits : tuple, optional
-        left and right limits for the bins (fft trick)
+        Left and right limits for the bins (fft trick).
     c : float, optional
-        parameter for the scotts factor: n ** (-0.2) * c
+        Parameter for the scotts factor: `n ** (-0.2) * c`.
 
     Returns
     -------
     bins : ndarray
-        positions for the kde estimates
+        Positions for the kde estimates.
     grid : ndarray
-        kde estimates
+        Kde estimates.
     """
     n = len(vec)
     nx = 200
@@ -125,21 +125,21 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
 
     Parameters
     ----------
-    fit : StanFit4Model instance
+    fit : StanFit4Model object
     pars : tuple
-        parameters plotted
+        Parameters plotted.
     dtypes : dict, optional
-        dictionary containing parameters as a key value and transform-function value.
+        Dictionary containing parameters as a key value and transform-function value.
     density : bool, optional, default True
-        if False plot only the trace data, exclude the density plot
+        If False plot only the trace data, exclude the density plot
     split_pars : bool, optional, default False
-        if True plot each parameter including vector and matrix components in their own axis
-    c : int, optional
-        constant for the kde function, ignored if density==False
+        If True plot each parameter including vector and matrix components in their own axis
+    c_kde : int, optional
+        Constant for the kde function, ignored if density==False
     nbins : int, optional
-        maximum number of bins for histogram function, ignored if density==False
+        Maximum number of bins for histogram function, ignored if density is False.
     inc_warmup : bool, optional, default False
-        include warmup
+        Include warmup
 
     Yields
     ------
@@ -147,31 +147,41 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
         dict contains
             par, parameter name
             name, parameter component name
-            vec,
+            vec, raw data
             hist, histogram data, optional
             kde, kde data, optional
     """
     # TODO: Add option to plot chains independently
     # This can be done with np.ndindex tricks
-    c = kwargs.get('c', 1)
+    c_kde = kwargs.get('c_kde', 1)
     nbins = kwargs.get('nbins', None)
     inc_warmup = kwargs.get('inc_warmup', False)
     for par in pars:
         vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
+        nchains = fit.sim['chains']
+        if nchains == 1:
+            if len(vecs.shape) == 1:
+                # add chain dimension
+                vecs = np.expand_dims(vecs, -1)
         par_dims = vecs.shape[2:]
         if not par_dims:
+            # add parameter dimension
             vecs = np.expand_dims(vecs, -1)
             par_dims = vecs.shape[2:]
         # reshape and translate for plotting
         vecs = vecs.reshape([vecs.shape[0]*vecs.shape[1]]+list(par_dims), order='F').T
         if split_pars:
             limits = None
-        else:
+        elif limits == 'min-max':
             limits = vecs.min(), vecs.max()
+        else:
+            limits = None
         m = np.multiply.reduce(par_dims)
         indices = np.c_[np.unravel_index(np.arange(m), par_dims, order='F')]
+        # This loop creates name instead of `fit.flatnames`.
         for idx in indices:
             vec = vecs[tuple(idx)]
+            is_unique = len(np.unique(vec)) == 1
             # use par if value scalar
             if par_dims == (1,):
                 name = par
@@ -180,21 +190,30 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
                 name = "{}[{}]".format(par, ",".join(map(str, idx+1)))
             if density:
                 if isinstance(vec[0], (int, np.integer, np.uint)):
-                    hist, edges = hist_data(vec, limits, nbins=nbins)
+                    if is_unique:
+                        hist, edges = np.array([1]), vec[0] + np.array([-0.5, 0.5])
+                    else:
+                        hist, edges = hist_data(vec, limits, nbins=nbins)
                     yield {'par' : par,
                            'name' : name,
                            'vec' : vec,
-                           'hist' : (hist, edges)}
+                           'hist' : (hist, edges),
+                           'unique' : is_unique}
                 else:
-                    x_kde, y_kde = kde_data(vec, limits, c=c)
+                    if is_unique:
+                        x_kde, y_kde = np.array([vec[0], vec[0]]), np.array([0,1])
+                    else:
+                        x_kde, y_kde = kde_data(vec, limits, c=c_kde)
                     yield {'par': par,
                            'name' : name,
                            'vec' : vec,
-                           'kde' : (x_kde, y_kde)}
+                           'kde' : (x_kde, y_kde),
+                           'unique' : is_unique}
             else:
                 yield {'par' : par,
                        'name' : name,
-                       'vec' : vec}
+                       'vec' : vec,
+                       'unique' : is_unique}
 
 def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
     """Function to yield data for the forestplot.
@@ -202,19 +221,19 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
 
     Parameters
     ----------
-    fit : StanFit4Model instance
+    fit : StanFit4Model object
     pars : tuple
-        parameters plotted
+        Parameters plotted.
     dtypes : dict, optional
-        dictionary containing parameters as a key value and transform-function value.
+        Dictionary containing parameters as a key value and transform-function value.
     split_pars : bool, optional, default False
-        if True plot each parameter including vector and matrix components in their own axis
+        If True plot each parameter including vector and matrix components in their own axis.
     c : int, optional
-        constant for the kde function, ignored if density==False
+        Constant for the kde function, ignored if density==False.
     nbins : int, optional
-        maximum number of bins for histogram function, ignored if density==False
+        Maximum number of bins for histogram function, ignored if density==False.
     inc_warmup : bool, optional, default False
-        include warmup
+        Include warmup.
 
     Yields
     ------
@@ -234,6 +253,11 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
     overlap = kwargs.get('overlap', 0.98)
     for par in pars:
         vecs = fit.extract(pars=par, permuted=False, dtypes=dtypes, inc_warmup=inc_warmup)[par]
+        nchains = fit.sim['chains']
+        if nchains == 1:
+            if len(vecs.shape) == 1:
+                # add chain dimension
+                vecs = np.expand_dims(vecs, -1)
         par_dims = vecs.shape[2:]
         if not par_dims:
             vecs = np.expand_dims(vecs, -1)
@@ -248,6 +272,7 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
         indices = np.c_[np.unravel_index(np.arange(m), par_dims, order='F')]
         for idx in indices:
             vec = vecs[tuple(idx)]
+            is_unique = len(np.unique(vec)) == 1
             # use par if value scalar
             if par_dims == (1,):
                 name = par
@@ -256,28 +281,36 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
                 name = "{}[{}]".format(par, ",".join(map(str, idx+1)))
 
             if isinstance(vec[0], (int, np.integer, np.uint)):
-                hist, edges = hist_data(vec, limits, nbins=nbins)
+                if is_unique:
+                    hist, edges = np.array([1]), vec[0] + np.array([-0.5, 0.5])
+                else:
+                    hist, edges = hist_data(vec, limits, nbins=nbins)
                 yield {'par' : par,
                        'name' : name,
                        'vec' : vec,
-                       'hist' : (hist/hist.max()*overlap, edges)}
+                       'hist' : (hist/hist.max()*overlap, edges),
+                       'unique' : is_unique}
             else:
-                x_kde, y_kde = kde_data(vec, limits, c=c)
+                if is_unique:
+                    x_kde, y_kde = np.array([vec[0], vec[0]]), np.array([0,1])
+                else:
+                    x_kde, y_kde = kde_data(vec, limits, c=c)
                 yield {'par': par,
                        'name' : name,
                        'vec' : vec,
-                       'kde' : (x_kde, y_kde/y_kde.max()*overlap)}
+                       'kde' : (x_kde, y_kde/y_kde.max()*overlap),
+                       'unique' : is_unique}
 
-def parcoords_data(fit, pars, divergence=False, **kwargs):
-    """Function to gather data for the parcoords-plot.
+def mcmc_parcoord_data(fit, pars, divergence=False, **kwargs):
+    """Function to gather data for the mcmc_parcoord-plot.
 
     Parameters
     ----------
-    fit : StanFit4Model instance
+    fit : StanFit4Model object
     pars : tuple
-        parameters plotted
+        Parameters plotted.
     divergence : bool, optional
-        If True, return divergent sample independently
+        If True, return divergent sample independently.
     transform : str, function
         If str, use {'minmax', 'standard'}
             minmax = (arr - min) / (max - min)
@@ -289,7 +322,7 @@ def parcoords_data(fit, pars, divergence=False, **kwargs):
     Returns
     -------
     data : list
-        List contains = (names, data, divergent data (if divergence is True))
+        List contains = (names, data, divergent data (if divergence is True)).
     """
     inc_warmup = kwargs.pop('inc_warmup', False)
     vectors = []
