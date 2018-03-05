@@ -40,7 +40,7 @@ def plot_hist(hist, edges, ax, fill, fill_dict, zero_level=None, **kwargs):
 
     default_dict = {
         ('lw', 'linewidth') : 2,
-        ('c', 'color') : None,
+        ('color', 'c') : None,
         'zorder' : 30,
     }
     # set default values
@@ -111,7 +111,7 @@ def plot_kde(x, y, ax, fill, fill_dict, zero_level=None, **kwargs):
     unique = kwargs.pop('unique', False)
     default_dict = {
         ('lw', 'linewidth') : 2,
-        ('c', 'color') : None,
+        ('color', 'c') : None,
         'zorder' : 30,
     }
     # set default values
@@ -186,7 +186,7 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
     # get function used for the plot
     statistic_func = plot_dict.pop('func')
     # set defaults
-    for key, item in {'c' : 'k', 'lw' : 2}.items():
+    for key, item in {'color' : 'k', 'lw' : 2}.items():
         if key not in plot_dict:
             plot_dict[key] = item
     statistic = statistic_func(vec)
@@ -693,14 +693,15 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     lw = kwargs.pop('lw', kwargs.get('linewidth', 1))
     alpha_div = kwargs.pop('alpha_div', 1)
     lw_div = kwargs.pop('lw_div', lw)
-    label = kwargs.pop('label', 'Non-divergent')
+    label_non = kwargs.pop('label', 'non-divergent')
     names, data, data_div = mcmc_parcoord_data(fit, pars=pars, \
                             transform=transform, divergence=bool(divergence))
     # run parallel coordinates plot in one-step
     if cmap is None:
         if color is None:
             color = 'k'
-        ax.plot(data, c=color, alpha=alpha, lw=lw, label='non-divergent', **kwargs)
+        ax.plot(data[0, :], c=color, alpha=alpha, lw=lw, label=label_non, **kwargs)
+        ax.plot(data[1:, :], c=color, alpha=alpha, lw=lw, label='_nolegend_', **kwargs)
     # run line by line
     else:
         n = data.shape[1]
@@ -709,7 +710,7 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
         else:
             colors = cmap(np.linspace(0,1,n))
         # non-divergent samples
-        label = 'non-divergent'
+        label = label_non
         for i, _data in enumerate(data.T):
             ax.plot(_data, c=colors[i], alpha=alpha, lw=lw, label=label, **kwargs)
             label = '_nolegend_'
