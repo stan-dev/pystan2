@@ -41,9 +41,16 @@ class TestStanc(unittest.TestCase):
             StanModel(model_code=model_code)
 
     def test_stanc_include(self):
+        model_code = 'parameters {\n#include external1.stan\n} model {\ny ~ normal(0,1);}'
+        testdata_path = os.path.join(os.path.dirname(__file__), 'data', "")
+        result = stanc(model_code=model_code, include_paths=[testdata_path])
+        desired = sorted({"status", "model_cppname", "cppcode", "model_name", "model_code", "include_paths"})
+        self.assertEqual(sorted(result.keys()), desired)
+        self.assertEqual(result['status'], 0)
+
+    def test_stanc_2_includes(self):
         model_code = 'parameters {\n#include external1.stan\n#include external2.stan\n} model {\ny ~ normal(0,1);\nz ~ normal(0,1)}'
-        testdata_path = os.path.join(os.path.dirname(__file__), 'data')
-        testdata_path += "/"
+        testdata_path = os.path.join(os.path.dirname(__file__), 'data', "")
         result = stanc(model_code=model_code, include_paths=[testdata_path])
         desired = sorted({"status", "model_cppname", "cppcode", "model_name", "model_code", "include_paths"})
         self.assertEqual(sorted(result.keys()), desired)

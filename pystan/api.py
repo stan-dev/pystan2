@@ -42,12 +42,9 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         A string naming the model. If none is provided 'anon_model' is
         the default. However, if `file` is a filename, then the filename
         will be used to provide a name.
-<<<<<<< HEAD
-=======
 
     include_paths: list of strings, optional
         Paths for #include files defined in Stan code.
->>>>>>> ac32d43... clean code, tests, handle include_paths
 
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the
@@ -123,10 +120,8 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     # bytes, going into C++ code
     model_code_bytes = model_code.encode('utf-8')
 
-<<<<<<< HEAD
-=======
     if include_paths is None:
-        include_paths = ['./']
+        include_paths = [os.path.join(os.path.abspath('.'), "")]
     elif isinstance(include_paths, string_types):
         include_paths = [include_paths]
     include_paths_bytes = [path.encode('utf-8') for path in include_paths]
@@ -134,7 +129,6 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     # set to False
     allow_undefined = False
 
->>>>>>> ac32d43... clean code, tests, handle include_paths
     if obfuscate_model_name:
         # Make the model name depend on the code.
         model_name = (
@@ -142,8 +136,6 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
             hashlib.md5(model_code_bytes).hexdigest())
 
     model_name_bytes = model_name.encode('ascii')
-<<<<<<< HEAD
-=======
 
     if not isinstance(file, string_types):
         # use default 'unknown file name'
@@ -151,7 +143,6 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     else:
         # use only the filename, used only for debug printing
         filename_bytes = os.path.split(file)[-1].encode('utf-8')
->>>>>>> ac32d43... clean code, tests, handle include_paths
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes)
     if result['status'] == -1:  # EXCEPTION_RC is -1
