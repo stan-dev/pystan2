@@ -1134,7 +1134,7 @@ def read_rdump(filename):
         d[name.strip()] = _rdump_value_to_numpy(value.strip())
     return d
 
-def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True):
+def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True):
     """Extract samples as a pandas dataframe for different parameters.
 
     Parameters
@@ -1205,7 +1205,7 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
                 flatname for flatname in fit.flatnames if flatname.startswith(par)
                 ]
                 for idx in np.arange(ss.shape[1]):
-                    column_name = par_flatnames[idx].replace('[','_').replace(',','_').replace(']','')
+                    column_name = par_flatnames[idx]
                     df[column_name] = ss[:,idx]
     else:
         n_save = fit.sim['n_save'][0]
@@ -1214,7 +1214,7 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
         chain_count = fit.sim['chains']+1
         df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
         df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
-		# Specify whether row is from warmup, 0 means not in warmup
+	# Specify whether row is from warmup, 0 means not in warmup
         df['warmup'] = 0
         # Modify this below if sample is from warmup
         if inc_warmup:
@@ -1237,6 +1237,6 @@ def to_dataframe(fit, pars=None, permuted=True, dtypes=None, inc_warmup=False, d
             if (par in pars) or (par[:par.find('[')] in pars):
                 chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
                 samples = np.array(chains).T
-                column_name = fit.sim['fnames_oi'][n].replace('[','_').replace(',','_').replace(']','')
+                column_name = fit.sim['fnames_oi'][n]
                 df[column_name] = samples.T.flatten()
     return df
