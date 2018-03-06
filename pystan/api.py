@@ -121,9 +121,11 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     model_code_bytes = model_code.encode('utf-8')
 
     if include_paths is None:
-        include_paths = [os.path.join(os.path.abspath('.'), "")]
+        include_paths = [os.path.abspath('.')]
     elif isinstance(include_paths, string_types):
         include_paths = [include_paths]
+    # add trailing /
+    include_paths = [os.path.join(path, "") for path in include_paths]
     include_paths_bytes = [path.encode('utf-8') for path in include_paths]
 
     # set to False
