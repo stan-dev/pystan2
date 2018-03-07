@@ -235,7 +235,7 @@ a number of methods.
       pars : {str, sequence of str}
          parameter (or quantile) name(s). If `permuted` is False,
          `pars` is ignored.
-      permuted : bool
+      permuted : bool, default False
          If True, returned samples are permuted. All chains are
          merged and warmup samples are discarded.
       dtypes : dict
@@ -251,3 +251,8 @@ a number of methods.
       Returns
       -------
       df : pandas dataframe
+	
+	   Note
+	   ----
+	   Unlike default in extract (`permuted=True`) 
+	   `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
