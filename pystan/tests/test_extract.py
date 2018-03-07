@@ -133,10 +133,10 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(df.shape, (4000,9))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 assert_array_equal(df[name].values,alpha[:,idx,jdx])
         for idx in range(2):
-            name = 'beta_{}'.format(idx+1)
+            name = 'beta[{}]'.format(idx+1)
             assert_array_equal(df[name].values,beta[:,idx])
         assert_array_equal(df['lp__'].values,lp__)
         # Test pars argument
@@ -144,7 +144,7 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 assert_array_equal(df[name].values,alpha[:,idx,jdx])
         # Test pars and dtype argument
         df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int})
@@ -152,7 +152,7 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):
             for jdx in range(3):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 assert_array_equal(df[name].values,alpha_int[:,idx,jdx])
 
     def test_to_dataframe_permuted_false_inc_warmup_false(self):
@@ -165,14 +165,14 @@ class TestExtract(unittest.TestCase):
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 for n in range(1,num_chains+1):
                     assert_array_equal(
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
                     )
                 alpha_index += 1
         for idx in range(2):
-            name = 'beta_{}'.format(idx+1)
+            name = 'beta[{}]'.format(idx+1)
             for n in range(1,num_chains+1):
                 assert_array_equal(
                 df[name].loc[df.chain == n].values,ss[:,n-1,6+idx]
@@ -206,14 +206,14 @@ class TestExtract(unittest.TestCase):
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 for n in range(1,num_chains+1):
                     assert_array_equal(
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
                     )
                 alpha_index += 1
         for idx in range(2):
-            name = 'beta_{}'.format(idx+1)
+            name = 'beta[{}]'.format(idx+1)
             for n in range(1,num_chains+1):
                 assert_array_equal(
                 df[name].loc[df.chain == n].values,ss[:,n-1,6+idx]
@@ -254,14 +254,14 @@ class TestExtract(unittest.TestCase):
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 for n in range(1,num_chains+1):
                     assert_array_equal(
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
                     )
                 alpha_index += 1
         for idx in range(2):
-            name = 'beta_{}'.format(idx+1)
+            name = 'beta[{}]'.format(idx+1)
             for n in range(1,num_chains+1):
                 assert_array_equal(
                 df[name].loc[df.chain == n].values,ss[:,n-1,6+idx]
@@ -288,7 +288,7 @@ class TestExtract(unittest.TestCase):
         alpha_index = 0
         for jdx in range(3):
             for idx in range(2):
-                name = 'alpha_{}_{}'.format(idx+1,jdx+1)
+                name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 for n in range(1,num_chains+1):
                     assert_array_equal(
                     df[name].loc[df.chain == n].values,ss[:,n-1,alpha_index]
