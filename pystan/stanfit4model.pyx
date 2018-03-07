@@ -867,7 +867,7 @@ cdef class StanFit4Model:
         pars : {str, sequence of str}
            parameter (or quantile) name(s). If `permuted` is False,
            `pars` is ignored.
-        permuted : bool
+        permuted : bool, default False
            If True, returned samples are permuted. All chains are
            merged and warmup samples are discarded.
         dtypes : dict
@@ -883,6 +883,11 @@ cdef class StanFit4Model:
         Returns
         -------
         df : pandas dataframe
+	
+	Note
+	----
+	Unlike default in extract (`permuted=True`) 
+	`.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
 
         """
         return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics)
