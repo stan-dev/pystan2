@@ -19,7 +19,7 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obfuscate_model_name=True):
+          include_paths=None, verbose=False, obfuscate_model_name=True):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -146,7 +146,10 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         # use only the filename, used only for debug printing
         filename_bytes = os.path.split(file)[-1].encode('utf-8')
 
-    result = pystan._api.stanc(model_code_bytes, model_name_bytes)
+    result = pystan._api.stanc(model_code_bytes, model_name_bytes,
+                               allow_undefined, filename_bytes, 
+                               include_paths_bytes,
+                              )
     if result['status'] == -1:  # EXCEPTION_RC is -1
         msg = result['msg']
         if PY2:
@@ -159,6 +162,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     del result['msg']
     result.update({'model_name': model_name})
     result.update({'model_code': model_code})
+    result.update({'include_paths' : include_paths})
     return result
 
 
