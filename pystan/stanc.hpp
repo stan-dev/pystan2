@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 /* REF: rstan/rstan/src/stanc.cpp */
 
@@ -13,6 +14,7 @@ typedef struct PyStancResult {
     std::string msg; // for communicating errors
     std::string model_cppname;
     std::string cppcode;
+    std::vector<std::string> include_paths;
 } PyStancResult;
 
 
