@@ -222,7 +222,7 @@ class StanModel:
         if not isinstance(stanc_ret, dict):
             raise ValueError("stanc_ret must be an object returned by stanc.")
         stanc_ret_keys = {'status', 'model_code', 'model_cppname',
-                          'cppcode', 'model_name'}
+                          'cppcode', 'model_name', 'include_paths'}
         if not all(n in stanc_ret_keys for n in stanc_ret):
             raise ValueError("stanc_ret lacks one or more of the keys: "
                              "{}".format(str(stanc_ret_keys)))
