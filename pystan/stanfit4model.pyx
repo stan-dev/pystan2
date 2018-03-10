@@ -42,7 +42,7 @@ import warnings
 import numpy as np
 
 import pystan.misc
-import pystan.plots
+import pystan.plot
 from pystan._compat import PY2, string_types
 from pystan.constants import (sampling_algo_t, optim_algo_t, variational_algo_t,
                               sampling_metric_t, stan_args_method_t)
@@ -519,6 +519,11 @@ cdef class StanFit4Model:
         fig, axes = fit.plot(kind='trace')
         ``
         """
+        if fit.mode == 1:
+            raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+                   "sampling is not conducted.".format(self.model_name))
+        elif fit.mode == 2:
+            raise ValueError("Stan model '{}' does not contain samples.".format(self.model_name))
         if pars is None:
             pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
         elif isinstance(pars, string_types):
@@ -531,7 +536,7 @@ cdef class StanFit4Model:
         elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
             return pystan.plot.mcmc_parcoord(self, pars, **kwargs)
         else:
-            raise ValueError("Incorrect plot type: use {'trace', 'forest', 'mcmc_parcoord'}")
+            raise ValueError("Incorrect plot type: for 'kind' use {'trace', 'forest', 'mcmc_parcoord'}")
 
     def plot_traceplot(self, pars=None, dtypes=None, **kwargs):
         """plot_traceplot(pars=None, dtypes=None, **kwargs)

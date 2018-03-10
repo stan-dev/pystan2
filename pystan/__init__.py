@@ -10,6 +10,10 @@ from pystan.api import stanc, stan
 from pystan.misc import read_rdump, stan_rdump, stansummary
 from pystan.model import StanModel
 from pystan.lookup import lookup
+from pystan.plot import traceplot as plot_traceplot,\
+                        forestplot as plot_forestplot,\
+                        mcmc_parcoord as plot_mcmc_parcoord,\
+                        plot
 
 logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())

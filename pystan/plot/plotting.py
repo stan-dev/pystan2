@@ -207,7 +207,6 @@ def _plot_statistic_for_density(density_x, density_y, vec, ax, plot_dict, zero_l
     ax.plot([statistic, statistic],[zero_level, height], **plot_dict)
     return ax
 
-
 def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwargs):
     """
     Use traceplot to display parameters.
@@ -279,7 +278,11 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
-
+    if fit.mode == 1:
+        raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name))
+    elif fit.mode == 2:
+        raise ValueError("Stan model '{}' does not contain samples.".format(fit.model_name))
     if pars is None:
         pars = fit.model_pars
     elif isinstance(pars, string_types):
@@ -515,6 +518,11 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
+    if fit.mode == 1:
+        raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name))
+    elif fit.mode == 2:
+        raise ValueError("Stan model '{}' does not contain samples.".format(fit.model_name))
     if pars is None:
         pars = fit.model_pars
     elif isinstance(pars, string_types):
@@ -537,7 +545,6 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
             n += np.multiply.reduce(par_dims)
         else:
             n += 1
-
     # create figure object
     overlap = float(kwargs.get('overlap', 1))
     figsize = kwargs.pop('figsize', (6, max(4.5, n/overlap)))
@@ -700,6 +707,12 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
+    if fit.mode == 1:
+        raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name))
+    elif fit.mode == 2:
+        raise ValueError("Stan model '{}' does not contain samples.".format(fit.model_name))
+
     if pars is None:
         pars = fit.model_pars
     elif isinstance(pars, string_types):
@@ -758,3 +771,53 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     ax.set_xticks(np.arange(len(names)))
     ax.set_xticklabels(names, rotation=90)
     return fig, ax
+
+def plot(fit, pars, dtypes, kind='trace', **kwargs):
+    """Visualize samples from posterior distributions
+
+    Parameters
+    ---------
+    fit : StanFit4Model object
+    pars : {str, sequence of str}
+        parameter name(s); by default use all parameters of interest.
+        Accepts also sampler params:
+            {'accept_stat__', 'stepsize__', 'treedepth__',
+             'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+    dtypes : dict
+        datatype of parameter(s).
+        If nothing is passed, np.float will be used for all parameters.
+        If np.int is specified, the histogram will be visualized, not but
+        kde.
+    kind : str
+        choose plot: {'trace', 'forest', 'mcmc_parcoord'}
+
+    Returns
+    -------
+    fig : Figure instance
+    axes : ndarray of Axes instances or Axes instance
+
+    Example
+    -------
+    ```
+    fit = model_program.sampling()
+    fig, axes = pystan.plot(fit, kind='trace')
+    ``
+    """
+    if fit.mode == 1:
+        raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name))
+    elif fit.mode == 2:
+        raise ValueError("Stan model '{}' does not contain samples.".format(fit.model_name))
+    if pars is None:
+        pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
+    elif isinstance(pars, string_types):
+        pars = [pars]
+        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
+        if kind.lower() in ('trace', 'traceplot', 'plot_traceplot'):
+            return traceplot(self, pars, dtypes=dtypes, **kwargs)
+        elif kind.lower() in ('forest', 'forestplot', 'plot_forestplot'):
+            return forestplot(self, pars, dtypes=dtypes, **kwargs)
+        elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords', 'plot_mcmc_parcoord'):
+            return mcmc_parcoord(self, pars, **kwargs)
+        else:
+            raise ValueError("Incorrect plot type: for 'kind' use {'trace', 'forest', 'mcmc_parcoord'}")
