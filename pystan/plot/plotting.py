@@ -800,7 +800,7 @@ def plot_fit(fit, pars, dtypes, kind='trace', **kwargs):
     -------
     ```
     fit = model_program.sampling()
-    fig, axes = pystan.plot(fit, kind='trace')
+    fig, axes = pystan.plot_fit(fit, kind='trace')
     ``
     """
     if fit.mode == 1:
