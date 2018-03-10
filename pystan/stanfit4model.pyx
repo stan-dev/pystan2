@@ -519,10 +519,10 @@ cdef class StanFit4Model:
         fig, axes = fit.plot(kind='trace')
         ``
         """
-        if fit.mode == 1:
+        if self.mode == 1:
             raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
                    "sampling is not conducted.".format(self.model_name))
-        elif fit.mode == 2:
+        elif self.mode == 2:
             raise ValueError("Stan model '{}' does not contain samples.".format(self.model_name))
         if pars is None:
             pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
@@ -681,7 +681,7 @@ cdef class StanFit4Model:
         """
         return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
 
-    def plot_mcmc_parcoord(self, pars=None, **kwargs):
+    def plot_mcmc_parcoord(self, pars=None, dtypes=None, **kwargs):
         """plot_mcmc_parcoord(pars=None, **kwargs)
 
         Visualize samples from posterior distributions
@@ -693,6 +693,9 @@ cdef class StanFit4Model:
             Accepts also sampler params:
                 {'accept_stat__', 'stepsize__', 'treedepth__',
                  'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+         dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters. 
         transform : str or function, optional
             If str, {'min'
             Function to transform data.
@@ -735,7 +738,6 @@ cdef class StanFit4Model:
         fig, axes = fit.plot_mcmc_parcoord(transform='standard', divergence=True)
         ``
         """
-        dtypes = kwargs.pop('dtypes', None)
         return self.plot(kind='mcmc_parcoord', pars=pars, dtypes=dtypes, **kwargs)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
