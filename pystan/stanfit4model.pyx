@@ -512,6 +512,12 @@ cdef class StanFit4Model:
         fig : Figure instance
         axes : ndarray of Axes instances or Axes instance
 
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot(kind='trace')
+        ``
         """
         if pars is None:
             pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
@@ -519,11 +525,11 @@ cdef class StanFit4Model:
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
         if kind.lower() in ('trace', 'traceplot'):
-            return pystan.plots.traceplot(self, pars, dtypes=dtypes, **kwargs)
+            return pystan.plot.traceplot(self, pars, dtypes=dtypes, **kwargs)
         elif kind.lower() in ('forest', 'forestplot'):
-            return pystan.plots.forestplot(self, pars, dtypes=dtypes, **kwargs)
+            return pystan.plot.forestplot(self, pars, dtypes=dtypes, **kwargs)
         elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
-            return pystan.plots.mcmc_parcoord(self, pars, **kwargs)
+            return pystan.plot.mcmc_parcoord(self, pars, **kwargs)
         else:
             raise ValueError("Incorrect plot type: use {'trace', 'forest', 'mcmc_parcoord'}")
 
@@ -588,6 +594,13 @@ cdef class StanFit4Model:
         -------
         fig : Figure instance
         axes : ndarray of Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot_traceplot()
+        ``
         """
         return self.plot(kind='trace', pars=pars, dtypes=dtypes, **kwargs)
 
@@ -652,6 +665,14 @@ cdef class StanFit4Model:
         -------
         fig : Figure instance
         ax : Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        # plot parameter 'y'
+        fig, axes = fit.plot_forestplot(pars=['y'])
+        ``
         """
         return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
 
@@ -701,6 +722,13 @@ cdef class StanFit4Model:
         -------
         fig : Figure instance
         ax : Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot_mcmc_parcoord(transform='standard', divergence=True)
+        ``
         """
         dtypes = kwargs.pop('dtypes', None)
         return self.plot(kind='mcmc_parcoord', pars=pars, dtypes=dtypes, **kwargs)

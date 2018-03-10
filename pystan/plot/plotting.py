@@ -266,6 +266,13 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
     -------
     fig : Figure instance
     axes : ndarray of Axes instances
+
+    Example
+    -------
+    ```
+    fit = model_program.sampling()
+    fig, axes = pystan.plot.traceplot(fit)
+    ``
     """
     try:
         import matplotlib.pyplot as plt
@@ -494,6 +501,14 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
     -------
     fig : Figure instance
     ax : Axes instances
+
+    Example
+    -------
+    ```
+    fit = model_program.sampling()
+    # plot parameter 'y'
+    fig, axes = pystan.plot.forestplot(fit, pars=['y'])
+    ``
     """
     try:
         import matplotlib.pyplot as plt
@@ -672,6 +687,13 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     -------
     fig : Figure instance
     ax : Axes instances
+
+    Example
+    -------
+    ```
+    fit = model_program.sampling()
+    fig, axes = pystan.plot.mcmc_parcoord(fit, transform='standard', divergence=True)
+    ``
     """
     try:
         import matplotlib.pyplot as plt

@@ -81,13 +81,15 @@ def kde_data(vec, limits=None, c=1):
     """Function to calculate approximate kernel density estimation data with scotts_factor.
     Speeds up the computation with fft trick.
 
+    The code is an adaption from https://github.com/mfouesneau/faststats
+
     Parameters
     ----------
     vec : ndarray
     limits : tuple, optional
         Left and right limits for the bins (fft trick).
     c : float, optional
-        Parameter for the scotts factor: `n ** (-0.2) * c`.
+        Constant for the scotts factor: `n ** (-0.2) * c`.
 
     Returns
     -------
@@ -101,6 +103,9 @@ def kde_data(vec, limits=None, c=1):
     scotts_factor = nx ** (-0.2) * c
     if limits is not None:
         vmin, vmax = limits
+        if vmin < vmin.min() or vmax > vmax.max():
+            logger.warning("Points outside the limit range could create biased density estimate")
+        vec = vec[ (vec >= vmin) & (vec <= vmax) ]
     else:
         vmin, vmax = vec.min(), vec.max()
     bins = np.linspace(vmin, vmax, nx)
