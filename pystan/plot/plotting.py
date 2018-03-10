@@ -772,7 +772,7 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     ax.set_xticklabels(names, rotation=90)
     return fig, ax
 
-def plot(fit, pars, dtypes, kind='trace', **kwargs):
+def plot_fit(fit, pars, dtypes, kind='trace', **kwargs):
     """Visualize samples from posterior distributions
 
     Parameters

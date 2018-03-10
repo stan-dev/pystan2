@@ -13,7 +13,7 @@ from pystan.lookup import lookup
 from pystan.plot import traceplot as plot_traceplot,\
                         forestplot as plot_forestplot,\
                         mcmc_parcoord as plot_mcmc_parcoord,\
-                        plot
+                        plot_fit
 
 logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
