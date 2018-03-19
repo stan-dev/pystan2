@@ -43,7 +43,7 @@ class TestRStanGettingStarted(unittest.TestCase):
         transformed parameters {
             real theta[J];
             for (j in 1:J)
-            theta[j] <- mu + tau * eta[j];
+            theta[j] = mu + tau * eta[j];
         }
         model {
             eta ~ normal(0, 1);

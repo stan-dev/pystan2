@@ -22,7 +22,7 @@ class TestPosteriorMeans(unittest.TestCase):
         transformed parameters {
             real p[n_subjects];
             for (j in 1:n_subjects) {
-                p[j] <- exp(rating[j])/(1+exp(rating[j])); // Logistic function
+                p[j] = exp(rating[j])/(1+exp(rating[j])); // Logistic function
                 }
         }
         model {
