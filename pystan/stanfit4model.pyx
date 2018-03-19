@@ -590,6 +590,8 @@ cdef class StanFit4Model:
             else `np.linspace(0,1,n)` where n is the vector count
         c_kde : int, optional
             Constant for the kde function, ignored if density==False
+        bw_kde : float, optional
+            Bandwitdh used for the density estimation. Overwrite scotts factor with c.
         nbins : int, optional
             Maximum number of bins for histogram function, ignored if density is False.
         inc_warmup : bool, optional, default False
@@ -659,6 +661,8 @@ cdef class StanFit4Model:
             else `np.linspace(0,1,n)` where n is the vector count
         c_kde : int, optional
             Constant for the kde function, ignored if density==False.
+        bw_kde : float, optional
+            Bandwitdh used for the density estimation. Overwrite scotts factor with c.
         nbins : int, optional
             Maximum number of bins for histogram function, ignored if density==False.
         inc_warmup : bool, optional, default False
@@ -695,7 +699,7 @@ cdef class StanFit4Model:
                  'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
          dtypes : dict
             datatype of parameter(s).
-            If nothing is passed, np.float will be used for all parameters. 
+            If nothing is passed, np.float will be used for all parameters.
         transform : str or function, optional
             If str, {'min'
             Function to transform data.

@@ -256,6 +256,8 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
         else `np.linspace(0,1,n)` where n is the vector count
     c_kde : int, optional
         Constant for the kde function, ignored if density==False
+    bw_kde : float, optional
+        Bandwitdh used for the density estimation. Overwrite scotts factor with c.
     nbins : int, optional
         Maximum number of bins for histogram function, ignored if density is False.
     inc_warmup : bool, optional, default False
@@ -493,6 +495,8 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
         else `np.linspace(0,1,n)` where n is the vector count
     c_kde : int, optional
         Constant for the kde function, ignored if density==False.
+    bw_kde : float, optional
+        Bandwitdh used for the density estimation. Overwrite scotts factor with c.
     nbins : int, optional
         Maximum number of bins for histogram function, ignored if density==False.
     inc_warmup : bool, optional, default False
@@ -772,7 +776,7 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     ax.set_xticklabels(names, rotation=90)
     return fig, ax
 
-def plot_fit(fit, pars, dtypes, kind='trace', **kwargs):
+def plot_fit(fit, pars=None, dtypes=None, kind='trace', **kwargs):
     """Visualize samples from posterior distributions
 
     Parameters
@@ -809,15 +813,17 @@ def plot_fit(fit, pars, dtypes, kind='trace', **kwargs):
     elif fit.mode == 2:
         raise ValueError("Stan model '{}' does not contain samples.".format(fit.model_name))
     if pars is None:
-        pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
+        pars = [par for par in fit.sim['pars_oi'] if par != 'lp__']
     elif isinstance(pars, string_types):
         pars = [pars]
-        pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        if kind.lower() in ('trace', 'traceplot', 'plot_traceplot'):
-            return traceplot(self, pars, dtypes=dtypes, **kwargs)
-        elif kind.lower() in ('forest', 'forestplot', 'plot_forestplot'):
-            return forestplot(self, pars, dtypes=dtypes, **kwargs)
-        elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords', 'plot_mcmc_parcoord'):
-            return mcmc_parcoord(self, pars, **kwargs)
-        else:
-            raise ValueError("Incorrect plot type: for 'kind' use {'trace', 'forest', 'mcmc_parcoord'}")
+        pars = pystan.misc._remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+    if dtypes is None:
+        dtypes = {}
+    if kind.lower() in ('trace', 'traceplot', 'plot_traceplot'):
+        return traceplot(fit, pars, dtypes=dtypes, **kwargs)
+    elif kind.lower() in ('forest', 'forestplot', 'plot_forestplot'):
+        return forestplot(fit, pars, dtypes=dtypes, **kwargs)
+    elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords', 'plot_mcmc_parcoord'):
+        return mcmc_parcoord(fit, pars, **kwargs)
+    else:
+        raise ValueError("Incorrect plot type: for 'kind' use {'trace', 'forest', 'mcmc_parcoord'}")

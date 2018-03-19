@@ -77,7 +77,7 @@ def fftconvolve(grid, kernel):
     convolved_grid = np.fft.irfft(fft_product, fft_shape)[fft_slice]
     return convolved_grid
 
-def kde_data(vec, limits=None, c=1):
+def kde_data(vec, limits=None, c=1, bw=None):
     """Function to calculate approximate kernel density estimation data with scotts_factor.
     Speeds up the computation with fft trick.
 
@@ -90,6 +90,8 @@ def kde_data(vec, limits=None, c=1):
         Left and right limits for the bins (fft trick).
     c : float, optional
         Constant for the scotts factor: `n ** (-0.2) * c`.
+    bw : float, optional
+        Bandwitdh used for the density estimation. Overwrite scotts factor with c.
 
     Returns
     -------
@@ -100,7 +102,10 @@ def kde_data(vec, limits=None, c=1):
     """
     n = len(vec)
     nx = 200
-    scotts_factor = nx ** (-0.2) * c
+    if bw is None:
+        scotts_factor = nx ** (-0.2) * c
+    else:
+        scotts_factor = bw
     if limits is not None:
         vmin, vmax = limits
         if vmin < vmin.min() or vmax > vmax.max():
@@ -141,6 +146,8 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
         If True plot each parameter including vector and matrix components in their own axis
     c_kde : int, optional
         Constant for the kde function, ignored if density==False
+    bw_kde : float, optional
+        Bandwitdh used for the density estimation. Overwrite scotts factor with c_kde.
     nbins : int, optional
         Maximum number of bins for histogram function, ignored if density is False.
     inc_warmup : bool, optional, default False
@@ -157,9 +164,10 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
             kde, kde data, optional
     """
     # TODO: Add option to plot chains independently
-    c_kde = kwargs.get('c_kde', 1)
-    nbins = kwargs.get('nbins', None)
-    inc_warmup = kwargs.get('inc_warmup', False)
+    c_kde = kwargs.pop('c_kde', 1)
+    bw_kde = kwargs.pop('bw_kde', None)
+    nbins = kwargs.pop('nbins', None)
+    inc_warmup = kwargs.pop('inc_warmup', False)
     sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__', \
                       'n_leapfrog__', 'divergent__', 'energy__'}
     for par in pars:
@@ -211,7 +219,7 @@ def traceplot_data(fit, pars, dtypes=None, density=True, split_pars=False, **kwa
                     if is_unique:
                         x_kde, y_kde = np.array([vec[0], vec[0]]), np.array([0,1])
                     else:
-                        x_kde, y_kde = kde_data(vec, limits, c=c_kde)
+                        x_kde, y_kde = kde_data(vec, limits, c=c_kde, bw=bw_kde)
                     yield {'par': par,
                            'name' : name,
                            'vec' : vec,
@@ -238,6 +246,8 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
         If True plot each parameter including vector and matrix components in their own axis.
     c_kde : int, optional
         Constant for the kde function, ignored if density==False.
+    bw_kde : float, optional
+        Bandwitdh used for the density estimation. Overwrite scotts factor with c_kde.
     nbins : int, optional
         Maximum number of bins for histogram function, ignored if density==False.
     inc_warmup : bool, optional, default False
@@ -257,12 +267,13 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
     """
     # TODO: Add option to plot chains independently
     # This can be done with np.ndindex tricks
-    c_kde = kwargs.get('c_kde', 1)
-    nbins = kwargs.get('nbins', None)
-    inc_warmup = kwargs.get('inc_warmup', False)
+    c_kde = kwargs.pop('c_kde', 1)
+    bw_kde = kwargs.pop('bw_kde', None)
+    nbins = kwargs.pop('nbins', None)
+    inc_warmup = kwargs.pop('inc_warmup', False)
     sampler_params = {'accept_stat__', 'stepsize__', 'treedepth__', \
                       'n_leapfrog__', 'divergent__', 'energy__'}
-    overlap = kwargs.get('overlap', 0.98)
+    overlap = kwargs.pop('overlap', 0.98)
     for par in pars:
         if par in sampler_params:
             n_save = fit.sim['n_save'][0]
@@ -311,7 +322,7 @@ def forestplot_data(fit, pars, dtypes=None, split_pars=False, **kwargs):
                 if is_unique:
                     x_kde, y_kde = np.array([vec[0], vec[0]]), np.array([0,1])
                 else:
-                    x_kde, y_kde = kde_data(vec, limits, c=c_kde)
+                    x_kde, y_kde = kde_data(vec, limits, c=c_kde, bw=bw_kde)
                 yield {'par': par,
                        'name' : name,
                        'vec' : vec,
