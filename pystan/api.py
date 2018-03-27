@@ -66,6 +66,15 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     -----
     C++ reserved words and Stan reserved words may not be used for
     variable names; see the Stan User's Guide for a complete list.
+    
+    The `#include` method follows a C/C++ syntax `#include foo/my_gp_funs.stan`.
+    The method needs to be at the start of the row, no whitespace is allowed.
+    After the included file no whitespace or comments are allowed.
+    `pystan.experimental`(PyStan 2.18) has a `fix_include`-function to clean the `#include`
+    statements from the `model_code`. 
+    Example: 
+    `from pystan.experimental import fix_include`
+    `model_code = fix_include(model_code)`
 
     See also
     --------
