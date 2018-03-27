@@ -30,5 +30,5 @@ def fix_include(model_code):
         msg = "Made {} subsitution for the model_code"
     else:
         msg = "Made {} subsitutions for the model_code"
-    logger.info(.format(n))
+    logger.info(msg.format(n))
     return model_code
