@@ -17,5 +17,5 @@ def fix_include(model_code):
     """
     pattern = r"(?<=\n)\s*(#include)\s*(\S+)\s*(?=\n)"
     model_code, n = re.subn(pattern, r"\1 \2", model_code)
-    logger.info("Made {} subsitutions for the model_code".format(n) 
+    logger.info("Made {} subsitutions for the model_code".format(n))
     return model_code
