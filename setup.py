@@ -189,6 +189,7 @@ def setup_package():
                     maintainer_email=AUTHOR_EMAIL,
                     packages=['pystan',
                               'pystan.tests',
+                              'pystan.experimental',
                               'pystan.external',
                               'pystan.external.pymc',
                               'pystan.external.enum',
