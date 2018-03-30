@@ -389,13 +389,13 @@ def mcmc_parcoord_data(fit, pars, divergence=False, **kwargs):
         vectors.append(vecs)
     vectors = np.column_stack(vectors)
     if not divergence:
-        return names, vectors.T, []
+        return names, vectors, []
     else:
         n_save = fit.sim['n_save'][0]
         if not inc_warmup:
             n_save = n_save - fit.sim['warmup2'][0]
         div_vec = np.r_[[item['divergent__'][-n_save:] for item in fit.get_sampler_params()]].ravel().astype(bool)
         if div_vec.sum():
-            return names, vectors[~div_vec, :].T, vectors[div_vec, :].T
+            return names, vectors[~div_vec, :], vectors[div_vec, :]
         else:
-            return names, vectors.T, []
+            return names, vectors, []

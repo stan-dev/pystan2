@@ -337,7 +337,7 @@ def traceplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwar
             logger.critical(err_msg)
             raise ValueError(err_msg)
     # create figure object
-    figsize = kwargs.pop('figsize', (6, max(4.5, 1.5*n)))
+    figsize = kwargs.pop('figsize', (6, max(3, 2*n)))
     fig, axes = plt.subplots(n, m, figsize=figsize, squeeze=False)
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
@@ -551,7 +551,7 @@ def forestplot(fit, pars=None, dtypes=None, kde_dict=None, hist_dict=None, **kwa
             n += 1
     # create figure object
     overlap = float(kwargs.get('overlap', 1))
-    figsize = kwargs.pop('figsize', (6, max(4.5, n/overlap)))
+    figsize = kwargs.pop('figsize', (6, max(3, n/overlap)))
     fig, ax = plt.subplots(1, 1, figsize=figsize)
     legend = kwargs.pop('legend', False)
     fill = kwargs.pop('fill', True)
@@ -739,18 +739,18 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
     if cmap is None:
         if color is None:
             color = 'k'
-        ax.plot(data[0, :], c=color, alpha=alpha, lw=lw, label=label_non, **kwargs)
-        ax.plot(data[1:, :], c=color, alpha=alpha, lw=lw, label='_nolegend_', **kwargs)
+        ax.plot(data[0], c=color, alpha=alpha, lw=lw, label=label_non, **kwargs)
+        ax.plot(data[1:].T, c=color, alpha=alpha, lw=lw, label='_nolegend_', **kwargs)
     # run line by line
     else:
-        n = data.shape[1]
+        n = data.shape[0]
         if isinstance(cmap, str):
             colors = plt.cm.get_cmap(cmap)(np.linspace(0,1,n))
         else:
             colors = cmap(np.linspace(0,1,n))
         # non-divergent samples
         label = label_non
-        for i, _data in enumerate(data.T):
+        for i, _data in enumerate(data):
             ax.plot(_data, c=colors[i], alpha=alpha, lw=lw, label=label, **kwargs)
             label = '_nolegend_'
     if divergence and len(data_div):
@@ -765,7 +765,7 @@ def mcmc_parcoord(fit, pars=None, transform=None, divergence=None, **kwargs):
         elif isinstance(divergence, str):
             divergence = [divergence]*n_div
         label = 'divergent'
-        for i, _data in enumerate(data_div.T):
+        for i, _data in enumerate(data_div):
             ax.plot(_data, c=divergence[i], alpha=alpha_div, lw=lw_div, label=label, **kwargs)
             label = '_no_legend_'
     if legend:
