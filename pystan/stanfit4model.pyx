@@ -42,7 +42,7 @@ import warnings
 import numpy as np
 
 import pystan.misc
-import pystan.plots
+import pystan.plot
 from pystan._compat import PY2, string_types
 from pystan.constants import (sampling_algo_t, optim_algo_t, variational_algo_t,
                               sampling_metric_t, stan_args_method_t)
@@ -487,45 +487,262 @@ cdef class StanFit4Model:
 
     # public methods
 
-    def plot(self, pars=None, dtypes=None):
-        """Visualize samples from posterior distributions
+    def plot(self, pars=None, dtypes=None, kind='trace', **kwargs):
+        """plot(kind='trace', pars=None, dtypes=None, **kwargs)
+
+        Visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}
-            parameter name(s); by default use all parameters of interest
+            parameter name(s); by default use all parameters of interest.
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        kind : str
+            choose plot: {'trace', 'forest', 'mcmc_parcoord'}
 
-        Note
-        ----
-        This is currently an alias for the `traceplot` method.
+        Returns
+        -------
+        fig : Figure instance
+        axes : ndarray of Axes instances or Axes instance
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot(kind='trace')
+        ``
         """
+        if self.mode == 1:
+            raise ValueError("Stan model '{}' is of mode 'test_grad';\n"\
+                   "sampling is not conducted.".format(self.model_name))
+        elif self.mode == 2:
+            raise ValueError("Stan model '{}' does not contain samples.".format(self.model_name))
         if pars is None:
             pars = [par for par in self.sim['pars_oi'] if par != 'lp__']
         elif isinstance(pars, string_types):
             pars = [pars]
         pars = pystan.misc._remove_empty_pars(pars, self.sim['pars_oi'], self.sim['dims_oi'])
-        return pystan.plots.traceplot(self, pars, dtypes)
+        if kind.lower() in ('trace', 'traceplot'):
+            return pystan.plot.traceplot(self, pars, dtypes=dtypes, **kwargs)
+        elif kind.lower() in ('forest', 'forestplot'):
+            return pystan.plot.forestplot(self, pars, dtypes=dtypes, **kwargs)
+        elif kind.lower() in ('mcmc_parcoord', 'parcoord', 'parcoords'):
+            return pystan.plot.mcmc_parcoord(self, pars, **kwargs)
+        else:
+            raise ValueError("Incorrect plot type: for 'kind' use {'trace', 'forest', 'mcmc_parcoord'}")
 
-    def traceplot(self, pars=None, dtypes=None):
-        """Visualize samples from posterior distributions
+    def plot_traceplot(self, pars=None, dtypes=None, **kwargs):
+        """plot_traceplot(pars=None, dtypes=None, **kwargs)
+
+        Use traceplot to visualize samples from posterior distributions
 
         Parameters
         ---------
         pars : {str, sequence of str}, optional
             parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
         dtypes : dict
             datatype of parameter(s).
             If nothing is passed, np.float will be used for all parameters.
             If np.int is specified, the histogram will be visualized, not but
             kde.
+        kde_dict: dictionary, optional
+            Dictionary appended for kde plots as kwargs.
+        hist_dict: dictionary, optional
+            Dictionary appended for histogram plots as kwargs.
+        split_pars : bool, optional
+            If True plot each parameter including vector and matrix components in their own axis.
+        density : bool, optional
+            If False don't plot kde or histograms. Plots histogram if dtype for parameter is int.
+        statistic : bool or str or list of dictionaries, optional
+            If True, statistic = mean.
+            If str, `{'mean', 'median'}`
+            Add statistic line for the density plot. Statistic function (key='func') is popped out.
+            The rest of the dictionary is appended to ax.plot.
+            E.g. `[{'func' : np.mean, 'lw' : 1}]`.
+            Use `functools.partial` if statistic funtion needs parameters.
+        force : bool, optional
+            If force is True then plot large number of parameters.
+        figsize : tuple, optional
+            Given in inches.
+        fill : bool, optional
+            Fill the density plot.
+        fill_dict : dict, optional
+            Keywords appended to `fill_between` plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        color : str or tuple, optional
+            Default color used for the plotting.
+            Is overwrited if kde_dict or hist_dict contains color keyword.
+            Overwrites cmap.
+        cmap : str or colormap object
+            Color lines based on the colormap.
+            Uses 0.5 for scalars
+            else `np.linspace(0,1,n)` where n is the vector count
+        c_kde : int, optional
+            Constant for the kde function, ignored if density==False
+        bw_kde : float, optional
+            Bandwitdh used for the density estimation. Overwrite scotts factor with c.
+        nbins : int, optional
+            Maximum number of bins for histogram function, ignored if density is False.
+        inc_warmup : bool, optional, default False
+            Include warmup
+
+        Returns
+        -------
+        fig : Figure instance
+        axes : ndarray of Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot_traceplot()
+        ``
         """
-        # FIXME: for now plot and traceplot do the same thing
-        return self.plot(pars, dtypes=dtypes)
+        return self.plot(kind='trace', pars=pars, dtypes=dtypes, **kwargs)
+
+    def plot_forestplot(self, pars=None, dtypes=None, **kwargs):
+        """plot_forestplot(pars=None, dtypes=None, **kwargs)
+
+        Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+        dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+            If np.int is specified, the histogram will be visualized, not but
+            kde.
+        kde_dict: dictionary, optional
+            Dictionary appended for kde plots as kwargs.
+        hist_dict: dictionary, optional
+            Dictionary appended for histogram plots as kwargs.
+        statistic : bool or str or list of dictionaries, optional
+            If True, statistic = mean.
+            If str, {'mean', 'median'}
+            Add statistic line for the density plot. Statistic function (key='func') is popped out.
+            The rest of the dictionary is appended to plt.plot.
+            E.g. [{'func' : np.mean, 'lw' : 1}].
+            Use functools.partial if statistic funtion needs parameters.
+        force : bool, optional
+            If force is True then plot large number of parameters.
+        legend : bool, optional
+            Add legend for the plot.
+        figsize : tuple, optional
+            Given in inches.
+        fill : bool, optional
+            Fill the density plot.
+        fill_dict : dict, optional
+            Keywords appended to `fill_between` plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        color : str or tuple, optional
+            Default color used for the plotting.
+            Is overwrited if kde_dict or hist_dict contains color keyword.
+            Overwrites cmap.
+        cmap : str or colormap object
+            Color lines based on the colormap.
+            Uses 0.5 for scalars
+            else `np.linspace(0,1,n)` where n is the vector count
+        c_kde : int, optional
+            Constant for the kde function, ignored if density==False.
+        bw_kde : float, optional
+            Bandwitdh used for the density estimation. Overwrite scotts factor with c.
+        nbins : int, optional
+            Maximum number of bins for histogram function, ignored if density==False.
+        inc_warmup : bool, optional, default False
+            Include warmup.
+        overlap : float, optional, default 0.98
+            Overlap density plots.
+
+        Returns
+        -------
+        fig : Figure instance
+        ax : Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        # plot parameter 'y'
+        fig, axes = fit.plot_forestplot(pars=['y'])
+        ``
+        """
+        return self.plot(kind='forest', pars=pars, dtypes=dtypes, **kwargs)
+
+    def plot_mcmc_parcoord(self, pars=None, dtypes=None, **kwargs):
+        """plot_mcmc_parcoord(pars=None, **kwargs)
+
+        Visualize samples from posterior distributions
+
+        Parameters
+        ---------
+        pars : {str, sequence of str}, optional
+            parameter name(s); by default use all parameters of interest
+            Accepts also sampler params:
+                {'accept_stat__', 'stepsize__', 'treedepth__',
+                 'n_leapfrog__', 'divergent__', 'energy__', 'lp__'}
+         dtypes : dict
+            datatype of parameter(s).
+            If nothing is passed, np.float will be used for all parameters.
+        transform : str or function, optional
+            If str, {'min'
+            Function to transform data.
+            Must return data in original shape.
+        divergence : bool or str or cmap, optional
+            If True or non-empty dictionary plot divergent samples independently.
+            If divergence is a color, color divergent samples correspondingly.
+            If divergence is a cmap (str, function), color divergent samples correspondingly.
+        cmap : str or function, optional
+            Color samples based on the index (order) with chosen colormap
+        color : str, tuple, optional
+            Color samples based on the one color.
+        alpha : float, optional
+            Alpha value used for the data
+        lw : float or int, optional
+            Linewidth for the data.
+        alpha_div : float, optional
+            Alpha value used for the divergent data
+        lw_div : float or int, optional
+            Linewidth for the divergent data.
+        label : str, optional
+            Add label for the plot
+        figsize : tuple, optional
+            Given in inches.
+        legend : bool, optional
+            Add legend for the plot.
+        tight_layout : bool, optional
+            Padding is set to 0.5.
+        inc_warmup : bool, optional
+
+        Returns
+        -------
+        fig : Figure instance
+        ax : Axes instances
+
+        Example
+        -------
+        ```
+        fit = model_program.sampling()
+        fig, axes = fit.plot_mcmc_parcoord(transform='standard', divergence=True)
+        ``
+        """
+        return self.plot(kind='mcmc_parcoord', pars=pars, dtypes=dtypes, **kwargs)
 
     def extract(self, pars=None, permuted=True, inc_warmup=False, dtypes=None):
         """Extract samples in different forms for different parameters.
