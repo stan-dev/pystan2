@@ -14,7 +14,7 @@ class TestFixedParam(unittest.TestCase):
             model { }
             generated quantities {
               real y;
-              y <- normal_rng(0, 1);
+              y = normal_rng(0, 1);
             }
         '''
         cls.model = pystan.StanModel(model_code=model_code)
