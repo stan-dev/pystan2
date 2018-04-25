@@ -855,8 +855,19 @@ class StanModel:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
+        
         m_pars = fit._get_param_names()
-        p_dims = fit._get_param_dims()
+        if isinstance(pars, string_types):
+            pars = [pars]
+        if pars is not None and len(pars) > 0:
+            fit._update_param_oi(pars)
+            if not all(p in m_pars for p in pars):
+                pars = np.asarray(pars)
+                unmatched = pars[np.invert(np.in1d(pars, m_pars))]
+                msg = "No parameter(s): {}; sampling not done."
+                raise ValueError(msg.format(', '.join(unmatched)))
+        else:
+            pars = m_pars
 
         if isinstance(init, numbers.Number):
             init = str(init)
@@ -892,7 +903,7 @@ class StanModel:
         stan_args.update(kwargs)
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
 
-        ret, sample = fit._call_sampler(stan_args)
+        ret, sample = fit._call_sampler(stan_args, pars_oi=pars)
 
         logger.warning('Automatic Differentiation Variational Inference (ADVI) is an EXPERIMENTAL ALGORITHM.')
         logger.warning('ADVI samples may be found on the filesystem in the file `{}`'.format(sample.args['sample_file'].decode('utf8')))
