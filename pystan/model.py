@@ -644,6 +644,10 @@ class StanModel:
             Argument `refresh` can be used to control how to indicate the progress
             during sampling (i.e. show the progress every \code{refresh} iterations).
             By default, `refresh` is `max(iter/10, 1)`.
+            
+        check_diagnostics : bool, optional
+            After sampling run `pystan.diagnostics.check_mcmc_diagnostics` function.
+            Default is `True`.
 
         Examples
         --------
@@ -695,7 +699,8 @@ class StanModel:
         if chains < 1:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
-
+        
+        check_diagnostics = kwargs.pop(check_diagnostics, True)
         # check that arguments in kwargs are valid
         valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
@@ -758,7 +763,8 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        pystan.diagnostics.check_mcmc_diagnostics(fit)  # noqa
+        if check_diagnostics:
+            pystan.diagnostics.check_mcmc_diagnostics(fit)  # noqa
 
         return fit
 
