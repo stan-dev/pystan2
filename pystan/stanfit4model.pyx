@@ -958,5 +958,5 @@ cdef class StanFit4Model:
         param_names = [n.decode('utf-8') for n in param_names_bytes]
         return param_names
 
-    def _call_sampler(self, dict args):
-        return _call_sampler(self.data, args)
+    def _call_sampler(self, dict args, pars_oi=None):
+        return _call_sampler(self.data, args, pars_oi=oars_oi)
