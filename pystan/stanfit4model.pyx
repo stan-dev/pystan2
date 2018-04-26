@@ -959,4 +959,4 @@ cdef class StanFit4Model:
         return param_names
 
     def _call_sampler(self, dict args, pars_oi=None):
-        return _call_sampler(self.data, args, pars_oi=oars_oi)
+        return _call_sampler(self.data, args, pars_oi=pars_oi)
