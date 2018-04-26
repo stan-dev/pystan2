@@ -700,7 +700,7 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
         
-        check_diagnostics = kwargs.pop(check_diagnostics, True)
+        check_diagnostics = kwargs.pop('check_diagnostics', True)
         # check that arguments in kwargs are valid
         valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
