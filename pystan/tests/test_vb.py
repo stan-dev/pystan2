@@ -11,7 +11,7 @@ class TestNormalVB(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        model_code = 'parameters {real y; real z;} model {y ~ normal(0,1); z ~ normal(0,1);}'
         cls.model = pystan.StanModel(model_code=model_code)
 
     def test_vb_default(self):
@@ -47,3 +47,11 @@ class TestNormalVB(unittest.TestCase):
         self.assertIsNotNone(vbf)
         self.assertEqual(vbf['args']['diagnostic_file'].decode('utf-8'), diag_file)
         self.assertTrue(os.path.exists(diag_file))
+        
+    def test_vb_pars(self):
+        vbf = self.model.vb(algorithm='fullrank', pars=['y'], seed=self.seed)
+        vbf2 = self.model.vb(algorithm='fullrank', pars='z', seed=self.seed)
+        self.assertIsNotNone(vbf)
+        self.assertIsNotNone(vbf2)
+        self.assertEqual(vbs['sampler_param_names'], ['y'])
+        self.assertEqual(vbs2['sampler_param_names'], ['z'])
