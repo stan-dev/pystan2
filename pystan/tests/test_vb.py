@@ -49,9 +49,9 @@ class TestNormalVB(unittest.TestCase):
         self.assertTrue(os.path.exists(diag_file))
         
     def test_vb_pars(self):
-        vbf = self.model.vb(algorithm='fullrank', pars=['y'], seed=self.seed)
-        vbf2 = self.model.vb(algorithm='fullrank', pars='z', seed=self.seed)
-        self.assertIsNotNone(vbf)
-        self.assertIsNotNone(vbf2)
-        self.assertEqual(vbs['sampler_param_names'], ['y'])
-        self.assertEqual(vbs2['sampler_param_names'], ['z'])
+        vbfit = self.model.vb(algorithm='fullrank', pars=['y'], seed=self.seed)
+        vbfit2 = self.model.vb(algorithm='fullrank', pars='z', seed=self.seed)
+        self.assertIsNotNone(vbfit)
+        self.assertIsNotNone(vbfit2)
+        self.assertEqual(vbfit['sampler_param_names'], ['y'])
+        self.assertEqual(vbfit2['sampler_param_names'], ['z'])
