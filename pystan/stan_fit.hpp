@@ -1283,14 +1283,13 @@ namespace pystan {
         std::vector<std::vector<double> > slst(sample_writer_ptr->values_.x().begin(),
                                                sample_writer_ptr->values_.x().end());
         
-        
         std::vector<std::string> slst_names(slst.size() - 1);
         std::vector<double> mean_pars(slst.size() - 1);
         for (size_t n = 0; n < mean_pars.size(); ++n) {
           slst_names[n] = fnames_oi[n];
           mean_pars[n] = slst[n][0];
         }
-
+        
         holder.sampler_params = slst;
         holder.sampler_param_names = slst_names;
         holder.mean_pars = mean_pars;
