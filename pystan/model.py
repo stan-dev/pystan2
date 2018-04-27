@@ -645,8 +645,8 @@ class StanModel:
             during sampling (i.e. show the progress every \code{refresh} iterations).
             By default, `refresh` is `max(iter/10, 1)`.
             
-        check_diagnostics : bool, optional
-            After sampling run `pystan.diagnostics.check_mcmc_diagnostics` function.
+        check_hmc_diagnostics : bool, optional
+            After sampling run `pystan.diagnostics.check_hmc_diagnostics` function.
             Default is `True`.
 
         Examples
@@ -700,7 +700,7 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
         
-        check_diagnostics = kwargs.pop('check_diagnostics', True)
+        check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', True)
         # check that arguments in kwargs are valid
         valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
@@ -763,8 +763,8 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        if check_diagnostics:
-            pystan.diagnostics.check_mcmc_diagnostics(fit)  # noqa
+        if check_hmc_diagnostics:
+            pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
 
         return fit
 
