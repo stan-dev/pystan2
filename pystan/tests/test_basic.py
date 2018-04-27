@@ -27,6 +27,12 @@ class TestNormal(unittest.TestCase):
         extr = fit.extract()
         y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
         self.assertEqual(fit.log_prob(y_last), log_prob_last)
+    
+    def test_check_diagnostics(self):
+        fit = self.model.sampling(iter=10, chains=1, check_diagnostics=True)
+        self.assertIsNotNone(fit)
+        fit2 = self.model.sampling(iter=10, chains=1, check_diagnostics=False)
+        self.assertIsNotNone(fit2)
 
     def test_control_stepsize(self):
         fit = self.model.sampling(control=dict(stepsize=0.001))
