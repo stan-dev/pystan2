@@ -29,9 +29,9 @@ class TestNormal(unittest.TestCase):
         self.assertEqual(fit.log_prob(y_last), log_prob_last)
     
     def test_check_diagnostics(self):
-        fit = self.model.sampling(iter=10, chains=1, check_diagnostics=True)
+        fit = self.model.sampling(iter=10, chains=1, check_hmc_diagnostics=True)
         self.assertIsNotNone(fit)
-        fit2 = self.model.sampling(iter=10, chains=1, check_diagnostics=False)
+        fit2 = self.model.sampling(iter=10, chains=1, check_hmc_diagnostics=False)
         self.assertIsNotNone(fit2)
 
     def test_control_stepsize(self):
