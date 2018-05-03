@@ -53,5 +53,5 @@ class TestNormalVB(unittest.TestCase):
         vbfit2 = self.model.vb(algorithm='fullrank', pars='z', seed=self.seed)
         self.assertIsNotNone(vbfit)
         self.assertIsNotNone(vbfit2)
-        self.assertEqual(vbfit['sampler_param_names'], ['y'])
-        self.assertEqual(vbfit2['sampler_param_names'], ['z'])
+        self.assertEqual(vbfit['mean_par_names'], ['y'])
+        self.assertEqual(vbfit2['mean_par_names'], ['z'])
