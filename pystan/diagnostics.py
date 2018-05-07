@@ -367,7 +367,7 @@ def check_rhat(fit, verbose = True):
 
         return False
 
-def check_mcmc_diagnostics(fit, verbose = True, per_chain = False):
+def check_hmc_diagnostics(fit, verbose = True, per_chain = False):
     """Checks all MCMC diagnostics
 
     Parameters

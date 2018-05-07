@@ -129,7 +129,7 @@ class TestExtract(unittest.TestCase):
         alpha = ss['alpha']
         beta = ss['beta']
         lp__ = ss['lp__']
-        df = self.fit.to_dataframe()
+        df = self.fit.to_dataframe(permuted=True)
         self.assertEqual(df.shape, (4000,9))
         for idx in range(2):
             for jdx in range(3):
@@ -140,14 +140,14 @@ class TestExtract(unittest.TestCase):
             assert_array_equal(df[name].values,beta[:,idx])
         assert_array_equal(df['lp__'].values,lp__)
         # Test pars argument
-        df = self.fit.to_dataframe(pars='alpha')
+        df = self.fit.to_dataframe(pars='alpha', permuted=True)
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):
             for jdx in range(3):
                 name = 'alpha[{},{}]'.format(idx+1,jdx+1)
                 assert_array_equal(df[name].values,alpha[:,idx,jdx])
         # Test pars and dtype argument
-        df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int})
+        df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int}, permuted=True)
         alpha_int = ss['alpha'].astype(np.int)
         self.assertEqual(df.shape, (4000,6))
         for idx in range(2):

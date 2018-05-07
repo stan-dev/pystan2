@@ -859,7 +859,7 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
-    def to_dataframe(self, pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True):
+    def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True):
         """Extract samples as a pandas dataframe for different parameters.
 
         Parameters
