@@ -111,7 +111,7 @@ Install `libpython` and `m2w64-toolchain` packages::
 In `PYTHONPATH\\Lib\\distutils` create `distutils.cfg` with text editor (e.g. `notepad`, `notepad++`) and add the following lines::
 
     [build]
-    mingw32
+    compiler=mingw32
     
 To find the correct `distutils` path, run `python`::
 
