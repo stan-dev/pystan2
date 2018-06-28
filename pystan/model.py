@@ -275,7 +275,7 @@ class StanModel:
             ('BOOST_NO_DECLTYPE', None),
             ('BOOST_DISABLE_ASSERTS', None),
         ]
-        
+
         build_extension = _get_build_extension()
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
@@ -298,7 +298,7 @@ class StanModel:
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
-        
+
         build_extension.extensions = cythonize([extension],
                                                include_path=cython_include_dirs,
                                                quiet=not verbose)
@@ -855,7 +855,7 @@ class StanModel:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
-        
+
         m_pars = fit._get_param_names()
         if isinstance(pars, string_types):
             pars = [pars]
@@ -907,9 +907,5 @@ class StanModel:
 
         logger.warning('Automatic Differentiation Variational Inference (ADVI) is an EXPERIMENTAL ALGORITHM.')
         logger.warning('ADVI samples may be found on the filesystem in the file `{}`'.format(sample.args['sample_file'].decode('utf8')))
-        
-        # remove the first value (=mean value)
-        sampler_params = [params[1:] for params in sample.sampler_params]
-        # remove lp__
-        mean_par_names = [name for name in sample.sampler_param_names[:-1]]
-        return OrderedDict([('args', sample.args), ('inits', sample.inits), ('sampler_params', sampler_params), ('sampler_param_names', sample.sampler_param_names), ('mean_pars', sample.mean_pars), ('mean_par_names', mean_par_names)])
+
+        return OrderedDict([('args', sample.args), ('inits', sample.inits), ('sampler_params', sample.sampler_params), ('sampler_param_names', sample.sampler_param_names), ('mean_pars', sample.mean_pars), ('mean_par_names', sample.mean_par_names)])

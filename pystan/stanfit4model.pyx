@@ -85,6 +85,7 @@ cdef class PyStanHolder:
     cdef public chains
     cdef public dict args
     cdef public mean_pars
+    cdef public list mean_par_names
     cdef public double mean_lp__
     cdef public adaptation_info
     cdef public sampler_params
@@ -144,6 +145,7 @@ cdef PyStanHolder _pystanholder_from_stanholder(StanHolder* holder):
     # FIXME: figure out origins of difficulties
     # r['args'] = _dict_from_stanargs(holder.args)
     h.mean_pars = holder.mean_pars
+    h.mean_par_names = [n.decode('utf-8') for n in holder.mean_par_names]
     h.mean_lp__ = holder.mean_lp__
     h.adaptation_info = holder.adaptation_info.decode('utf-8')
     h.sampler_params = holder.sampler_params
@@ -883,10 +885,10 @@ cdef class StanFit4Model:
         Returns
         -------
         df : pandas dataframe
-	
+
 	Note
 	----
-	Unlike default in extract (`permuted=True`) 
+	Unlike default in extract (`permuted=True`)
 	`.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
 
         """
