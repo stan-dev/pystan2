@@ -1228,7 +1228,7 @@ namespace pystan {
         }
         holder.adaptation_info = adaptation_info;
 
-        std::vector<std::vector<double> > slst(sample_writer_ptr->sampler_values_.x().begin(),
+        std::vector<std::vector<double> > slst(sample_writer_ptr->sampler_values_.x().begin()+1,
                                                sample_writer_ptr->sampler_values_.x().end());
 
         std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
