@@ -140,6 +140,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         vector[string] chain_names
         StanArgs args
         vector[double] mean_pars
+        vector[string] mean_par_names
         double mean_lp__
         string adaptation_info
         vector[vector[double] ] sampler_params
@@ -147,4 +148,3 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
 
     # free standing functions
     void get_all_flatnames(vector[string] names, vector[vector[uint]]& dims, vector[string] fnames, bool col_major)
-

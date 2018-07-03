@@ -439,6 +439,7 @@ namespace pystan {
           std::vector<std::string> chain_names;
           StanArgs args;
           std::vector<double> mean_pars;
+          std::vector<std::string> mean_par_names;
           double mean_lp__;
           std::string adaptation_info;
           std::vector<std::vector<double> > sampler_params;
@@ -1232,6 +1233,7 @@ namespace pystan {
 
         std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
         slst_names.insert(slst_names.end(), sampler_names.begin(), sampler_names.end());
+
         holder.sampler_params = slst;
         holder.sampler_param_names = slst_names;
         holder.chain_names = fnames_oi;
@@ -1282,13 +1284,22 @@ namespace pystan {
         }
         std::vector<std::vector<double> > slst(sample_writer_ptr->values_.x().begin(),
                                                sample_writer_ptr->values_.x().end());
+
         std::vector<double> mean_pars(slst.size() - 1);
-        for (size_t n = 0; n < mean_pars.size(); ++n)
+        std::vector<std::string> mean_par_names(slst.size() - 1);
+        for (size_t n = 0; n < mean_pars.size(); ++n) {
           mean_pars[n] = slst[n][0];
+          mean_par_names[n] = fnames_oi[n];
+        }
+
+        for (size_t n = 0; n < slst.size(); ++n) {
+          slst[n].erase(slst[n].begin());
+        }
 
         holder.sampler_params = slst;
-        holder.sampler_param_names = constrained_param_names;
+        holder.sampler_param_names = fnames_oi;
         holder.mean_pars = mean_pars;
+        holder.mean_par_names = mean_par_names;
         holder.args = args;
         holder.inits = unconstrained_to_constrained(model, random_seed, id,
                                                     init_writer.x());
