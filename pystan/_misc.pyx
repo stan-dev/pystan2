@@ -9,7 +9,6 @@ cpdef get_kept_samples(int n, dict sim):
     """See documentation in misc.py"""
     cdef int i, j, num_chains, num_samples, num_warmup, ss_index, s_index
     cdef double[:] s, ss
-    cdef long[:] perm
     num_chains = sim['chains']
     nth_key = list(sim['samples'][0]['chains'].keys())[n]
 
@@ -19,11 +18,10 @@ cpdef get_kept_samples(int n, dict sim):
 
     ss = np.empty((num_samples - num_warmup) * num_chains)
     for i in range(num_chains):
-        perm = sim['permutation'][i]
         s = sim['samples'][i]['chains'][nth_key]
         for j in range(num_samples - num_warmup):
             ss_index = i * (num_samples - num_warmup) + j
-            s_index = num_warmup + perm[j]
+            s_index = num_warmup + j
             ss[ss_index] = s[s_index]
     return ss
 
