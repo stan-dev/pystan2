@@ -11,7 +11,9 @@ def traceplot(fit, pars, dtypes, **kwargs):
     """
     # FIXME: eventually put this in the StanFit object
     # FIXME: write a to_pymc(_trace) function
-    logger.warning("Deprecation warning, plotting module is going to be removed from PyStan (2.19<=) library. In future, use ArviZ plotting library (`pip install arviz`)"
+    logger.warning("Deprecation warning, plotting module"\
+                   " is going to be removed from PyStan (2.19<=)."\
+                   " In future, use ArviZ library (`pip install arviz`)")
     try:
         from pystan.external.pymc import plots
     except ImportError:
