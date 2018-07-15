@@ -8,6 +8,7 @@
 import hashlib
 import io
 import logging
+import os
 import warnings
 
 import pystan._api  # stanc wrapper
@@ -18,7 +19,7 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          verbose=False, obfuscate_model_name=True):
+          include_paths=None, verbose=False, obfuscate_model_name=True):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -42,6 +43,9 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         the default. However, if `file` is a filename, then the filename
         will be used to provide a name.
 
+    include_paths: list of strings, optional
+        Paths for #include files defined in Stan code.
+
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the
         console. This output may be useful for debugging.
@@ -62,6 +66,15 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     -----
     C++ reserved words and Stan reserved words may not be used for
     variable names; see the Stan User's Guide for a complete list.
+    
+    The `#include` method follows a C/C++ syntax `#include foo/my_gp_funs.stan`.
+    The method needs to be at the start of the row, no whitespace is allowed.
+    After the included file no whitespace or comments are allowed.
+    `pystan.experimental`(PyStan 2.18) has a `fix_include`-function to clean the `#include`
+    statements from the `model_code`. 
+    Example: 
+    `from pystan.experimental import fix_include`
+    `model_code = fix_include(model_code)`
 
     See also
     --------
@@ -116,6 +129,17 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     # bytes, going into C++ code
     model_code_bytes = model_code.encode('utf-8')
 
+    if include_paths is None:
+        include_paths = [os.path.abspath('.')]
+    elif isinstance(include_paths, string_types):
+        include_paths = [include_paths]
+    # add trailing /
+    include_paths = [os.path.join(path, "") for path in include_paths]
+    include_paths_bytes = [path.encode('utf-8') for path in include_paths]
+
+    # set to False
+    allow_undefined = False
+
     if obfuscate_model_name:
         # Make the model name depend on the code.
         model_name = (
@@ -124,7 +148,17 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
 
     model_name_bytes = model_name.encode('ascii')
 
-    result = pystan._api.stanc(model_code_bytes, model_name_bytes)
+    if not isinstance(file, string_types):
+        # use default 'unknown file name'
+        filename_bytes  = b'unknown file name'
+    else:
+        # use only the filename, used only for debug printing
+        filename_bytes = os.path.split(file)[-1].encode('utf-8')
+
+    result = pystan._api.stanc(model_code_bytes, model_name_bytes,
+                               allow_undefined, filename_bytes, 
+                               include_paths_bytes,
+                              )
     if result['status'] == -1:  # EXCEPTION_RC is -1
         msg = result['msg']
         if PY2:
@@ -137,14 +171,15 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     del result['msg']
     result.update({'model_name': model_name})
     result.update({'model_code': model_code})
+    result.update({'include_paths' : include_paths})
     return result
 
 
 def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=None, algorithm=None, control=None, sample_file=None,
-         diagnostic_file=None, verbose=False, boost_lib=None,
-         eigen_lib=None, n_jobs=-1, **kwargs):
+         diagnostic_file=None, verbose=False, boost_lib=None, eigen_lib=None,
+         include_paths=None, n_jobs=-1, **kwargs):
     """Fit a model using Stan.
 
     The `pystan.stan` function was deprecated in version 2.17 and will be
@@ -250,6 +285,9 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         The path to a version of the Eigen C++ library to use instead of
         the one in the supplied with PyStan.
 
+    include_paths : list of strings, optional
+        Paths for #include files defined in Stan code.
+
     verbose : boolean, optional
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging. False by default.
@@ -321,12 +359,12 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Argument `refresh` can be used to control how to indicate the progress
         during sampling (i.e. show the progress every \code{refresh} iterations).
         By default, `refresh` is `max(iter/10, 1)`.
-        
+
     obfuscate_model_name : boolean, optional
         `obfuscate_model_name` is only valid if `fit` is None. True by default.
         If False the model name in the generated C++ code will not be made
         unique by the insertion of randomly generated characters.
-        Generally it is recommended that this parameter be left as True. 
+        Generally it is recommended that this parameter be left as True.
 
     Examples
     --------
@@ -387,6 +425,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     else:
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
+                      include_paths=include_paths,
                       obfuscate_model_name=obfuscate_model_name, verbose=verbose)
     # check that arguments in kwargs are valid
     valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",

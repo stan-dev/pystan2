@@ -8,6 +8,7 @@
 
 from libcpp cimport bool
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 
 cdef extern from "stanc.hpp":
     struct PyStancResult:
@@ -15,4 +16,7 @@ cdef extern from "stanc.hpp":
         string msg
         string model_cppname
         string cppcode
-    int stanc(string& model_stancode, string& model_name, PyStancResult&)
+        vector[string] include_paths
+    int stanc(string& model_stancode, string& model_name,
+              bool& allow_undefined, string& filename,
+              vector[string]& include_paths, PyStancResult&)
