@@ -23,5 +23,5 @@ def traceplot(fit, pars, dtypes, **kwargs):
     if pars is None:
         pars = list(fit.model_pars) + ["lp__"]
     values = fit.extract(dtypes=dtypes, pars=pars, permuted=False)
-    values = {key : arr.reshape(-1, np.multiply.reduce(arr.shape[2:]), order="F") for key, arr in values.items()}
+    values = {key : arr.reshape(-1, int(np.multiply.reduce(arr.shape[2:])), order="F") for key, arr in values.items()}
     return plots.traceplot(values, pars, **kwargs)
