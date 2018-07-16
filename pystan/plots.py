@@ -21,4 +21,6 @@ def traceplot(fit, pars, dtypes, **kwargs):
         raise
     if pars is None:
         pars = list(fit.model_pars) + ["lp__"]
-    return plots.traceplot(fit.extract(dtypes=dtypes, pars=pars, permuted=False), pars, **kwargs)
+    values = fit.extract(dtypes=dtypes, pars=pars, permuted=False)
+    values = {key : arr.reshape(-1, np.multiply.reduce(arr.shape[2:]), order="F") for key, arr in values.items()}
+    return plots.traceplot(values, pars, **kwargs)
