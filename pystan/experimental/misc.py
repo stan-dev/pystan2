@@ -33,8 +33,8 @@ def fix_include(model_code):
     pattern = r"(?<=\n)\s*(#include)\s*(\S+)\s*(?=\n)"
     model_code, n = re.subn(pattern, r"\1 \2", model_code)
     if n == 1:
-        msg = "Made {} subsitution for the model_code"
+        msg = "Made {} substitution for the model_code"
     else:
-        msg = "Made {} subsitutions for the model_code"
+        msg = "Made {} substitutions for the model_code"
     logger.info(msg.format(n))
     return model_code
