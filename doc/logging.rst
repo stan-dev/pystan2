@@ -28,6 +28,11 @@ To redirect all messages only to a file.
 
     import logging
     logger = logging.getLogger("pystan")
+    
+    # add root logger (logger Level always Warning)
+    # not needed if PyStan already imported
+    logger.addHandler(logging.NullHandler()) 
+    
     logger_path = "pystan.log"
     fh = logging.FileHandler(logger_path, encoding="utf-8")
     fh.setLevel(logging.INFO)
@@ -38,7 +43,8 @@ To redirect all messages only to a file.
 
     import pystan
 
-To use both (default, file) logging options import pystan before the setup
+To use both (default, file) logging options import pystan before the setup.
+In this case PyStan adds root handler, which means that user can skip the root handler step.
 
 .. code-block:: python
 
