@@ -1,3 +1,4 @@
+import numpy as np
 import logging
 
 logger = logging.getLogger('pystan')
@@ -11,9 +12,16 @@ def traceplot(fit, pars, dtypes, **kwargs):
     """
     # FIXME: eventually put this in the StanFit object
     # FIXME: write a to_pymc(_trace) function
+    logger.warning("Deprecation warning, plotting module"\
+                   " is going to be removed from PyStan (2.19<=)."\
+                   " In future, use ArviZ library (`pip install arviz`)")
     try:
         from pystan.external.pymc import plots
     except ImportError:
         logger.critical("matplotlib required for plotting.")
         raise
-    return plots.traceplot(fit.extract(dtypes=dtypes), pars, **kwargs)
+    if pars is None:
+        pars = list(fit.model_pars) + ["lp__"]
+    values = fit.extract(dtypes=dtypes, pars=pars, permuted=False)
+    values = {key : arr.reshape(-1, int(np.multiply.reduce(arr.shape[2:])), order="F") for key, arr in values.items()}
+    return plots.traceplot(values, pars, **kwargs)
