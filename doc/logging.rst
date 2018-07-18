@@ -29,7 +29,7 @@ To redirect all messages only to a file.
     import logging
     logger = logging.getLogger("pystan")
     logger_path = "pystan.log"
-    fh = logging.Filehandler(logger_path, encoding="utf-8")
+    fh = logging.FileHandler(logger_path, encoding="utf-8")
     fh.setLevel(logging.INFO)
     # optional step
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
