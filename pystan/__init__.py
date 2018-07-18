@@ -15,7 +15,7 @@ from pystan.lookup import lookup
 logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
 if len(logger.handlers) == 1:
-    logging.basicConfig(level=logging.INFO)
+    logger.setLevel(logging.INFO)
 
 # following PEP 386
 __version__ = '2.17.1.0'
