@@ -1,4 +1,4 @@
-.. _setting_logger:
+.. _logging:
 
 .. currentmodule:: pystan
 
