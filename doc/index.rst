@@ -26,6 +26,7 @@ Documentation
    differences_pystan_rstan
    api
    conversion
+   logging
    windows
 
 Stan documentation
