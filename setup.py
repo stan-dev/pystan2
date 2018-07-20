@@ -101,8 +101,8 @@ from distutils.extension import Extension
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
-                     'pystan/stan/lib/stan_math/lib/boost_1.64.0',
-                     'pystan/stan/lib/stan_math/lib/cvodes_2.9.0/include']
+                     'pystan/stan/lib/stan_math/lib/boost_1.66.0',
+                     'pystan/stan/lib/stan_math/lib/sundials_3.1.0/include']
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -115,6 +115,7 @@ extra_compile_args = [
     '-ftemplate-depth-256',
     '-Wno-unused-function',
     '-Wno-uninitialized',
+    '-std=c++11',
 ]
 
 if platform.platform().startswith('Win'):
@@ -123,6 +124,7 @@ if platform.platform().startswith('Win'):
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
+            '/std:c++11',
         ]
 
 
