@@ -11,6 +11,7 @@ class TestExtraCompileArgs(unittest.TestCase):
             '-ftemplate-depth-1024',
             '-Wno-unused-function',
             '-Wno-uninitialized',
+            '-std=c++11',
         ]
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
         model = pystan.StanModel(model_code=model_code, model_name="normal1",

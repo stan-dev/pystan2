@@ -259,8 +259,8 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.64.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "cvodes_2.9.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.66.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_3.1.0", "include"),
             np.get_include(),
         ]
 
@@ -292,9 +292,14 @@ class StanModel:
                 '-ftemplate-depth-256',
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
+                '-std=c++11',
             ]
             if platform.platform().startswith('Win') and build_extension.compiler in (None, 'msvc'):
-                extra_compile_args = ['/EHsc', '-DBOOST_DATE_TIME_NO_LIB']
+                extra_compile_args = [
+                    '/EHsc',
+                    '-DBOOST_DATE_TIME_NO_LIB',
+                    '/std:c++11',
+                ]
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
