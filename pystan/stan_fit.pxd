@@ -42,7 +42,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
     cdef cppclass stan_fit[M, R]:
         stan_fit(vars_r_t& vars_r, vars_i_t& vars_i, uint random_seed) except +
         bool update_param_oi(vector[string] pars)
-        vector[double] unconstrain_pars(vars_r_t& vars_r, vars_i_t& vars_i)
+        vector[double] unconstrain_pars(vars_r_t& vars_r, vars_i_t& vars_i) except +
         vector[double] constrain_pars(vector[double]& params_r) except +
         double log_prob(vector[double] upar, bool jacobian_adjust_transform, bool gradient) except +
         vector[double] grad_log_prob(vector[double] upar, bool jacobian_adjust_transform) except +
