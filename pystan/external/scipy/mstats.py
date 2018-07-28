@@ -11,6 +11,7 @@ scipy is distributed under a BSD license
 
 import numpy as np
 import numpy.ma as ma
+from numpy.ma import masked, nomask
 
 def mquantiles(a, prob=list([.25,.5,.75]), alphap=.4, betap=.4, axis=None,
                limit=()):
