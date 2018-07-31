@@ -121,11 +121,20 @@ extra_compile_args = [
 if platform.platform().startswith('Win'):
     from Cython.Build.Inline import _get_build_extension
     if _get_build_extension().compiler in (None, 'msvc'):
+        logger.warning("MSVC is not supported")
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
-            '/std:c++11',
+            '/std:c++14',
         ]
+    else:
+        # fix bug in MingW-W64
+        # use posix threads
+        extra_compile_args.extend([
+            "-D_hypot=hypot",
+            "-pthread",
+            "-fexceptions",
+            ])
 
 
 stanc_sources = [
