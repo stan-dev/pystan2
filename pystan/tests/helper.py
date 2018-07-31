@@ -23,7 +23,11 @@ def save_model(stan_model, path):
 
 def get_model(filename, model_code, **kwargs):
     root = os.path.join(os.path.dirname(__file__), 'cached_models')
-    os.makedirs(root, exists_ok=True)
+    # py27 does not have 'exist_ok'
+    try:
+        os.makedirs(root)
+    except OSError:
+        pass
     path = os.path.join(root, filename)
     if os.path.exists(path):
         stan_model = load_model(path)
