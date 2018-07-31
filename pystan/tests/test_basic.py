@@ -8,15 +8,18 @@ import numpy as np
 
 import pystan
 from pystan._compat import PY2
-
+from pystan.tests.helper import get_model
 
 class TestNormal(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-        cls.model = pystan.StanModel(model_code=model_code, model_name="normal1",
-                                     verbose=True, obfuscate_model_name=False)
+        cls.model = get_model("standard_normal_model",
+                              model_code, model_name="normal1",
+                              verbose=True, obfuscate_model_name=False)
+        #cls.model = pystan.StanModel(model_code=model_code, model_name="normal1",
+        #                             verbose=True, obfuscate_model_name=False)
 
     def test_constructor(self):
         self.assertEqual(self.model.model_name, "normal1")
@@ -27,7 +30,7 @@ class TestNormal(unittest.TestCase):
         extr = fit.extract()
         y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
         self.assertEqual(fit.log_prob(y_last), log_prob_last)
-    
+
     def test_check_diagnostics(self):
         fit = self.model.sampling(iter=10, chains=1, check_hmc_diagnostics=True)
         self.assertIsNotNone(fit)
@@ -58,7 +61,9 @@ class TestBernoulli(unittest.TestCase):
             """
         cls.bernoulli_data = bernoulli_data = {'N': 10, 'y': [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]}
 
-        cls.model = model = pystan.StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
+        cls.model = model = get_model("bernoulli_model",
+                                      bernoulli_model_code, model_name="bernoulli")
+        #cls.model = model = pystan.StanModel(model_code=bernoulli_model_code, model_name="bernoulli")
 
         cls.fit = model.sampling(data=bernoulli_data)
 

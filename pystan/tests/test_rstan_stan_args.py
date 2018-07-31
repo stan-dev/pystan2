@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 import pystan
+from pystan.tests.helper import get_model
 
 # REF: rstan/tests/unitTests/runit.test.stan_args_hpp.R
 
@@ -16,7 +17,8 @@ class TestPyStanArgs(unittest.TestCase):
 
         code = '''
         data {
-            real y[20];
+            int N;
+            real y[N];
         }
         parameters {
             real mu;
@@ -25,8 +27,8 @@ class TestPyStanArgs(unittest.TestCase):
         model {
             y ~ normal(mu, sigma);
         }'''
-
-        sf = pystan.stan(model_code=code, iter=10, thin=3, data=dict(y=y))
+        sm = get_model("norma_mu_sigma_model", code)
+        sf = sm.sampling(iter=10, thin=3, data=dict(y=y, N=20))
         args = sf.stan_args[0]
         self.assertEqual(args['iter'], 10)
         self.assertEqual(args['thin'], 3)

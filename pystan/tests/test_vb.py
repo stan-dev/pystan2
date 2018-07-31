@@ -3,7 +3,7 @@ import unittest
 
 
 import pystan
-
+from pystan.tests.helper import get_model
 
 class TestNormalVB(unittest.TestCase):
 
@@ -11,8 +11,9 @@ class TestNormalVB(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        model_code = 'parameters {real y; real z;} model {y ~ normal(0,1); z ~ normal(0,1);}'
-        cls.model = pystan.StanModel(model_code=model_code)
+        model_code = 'parameters {real x;real y;real z;} model {x ~ normal(0,1);y ~ normal(0,1);z ~ normal(0,1);}'
+        cls.model = get_model("standard_normals_model", model_code)
+        #cls.model = pystan.StanModel(model_code=model_code)
 
     def test_vb_default(self):
         vbf1 = self.model.vb(seed=self.seed)
@@ -47,7 +48,7 @@ class TestNormalVB(unittest.TestCase):
         self.assertIsNotNone(vbf)
         self.assertEqual(vbf['args']['diagnostic_file'].decode('utf-8'), diag_file)
         self.assertTrue(os.path.exists(diag_file))
-        
+
     def test_vb_pars(self):
         vbfit = self.model.vb(algorithm='fullrank', pars=['y'], seed=self.seed)
         vbfit2 = self.model.vb(algorithm='fullrank', pars='z', seed=self.seed)

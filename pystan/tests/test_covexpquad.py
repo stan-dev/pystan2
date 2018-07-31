@@ -1,6 +1,6 @@
 import unittest
 
-from pystan import StanModel, stan
+from pystan import StanModel
 
 class TestCovExpQuad(unittest.TestCase):
     """
@@ -20,7 +20,6 @@ class TestCovExpQuad(unittest.TestCase):
           """
       cls.model = StanModel(model_code=covexpquad)
 
-    def test_8schools_pars(self):
+    def test_covexpquad(self):
         model = self.model
         self.assertIsNotNone(model)
- 

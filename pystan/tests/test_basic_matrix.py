@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 from pystan import StanModel
-
+from pystan.tests.helper import get_model
 
 class TestMatrixParam(unittest.TestCase):
 
@@ -21,7 +21,8 @@ class TestMatrixParam(unittest.TestCase):
             for (d in 1:D)
             beta[k,d] ~ normal(if_else(d==2,100, 0),1);
         }"""
-        cls.model = StanModel(model_code=model_code)
+        cls.model = get_model("matrix_normal_model", model_code)
+        #cls.model = StanModel(model_code=model_code)
 
     def test_matrix_param(self):
         sm = self.model
