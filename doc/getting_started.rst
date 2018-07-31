@@ -56,12 +56,9 @@ Mac OS X users encountering installation problems may wish to consult the
 Windows
 -------
 
-PyStan on Windows requires Python 3.5 or higher and a working C++ compiler.  If
-you have already installed Python 3.5 (or higher) and the Microsoft Visual C++
-14.0 (or higher) compiler, running ``pip install pystan`` will install PyStan.
-Note that you must specify ``n_jobs=1`` when drawing samples using Stan because
-PyStan on Windows is not currently able to use multiple processors
-simultaneously.
+PyStan on Windows requires Python 2.7/3.x and a working C++ compiler.  If
+you have already installed Python and the MingW-w64 C++ compiler,
+running ``pip install pystan`` will install PyStan.
 
 If you need to install a C++ compiler, you will find detailed installation
 instructions in :ref:`windows`.
@@ -86,18 +83,17 @@ which studied coaching effects from eight schools.
     schools_code = """
     data {
         int<lower=0> J; // number of schools
-        real y[J]; // estimated treatment effects
-        real<lower=0> sigma[J]; // s.e. of effect estimates
+        vector[J] y; // estimated treatment effects
+        vector<lower=0>[J] sigma; // s.e. of effect estimates
     }
     parameters {
         real mu;
         real<lower=0> tau;
-        real eta[J];
+        vector[J] eta;
     }
     transformed parameters {
-        real theta[J];
-        for (j in 1:J)
-        theta[j] = mu + tau * eta[j];
+        vector[J] theta;
+        theta = mu + tau * eta;
     }
     model {
         eta ~ normal(0, 1);
