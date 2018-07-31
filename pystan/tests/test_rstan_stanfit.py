@@ -4,7 +4,7 @@ import numpy as np
 
 from pystan import StanModel, stan
 from pystan._compat import PY2
-
+from pystan.tests.helper import get_model
 
 # REF: rstan/tests/unitTests/runit.test.stanfit.R
 
