@@ -1,0 +1,98 @@
+version: '{build}'
+image: Visual Studio 2015
+platform:
+  - x86
+  - x64
+environment:
+  global:
+    WHEELHOUSE_UPLOADER_REGION: IAD
+    WHEELHOUSE_UPLOADER_USERNAME: pystan-worker
+    WHEELHOUSE_UPLOADER_SECRET:
+      secure: cqdCOlelH3UdBVv+FyD4nNfT5X5bB2OwqehwkxqMABKcHy1H4+t8v3jVVvTxV7uq
+
+  matrix:
+    - CONDA: 27
+    - CONDA: 35
+    - CONDA: 36
+    - CONDA: 37
+
+install:
+  # If there is a newer build queued for the same PR, cancel this one.
+  # The AppVeyor 'rollout builds' option is supposed to serve the same
+  # purpose but it is problematic because it tends to cancel builds pushed
+  # directly to master instead of just PR builds (or the converse).
+  # credits: JuliaLang developers.
+  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
+      https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
+      Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
+        throw "There are newer queued builds for this pull request, failing early." }
+
+  - ECHO "Filesystem root:"
+  - ps: "ls \"C:/\""
+  - SET "CONDAPATH=conda%CONDA%"
+  - if %CONDA%==27 (SET "CONDAPATH=conda")
+  - if %CONDA%==37 (SET "CONDAPATH=conda36")
+  - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
+
+  - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
+  - if %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" root)
+  - if NOT %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" base)
+
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+
+  - if %CONDA%==37 (CALL "conda create -n py37 python=3.7 -y && activate py37")
+
+  # checkout submodules
+  - git submodule update --init --recursive
+  # Check that we have the expected version and architecture for Python
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
+
+  # setup conda - use default channel
+  - conda update --all -q
+  - conda info
+  - conda install numpy cython scipy matplotlib pandas setuptools libpython m2w64-toolchain -c msys2 -q
+  # test numpy
+  - python -c "import numpy as np; print('numpy imported succesfull')"
+  # test gcc version
+  - gcc --version
+  # Upgrade to the latest version of pip to avoid it displaying warnings
+  # about it being out of date.
+  - python -m pip install --disable-pip-version-check --upgrade pip
+
+  # Install the build dependencies of the project.
+  - pip install -q -r ./continuous_integration/appveyor/requirements.txt
+  - pip install -q -r requirements.txt
+  - pip install -q -r test-requirements.txt
+
+build_script:
+  - ECHO "Starting to build the wheel"
+  # build the wheel and install it
+  - python setup.py --quiet bdist_wheel bdist_wininst
+  - ps: "ls dist"
+
+  - ECHO "Install generated wheel to test it"
+  # Install the generated wheel package to test it
+  - pip install --pre --no-index --find-links dist/ pystan
+
+test_script:
+  # Change to a non-source folder to make sure we run the tests on the
+  # installed library.
+  - mkdir empty_folder
+  - cd empty_folder
+  - SET "JOBLIB_MULTIPROCESSING=1"
+  - ECHO "Starting the tests"
+  - "python -c \"import nose; nose.main()\" pystan.tests"
+  # Move back to the project folder
+  - "cd .."
+
+after_test:
+  - ECHO "After tests - Building wheels"
+  # If tests are successful, create binary packages for the project.
+  # TODO: may need to set PBR_VERSION, submodules often confuse pbr
+  - python setup.py bdist_wheel
+  - ps: "ls dist"
+  # APPVEYOR_REPO_TAG will be true if commit is tagged
+  - "IF /I %APPVEYOR_REPO_TAG%==true (pip install wheelhouse-uploader)"
+  - "IF /I %APPVEYOR_REPO_TAG%==true (python -m wheelhouse_uploader upload --local-folder=dist --no-ssl-check --no-update-index --region=%WHEELHOUSE_UPLOADER_REGION% wheels)"
