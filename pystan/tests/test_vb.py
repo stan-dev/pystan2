@@ -35,15 +35,15 @@ class TestNormalVB(unittest.TestCase):
         self.assertIsNotNone(vbf)
 
     def test_vb_sample_file(self):
-        sample_file = os.path.join(tempfile.mkdtemp(), 'vb-results.csv'
+        sample_file = os.path.join(tempfile.mkdtemp(), 'vb-results.csv')
         vbf = self.model.vb(algorithm='fullrank', sample_file=sample_file, seed=self.seed)
         self.assertIsNotNone(vbf)
         self.assertEqual(vbf['args']['sample_file'].decode('utf-8'), sample_file)
         self.assertTrue(os.path.exists(sample_file))
 
     def test_vb_diagnostic_file(self):
-        sample_file = os.path.join(tempfile.mkdtemp(), 'vb-results.csv'
-        diag_file = os.path.join(tempfile.mkdtemp(), 'vb-diag.csv'
+        sample_file = os.path.join(tempfile.mkdtemp(), 'vb-results.csv')
+        diag_file = os.path.join(tempfile.mkdtemp(), 'vb-diag.csv')
         vbf = self.model.vb(algorithm='fullrank', sample_file=sample_file, diagnostic_file=diag_file, seed=self.seed)
         self.assertIsNotNone(vbf)
         self.assertEqual(vbf['args']['diagnostic_file'].decode('utf-8'), diag_file)
