@@ -143,7 +143,7 @@ def _array_to_table(arr, rownames, colnames, n_digits):
         line = '{name:{width}}'.format(name=rowname, width=widths[0])
         for j, (num, width) in enumerate(zip(row, widths[1:])):
             if colnames[j] == 'n_eff':
-                num = int(round(num, 0))
+                num = int(round(num, 0)) if not np.isnan(num) else num
             line += '{num:>{width}}'.format(num=_format_number(num, n_digits, max_col_width - 1), width=width)
         lines.append(line)
     return '\n'.join(lines)
@@ -351,7 +351,6 @@ def _summary_sim(sim, pars, probs):
                         chains=tuple("chain:{}".format(cid) for cid in cids))
     ess_and_rhat = np.array([pystan.chains.ess_and_splitrhat(sim, n) for n in tidx_colm])
     ess, rhat = [arr.ravel() for arr in np.hsplit(ess_and_rhat, 2)]
-    ess = ess.round().astype(int)  # for display, round effective sample size
     return dict(msd=msd, c_msd=c_msd, c_msd_names=c_msd_names, quan=quan,
                 c_quan=c_quan, c_quan_names=c_quan_names,
                 sem=msd[:, 1] / np.sqrt(ess), ess=ess, rhat=rhat,
@@ -1222,7 +1221,7 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
                 df.loc[
                 n*fit.sim['n_save'][n]:
                 n*fit.sim['n_save'][n]+fit.sim['warmup2'][n]-1,'warmup'
-                ] = 1 
+                ] = 1
         if diagnostics == True:
             diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
 			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
@@ -1231,7 +1230,7 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
                 for n in range(0,chain_count-1):
                     diag_list.append(fit.get_sampler_params()[n][diag + '__'][-n_save:].astype(diag_dtype))
                 df[diag + '__'] = np.hstack(diag_list)
-        
+
         for n in range(len(fit.sim['fnames_oi'])):
             par = fit.sim['fnames_oi'][n]
             if (par in pars) or (par[:par.find('[')] in pars):

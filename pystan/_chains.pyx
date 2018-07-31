@@ -126,6 +126,9 @@ def effective_sample_size(dict sim, int n):
     cdef double n_kept_samples
     for chain in range(m):
         n_kept_samples = ns_kept[chain]
+        if n_kept_samples == 1:
+            # fix crash for mingw on Windows
+            return np.nan
         chain_mean.push_back(get_chain_mean(sim, chain, n))
         chain_var.push_back(acov[chain][0] * n_kept_samples / (n_kept_samples-1))
 
