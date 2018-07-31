@@ -41,7 +41,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
 
-  - if %CONDA%==37 (CALL "conda create -n py37 python=3.7 -y && activate py37")
+  - if %CONDA%==37 (CALL conda create -n py37 python=3.7 -y && activate py37)
 
   # checkout submodules
   - git submodule update --init --recursive
