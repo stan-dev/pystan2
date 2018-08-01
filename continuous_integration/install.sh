@@ -23,9 +23,8 @@ chmod +x miniconda.sh
 export PATH=$HOME/miniconda3/bin:$PATH
 # Update conda itself
 conda update --yes --quiet conda
-
 PYTHON_VERSION_MAJOR=${TRAVIS_PYTHON_VERSION:0:1}
-ENV_NAME="${TRAVIS_OS_NAME}_${CC}_${PYTHON_VERSION_MAJOR}${$PYTHON_VERSION_MINOR}"
+ENV_NAME="${TRAVIS_OS_NAME}_${CC}_${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}"
 if [[ $PYTHON_VERSION_MAJOR == '2' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython=0.22 numpy=1.10.1 scipy nose matplotlib pandas; fi
 if [[ $PYTHON_VERSION_MAJOR == '3' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib pandas; fi
 source activate $ENV_NAME
