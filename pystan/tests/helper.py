@@ -1,13 +1,13 @@
 import os
 import pickle
-import gzip
+import bz2
 
 import pystan
 
 def load_model(path):
     _, ext = os.path.splitext(path)
-    if ext != '.gz':
-        path = ext + ".gz"
+    if ext != '.bz2':
+        path = ext + ".bz2"
     with gzip.open(path, "rb") as f:
         pickled_model = f.read()
     stan_model = pickle.loads(pickled_model)
@@ -16,8 +16,8 @@ def load_model(path):
 def save_model(stan_model, path):
     pickled_model = pickle.dumps(stan_model, protocol=pickle.HIGHEST_PROTOCOL)
     _, ext = os.path.splitext(path)
-    if ext != '.gz':
-        path = ext + ".gz"
+    if ext != '.bz2':
+        path = ext + ".bz2"
     with gzip.open(path, "wb") as f:
         f.write(pickled_model)
 
