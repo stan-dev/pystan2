@@ -16,7 +16,7 @@ fi
 
 # use Anaconda to get compiled versions of scipy and numpy,
 # modified from https://gist.github.com/dan-blanchard/7045057
-if [[ ! -d $HOME/miniconda3 ]]
+if [[ ! -d $HOME/miniconda3 ]]; then
     if [[ $TRAVIS_OS_NAME == 'linux' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O miniconda.sh; fi
     if [[ $TRAVIS_OS_NAME == 'osx' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-MacOSX-x86_64.sh -O miniconda.sh; fi
     chmod +x miniconda.sh
