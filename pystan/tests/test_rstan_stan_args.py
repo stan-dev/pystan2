@@ -27,7 +27,7 @@ class TestPyStanArgs(unittest.TestCase):
         model {
             y ~ normal(mu, sigma);
         }'''
-        sm = get_model("norma_mu_sigma_model", code)
+        sm = get_model("normal_mu_sigma_model", code)
         sf = sm.sampling(iter=10, thin=3, data=dict(y=y, N=20))
         args = sf.stan_args[0]
         self.assertEqual(args['iter'], 10)

@@ -30,7 +30,7 @@ class TestOptim(unittest.TestCase):
         np.random.seed(1)
         y = np.random.normal(size=N)
         cls.dat = {'N': N, 'y': y}
-        cls.sm = get_model("norma_mu_sigma_model", stdnorm, verbose=True)
+        cls.sm = get_model("normal_mu_sigma_model", stdnorm, verbose=True)
         #cls.sm = pystan.StanModel(model_code=stdnorm, verbose=True)
 
     def test_optim_stdnorm(self):
