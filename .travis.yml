@@ -3,9 +3,6 @@
 language: c
 dist: trusty
 sudo: false
-cache:
-  directories:
-    - $HOME/miniconda3
 os:
   - linux
 git:

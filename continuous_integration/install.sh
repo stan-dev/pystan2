@@ -16,28 +16,20 @@ fi
 
 # use Anaconda to get compiled versions of scipy and numpy,
 # modified from https://gist.github.com/dan-blanchard/7045057
-if [[ ! -d $HOME/miniconda3/envs ]]; then
-    if [[ $TRAVIS_OS_NAME == 'linux' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O miniconda.sh; fi
-    if [[ $TRAVIS_OS_NAME == 'osx' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-MacOSX-x86_64.sh -O miniconda.sh; fi
-    chmod +x miniconda.sh
-    ./miniconda.sh -b
-fi
+if [[ $TRAVIS_OS_NAME == 'linux' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O miniconda.sh; fi
+if [[ $TRAVIS_OS_NAME == 'osx' ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-MacOSX-x86_64.sh -O miniconda.sh; fi
+chmod +x miniconda.sh
+./miniconda.sh -b
 export PATH=$HOME/miniconda3/bin:$PATH
 # Update conda itself
 conda update --yes --quiet conda
 
 PYTHON_VERSION_MAJOR=${TRAVIS_PYTHON_VERSION:0:1}
 ENV_NAME="${TRAVIS_OS_NAME}_${CC}_${PYTHON_VERSION_MAJOR}${$PYTHON_VERSION_MINOR}"
-ENVS=$(conda env list | awk '{print $1}' )
-if [[ $ENVS = *"$1"* ]]; then
-    source activate $ENV_NAME
-    python -c "import numpy"
-else
-    if [[ $PYTHON_VERSION_MAJOR == '2' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython=0.22 numpy=1.10.1 scipy nose matplotlib pandas; fi
-    if [[ $PYTHON_VERSION_MAJOR == '3' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib pandas; fi
-    source activate $ENV_NAME
-    python -c "import numpy"
+if [[ $PYTHON_VERSION_MAJOR == '2' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython=0.22 numpy=1.10.1 scipy nose matplotlib pandas; fi
+if [[ $PYTHON_VERSION_MAJOR == '3' ]]; then conda create --quiet --yes -n $ENV_NAME python=$TRAVIS_PYTHON_VERSION pip Cython numpy scipy nose matplotlib pandas; fi
+source activate $ENV_NAME
+python -c "import numpy"
 
-    # run quietly due to travis ci's log limit
-    python setup.py -q install
-fi
+# run quietly due to travis ci's log limit
+python setup.py -q install
