@@ -14,11 +14,8 @@ compiler:
   - gcc
 env:
   - TRAVIS_PYTHON_VERSION=2.7
-  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
+  - TRAVIS_PYTHON_VERSION=3.5
+  - TRAVIS_PYTHON_VERSION=3.6
 notifications:
   email:
     recipients:
@@ -26,4 +23,4 @@ notifications:
     on_success: change
     on_failure: always
 install: source continuous_integration/install.sh
-script: bash continuous_integration/test_script.sh --exclude="$TESTS_EXCLUDE_RE"
+script: bash continuous_integration/test_script.sh
