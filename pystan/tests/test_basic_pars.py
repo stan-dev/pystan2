@@ -34,7 +34,6 @@ class Test8Schools(unittest.TestCase):
                            'y': [28,  8, -3,  7, -1,  1, 18, 12],
                            'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
 
-        model_path = testdata_path =
         cls.model = get_model("schools_model", schools_code)
         #cls.model pystan.StanModel(model_code=schools_code)
 
