@@ -8,7 +8,7 @@ def load_model(path):
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
         path = ext + ".bz2"
-    with gzip.open(path, "rb") as f:
+    with bz2.open(path, "rb") as f:
         pickled_model = f.read()
     stan_model = pickle.loads(pickled_model)
     return stan_model
@@ -18,7 +18,7 @@ def save_model(stan_model, path):
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
         path = ext + ".bz2"
-    with gzip.open(path, "wb") as f:
+    with bz2.open(path, "wb") as f:
         f.write(pickled_model)
 
 def get_model(filename, model_code, **kwargs):
