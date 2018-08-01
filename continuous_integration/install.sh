@@ -40,3 +40,4 @@ else
 
     # run quietly due to travis ci's log limit
     python setup.py -q install
+fi
