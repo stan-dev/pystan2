@@ -5,6 +5,7 @@ import bz2
 import pystan
 from pystan._compat import PY2
 
+
 def get_bz2_open():
     if PY2:
         bz2_open = bz2.BZ2File
@@ -16,7 +17,8 @@ def load_model(path):
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
         path = ext + ".bz2"
-    with get_bz2_open(path, "rb") as f:
+    bz2_open = get_bz2_open()
+    with bz2_open(path, "rb") as f:
         pickled_model = f.read()
     stan_model = pickle.loads(pickled_model)
     return stan_model
@@ -26,7 +28,8 @@ def save_model(stan_model, path):
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
         path = ext + ".bz2"
-    with get_bz2_open(path, "wb") as f:
+    bz2_open = get_bz2_open()
+    with bz2_open(path, "wb") as f:
         f.write(pickled_model)
 
 def get_model(filename, model_code, **kwargs):
