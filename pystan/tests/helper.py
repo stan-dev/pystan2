@@ -16,7 +16,7 @@ def get_bz2_open():
 def load_model(path):
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
-        path = ext + ".bz2"
+        path = path + ".bz2"
     bz2_open = get_bz2_open()
     with bz2_open(path, "rb") as f:
         pickled_model = f.read()
@@ -27,7 +27,7 @@ def save_model(stan_model, path):
     pickled_model = pickle.dumps(stan_model, protocol=pickle.HIGHEST_PROTOCOL)
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
-        path = ext + ".bz2"
+        path = path + ".bz2"
     bz2_open = get_bz2_open()
     with bz2_open(path, "wb") as f:
         f.write(pickled_model)
@@ -43,7 +43,7 @@ def get_model(filename, model_code, **kwargs):
     # use .bz2 compression
     _, ext = os.path.splitext(path)
     if ext != '.bz2':
-        path = ext + ".bz2"
+        path = path + ".bz2"
     if os.path.exists(path):
         stan_model = load_model(path)
     else:
