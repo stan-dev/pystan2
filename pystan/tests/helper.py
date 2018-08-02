@@ -40,6 +40,10 @@ def get_model(filename, model_code, **kwargs):
     except OSError:
         pass
     path = os.path.join(root, filename)
+    # use .bz2 compression
+    _, ext = os.path.splitext(path)
+    if ext != '.bz2':
+        path = ext + ".bz2"
     if os.path.exists(path):
         stan_model = load_model(path)
     else:
