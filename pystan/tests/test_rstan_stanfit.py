@@ -4,7 +4,7 @@ import numpy as np
 
 from pystan import StanModel, stan
 from pystan._compat import PY2
-
+from pystan.tests.helper import get_model
 
 # REF: rstan/tests/unitTests/runit.test.stanfit.R
 
@@ -30,7 +30,8 @@ class TestStanfit(unittest.TestCase):
 
         code = '''
         data {
-            real y[20];
+            int N;
+            real y[N];
         }
         parameters {
             real mu;
@@ -55,7 +56,8 @@ class TestStanfit(unittest.TestCase):
             g_mu = np.sum(y - mu) * sigma**(-2)
             return (g_mu, g_lsigma)
 
-        sf = stan(model_code=code, data=dict(y=y), iter=200)
+        sm = get_model("normal_mu_sigma_model", code)
+        sf = sm.sampling(data=dict(y=y, N=20), iter=200)
         mu = 0.1
         sigma = 2
         self.assertEqual(sf.log_prob(sf.unconstrain_pars(dict(mu=mu, sigma=sigma))),
@@ -71,7 +73,8 @@ class TestStanfit(unittest.TestCase):
                 -1.36,  1.43,  0.80, -0.48, -1.61, -1.27)
         code = """
             data {
-                real y[20];
+                int N;
+                real y[N];
             }
             parameters {
                 real mu;
@@ -81,12 +84,13 @@ class TestStanfit(unittest.TestCase):
                 y ~ normal(mu, sigma);
             }"""
         stepsize0 = 0.15
-        sf = stan(model_code=code, data=dict(y=y), iter=200,
-                    control=dict(adapt_engaged=False, stepsize=stepsize0))
+        sm = get_model("normal_mu_sigma_model", code)
+        sf = sm.sampling(data=dict(y=y, N=20), iter=200,
+                         control=dict(adapt_engaged=False, stepsize=stepsize0))
         self.assertEqual(sf.get_sampler_params()[0]['stepsize__'][0], stepsize0)
-        sf2 = stan(fit=sf, iter=20, algorithm='HMC', data=dict(y=y),
+        sf2 = stan(fit=sf, iter=20, algorithm='HMC', data=dict(y=y, N=20),
                     control=dict(adapt_engaged=False, stepsize=stepsize0))
         self.assertEqual(sf2.get_sampler_params()[0]['stepsize__'][0], stepsize0)
-        sf3 = stan(fit=sf, iter=1, data=dict(y=y), init=0, chains=1)
+        sf3 = stan(fit=sf, iter=1, data=dict(y=y, N=20), init=0, chains=1)
         i_u = sf3.unconstrain_pars(sf3.get_inits()[0])
         np.testing.assert_equal(i_u, [0, 0])

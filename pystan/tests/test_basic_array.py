@@ -22,7 +22,8 @@ class TestBasicArray(unittest.TestCase):
           for (k in 1:K)
             beta[k,1,2] ~ normal(100,1);
         }"""
-        cls.fit = pystan.stan(model_code=model_code, data=dict(K=4))
+        cls.model = pystan.StanModel(model_code=model_code)
+        cls.fit = cls.model.sampling(data=dict(K=4))
 
     def test_array_param_sampling(self):
         """

@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 
 import pystan
+from pystan.tests.helper import get_model
 
 
 def validate_data(fit):
@@ -57,7 +58,8 @@ class TestRStanGettingStarted(unittest.TestCase):
             'sigma': [15, 10, 16, 11,  9, 11, 10, 18]
         }
 
-        cls.sm = sm = pystan.StanModel(model_code=schools_code)
+        cls.sm = sm = get_model("schools_model", schools_code)
+        #cls.sm = sm = pystan.StanModel(model_code=schools_code)
         cls.fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
 
     def test_stan(self):
