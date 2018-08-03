@@ -41,7 +41,8 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
 
-  - if %CONDA%==37 (CALL conda create -n py37 python=3.7 -y && activate py37)
+  - if %CONDA%==37 (CALL conda create -n py37 python=3.7 -y -q)
+  - if %CONDA%==37 (CALL conda activate py37)
 
   # checkout submodules
   - git submodule update --init --recursive
@@ -65,6 +66,8 @@ install:
   - pip install -q -r ./continuous_integration/appveyor/requirements.txt
   - pip install -q -r requirements.txt
   - pip install -q -r test-requirements.txt
+  # use progress bar for nosetests
+  - pip install -q nose-progressive
 
 build_script:
   - ECHO "Starting to build the wheel"
@@ -74,7 +77,7 @@ build_script:
 
   - ECHO "Install generated wheel to test it"
   # Install the generated wheel package to test it
-  - pip install --pre --no-index --find-links dist/ pystan
+  - pip install --pre --no-index --find-links --quiet dist/ pystan
 
 test_script:
   # Change to a non-source folder to make sure we run the tests on the
@@ -83,16 +86,16 @@ test_script:
   - cd empty_folder
   - SET "JOBLIB_MULTIPROCESSING=1"
   - ECHO "Starting the tests"
-  - "python -c \"import nose; nose.main()\" pystan.tests"
+  - "python -c \"import nose; nose.main()\" pystan.tests -s --progressive-with-bar"
   # Move back to the project folder
-  - "cd .."
+  - "cd ..After test: uploading wheels if needed"
 
 after_test:
-  - ECHO "After tests - Building wheels"
+  # wheel is already built in "build_script"
   # If tests are successful, create binary packages for the project.
   # TODO: may need to set PBR_VERSION, submodules often confuse pbr
-  - python setup.py bdist_wheel
+  - python setup.py --quiet bdist_wheel
   - ps: "ls dist"
   # APPVEYOR_REPO_TAG will be true if commit is tagged
-  - "IF /I %APPVEYOR_REPO_TAG%==true (pip install wheelhouse-uploader)"
+  - "IF /I %APPVEYOR_REPO_TAG%==true (pip install wheelhouse-uploader -q)"
   - "IF /I %APPVEYOR_REPO_TAG%==true (python -m wheelhouse_uploader upload --local-folder=dist --no-ssl-check --no-update-index --region=%WHEELHOUSE_UPLOADER_REGION% wheels)"
