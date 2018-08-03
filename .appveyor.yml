@@ -77,7 +77,7 @@ build_script:
 
   - ECHO "Install generated wheel to test it"
   # Install the generated wheel package to test it
-  - pip install --pre --no-index --find-links --quiet dist/ pystan
+  - pip install -q --pre --no-index --find-links dist/ pystan
 
 test_script:
   # Change to a non-source folder to make sure we run the tests on the
