@@ -66,8 +66,7 @@ install:
   - pip install -q -r ./continuous_integration/appveyor/requirements.txt
   - pip install -q -r requirements.txt
   - pip install -q -r test-requirements.txt
-
-build_script:
+  
   - ECHO "Starting to build the wheel"
   # build the wheel and install it
   - python setup.py --quiet bdist_wheel bdist_wininst
@@ -77,6 +76,9 @@ build_script:
   # Install the generated wheel package to test it
   - pip install -q --pre --no-index --find-links dist/ pystan
 
+# Not a .NET project, we build pystan in the install step instead
+build: false
+
 test_script:
   # Change to a non-source folder to make sure we run the tests on the
   # installed library.
@@ -84,7 +86,7 @@ test_script:
   - cd empty_folder
   - SET "JOBLIB_MULTIPROCESSING=1"
   - ECHO "Starting the tests"
-  - nosetests -w C:\projects\pystan\pystan\tests --nocapture --verbosity=2
+  - python -m "import nose; nose.main()" --nocapture --verbosity=2 pystan.tests
   # Move back to the project folder
   - "cd ..After test: uploading wheels if needed"
 
