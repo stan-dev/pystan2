@@ -88,7 +88,8 @@ test_script:
   - ECHO "Starting the tests"
   - python -c "import nose; nose.main()" --nocapture --verbosity=2 pystan.tests
   # Move back to the project folder
-  - "cd ..After test: uploading wheels if needed"
+  - cd ..
+  - ECHO "End of testing"
 
 after_test:
   # wheel is already built in "install" step
