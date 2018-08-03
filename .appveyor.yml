@@ -86,7 +86,7 @@ test_script:
   - cd empty_folder
   - SET "JOBLIB_MULTIPROCESSING=1"
   - ECHO "Starting the tests"
-  - python -m "import nose; nose.main()" --nocapture --verbosity=2 pystan.tests
+  - python -c "import nose; nose.main()" --nocapture --verbosity=2 pystan.tests
   # Move back to the project folder
   - "cd ..After test: uploading wheels if needed"
 
