@@ -86,7 +86,7 @@ test_script:
   - cd empty_folder
   - SET "JOBLIB_MULTIPROCESSING=1"
   - ECHO "Starting the tests"
-  - "python -c \"import nose; nose.main()\" pystan.tests -s --progressive-with-bar"
+  - nosetests -w C:\projects\pystan\pystan\tests -s --progressive-with-bar
   # Move back to the project folder
   - "cd ..After test: uploading wheels if needed"
 
