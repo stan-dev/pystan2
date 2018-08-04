@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 import pystan
 
@@ -13,6 +14,12 @@ class TestExtraCompileArgs(unittest.TestCase):
             '-Wno-uninitialized',
             '-std=c++11',
         ]
+        if sys.platform.startswith("win"):
+            extra_compile_args.extend([
+                "-D_hypot=hypot",
+                "-pthread",
+                "-fexceptions"
+            ])
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
         model = pystan.StanModel(model_code=model_code, model_name="normal1",
                                  extra_compile_args=extra_compile_args)
