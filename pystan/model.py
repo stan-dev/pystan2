@@ -570,9 +570,10 @@ class StanModel:
             including warmup.
 
         warmup : int, iter//2 by default
-            Positive integer specifying number of warmup (aka burin) iterations.
+            Positive integer specifying number of warmup (aka burn-in) iterations.
             As `warmup` also specifies the number of iterations used for step-size
             adaption, warmup samples should not be used for inference.
+            `warmup=0` forced if `algorithm=\"Fixed_param\"`.
 
         thin : int, 1 by default
             Positive integer specifying the period for saving samples.
@@ -701,6 +702,10 @@ class StanModel:
         algorithm = "NUTS" if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise ValueError("Algorithm must be one of {}".format(algorithms))
+        if algorithm=="Fixed_param":
+            if warmup  > 0:
+                logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
+            warmup = 0
 
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
