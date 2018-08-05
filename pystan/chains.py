@@ -1,5 +1,5 @@
 import pystan._chains as _chains
-
+from numpy import nan
 
 def ess(sim, n):
     """Calculate effective sample size
@@ -10,7 +10,11 @@ def ess(sim, n):
     n : int
         Parameter index starting from 0
     """
-    return _chains.effective_sample_size(sim, n)
+    try:
+        ess = _chains.effective_sample_size(sim, n)
+    except (ValueError, ZeroDivisionError):
+        ess = nan
+    return ess
 
 
 def splitrhat(sim, n):
@@ -22,8 +26,11 @@ def splitrhat(sim, n):
     n : int
         Parameter index starting from 0
     """
-    return _chains.split_potential_scale_reduction(sim, n)
-
+    try:
+        rhat = _chains.split_potential_scale_reduction(sim, n)
+    except (ValueError, ZeroDivisionError):
+        rhat = nan
+    return rhat
 
 def ess_and_splitrhat(sim, n):
     """Calculate ess and rhat

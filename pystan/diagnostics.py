@@ -283,7 +283,7 @@ def check_n_eff(fit, verbose = True):
         
     n_effs = fit_summary['summary'][:, n_effs_index]
     names = fit_summary['summary_rownames']
-    n_iter = len(fit.extract()['lp__'])
+    n_iter = (np.asarray(fit.sim['n_save'])-np.asarray(fit.sim['warmup2'])).sum()
 
     no_warning = True
     for n_eff, name in zip(n_effs, names):

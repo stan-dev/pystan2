@@ -792,7 +792,7 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        if check_hmc_diagnostics:
+        if check_hmc_diagnostics and algorithm in ("NUTS", "HMC"):
             pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
 
         return fit
