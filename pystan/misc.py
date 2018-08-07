@@ -395,7 +395,7 @@ def _split_data(data):
     for k, v in data.items():
         if np.issubdtype(np.asarray(v).dtype, np.integer):
             data_i.update({k.encode('utf-8'): np.asarray(v, dtype=int)})
-        elif np.issubdtype(np.asarray(v).dtype, np.floating):
+        elif np.issubdtype(np.asarray(v).dtype, np.float64):
             data_r.update({k.encode('utf-8'): np.asarray(v, dtype=float)})
         else:
             msg = "Variable {} is neither int nor float nor list/array thereof"
