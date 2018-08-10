@@ -446,6 +446,8 @@ cdef class StanFit4Model:
     cdef public stan_args
     cdef public stanmodel
     cdef public date
+    cdef public _repr_pars
+    cdef public _repr_num
 
     def __cinit__(self, *args):
         # __cinit__ must be callable with no arguments for unpickling
@@ -465,6 +467,8 @@ cdef class StanFit4Model:
     def __init__(self, data, random_seed):
         self.data = data
         self.random_seed = random_seed
+        self._set_repr_pars(None)
+        self._set_repr_num (100)
 
     def __dealloc__(self):
         del self.thisptr
@@ -657,8 +661,35 @@ cdef class StanFit4Model:
         s = pystan.misc.stansummary(self)
         return s.encode('utf-8') if PY2 else s
 
+    def _get_repr_num(self):
+      return self._repr_num
+
+    def _get_repr_pars(self):
+        update = False
+        if self._repr_pars is not None:
+            update = len(self._repr_pars)-1 != self._repr_num
+        if self._repr_pars is not None and not update:
+            return self._repr_pars
+        elif len(self.flatnames) > self._repr_num:
+            logger.warning("Truncated summary with the 'fit.__repr__' method. For the full summary use 'print(fit)'")
+            self._set_repr_pars(self.flatnames[:self._repr_num-1] + ['lp__'])
+            return self._repr_pars
+
+    def _set_repr_num(self, n):
+        self._repr_num = n
+
+    def _set_repr_pars(self, pars):
+        self._repr_pars = pars
+
     def __repr__(self):
-        return self.__str__()
+        pars = self._get_repr_pars()
+        if pars is not None and len(self.flatnames) > len(pars):
+            s = "\nWarning: Shown data is truncated to {} parameters".format(len(pars))
+            s += "\nFor the full summary use 'print(fit)'\n\n"
+            s += pystan.misc.stansummary(self, pars=pars)
+        else:
+            s = pystan.misc.stansummary(self)
+        return s.encode('utf-8') if PY2 else s
 
     def __getitem__(self, key):
         extr = self.extract(pars=(key,))
