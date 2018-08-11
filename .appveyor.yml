@@ -66,7 +66,7 @@ install:
   - pip install -q -r ./continuous_integration/appveyor/requirements.txt
   - pip install -q -r requirements.txt
   - pip install -q -r test-requirements.txt
-  
+
   - ECHO "Starting to build the wheel"
   # build the wheel and install it
   - python setup.py --quiet bdist_wheel bdist_wininst
@@ -86,7 +86,15 @@ test_script:
   - cd empty_folder
   - SET "JOBLIB_MULTIPROCESSING=1"
   - ECHO "Starting the tests"
-  - python -c "import nose; nose.main()" --nocapture --verbosity=2 pystan.tests
+  - "python -c \"import nose; nose.main()\" --nocapture pystan.tests.test_basic \
+     pystan.tests.test_basic_array pystan.tests.test_basic_matrix \
+     pystan.tests.test_basic_pars pystan.tests.test_chains pystan.tests.test_ess \
+     pystan.tests.test_extra_compile_args pystan.tests.test_extract \
+     pystan.tests.test_fixed_param pystan.tests.test_linear_regression \
+     pystan.tests.test_misc pystan.tests.test_misc_args pystan.tests.test_optimizing_example \
+     pystan.tests.test_pickle pystan.tests.test_stan_file_io pystan.tests.test_stanc \
+     pystan.tests.test_unconstrain_pars pystan.tests.test_user_inits pystan.tests.test_utf8
+     pystan.tests.test_vb" 
   # Move back to the project folder
   - cd ..
   - ECHO "End of testing"
