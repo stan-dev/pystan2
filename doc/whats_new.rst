@@ -6,6 +6,14 @@
  What's New
 ============
 
+v2.18.0.0 (TBD)
+========================
+- Update Stan source to v2.18.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.18.0>`_)
+- Fit method ``to_dataframe`` organizes draws into a Pandas DataFrame. Only works if Pandas is installed. Thanks to Liam Brannigan and Ari Hartikainen.
+- Improved effective sample size calculation. Thanks to Aki Vehtari.
+- Implemented ``pystan.diagnostics``. Thanks to @jjramsey.
+- Several bug fixes.
+
 v2.17.1.0 (16. Jan 2018)
 ========================
 - Update Stan source to v2.17.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.17.1>`_) (bugfix release)
