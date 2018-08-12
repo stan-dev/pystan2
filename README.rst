@@ -38,8 +38,8 @@ Detailed Installation Instructions
 Detailed installation instructions can be found in the
 `doc/installation_beginner.md <https://github.com/chendaniely/pystan/blob/develop/doc/installation_beginner.rst/>`_ file.
 
-Quick Installation
-------------------
+Quick Installation (Linux and macOS)
+------------------------------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
 (version 0.22 or greater) are required. `matplotlib <http://matplotlib.org/>`_

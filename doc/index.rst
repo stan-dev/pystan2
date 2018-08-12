@@ -21,6 +21,7 @@ Documentation
    whats_new
    getting_started
    installation_beginner
+   installation_cvodes
    optimizing
    avoiding_recompilation
    differences_pystan_rstan

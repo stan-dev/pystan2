@@ -50,12 +50,13 @@ long as you can get the necessary python dependencies installed, pystan
 will work. If you want to install Anaconda, follow the Windows, Macs,
 and Linux instructions below.
 
-Windows
-~~~~~~~
+Linux
+~~~~~
 
-The Anaconda installer should be able to be double-clicked and
-installed. Use all of the defaults for installation except make sure to
-check Make Anaconda the default Python.
+After downloading the installer execute the associated shell script. For
+example, if the file downloaded were named ``Anaconda3-4.1.1-Linux-x86_64.sh``
+you would enter ``bash Anaconda3-4.1.1-Linux-x86_64.sh`` in the directory where
+you downloaded the file.
 
 Macs
 ~~~~
@@ -64,13 +65,14 @@ After downloading the installer, double click the .pkg file and follow
 the instructions on the screen. Use all of the defaults for
 installation.
 
-Linux
-~~~~~
+Windows
+~~~~~~~
 
-After downloading the installer execute the associated shell script. For
-example, if the file downloaded were named ``Anaconda3-4.1.1-Linux-x86_64.sh``
-you would enter ``bash Anaconda3-4.1.1-Linux-x86_64.sh`` in the directory where
-you downloaded the file.
+PyStan on Windows is *partially* supported. See `PyStan on Windows <windows_>`_.
+
+The Anaconda installer should be able to be double-clicked and
+installed. Use all of the defaults for installation except make sure to
+check Make Anaconda the default Python.
 
 Uninstalling Anaconda
 ~~~~~~~~~~~~~~~~~~~~~
