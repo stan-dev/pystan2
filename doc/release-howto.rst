@@ -103,6 +103,13 @@ editing ``recipe/meta.yaml`` and submitting a pull request.
 You will need the sha256 of the tarball. Calculate it by hand (with ``sha256sum``) or find it at
 https://pypi.org/project/pystan/#files after uploading the tarball.
 
+Update and Tag CVODES branch
+----------------------------
+- Checkout the ``cvodes`` branch.
+- Rebase this on the current release.
+- Tag this current commit with a tag that includes the suffix ``-cvodes`` (e.g., `v2.18.0.0-cvodes`).
+- Push the tag.
+
 Make Release Announcement
 -------------------------
 
