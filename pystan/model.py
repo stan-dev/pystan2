@@ -291,29 +291,39 @@ class StanModel:
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
         if extra_compile_args is None:
+            extra_compile_args = []
+
+        if platform.platform().startswith('Win'):
+            if build_extension.compiler in (None, 'msvc'):
+                logger.warning("MSVC compiler is not supported")
+                extra_compile_args = [
+                    '/EHsc',
+                    '-DBOOST_DATE_TIME_NO_LIB',
+                    '/std:c++14',
+                ] + extra_compile_args
+            else:
+                # Windows, but not msvc, likely mingw
+                # fix bug in MingW-W64
+                # use posix threads
+                extra_compile_args = [
+                    '-O2',
+                    '-ftemplate-depth-256',
+                    '-Wno-unused-function',
+                    '-Wno-uninitialized',
+                    '-std=c++11',
+                    "-D_hypot=hypot",
+                    "-pthread",
+                    "-fexceptions",
+                ] + extra_compile_args
+        else:
+            # linux or macOS
             extra_compile_args = [
                 '-O2',
                 '-ftemplate-depth-256',
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++11',
-            ]
-            if platform.platform().startswith('Win'):
-                if build_extension.compiler in (None, 'msvc'):
-                    logger.warning("MSVC compiler is not supported")
-                    extra_compile_args = [
-                        '/EHsc',
-                        '-DBOOST_DATE_TIME_NO_LIB',
-                        '/std:c++14',
-                    ]
-                else:
-                    # fix bug in MingW-W64
-                    # use posix threads
-                    extra_compile_args.extend([
-                        "-D_hypot=hypot",
-                        "-pthread",
-                        "-fexceptions",
-                        ])
+            ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,

@@ -1,7 +1,9 @@
-import unittest
+import distutils.errors
 import sys
+import unittest
 
 import pystan
+from pystan._compat import PY2
 
 
 class TestExtraCompileArgs(unittest.TestCase):
@@ -27,3 +29,13 @@ class TestExtraCompileArgs(unittest.TestCase):
         extr = fit.extract()
         y_last, log_prob_last = extr['y'][-1], extr['lp__'][-1]
         self.assertEqual(fit.log_prob(y_last), log_prob_last)
+
+    def test_extra_compile_args_failure(self):
+        extra_compile_args = ['-non-existent-option']
+        if sys.platform.startswith("win"):
+            return
+        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
+        with assertRaisesRegex(distutils.errors.CompileError, 'failed with exit status'):
+            pystan.StanModel(model_code=model_code, model_name="normal1",
+                             extra_compile_args=extra_compile_args)
