@@ -15,7 +15,6 @@ Before Tagging Release
 ======================
 - Update release notes, ``doc/whats_new.rst``.
 - Double check version number in ``pystan/__init__.py``
-- Update version in snippet in ``doc/getting_started.rst``, i.e., "wget ..."
 - Commit any changes you just made.
 - Double check that tests pass for this commit.
 

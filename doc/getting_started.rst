@@ -38,18 +38,6 @@ PyStan and the required packages may be installed from the `Python Package Index
 
    pip install pystan
 
-To install PyStan from source, first make sure you have installed the
-dependencies, then issue the commands:
-
-::
-
-   wget https://pypi.python.org/packages/source/p/pystan/pystan-2.17.1.0.tar.gz
-   # alternatively, use curl, or a web browser
-   tar zxvf pystan-2.17.1.0.tar.gz
-   cd pystan-2.17.1.0
-   python setup.py install
-   cd ..  # change out of the source directory before importing pystan
-
 Mac OS X users encountering installation problems may wish to consult the
 `PyStan Wiki <https://github.com/stan-dev/pystan/wiki>`_ for possible solutions.
 
