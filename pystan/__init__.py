@@ -18,4 +18,5 @@ if len(logger.handlers) == 1:
     logging.basicConfig(level=logging.INFO)
 
 # following PEP 386
-__version__ = '2.18.0.0'
+# See also https://docs.openstack.org/pbr/latest/user/semver.html
+__version__ = '2.18.0.1.dev'
