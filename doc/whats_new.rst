@@ -6,6 +6,10 @@
  What's New
 ============
 
+under development
+=================
+
+
 v2.18.0.0 (16. Aug 2018)
 ========================
 - Update Stan source to v2.18.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.18.0>`_)
