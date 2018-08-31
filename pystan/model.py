@@ -23,7 +23,6 @@ import string
 import sys
 import tempfile
 import time
-import warnings
 
 import distutils
 from distutils.core import Extension
@@ -77,7 +76,7 @@ def _map_parallel(function, args, n_jobs):
             del _sem  # cleanup
         except (ImportError, OSError) as e:
             multiprocessing = None
-            warnings.warn('%s. _map_parallel will operate in serial mode' % (e,))
+            logger.warning('{}. _map_parallel will operate in serial mode'.format(e))
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
@@ -413,8 +412,8 @@ class StanModel:
     @property
     def dso(self):
         # warning added in PyStan 2.8.0
-        warnings.warn('Accessing the module with `dso` is deprecated and will be removed in a future version. '\
-                      'Use `module` instead.', DeprecationWarning)
+        logger.warning('DeprecationWarning: Accessing the module with `dso` is deprecated and will be removed in a future version. '\
+                       'Use `module` instead.')
         return self.module
 
     def get_cppcode(self):

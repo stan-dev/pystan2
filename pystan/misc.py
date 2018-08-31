@@ -34,7 +34,6 @@ import re
 import sys
 import tempfile
 import time
-import warnings
 
 import numpy as np
 try:
@@ -115,7 +114,7 @@ def stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_su
 
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
     # warning added in PyStan 2.17.0
-    warnings.warn('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
+    logger.warning('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
                   'Use `stansummary` instead.', DeprecationWarning)
     return stansummary(fit, pars=pars, probs=probs, digits_summary=digits_summary)
 
@@ -693,18 +692,18 @@ def _check_seed(seed):
         try:
             seed = int(seed)
         except ValueError:
-            warnings.warn("`seed` must be castable to an integer")
+            logger.warning("`seed` must be castable to an integer")
             seed = None
         else:
             if seed < 0:
-                warnings.warn("`seed` may not be negative")
+                logger.warning("`seed` may not be negative")
                 seed = None
             elif seed > MAX_UINT:
                 raise ValueError('`seed` is too large; max is {}'.format(MAX_UINT))
     elif isinstance(seed, np.random.RandomState):
         seed = seed.randint(0, MAX_UINT)
     elif seed is not None:
-        warnings.warn('`seed` has unexpected type')
+        logger.warning('`seed` has unexpected type')
         seed = None
 
     if seed is None:
@@ -1163,11 +1162,11 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
     except ImportError:
         raise ImportError("Pandas module not found. You can install pandas with: pip install pandas")
     if inc_warmup is True and permuted is True:
-        logging.warning("`inc_warmup` ignored when `permuted` is True.")
+        logger.warning("`inc_warmup` ignored when `permuted` is True.")
     if diagnostics is True and permuted is True:
-        logging.warning("`diagnostics` ignored when `permuted` is True.")
+        logger.warning("`diagnostics` ignored when `permuted` is True.")
     if dtypes is not None and permuted is False and pars is None:
-        logging.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
+        logger.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
     fit._verify_has_samples()
 

@@ -9,7 +9,6 @@ import hashlib
 import io
 import logging
 import os
-import warnings
 
 import pystan._api  # stanc wrapper
 from pystan._compat import string_types, PY2
@@ -411,8 +410,8 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
     ...     return dict(mu=1, sigma=4, z=np.random.normal(size=(3, 2)), alpha=1 + chain_id)
     >>> exfit1 = stan(model_code=excode, init=initfun2)
     """
-    warnings.warn('pystan.stan was deprecated in version 2.17 and will be removed in version 3.0. '
-                  'Compile and use a Stan program in separate steps.', DeprecationWarning)
+    logger.warning('DeprecationWarning: pystan.stan was deprecated in version 2.17 and will be removed in version 3.0. '
+                  'Compile and use a Stan program in separate steps.')
     # NOTE: this is a thin wrapper for other functions. Error handling occurs
     # elsewhere.
     if data is None:
