@@ -1,4 +1,5 @@
 # distutils: language = c++
+# cython: language_level=2
 #-----------------------------------------------------------------------------
 # Copyright (c) 2013, Allen B. Riddell
 #
