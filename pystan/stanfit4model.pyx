@@ -35,8 +35,9 @@ from pystan.stan_fit cimport stan_fit, StanArgs, StanHolder, get_all_flatnames
 np.import_array()
 
 # python imports
-import collections
+from collections import OrderedDict
 import logging
+from operator import itemgetter
 import warnings
 
 import numpy as np
@@ -137,7 +138,7 @@ cdef PyStanHolder _pystanholder_from_stanholder(StanHolder* holder):
         chains.append(ch)
         inc(it)
     chain_names = [n.decode('utf-8') for n in holder.chain_names]
-    h.chains = collections.OrderedDict(zip(chain_names, chains))
+    h.chains = OrderedDict(zip(chain_names, chains))
 
     # NOTE: when _pystanholder_from_stanholder is called we also have a pointer
     # to holder.args available so we will use it directly from there. Strictly
@@ -539,8 +540,7 @@ cdef class StanFit4Model:
         Parameters
         ----------
         pars : {str, sequence of str}
-           parameter (or quantile) name(s). If `permuted` is False,
-           `pars` is ignored.
+           parameter name(s).
         permuted : bool
            If True, returned samples are permuted. All chains are
            merged and warmup samples are discarded.
@@ -572,6 +572,7 @@ cdef class StanFit4Model:
         self._verify_has_samples()
         if inc_warmup is True and permuted is True:
             logger.warning("`inc_warmup` ignored when `permuted` is True.")
+            inc_warmup = False
         if dtypes is not None and permuted is False and pars is None:
             logger.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
@@ -587,70 +588,49 @@ cdef class StanFit4Model:
         allpars = self.sim['pars_oi'] + self.sim['fnames_oi']
         pystan.misc._check_pars(allpars, pars)
 
-        tidx = pystan.misc._pars_total_indexes(self.sim['pars_oi'],
-                                               self.sim['dims_oi'],
-                                               self.sim['fnames_oi'],
-                                               pars)
+        n_kept = [s if inc_warmup else s-w for s, w in zip(self.sim['n_save'], self.sim['warmup2'])]
 
-        n_kept = [s-w for s, w in zip(self.sim['n_save'], self.sim['warmup2'])]
+        par_keys = OrderedDict()
+        for key in self.sim['fnames_oi']:
+            par = key.replace("]", "").split("[")
+            par = par[0]
+            if par not in par_keys:
+                par_keys[par] = []
+            par_keys[par].append(key)
 
-        if permuted:
-            extracted = collections.OrderedDict()
-            for par in pars:
-                sss = [pystan.misc._get_kept_samples(p, self.sim)
-                       for p in tidx[par]]
-                ss = np.column_stack(sss)
-                if par in dtypes.keys():
-                    ss = ss.astype(dtypes[par])
-                s = {par: ss}
-                extracted.update(s)
-                par_idx = self.sim['pars_oi'].index(par)
-                par_dim = self.sim['dims_oi'][par_idx]
-                # scalars have dim [], otherwise as one would expect
-                par_dim = [1] if par_dim == [] else par_dim
-                newdim = [sum(n_kept)] + par_dim
-                # order='F' means column-major order
-                extracted[par] = extracted[par].reshape(newdim, order='F')
-                # squeeze dim for scalar params, e.g., (4000,1) into (4000,)
-                if len(newdim) == 2 and newdim[1] == 1:
-                    extracted[par] = np.squeeze(extracted[par])
-        elif pars_original is not None:
-            n_chains = self.sim['chains']
-            extracted = collections.OrderedDict()
-            for par in pars:
-                extracted_par = []
-                for n in tidx[par]:
-                    chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
-                    n_save = self.sim['n_save'][0]
-                    if not inc_warmup:
-                        n_save = n_save - self.sim['warmup2'][0]
-                    samples = np.column_stack(chains)
-                    extracted_par.append(samples[:, :, np.newaxis])
-                extracted_par = np.dstack(extracted_par)
-                if par in dtypes.keys():
-                    extracted_par = extracted_par.astype(dtypes[par])
-                extracted[par] = extracted_par
-                par_idx = self.sim['pars_oi'].index(par)
-                par_dim = self.sim['dims_oi'][par_idx]
-                # scalars have dim [], otherwise as one would expect
-                par_dim = [1] if par_dim == [] else par_dim
-                newdim = [n_save, n_chains] + par_dim
-                # order='F' means column-major order
-                extracted[par] = extracted[par].reshape(newdim, order='F')
-                # squeeze dim for scalar params, e.g., (1000,4,1) into (1000,4)
-                if len(newdim) == 3 and newdim[2] == 1:
-                    extracted[par] = np.squeeze(extracted[par])
-        else:
-            extracted = []
-            for n in range(len(self.sim['fnames_oi'])):
-                chains = pystan.misc._get_samples(n, self.sim, inc_warmup)
-                # FIXME: n_save doesn't appear to be used?
-                n_save = self.sim['n_save'][0]
-                if not inc_warmup:
-                    n_save = n_save - self.sim['warmup2'][0]
-                samples = np.array(chains).T
-                extracted.append(samples[:, :, np.newaxis])
-            extracted = np.dstack(extracted)
+        shapes = dict(zip(self.sim['pars_oi'], self.sim['dims_oi']))
+
+        return_array = (not permuted) and (pars_original is None)
+        extracted = OrderedDict()
+
+        for par, keys in par_keys.items():
+            par_samples = []
+            shape = shapes[par]
+            dtype = dtypes.get(par)
+            for pyholder, permutation, n_kept_ in zip(self.sim['samples'], self.sim['permutation'], n_kept):
+                arr = itemgetter(*keys)(pyholder.chains)
+                if shape:
+                    arr = np.column_stack(arr)
+                arr = arr[-n_kept_:]
+                if permuted:
+                    arr = arr[permutation]
+                if not return_array:
+                    new_shape = tuple([-1]+list(shape))
+                    arr = arr.reshape(new_shape, order='F')
+                par_samples.append(arr)
+            if permuted:
+                arr = np.concatenate(par_samples, axis=0)
+            elif (not permuted) and (pars_original is not None):
+                arr = np.stack(par_samples, axis=1)
+            else:
+                arr = np.stack(par_samples, axis=1)
+            if not return_array and len(arr.shape) == 2 and arr.shape[1] == 1:
+                arr = np.squeeze(arr, axis=1)
+            if not return_array:
+              arr = arr.astype(dtype)
+            extracted[par] = arr
+        if return_array:
+            extracted = np.dstack(extracted.values())
         return extracted
 
     def __unicode__(self):
@@ -837,7 +817,7 @@ cdef class StanFit4Model:
         parameter `inc_warmup` indicates whether to include the warmup period.
         """
         self._verify_has_samples()
-        ldf = [collections.OrderedDict(zip(ch['sampler_param_names'], np.array(ch['sampler_params']))) for ch in self.sim['samples']]
+        ldf = [OrderedDict(zip(ch['sampler_param_names'], np.array(ch['sampler_params']))) for ch in self.sim['samples']]
         if inc_warmup:
             return ldf
         else:
