@@ -130,7 +130,7 @@ class TestExtract(unittest.TestCase):
         beta = ss['beta']
         lp__ = ss['lp__']
         df = self.fit.to_dataframe(permuted=True)
-        self.assertEqual(df.shape, (4000,9))
+        self.assertEqual(df.shape, (4000,18))
         for idx in range(2):
             for jdx in range(3):
                 name = 'alpha[{},{}]'.format(idx+1,jdx+1)
@@ -141,7 +141,7 @@ class TestExtract(unittest.TestCase):
         assert_array_equal(df['lp__'].values,lp__)
         # Test pars argument
         df = self.fit.to_dataframe(pars='alpha', permuted=True)
-        self.assertEqual(df.shape, (4000,6))
+        self.assertEqual(df.shape, (4000,15))
         for idx in range(2):
             for jdx in range(3):
                 name = 'alpha[{},{}]'.format(idx+1,jdx+1)
@@ -149,7 +149,7 @@ class TestExtract(unittest.TestCase):
         # Test pars and dtype argument
         df = self.fit.to_dataframe(pars='alpha',dtypes = {'alpha':np.int}, permuted=True)
         alpha_int = ss['alpha'].astype(np.int)
-        self.assertEqual(df.shape, (4000,6))
+        self.assertEqual(df.shape, (4000,15))
         for idx in range(2):
             for jdx in range(3):
                 name = 'alpha[{},{}]'.format(idx+1,jdx+1)
@@ -187,8 +187,8 @@ class TestExtract(unittest.TestCase):
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
             assert_array_equal(
-                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
-                np.arange(1,num_samples +1,dtype=np.int)
+                df.draw.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples+1,dtype=np.int)
                 )
             for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(
@@ -236,14 +236,15 @@ class TestExtract(unittest.TestCase):
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
             assert_array_equal(
-                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
-                np.arange(1,num_samples +1,dtype=np.int)
+                df.draw.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples+1,dtype=np.int)
                 )
             for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(
                 df[diag+'__'].values[n*num_samples:(n+1)*num_samples],
                 fit.get_sampler_params()[n][diag+'__'][-num_samples:].astype(diag_type)
                 )
+
     def test_to_dataframe_permuted_false_diagnostics_false(self):
         fit = self.fit
         ss = fit.extract(permuted=False)
@@ -274,8 +275,8 @@ class TestExtract(unittest.TestCase):
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
                 assert_array_equal(
-                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
-                np.arange(1,num_samples +1,dtype=np.int)
+                df.draw.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples+1,dtype=np.int)
                 )
 
     def test_to_dataframe_permuted_false_pars(self):
@@ -302,8 +303,8 @@ class TestExtract(unittest.TestCase):
                 (n+1)*np.ones(num_samples,dtype=np.int)
                 )
             assert_array_equal(
-                df.chain_idx.values[n*num_samples:(n+1)*num_samples],
-                np.arange(1,num_samples +1,dtype=np.int)
+                df.draw.values[n*num_samples:(n+1)*num_samples],
+                np.arange(1,num_samples+1,dtype=np.int)
                 )
             for diag, diag_type in diagnostic_type.items():
                 assert_array_equal(

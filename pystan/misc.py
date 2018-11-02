@@ -28,6 +28,7 @@ import itertools
 import logging
 import math
 from numbers import Number
+from operator import itemgetter
 import os
 import random
 import re
@@ -1140,17 +1141,15 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
     pars : {str, sequence of str}
        parameter (or quantile) name(s).
     permuted : bool
-       If True, returned samples are permuted. All chains are
-       merged and warmup samples are discarded.
+       If True, returned samples are permuted and warmup samples are discarded.
     dtypes : dict
         datatype of parameter(s).
-        If nothing is passed, np.float will be used for all parameters.
+        If nothing is passed, float will be used for all parameters.
     inc_warmup : bool
        If True, warmup samples are kept; otherwise they are
-       discarded. If `permuted` is True, `inc_warmup` is ignored.
+       discarded.
     diagnostics : bool
 	   If True, include MCMC diagnostics in dataframe.
-	   If `permuted` is True, `diagnostics` is ignored.
 
     Returns
     -------
@@ -1163,13 +1162,11 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
         raise ImportError("Pandas module not found. You can install pandas with: pip install pandas")
     if inc_warmup is True and permuted is True:
         logger.warning("`inc_warmup` ignored when `permuted` is True.")
-    if diagnostics is True and permuted is True:
-        logger.warning("`diagnostics` ignored when `permuted` is True.")
-    if dtypes is not None and permuted is False and pars is None:
-        logger.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
+        inc_warmup = False
 
     fit._verify_has_samples()
 
+    pars_original = pars
     if pars is None:
         pars = fit.sim['pars_oi']
     elif isinstance(pars, string_types):
@@ -1181,60 +1178,96 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
     allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
     pystan.misc._check_pars(allpars, pars)
 
-    tidx = pystan.misc._pars_total_indexes(fit.sim['pars_oi'],
-                                           fit.sim['dims_oi'],
-                                           fit.sim['fnames_oi'],
-                                           pars)
+    n_kept = [s if inc_warmup else s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
 
-    n_kept = [s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    par_keys = OrderedDict()
+    for key in fit.sim['fnames_oi']:
+        par = key.split("[")
+        par = par[0]
+        if par not in par_keys:
+            par_keys[par] = []
+        par_keys[par].append(key)
 
-    df = pd.DataFrame()
-    if permuted:
-        for par in pars:
-            sss = [pystan.misc._get_kept_samples(p, fit.sim)
-                   for p in tidx[par]]
-            ss = np.column_stack(sss)
-            if par in dtypes.keys():
-                ss = ss.astype(dtypes[par])
-            if ss.shape[1] == 1:
-                df[par] = ss[:,0]
-            else:
-                par_flatnames = [
-                flatname for flatname in fit.flatnames if flatname.startswith(par)
-                ]
-                for idx in np.arange(ss.shape[1]):
-                    column_name = par_flatnames[idx]
-                    df[column_name] = ss[:,idx]
+    diagnostic_type = {'divergent__':int,
+                       'energy__':float,
+                       'treedepth__':int,
+                       'accept_stat__':float,
+                       'stepsize__':float,
+                       'n_leapfrog__':int}
+
+    if pars_original is None and len(dtypes) == 0:
+        dfs = []
+        for idx, (pyholder, permutation, n_kept_) in enumerate(zip(fit.sim['samples'], fit.sim['permutation'], n_kept), 1):
+            df = pd.DataFrame.from_dict(pyholder['chains'])
+            df = df.iloc[-n_kept_:, :]
+            df.loc[:, 'chain'] = idx
+            df.loc[:, 'draw'] = np.arange(1,df.shape[0]+1, dtype=int)
+            df.loc[:, 'warmup'] = 0
+            if inc_warmup:
+                warmup = np.arange(df.shape[0]) < fit.sim['warmup2'][idx-1]
+                df.loc[warmup, 'warmup'] = 1
+            if diagnostics:
+                diagnostics_df = pd.DataFrame(pyholder['sampler_params'], index=pyholder['sampler_param_names']).T
+                diagnostics_df = diagnostics_df.iloc[-n_kept_:, :]
+                for key, dtype_ in diagnostic_type.items():
+                    if key in diagnostics_df:
+                        diagnostics_df.loc[:, key] = diagnostics_df.loc[:, key].astype(dtype_)
+                df = pd.concat((df, diagnostics_df), axis=1, sort=False)
+            if permuted:
+                df = df.iloc[permutation, :]
+            dfs.append(df)
+        df = pd.concat(dfs, axis=0, sort=False, ignore_index=True)
+    elif len(pars) == 0:
+        dfs = []
+        if diagnostics:
+            for idx, (pyholder, permutation, n_kept_) in enumerate(zip(fit.sim['samples'], fit.sim['permutation'], n_kept), 1):
+                df = pd.DataFrame(pyholder['sampler_params'], index=pyholder['sampler_param_names']).T
+                df = df.iloc[-n_kept_:, :]
+                for key, dtype_ in diagnostic_type.items():
+                    if key in diagnostics_df:
+                        df.loc[:, key] = df.loc[:, key].astype(dtype_)
+                df.insert(loc=0, column='chain', value=idx)
+                df.insert(loc=1, column='draw', value=np.arange(1,df.shape[0]+1, dtype=int))
+                df.insert(loc=2, column='warmup', value=0)
+                if inc_warmup:
+                    warmup = np.arange(df.shape[0]) < fit.sim['warmup2'][idx-1]
+                    df.loc[warmup, 'warmup'] = 1
+                if permuted:
+                    df = df.iloc[permutation, :]
+                dfs.append(df)
+        if dfs:
+            df = pd.concat(dfs, axis=0, sort=False, ignore_index=True)
+        else:
+            df = pd.DataFrame()
     else:
-        n_save = fit.sim['n_save'][0]
-        if not inc_warmup:
-            n_save = n_save - fit.sim['warmup2'][0]
-        chain_count = fit.sim['chains']+1
-        df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
-        df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
-	# Specify whether row is from warmup, 0 means not in warmup
-        df['warmup'] = 0
-        # Modify this below if sample is from warmup
-        if inc_warmup:
-            for n in range(0,chain_count-1):
-                df.loc[
-                n*fit.sim['n_save'][n]:
-                n*fit.sim['n_save'][n]+fit.sim['warmup2'][n]-1,'warmup'
-                ] = 1
-        if diagnostics == True:
-            diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
-			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
-            for diag, diag_dtype in diagnostic_type.items():
-                diag_list = []
-                for n in range(0,chain_count-1):
-                    diag_list.append(fit.get_sampler_params()[n][diag + '__'][-n_save:].astype(diag_dtype))
-                df[diag + '__'] = np.hstack(diag_list)
-
-        for n in range(len(fit.sim['fnames_oi'])):
-            par = fit.sim['fnames_oi'][n]
-            if (par in pars) or (par[:par.find('[')] in pars):
-                chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
-                samples = np.array(chains).T
-                column_name = fit.sim['fnames_oi'][n]
-                df[column_name] = samples.T.flatten()
+        extracted = []
+        for par in pars:
+            keys = par_keys.get(par, [par])
+            par_dfs = []
+            dtype = dtypes.get(par)
+            for idx, (pyholder, permutation, n_kept_) in enumerate(zip(fit.sim['samples'], fit.sim['permutation'], n_kept), 1):
+                if len(keys) == 1:
+                    par_df = pd.DataFrame(list(itemgetter(*keys)(pyholder['chains'])), columns=keys).astype(dtype)
+                else:
+                    par_df = pd.DataFrame(list(itemgetter(*keys)(pyholder['chains'])), index=keys).T.astype(dtype)
+                par_df = par_df.iloc[-n_kept_:, :]
+                par_df.loc[:, 'chain'] = idx
+                par_df.loc[:, 'draw'] = np.arange(1,par_df.shape[0]+1, dtype=int)
+                par_df.loc[:, 'warmup'] = 0
+                if inc_warmup:
+                    warmup = np.arange(par_df.shape[0]) < fit.sim['warmup2'][idx-1]
+                    par_df.loc[warmup, 'warmup'] = 1
+                if diagnostics:
+                    diagnostics_df = pd.DataFrame(pyholder['sampler_params'], index=pyholder['sampler_param_names']).T
+                    diagnostics_df = diagnostics_df.iloc[-n_kept_:, :]
+                    for key, dtype_ in diagnostic_type.items():
+                        if key in diagnostics_df:
+                            diagnostics_df.loc[:, key] = diagnostics_df.loc[:, key].astype(dtype_)
+                    par_df = pd.concat((par_df, diagnostics_df), axis=1, sort=False)
+                if permuted:
+                    par_df = par_df.iloc[permutation, :]
+                par_dfs.append(par_df)
+            par_df = pd.concat(par_dfs, axis=0, sort=False, ignore_index=True)
+            extracted.append(par_df)
+        df = pd.concat(extracted, axis=1, sort=False)
     return df
