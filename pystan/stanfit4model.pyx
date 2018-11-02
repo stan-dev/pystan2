@@ -540,7 +540,7 @@ cdef class StanFit4Model:
         Parameters
         ----------
         pars : {str, sequence of str}
-           parameter name(s).
+           parameter (or quantile) name(s).
         permuted : bool
            If True, returned samples are permuted. All chains are
            merged and warmup samples are discarded.
@@ -592,7 +592,7 @@ cdef class StanFit4Model:
 
         par_keys = OrderedDict()
         for key in self.sim['fnames_oi']:
-            par = key.replace("]", "").split("[")
+            par = key.split("[")
             par = par[0]
             if par not in par_keys:
                 par_keys[par] = []
@@ -603,9 +603,10 @@ cdef class StanFit4Model:
         return_array = (not permuted) and (pars_original is None)
         extracted = OrderedDict()
 
-        for par, keys in par_keys.items():
+        for par in pars:
+            keys = par_keys.get(par, [par])
             par_samples = []
-            shape = shapes[par]
+            shape = shapes.get(par, [])
             dtype = dtypes.get(par)
             for pyholder, permutation, n_kept_ in zip(self.sim['samples'], self.sim['permutation'], n_kept):
                 arr = itemgetter(*keys)(pyholder.chains)
@@ -878,30 +879,27 @@ cdef class StanFit4Model:
         Parameters
         ----------
         pars : {str, sequence of str}
-           parameter (or quantile) name(s). If `permuted` is False,
-           `pars` is ignored.
+            parameter (or quantile) name(s).
         permuted : bool, default False
-           If True, returned samples are permuted. All chains are
-           merged and warmup samples are discarded.
+            If True, returned samples are permuted.
+            Warmup samples are discarded.
         dtypes : dict
-		    datatype of parameter(s).
-			If nothing is passed, np.float will be used for all parameters.
+		        datatype of parameter(s).
+			      If nothing is passed, np.float will be used for all parameters.
         inc_warmup : bool
-           If True, warmup samples are kept; otherwise they are
-           discarded. If `permuted` is True, `inc_warmup` is ignored.
+            If True, warmup samples are kept; otherwise they are
+            discarded. If `permuted` is True, `inc_warmup` is ignored.
         diagnostics : bool
-	       If True, include MCMC diagnostics in dataframe.
-           If `permuted` is True, `diagnostics` is ignored.
+	          If True, include hmc diagnostics in dataframe.
 
         Returns
         -------
         df : pandas dataframe
 
-	Note
-	----
-	Unlike default in extract (`permuted=True`)
-	`.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
-
+	      Note
+	      ----
+	      Unlike default in extract (`permuted=True`)
+	      `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
         """
         return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics)
 
