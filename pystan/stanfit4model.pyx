@@ -37,7 +37,6 @@ np.import_array()
 # python imports
 from collections import OrderedDict
 import logging
-from operator import itemgetter
 import warnings
 
 import numpy as np
@@ -411,6 +410,19 @@ def _call_sampler(data, args, pars_oi=None):
     del fitptr
     return ret, holder
 
+def _split_pars_locs(fnames, pars):
+    """Split flatnames to par and location"""
+    par_keys = OrderedDict((par, []) for par in pars)
+    for key in fnames:
+        par_tail = key.split("[")
+        par = par_tail[0]
+        loc = [Ellipsis]
+        for tail in par_tail[1:]:
+            loc = []
+            for i in tail[:-1].split(","):
+                loc.append(int(i)-1)
+        par_keys[par].append((key, loc))
+    return par_keys
 
 cdef class StanFit4Model:
     """Holder for results obtained from running a Stan model with data
@@ -589,49 +601,53 @@ cdef class StanFit4Model:
         pystan.misc._check_pars(allpars, pars)
 
         n_kept = [s if inc_warmup else s-w for s, w in zip(self.sim['n_save'], self.sim['warmup2'])]
+        chains = len(self.sim['samples'])
 
-        par_keys = OrderedDict()
-        for key in self.sim['fnames_oi']:
-            par = key.split("[")
-            par = par[0]
-            if par not in par_keys:
-                par_keys[par] = []
-            par_keys[par].append(key)
+        # return array (n, chains, flat_pars)
+        if (not permuted) and (pars_original is None):
+            n = n_kept[0]
+            arr_shape = [n, chains, len(self.sim['fnames_oi'])]
+            arr = np.empty(arr_shape, order='F')
+            for chain, (pyholder, n) in enumerate(zip(self.sim['samples'], n_kept)):
+                for i, item in enumerate(pyholder.chains.values()):
+                    arr[:, chain, i] = item[-n:]
+            return arr
+
+
+        par_keys = _split_pars_locs(self.sim['fnames_oi'], self.sim['pars_oi'])
 
         shapes = dict(zip(self.sim['pars_oi'], self.sim['dims_oi']))
 
-        return_array = (not permuted) and (pars_original is None)
         extracted = OrderedDict()
-
         for par in pars:
-            keys = par_keys.get(par, [par])
-            par_samples = []
+            if par in extracted:
+                continue
+            keys_locs = par_keys.get(par, [(par, [Ellipsis])])
             shape = shapes.get(par, [])
             dtype = dtypes.get(par)
-            for pyholder, permutation, n_kept_ in zip(self.sim['samples'], self.sim['permutation'], n_kept):
-                arr = itemgetter(*keys)(pyholder.chains)
-                if shape:
-                    arr = np.column_stack(arr)
-                arr = arr[-n_kept_:]
-                if permuted:
-                    arr = arr[permutation]
-                if not return_array:
-                    new_shape = tuple([-1]+list(shape))
-                    arr = arr.reshape(new_shape, order='F')
-                par_samples.append(arr)
+
             if permuted:
-                arr = np.concatenate(par_samples, axis=0)
-            elif (not permuted) and (pars_original is not None):
-                arr = np.stack(par_samples, axis=1)
+                arr_shape = [sum(n_kept)] + shape
+                arr = np.empty(arr_shape, dtype=dtype, order='F')
+                for chain, (pyholder, permutation, n) in enumerate(zip(self.sim['samples'], self.sim['permutation'], n_kept)):
+                    n_processed = sum(n_kept[:chain])
+                    axes = [slice(n_processed, n_processed+n)]
+                    for key, loc in keys_locs:
+                        arr_slice = tuple(axes + loc)
+                        arr[arr_slice] = pyholder.chains[key][-n:][permutation]
+                extracted[par] = arr
+
             else:
-                arr = np.stack(par_samples, axis=1)
-            if not return_array and len(arr.shape) == 2 and arr.shape[1] == 1:
-                arr = np.squeeze(arr, axis=1)
-            if not return_array:
-              arr = arr.astype(dtype)
-            extracted[par] = arr
-        if return_array:
-            extracted = np.dstack(extracted.values())
+                n = n_kept[0]
+                arr_shape = [n, chains] + shape
+                arr = np.empty(arr_shape, dtype=dtype, order='F')
+                for chain, (pyholder, n) in enumerate(zip(self.sim['samples'], n_kept)):
+                    axes = [slice(None), chain]
+                    for key, loc in keys_locs:
+                        arr_slice = tuple(axes + loc)
+                        arr[arr_slice] = pyholder.chains[key][-n:]
+                extracted[par] = arr
+
         return extracted
 
     def __unicode__(self):
@@ -873,7 +889,7 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
-    def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True):
+    def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
         """Extract samples as a pandas dataframe for different parameters.
 
         Parameters
@@ -882,26 +898,33 @@ cdef class StanFit4Model:
             parameter (or quantile) name(s).
         permuted : bool, default False
             If True, returned samples are permuted.
-            Warmup samples are discarded.
+            If inc_warmup is True, warmup samples have negative order.
         dtypes : dict
-		        datatype of parameter(s).
-			      If nothing is passed, np.float will be used for all parameters.
+            datatype of parameter(s).
+            If nothing is passed, float will be used for all parameters.
         inc_warmup : bool
             If True, warmup samples are kept; otherwise they are
-            discarded. If `permuted` is True, `inc_warmup` is ignored.
+            discarded.
         diagnostics : bool
-	          If True, include hmc diagnostics in dataframe.
+            If True, include hmc diagnostics in dataframe.
+        header : bool
+            If True, include header columns.
+
 
         Returns
         -------
         df : pandas dataframe
+            Returned dataframe contains: [header_df]|[draws_df]|[diagnostics_df],
+            where all groups are optional.
+            To exclude draws_df use `pars=[]`.
 
-	      Note
-	      ----
-	      Unlike default in extract (`permuted=True`)
-	      `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
+
+        Note
+        ----
+        Unlike default in extract (`permuted=True`)
+        `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
         """
-        return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics)
+        return pystan.misc.to_dataframe(fit=self, pars=pars, permuted=permuted, dtypes=dtypes, inc_warmup=inc_warmup, diagnostics=diagnostics, header=header)
 
 
     # FIXME: when this is a normal Python class one can use @property instead
