@@ -1132,109 +1132,183 @@ def read_rdump(filename):
         d[name.strip()] = _rdump_value_to_numpy(value.strip())
     return d
 
-def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True):
+def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
     """Extract samples as a pandas dataframe for different parameters.
 
     Parameters
     ----------
     pars : {str, sequence of str}
-       parameter (or quantile) name(s).
+        parameter (or quantile) name(s).
     permuted : bool
-       If True, returned samples are permuted. All chains are
-       merged and warmup samples are discarded.
+        If True, returned samples are permuted.
+        If inc_warmup is True, warmup samples have negative order.
     dtypes : dict
         datatype of parameter(s).
-        If nothing is passed, np.float will be used for all parameters.
+        If nothing is passed, float will be used for all parameters.
     inc_warmup : bool
-       If True, warmup samples are kept; otherwise they are
-       discarded. If `permuted` is True, `inc_warmup` is ignored.
+        If True, warmup samples are kept; otherwise they are
+        discarded.
     diagnostics : bool
-	   If True, include MCMC diagnostics in dataframe.
-	   If `permuted` is True, `diagnostics` is ignored.
+        If True, include hmc diagnostics in dataframe.
+    header : bool
+       If True, include header columns.
 
     Returns
     -------
     df : pandas dataframe
+        Returned dataframe contains: [header_df]|[draws_df]|[diagnostics_df],
+        where all groups are optional.
+        To exclude draws_df use `pars=[]`.
 
     """
     try:
         import pandas as pd
     except ImportError:
         raise ImportError("Pandas module not found. You can install pandas with: pip install pandas")
-    if inc_warmup is True and permuted is True:
-        logger.warning("`inc_warmup` ignored when `permuted` is True.")
-    if diagnostics is True and permuted is True:
-        logger.warning("`diagnostics` ignored when `permuted` is True.")
-    if dtypes is not None and permuted is False and pars is None:
-        logger.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
     fit._verify_has_samples()
-
+    pars_original = pars
     if pars is None:
         pars = fit.sim['pars_oi']
     elif isinstance(pars, string_types):
         pars = [pars]
-    pars = pystan.misc._remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+    if pars:
+        pars = pystan.misc._remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+        allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
+        _check_pars(allpars, pars)
+
     if dtypes is None:
         dtypes = {}
 
-    allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
-    pystan.misc._check_pars(allpars, pars)
+    n_kept = [s if inc_warmup else s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    chains = len(fit.sim['samples'])
 
-    tidx = pystan.misc._pars_total_indexes(fit.sim['pars_oi'],
-                                           fit.sim['dims_oi'],
-                                           fit.sim['fnames_oi'],
-                                           pars)
+    diagnostic_type = {'divergent__':int,
+                       'energy__':float,
+                       'treedepth__':int,
+                       'accept_stat__':float,
+                       'stepsize__':float,
+                       'n_leapfrog__':int}
 
-    n_kept = [s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    header_dict = OrderedDict()
+    if header:
+        idx = np.concatenate([np.full(n_kept[chain], chain, dtype=int) for chain in range(chains)])
+        warmup = [np.zeros(n_kept[chain], dtype=np.int64) for chain in range(chains)]
 
-    df = pd.DataFrame()
-    if permuted:
-        for par in pars:
-            sss = [pystan.misc._get_kept_samples(p, fit.sim)
-                   for p in tidx[par]]
-            ss = np.column_stack(sss)
-            if par in dtypes.keys():
-                ss = ss.astype(dtypes[par])
-            if ss.shape[1] == 1:
-                df[par] = ss[:,0]
-            else:
-                par_flatnames = [
-                flatname for flatname in fit.flatnames if flatname.startswith(par)
-                ]
-                for idx in np.arange(ss.shape[1]):
-                    column_name = par_flatnames[idx]
-                    df[column_name] = ss[:,idx]
-    else:
-        n_save = fit.sim['n_save'][0]
-        if not inc_warmup:
-            n_save = n_save - fit.sim['warmup2'][0]
-        chain_count = fit.sim['chains']+1
-        df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
-        df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
-	# Specify whether row is from warmup, 0 means not in warmup
-        df['warmup'] = 0
-        # Modify this below if sample is from warmup
         if inc_warmup:
-            for n in range(0,chain_count-1):
-                df.loc[
-                n*fit.sim['n_save'][n]:
-                n*fit.sim['n_save'][n]+fit.sim['warmup2'][n]-1,'warmup'
-                ] = 1
-        if diagnostics == True:
-            diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
-			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
-            for diag, diag_dtype in diagnostic_type.items():
-                diag_list = []
-                for n in range(0,chain_count-1):
-                    diag_list.append(fit.get_sampler_params()[n][diag + '__'][-n_save:].astype(diag_dtype))
-                df[diag + '__'] = np.hstack(diag_list)
+            draw = []
+            for chain, w in zip(range(chains), fit.sim['warmup2']):
+                warmup[chain][:w] = 1
+                draw.append(np.arange(n_kept[chain], dtype=np.int64) - w)
+            draw = np.concatenate(draw)
+        else:
+            draw = np.concatenate([np.arange(n_kept[chain], dtype=np.int64) for chain in range(chains)])
+        warmup = np.concatenate(warmup)
 
-        for n in range(len(fit.sim['fnames_oi'])):
-            par = fit.sim['fnames_oi'][n]
-            if (par in pars) or (par[:par.find('[')] in pars):
-                chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
-                samples = np.array(chains).T
-                column_name = fit.sim['fnames_oi'][n]
-                df[column_name] = samples.T.flatten()
+        header_dict = OrderedDict(zip(['chain', 'draw', 'warmup'], [idx, draw, warmup]))
+
+    if permuted:
+        if inc_warmup:
+            chain_permutation = []
+            chain_permutation_order = []
+            permutation = []
+            permutation_order = []
+            for chain, p, w in zip(range(chains), fit.sim['permutation'], fit.sim['warmup2']):
+                chain_permutation.append(list(range(-w, 0)) + p)
+                chain_permutation_order.append(list(range(-w, 0)) + list(np.argsort(p)))
+                permutation.append(sum(n_kept[:chain])+chain_permutation[-1]+w)
+                permutation_order.append(sum(n_kept[:chain])+chain_permutation_order[-1]+w)
+            chain_permutation = np.concatenate(chain_permutation)
+            chain_permutation_order = np.concatenate(chain_permutation_order)
+            permutation = np.concatenate(permutation)
+            permutation_order = np.concatenate(permutation_order)
+
+        else:
+            chain_permutation = np.concatenate(fit.sim['permutation'])
+            chain_permutation_order = np.concatenate([np.argsort(item) for item in fit.sim['permutation']])
+            permutation = np.concatenate([sum(n_kept[:chain])+p for chain, p in enumerate(fit.sim['permutation'])])
+            permutation_order = np.argsort(permutation)
+
+        header_dict["permutation"] = permutation
+        header_dict["chain_permutation"] = chain_permutation
+        header_dict["permutation_order"] = permutation_order
+        header_dict["chain_permutation_order"] = chain_permutation_order
+
+    if header:
+        header_df = pd.DataFrame.from_dict(header_dict)
+    else:
+        if permuted:
+            header_df = pd.DataFrame.from_dict({"permutation_order" : header_dict["permutation_order"]})
+        else:
+            header_df = pd.DataFrame()
+
+    fnames_set = set(fit.sim['fnames_oi'])
+    pars_set = set(pars)
+    if pars_original is None or fnames_set == pars_set:
+        dfs = [pd.DataFrame.from_dict(pyholder.chains).iloc[-n:] for pyholder, n in zip(fit.sim['samples'], n_kept)]
+        df = pd.concat(dfs, axis=0, sort=False, ignore_index=True)
+        if dtypes:
+            if not fnames_set.issuperset(pars_set):
+                par_keys = OrderedDict([(par, []) for par in fit.sim['pars_oi']])
+                for key in fit.sim['fnames_oi']:
+                    par = key.split("[")
+                    par = par[0]
+                    par_keys[par].append(key)
+
+            for par, dtype in dtypes.items():
+                if isinstance(dtype, (float, np.float64)):
+                    continue
+                for key in par_keys.get(par, [par]):
+                    df.loc[:, key] = df.loc[:, key].astype(dtype)
+
+    elif pars:
+        par_keys = dict()
+        if not fnames_set.issuperset(pars_set):
+            par_keys = OrderedDict([(par, []) for par in fit.sim['pars_oi']])
+            for key in fit.sim['fnames_oi']:
+                par = key.split("[")
+                par = par[0]
+                par_keys[par].append(key)
+
+        columns = []
+        for par in pars:
+            columns.extend(par_keys.get(par, [par]))
+        columns = list(np.unique(columns))
+
+        df = pd.DataFrame(index=np.arange(sum(n_kept)), columns=columns, dtype=float)
+        for key in columns:
+            key_values = []
+            for chain, (pyholder, n) in enumerate(zip(fit.sim['samples'], n_kept)):
+                key_values.append(pyholder.chains[key][-n:])
+            df.loc[:, key] = np.concatenate(key_values)
+
+        for par, dtype in dtypes.items():
+            if isinstance(dtype, (float, np.float64)):
+                continue
+            for key in par_keys.get(par, [par]):
+                df.loc[:, key] = df.loc[:, key].astype(dtype)
+    else:
+        df = pd.DataFrame()
+
+    if diagnostics:
+        diagnostics_dfs = []
+        for idx, (pyholder, permutation, n) in enumerate(zip(fit.sim['samples'], fit.sim['permutation'], n_kept), 1):
+            diagnostics_df = pd.DataFrame(pyholder['sampler_params'], index=pyholder['sampler_param_names']).T
+            diagnostics_df = diagnostics_df.iloc[-n:, :]
+            for key, dtype in diagnostic_type.items():
+                if key in diagnostics_df:
+                    diagnostics_df.loc[:, key] = diagnostics_df.loc[:, key].astype(dtype)
+            diagnostics_dfs.append(diagnostics_df)
+        if diagnostics_dfs:
+            diagnostics_df = pd.concat(diagnostics_dfs, axis=0, sort=False, ignore_index=True)
+        else:
+            diagnostics_df = pd.DataFrame()
+    else:
+        diagnostics_df = pd.DataFrame()
+
+    df = pd.concat((header_df, df, diagnostics_df), axis=1, sort=False)
+    if permuted:
+        df.sort_values(by='permutation_order', inplace=True)
+        if not header:
+            df.drop(columns='permutation_order', inplace=True)
     return df
