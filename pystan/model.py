@@ -513,9 +513,10 @@ class StanModel:
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
-        idx_of_lp = m_pars.index('lp__')
-        del m_pars[idx_of_lp]
-        del p_dims[idx_of_lp]
+        if 'lp__' in m_pars:
+            idx_of_lp = m_pars.index('lp__')
+            del m_pars[idx_of_lp]
+            del p_dims[idx_of_lp]
 
         if isinstance(init, numbers.Number):
             init = str(init)
