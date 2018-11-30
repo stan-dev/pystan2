@@ -1,5 +1,4 @@
 import pystan
-import pickle
 import numpy as np
 import logging
 
@@ -56,7 +55,7 @@ def check_div(fit, verbose = True, per_chain = False):
 
             N = divergent.size
             logger.warning('{} of {} iterations ended '.format(n, N) +
-                           'with a divergence ({}%).'.format(100 * n / N))
+                           'with a divergence ({:.3g} %).'.format(100 * n / N))
 
             if per_chain:
                 chain_len, num_chains = divergent.shape
@@ -66,7 +65,7 @@ def check_div(fit, verbose = True, per_chain = False):
                         logger.warning('Chain {}: {} of {} iterations ended '.format(chain_num + 1,
                                                                                      n_for_chains[chain_num],
                                                                                      chain_len) +
-                                       'with a divergence ({}%).'.format(100 * n_for_chains[chain_num] /
+                                       'with a divergence ({:.3g} %).'.format(100 * n_for_chains[chain_num] /
                                                                          chain_len))
 
             try:
@@ -145,7 +144,7 @@ def check_treedepth(fit, verbose = True, per_chain = False):
         if verbosity > 0:
             N = depths.size
             logger.warning(('{} of {} iterations saturated the maximum tree depth of {}'
-                                + ' ({}%)').format(n, N, max_treedepth, 100 * n / N))
+                                + ' ({:.3g} %)').format(n, N, max_treedepth, 100 * n / N))
 
             if per_chain:
                 chain_len, num_chains = depths.shape
@@ -155,7 +154,7 @@ def check_treedepth(fit, verbose = True, per_chain = False):
                         logger.warning('Chain {}: {} of {} saturated '.format(chain_num + 1,
                                                                               n_for_chains[chain_num],
                                                                               chain_len) +
-                                       'the maximum tree depth of {} ({}%).'.format(max_treedepth,
+                                       'the maximum tree depth of {} ({:.3g} %).'.format(max_treedepth,
                                                                                     100 * n_for_chains[chain_num] /
                                                                                     chain_len))
 
@@ -205,7 +204,7 @@ def check_energy(fit, verbose = True):
     try:
         energies = np.column_stack([y['energy__'] for y in sampler_params])
     except:
-        raise ValueError('energy__ not in sampler params of fit object')
+        raise ValueError('Cannot access energy information from fit object')
 
     chain_len, num_chains = energies.shape
 
@@ -264,35 +263,23 @@ def check_n_eff(fit, verbose = True):
         ``True`` if there are no problems with effective sample size
         and ``False`` otherwise.
 
-    Raises
-    ------
-    ValueError
-        If the output of ``fit.summary()`` has no information about
-        effective sample size (i.e., n_eff).
-
     """
 
     verbosity = int(verbose)
 
-    fit_summary = fit.summary(probs=[0.5])
-
-    try:
-        n_effs_index = fit_summary['summary_colnames'].index('n_eff')
-    except:
-        raise ValueError('Summary of fit object appears to lack information on effective sample size')
-
-    n_effs = fit_summary['summary'][:, n_effs_index]
-    names = fit_summary['summary_rownames']
     n_iter = sum(fit.sim['n_save'])-sum(fit.sim['warmup2'])
 
     no_warning = True
-    for n_eff, name in zip(n_effs, names):
+    for n, name in enumerate(fit.sim['fnames_oi']):
+        n_eff = pystan.chains.ess(fit.sim, n)
         ratio = n_eff / n_iter
         if ((ratio < 0.001) or np.isnan(ratio) or np.isinf(ratio)):
             if verbosity > 0:
                 logger.warning('n_eff / iter for parameter {} is {}!'.format(name, ratio))
 
             no_warning = False
+            if verbosity <= 0:
+                break
 
     if no_warning:
         if verbosity > 1:
@@ -327,34 +314,22 @@ def check_rhat(fit, verbose = True):
         ``True`` if there are no problems with with Rhat and ``False``
         otherwise.
 
-    Raises
-    ------
-    ValueError
-        If the output of ``fit.summary()`` has no information about
-        Rhat.
-
     """
 
     verbosity = int(verbose)
 
-    fit_summary = fit.summary(probs=[0.5])
-
-    try:
-        Rhat_index = fit_summary['summary_colnames'].index('Rhat')
-    except:
-        raise ValueError('Summary of fit object appears to lack information on Rhat')
-
-    rhats = fit_summary['summary'][:, Rhat_index]
-    names = fit_summary['summary_rownames']
-
     no_warning = True
-    for rhat, name in zip(rhats, names):
+    for n, name in enumerate(fit.sim['fnames_oi']):
+        rhat = pystan.chains.splitrhat(fit.sim, n)
+
         if (np.isnan(rhat) or np.isinf(rhat) or (rhat > 1.1) or (rhat < 0.9)):
 
             if verbosity > 0:
                 logger.warning('Rhat for parameter {} is {}!'.format(name, rhat))
 
             no_warning = False
+            if verbosity <= 0:
+                break
 
     if no_warning:
         if verbosity > 1:
@@ -368,7 +343,7 @@ def check_rhat(fit, verbose = True):
         return False
 
 def check_hmc_diagnostics(fit, verbose = True, per_chain = False):
-    """Checks all MCMC diagnostics
+    """Checks all hmc diagnostics
 
     Parameters
     ----------
