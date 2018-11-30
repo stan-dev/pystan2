@@ -15,7 +15,7 @@ PyStan is partially supported under Windows with the following caveats:
 PyStan requires a working C++ compiler. Configuring such a compiler is
 typically the most challenging step in getting PyStan running.
 
-PyStan is tested against the MingW-w64 compiler which works on both Python versions (2.7, 3.x)
+PyStan is tested against the mingw-w64 compiler which works on both Python versions (2.7, 3.x)
 and supports x86 and x64.
 
 Due to problems with MSVC template deduction, functions with Eigen library are failing.
@@ -46,11 +46,11 @@ You can open the command line with
 
 Test conda package manager by::
 
-``conda info``
+    conda info
 
 To update conda package manager to the latest version::
 
-``conda update conda``
+    conda update conda
 
 Create a conda virtual environment (optional)
 =============================================
@@ -58,37 +58,37 @@ Create a conda virtual environment (optional)
 It is a good practice to keep specific projects on their on conda virtual environments
 to prevent unnecessary package collisions. Create a new conda environment with::
 
-``conda create -n stan_env python=3.7``
+    conda create -n stan_env python=3.7
 
 where ``stan_env`` is the name of the environment.
 
 After this activate environment with::
 
-``conda activate stan_env``
+    conda activate stan_env
 
 or if your conda doesn't include ``conda activate`` use::
 
-``activate stan_env``
+    activate stan_env
 
 To close the environment type::
 
-``deactivate``
+    deactivate
 
 Installing C++ compiler
 =======================
 
-There are several ways to install MingW-w64 compiler toolchain, but in these instructions
+There are several ways to install mingw-w64 compiler toolchain, but in these instructions
 install compiler with ``conda`` package manager which comes with the Anaconda package.
 
-To install MingW-w64 compiler type::
+To install mingw-w64 compiler type::
 
-``conda install libpython m2w64-toolchain -c msys2``
+    conda install libpython m2w64-toolchain -c msys2
 
 This will install
 
-- ``libpython`` package which is needed to import MingW-w64.
+- ``libpython`` package which is needed to import mingw-w64.
 <https://anaconda.org/anaconda/libpython>
-- MingW-w64 toolchain. <https://anaconda.org/msys2/m2w64-toolchain>
+- mingw-w64 toolchain. <https://anaconda.org/msys2/m2w64-toolchain>
 
 ``libpython`` setups automatically ``distutils.cfg`` file, but if that is failed
 use the following instructions to setup it manually
@@ -110,11 +110,11 @@ Install dependencies
 It is recommended that on Windows the dependencies are installed with conda and ``conda-forge`` channel.
 Required dependencies are ``numpy`` and ``cython``.::
 
-``conda install numpy cython -c conda-forge``
+    conda install numpy cython -c conda-forge
 
 Optional dependencies are ``matplotlib``, ``scipy`` and ``pandas``.::
 
-``conda install matplotlib scipy pandas -c conda-forge``
+    conda install matplotlib scipy pandas -c conda-forge
 
 Installing PyStan
 =================
@@ -146,9 +146,9 @@ Steps
 
 With pip
 
-``conda install numpy cython matplotlib scipy pandas -c conda-forge``
-``pip install pystan``
+    conda install numpy cython matplotlib scipy pandas -c conda-forge
+    pip install pystan``
 
 With conda
 
-``conda install numpy cython matplotlib scipy pandas pystan -c conda-forge``
+    conda install numpy cython matplotlib scipy pandas pystan -c conda-forge
