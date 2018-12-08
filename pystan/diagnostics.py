@@ -410,7 +410,7 @@ def check_rhat(fit, pars=None, verbose=True):
 
         return False
 
-def check_hmc_diagnostics(fit, pars=None, verbose=True, per_chain=False):
+def check_hmc_diagnostics(fit, pars=None, verbose=True, per_chain=False, checks=None):
     """Checks all hmc diagnostics
 
     Parameters
@@ -428,6 +428,9 @@ def check_hmc_diagnostics(fit, pars=None, verbose=True, per_chain=False):
     per_chain : bool, optional
         Where applicable, print diagnostics on a per-chain basis. This
         applies mainly to the divergence and treedepth checks.
+    checks : list, {"n_eff", "Rhat", "divergence", "treedepth", "energy"}, optional
+        By default run all checks. If ``checks`` is defined, run only
+        checks given in ``checks``
 
 
     Returns
@@ -445,36 +448,57 @@ def check_hmc_diagnostics(fit, pars=None, verbose=True, per_chain=False):
     # For consistency with the individual diagnostic functions
     verbosity = int(verbose)
 
+    all_checks = {"n_eff", "Rhat", "divergence", "treedepth", "energy"}
+    if checks is None:
+        checks = all_checks
+    else:
+        undefined_checks = []
+        for c in checks:
+            # accept lowercase Rhat
+            if c == "rhat":
+                continue
+            if c not in all_checks:
+                undefined_checks.append(c)
+        if undefined_checks:
+            ucstr = "[" + ", ".join(undefined_checks) + "]"
+            msg = "checks: {} are not legal checks: {}".format(ucstr, all_checks)
+            raise TypeError(msg)
+
     out_dict = {}
 
-    try:
-        out_dict['n_eff'] = check_n_eff(fit, pars, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of effective sample size (n_eff)')
+    if "n_eff" in checks:
+        try:
+            out_dict['n_eff'] = check_n_eff(fit, pars, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of effective sample size (n_eff)')
 
-    try:
-        out_dict['Rhat'] = check_rhat(fit, pars, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of potential scale reduction factors (Rhat)')
+    if ("Rhat" in checks) or ("rhat" in checks):
+        try:
+            out_dict['Rhat'] = check_rhat(fit, pars, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of potential scale reduction factors (Rhat)')
 
-    try:
-        out_dict['divergence'] = check_div(fit, verbose, per_chain)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of divergent transitions (divergence)')
+    if "divergence" in checks:
+        try:
+            out_dict['divergence'] = check_div(fit, verbose, per_chain)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of divergent transitions (divergence)')
 
-    try:
-        out_dict['treedepth'] = check_treedepth(fit, verbose, per_chain)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of transitions ending prematurely due to maximum tree depth limit (treedepth)')
+    if "treedepth" in checks:
+        try:
+            out_dict['treedepth'] = check_treedepth(fit, verbose, per_chain)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of transitions ending prematurely due to maximum tree depth limit (treedepth)')
 
-    try:
-        out_dict['energy'] = check_energy(fit, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of E-BFMI (energy)')
+    if "energy" in checks:
+        try:
+            out_dict['energy'] = check_energy(fit, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of E-BFMI (energy)')
 
     return out_dict
