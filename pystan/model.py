@@ -811,8 +811,8 @@ class StanModel:
         # messages.
         if check_hmc_diagnostics is None and algorithm in ("NUTS", "HMC"):
             if n_flatnames > 1000:
-                msg = "Maximum (flat) parameter count (1000) exceeded: " +
-                      "skipping diagnostic tests for n_eff and Rhat.\n" +
+                msg = "Maximum (flat) parameter count (1000) exceeded: " +\
+                      "skipping diagnostic tests for n_eff and Rhat.\n" +\
                       "To run all diagnostics call pystan.check_hmc_diagnostics(fit)"
                 logger.warning(msg)
                 checks = ["divergence", "treedepth", "energy"]
