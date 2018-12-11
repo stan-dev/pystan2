@@ -726,7 +726,9 @@ class StanModel:
 
         check_hmc_diagnostics : bool, optional
             After sampling run `pystan.diagnostics.check_hmc_diagnostics` function.
-            Default is `True`.
+            Default is `True`. Checks for n_eff and rhat skipped if the flat
+            parameter count is higher than 1000, unless user explicitly defines
+            ``check_hmc_diagnostics=True``.
 
         Examples
         --------
@@ -783,7 +785,7 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
 
-        check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', True)
+        check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', None)
         # check that arguments in kwargs are valid
         valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
@@ -846,7 +848,17 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        if check_hmc_diagnostics and algorithm in ("NUTS", "HMC"):
+        if check_hmc_diagnostics is None and algorithm in ("NUTS", "HMC"):
+            if n_flatnames > 1000:
+                msg = "Maximum (flat) parameter count (1000) exceeded: " +\
+                      "skipping diagnostic tests for n_eff and Rhat.\n" +\
+                      "To run all diagnostics call pystan.check_hmc_diagnostics(fit)"
+                logger.warning(msg)
+                checks = ["divergence", "treedepth", "energy"]
+                pystan.diagnostics.check_hmc_diagnostics(fit, checks=checks)  # noqa
+            else:
+                pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
+        elif check_hmc_diagnostics and algorithm in ("NUTS", "HMC"):
             pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
 
         return fit
