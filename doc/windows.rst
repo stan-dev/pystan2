@@ -38,13 +38,11 @@ which PyStan requires. The following instructions assume that you are using Wind
 Open Command prompt
 ===================
 
-All the following commands are written to a command line.
-You can open the command line with
+    All the following commands are written in a command line prompt. You can use one like
+`Anaconda Prompt` if you installed Python using Anaconda in the previous step, or
+`Command Prompt` which comes with Windows.
 
-- open "Anaconda prompt"
-- open "Command prompt" ``cmd.exe`` (if conda is found on your PATH).
-
-Test conda package manager by::
+Test that the conda package manager is properly installed by typing::
 
     conda info
 
@@ -92,12 +90,12 @@ This will install
 ``libpython`` setups automatically ``distutils.cfg`` file, but if that is failed
 use the following instructions to setup it manually
 
-In `PYTHONPATH\\Lib\\distutils` create `distutils.cfg` with text editor (e.g. `notepad`, `notepad++`) and add the following lines::
+In ``PYTHONPATH\\Lib\\distutils`` create a ``distutils.cfg`` file with a text editor (e.g. Notepad) and add the following lines::
 
     [build]
     compiler=mingw32
 
-To find the correct `distutils` path, run `python`::
+To find the correct ``distutils`` path, run the following lines in ``python``::
 
     >>> import distutils
     >>> print(distutils.__file__)
@@ -106,26 +104,21 @@ To find the correct `distutils` path, run `python`::
 Install dependencies
 ====================
 
-It is recommended that on Windows the dependencies are installed with conda and ``conda-forge`` channel.
-Required dependencies are ``numpy`` and ``cython``.::
+It is recommended that on Windows the dependencies are installed with conda and the ``conda-forge`` channel.
+Required dependencies are ``numpy`` and ``cython``::
 
     conda install numpy cython -c conda-forge
 
-Optional dependencies are ``matplotlib``, ``scipy`` and ``pandas``.::
+Optional dependencies are ``matplotlib``, ``scipy`` and ``pandas``::
 
     conda install matplotlib scipy pandas -c conda-forge
 
 Installing PyStan
 =================
 
-You can install PyStan with either pip (recommended) or conda
-
-with pip::
+You can install PyStan with either pip (recommended) or conda::
 
     pip install pystan
-
-And with conda
-
     conda install pystan -c conda-forge
 
 
@@ -139,15 +132,14 @@ a very simple model::
     >>> y = model.sampling().extract()['y']
     >>> y.mean()  # with luck the result will be near 0
 
-
 Steps
 =====
 
-With pip
-
-    conda install numpy cython matplotlib scipy pandas -c conda-forge
-    pip install pystan``
-
-With conda
+With conda::
 
     conda install numpy cython matplotlib scipy pandas pystan -c conda-forge
+    
+With pip::
+
+    conda install numpy cython matplotlib scipy pandas -c conda-forge
+    pip install pystan
