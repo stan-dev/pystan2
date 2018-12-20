@@ -20,8 +20,8 @@ Prerequisite knowledge
 
 It is highly recommended to know what ``bash`` is and the basics of
 navigating the terminal. You can review or learn it from the `Software
-Carpentry <http://software-carpentry.org/>`__ bash lesson here:
-http://swcarpentry.github.io/shell-novice/.
+Carpentry <http://software-carpentry.org/>`_ (`bash lesson here 
+<http://swcarpentry.github.io/shell-novice/>`_).
 
 Lessons 1 - 3 are proabably the most important.
 
@@ -29,7 +29,7 @@ Installing Python
 -----------------
 
 The easiest way to install Python is to use the Anaconda distribution
-of python. It can be downloaded here: http://continuum.io/downloads.
+of python. It can be downloaded `here <https://www.anaconda.com/download/>`_.
 
 This is because PyStan (and many python tools) require packages (aka
 modules) that have C dependencies. These types of dependencies are

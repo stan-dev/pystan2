@@ -28,12 +28,12 @@ Installing Python
 
 There several ways of installing PyStan on Windows. The following instructions
 assume you have installed Python as packaged in the `Anaconda
-Python distribution <https://www.anaconda.com/download/#windows>`
-or `Miniconda distribution <https://conda.io/miniconda.html>`.
+Python distribution <https://www.anaconda.com/download/#windows>`_
+or `Miniconda distribution <https://conda.io/miniconda.html>`_.
 The Anaconda distribution is well-maintained and includes packages such as Numpy
-which PyStan requires. The following instructions assume that you are using Windows 7.
+which PyStan requires. The following instructions assume that you are using Windows 7 
 (`Windows 10 disregards user choice and user privacy
-<https://www.eff.org/deeplinks/2016/08/windows-10-microsoft-blatantly-disregards-user-choice-and-privacy-deep-dive>`_.)
+<https://www.eff.org/deeplinks/2016/08/windows-10-microsoft-blatantly-disregards-user-choice-and-privacy-deep-dive>`_).
 
 Open Command prompt
 ===================
@@ -86,8 +86,7 @@ To install mingw-w64 compiler type::
 
 This will install
 
-- ``libpython`` package which is needed to import mingw-w64.
-<https://anaconda.org/anaconda/libpython>
+- ``libpython`` package which is needed to import mingw-w64. <https://anaconda.org/anaconda/libpython>
 - mingw-w64 toolchain. <https://anaconda.org/msys2/m2w64-toolchain>
 
 ``libpython`` setups automatically ``distutils.cfg`` file, but if that is failed
