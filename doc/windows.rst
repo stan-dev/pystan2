@@ -1,4 +1,4 @@
-.. _windows:
+.. _pystan_on_windows:
 
 .. currentmodule:: pystan
 

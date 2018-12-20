@@ -68,7 +68,7 @@ installation.
 Windows
 ~~~~~~~
 
-PyStan on Windows is *partially* supported. See `PyStan on Windows <_windows>`_.
+PyStan on Windows is *partially* supported. See `PyStan on Windows <_pystan_on_windows>`_.
 
 The Anaconda installer should be able to be double-clicked and
 installed. Use all of the defaults for installation except make sure to
