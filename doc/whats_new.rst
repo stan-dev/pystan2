@@ -6,9 +6,10 @@
  What's New
 ============
 
-under development
-=================
-
+v2.18.1.0 (22. Dec 2018)
+========================
+- Update Stan source to v2.18.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.18.1>`_)
+- Performance improvements for `extract` method.
 
 v2.18.0.0 (16. Aug 2018)
 ========================
