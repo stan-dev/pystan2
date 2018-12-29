@@ -23,7 +23,7 @@ navigating the terminal. You can review or learn it from the `Software
 Carpentry <http://software-carpentry.org/>`_ (`bash lesson here 
 <http://swcarpentry.github.io/shell-novice/>`_).
 
-Lessons 1 - 3 are proabably the most important.
+Lessons 1 - 3 are probably the most important.
 
 Installing Python
 -----------------
