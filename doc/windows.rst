@@ -38,7 +38,7 @@ which PyStan requires. The following instructions assume that you are using Wind
 Open Command prompt
 ===================
 
-    All the following commands are written in a command line prompt. You can use one like
+All the following commands are written in a command line prompt. You can use one like
 `Anaconda Prompt` if you installed Python using Anaconda in the previous step, or
 `Command Prompt` which comes with Windows.
 
