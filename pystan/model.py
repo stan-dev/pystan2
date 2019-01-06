@@ -809,7 +809,7 @@ class StanModel:
 
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        if check_hmc_diagnostics is None and algorithm in ("NUTS", "HMC"):
+        if (check_hmc_diagnostics is None and algorithm in ("NUTS", "HMC")) and fit.mode != 1:
             if n_flatnames > 1000:
                 msg = "Maximum (flat) parameter count (1000) exceeded: " +\
                       "skipping diagnostic tests for n_eff and Rhat.\n" +\
@@ -819,7 +819,7 @@ class StanModel:
                 pystan.diagnostics.check_hmc_diagnostics(fit, checks=checks)  # noqa
             else:
                 pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
-        elif check_hmc_diagnostics and algorithm in ("NUTS", "HMC"):
+        elif (check_hmc_diagnostics and algorithm in ("NUTS", "HMC")) and fit.mode != 1:
             pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
 
         return fit
