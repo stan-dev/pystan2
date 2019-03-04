@@ -31,7 +31,6 @@ install:
   - ps: "ls \"C:/\""
   - SET "CONDAPATH=conda%CONDA%"
   - if %CONDA%==27 (SET "CONDAPATH=conda")
-  - if %CONDA%==37 (SET "CONDAPATH=conda36")
   - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
 
   - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
@@ -40,9 +39,6 @@ install:
 
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-
-  - if %CONDA%==37 (CALL conda create -n py37 python=3.7 -y -q)
-  - if %CONDA%==37 (CALL conda activate py37)
 
   # checkout submodules
   - git submodule update --init --recursive
