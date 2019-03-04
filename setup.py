@@ -167,7 +167,10 @@ extensions = [
               include_dirs=stan_include_dirs,
               extra_compile_args=extra_compile_args),
     # _misc.pyx does not use Stan libs
-    Extension("pystan._misc", ["pystan/_misc.pyx"], language='c++')
+    Extension("pystan._misc", 
+              ["pystan/_misc.pyx"], 
+              language='c++',
+              extra_compile_args=extra_compile_args)
 ]
 
 
