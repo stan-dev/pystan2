@@ -101,8 +101,8 @@ from distutils.extension import Extension
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
-                     'pystan/stan/lib/stan_math/lib/boost_1.66.0',
-                     'pystan/stan/lib/stan_math/lib/sundials_3.1.0/include']
+                     'pystan/stan/lib/stan_math/lib/boost_1.69.0',
+                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include']
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -115,7 +115,7 @@ extra_compile_args = [
     '-ftemplate-depth-256',
     '-Wno-unused-function',
     '-Wno-uninitialized',
-    '-std=c++11',
+    '-std=c++1y',
 ]
 
 if platform.platform().startswith('Win'):
@@ -125,7 +125,7 @@ if platform.platform().startswith('Win'):
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
-            '/std:c++14',
+            '/std:c++1y',
         ]
     else:
         # fix bug in MingW-W64
@@ -140,16 +140,17 @@ if platform.platform().startswith('Win'):
 stanc_sources = [
     "pystan/stan/src/stan/lang/ast_def.cpp",
     "pystan/stan/src/stan/lang/grammars/bare_type_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/block_var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/expression07_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/expression_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/functions_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/indexes_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/local_var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/program_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/semantic_actions_def.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_2_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/term_grammar_inst.cpp",
-    "pystan/stan/src/stan/lang/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/whitespace_grammar_inst.cpp",
 ]
 

@@ -262,8 +262,8 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.66.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_3.1.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
             np.get_include(),
         ]
 
@@ -348,7 +348,7 @@ class StanModel:
                     '-ftemplate-depth-256',
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
-                    '-std=c++11',
+                    '-std=c++1y',
                     "-D_hypot=hypot",
                     "-pthread",
                     "-fexceptions",
@@ -360,7 +360,7 @@ class StanModel:
                 '-ftemplate-depth-256',
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
-                '-std=c++11',
+                '-std=c++1y',
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
