@@ -14,5 +14,5 @@ class TestUnconstrainPars(unittest.TestCase):
         data, seed = {}, 1
         fit = self.model.fit_class(data, seed)
         assertRaisesRegex = self.assertRaisesRegexp if PY2 else self.assertRaisesRegex
-        with assertRaisesRegex(RuntimeError, 'variable x missing'):
+        with assertRaisesRegex(RuntimeError, 'Variable x missing'):
             fit.unconstrain_pars({})

@@ -1254,7 +1254,7 @@ namespace pystan {
         pystan_sample_writer *sample_writer_ptr
           = sample_writer_factory(&sample_stream,
                                   comment_stream, "# ",
-                                  1,
+                                  3,
                                   0,
                                   constrained_param_names.size(),
                                   output_samples + 1,

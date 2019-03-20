@@ -15,7 +15,6 @@ class TestExtraCompileArgs(unittest.TestCase):
             '-ftemplate-depth-1024',
             '-Wno-unused-function',
             '-Wno-uninitialized',
-            '-std=c++11',
         ]
         if sys.platform.startswith("win"):
             extra_compile_args.extend([
