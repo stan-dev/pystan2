@@ -1,12 +1,12 @@
-# language is set to c to work around travis ci bug
-# https://github.com/travis-ci/travis-ci/issues/2312
 language: c
-dist: trusty
+dist: xenial
 sudo: required
 os:
   - linux
 git:
   submodules: false
+services:
+  - xvfb
 before_install:
   - git submodule update --init --recursive
 compiler:
