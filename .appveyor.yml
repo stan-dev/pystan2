@@ -51,7 +51,7 @@ install:
   # setup conda - use default channel
   - conda update --all -q
   - conda info
-  - conda install numpy cython scipy matplotlib pandas setuptools libpython m2w64-toolchain -c
+  - conda install numpy cython scipy matplotlib pandas setuptools libpython m2w64-toolchain
   # test numpy
   - python -c "import numpy as np; print('numpy import was succesfull')"
   # test gcc version
