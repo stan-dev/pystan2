@@ -6,12 +6,6 @@
 
 set -e
 
-if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
-    export DISPLAY=:99.0
-    sh -e /etc/init.d/xvfb start
-fi
-
-
 # steps common to linux and OS X
 
 # use Anaconda to get compiled versions of scipy and numpy,
