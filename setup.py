@@ -125,7 +125,7 @@ if platform.platform().startswith('Win'):
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
-            '/std:c++1y',
+            '/std:c++14',
         ]
     else:
         # fix bug in MingW-W64
@@ -168,8 +168,8 @@ extensions = [
               include_dirs=stan_include_dirs,
               extra_compile_args=extra_compile_args),
     # _misc.pyx does not use Stan libs
-    Extension("pystan._misc", 
-              ["pystan/_misc.pyx"], 
+    Extension("pystan._misc",
+              ["pystan/_misc.pyx"],
               language='c++',
               extra_compile_args=extra_compile_args)
 ]
