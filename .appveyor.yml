@@ -39,11 +39,16 @@ install:
 
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  
+
   - conda install git -y -q
   - git config --system core.longpaths true
   # checkout submodules
   - git submodule update --init --recursive
+
+  # remove long paths
+  - SETLOCAL ENABLEDELAYEDEXPANSION
+  - FOR /D /R "pystan/stan/lib/stan_math/lib" %%D IN (doc) DO @IF EXIST "%%D" RD /S /Q "%%D"
+
   # Check that we have the expected version and architecture for Python
   - python --version
   - python -c "import struct; print(struct.calcsize('P') * 8)"
@@ -64,7 +69,7 @@ install:
   - pip install -q -r ./continuous_integration/appveyor/requirements.txt
   - pip install -q -r requirements.txt
   - pip install -q -r test-requirements.txt
-  
+
   - conda list
   - pip freeze
 
@@ -94,7 +99,7 @@ test_script:
      pystan.tests.test_linear_regression pystan.tests.test_misc \
      pystan.tests.test_misc_args pystan.tests.test_optimizing_example \
      pystan.tests.test_stanc pystan.tests.test_unconstrain_pars \
-     pystan.tests.test_utf8 pystan.tests.test_vb" 
+     pystan.tests.test_utf8 pystan.tests.test_vb"
   # Move back to the project folder
   - cd ..
   - ECHO "End of testing"
