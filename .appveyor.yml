@@ -48,6 +48,7 @@ install:
   # remove long paths
   - SETLOCAL ENABLEDELAYEDEXPANSION
   - FOR /D /R "pystan/stan/lib/stan_math/lib" %%D IN (doc) DO @IF EXIST "%%D" RD /S /Q "%%D"
+  - FOR /D /R "pystan/stan/lib/stan_math/lib" %%D IN (test) DO @IF EXIST "%%D" RD /S /Q "%%D"
 
   # Check that we have the expected version and architecture for Python
   - python --version
