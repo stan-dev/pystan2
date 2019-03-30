@@ -28,7 +28,7 @@ import os
 import platform
 import sys
 
-LONG_DESCRIPTION = open('README.rst').read()
+LONG_DESCRIPTION = codecs.open('README.rst', encoding='utf-8').read()
 NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
 AUTHOR       = 'PyStan Developers'
