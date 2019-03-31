@@ -6,6 +6,13 @@
  What's New
 ============
 
+v2.19.0.0 (31. Mar 2019)
+========================
+- Update Stan source to v2.19.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.19.0>`_)
+- Stan 2.19 requires a compiler which supports C++14. For example, if you use gcc as your compiler you will need to use gcc version 4.9.3 or higher.
+- New sampler parameters for VB mode: ``log_p__`` and ``log_g__`` values are added to sample file (csv) if defined with ``sample_file``.
+- Reminder: Python 2 is not supported after 2019-12-31. PyStan will phase out testing of Python 2 after this point.
+
 v2.18.1.0 (22. Dec 2018)
 ========================
 - Update Stan source to v2.18.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.18.1>`_)
