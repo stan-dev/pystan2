@@ -19,4 +19,4 @@ if len(logger.handlers) == 1:
 
 # following PEP 386
 # See also https://docs.openstack.org/pbr/latest/user/semver.html
-__version__ = '2.19.0.0'
+__version__ = '2.19.0.1dev'
