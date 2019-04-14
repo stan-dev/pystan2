@@ -252,6 +252,9 @@ class StanModel:
         self.model_cppcode = stanc_ret['cppcode']
         self.model_include_paths = stanc_ret['include_paths']
 
+        if allow_undefined or include_dirs or includes:
+            logger.warning("External C++ interface is an experimental feature. Be careful.")
+
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
         logger.info(msg.format(self.model_name))
         if verbose:
@@ -272,6 +275,8 @@ class StanModel:
         pystan_dir = os.path.dirname(__file__)
         if include_dirs is None:
             include_dirs = []
+        elif not isinstance(include_dirs, list):
+            raise TypeError("'include_dirs' needs to be a list: type={}".format(type(include_dirs)))
         include_dirs += [
             lib_dir,
             pystan_dir,
@@ -287,7 +292,7 @@ class StanModel:
         if includes is not None:
             code = ""
             for fn in includes:
-                code += "#include \"{0}\"\n".format(fn)
+                code += '#include "{0}"\n'.format(fn)
             ind = self.model_cppcode.index("static int current_statement_begin__;")
             self.model_cppcode = "\n".join([
                 self.model_cppcode[:ind], code, self.model_cppcode[ind:]
