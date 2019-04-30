@@ -547,15 +547,17 @@ class StanModel:
         save_iterations : bool, optional
         refresh : int, optional
         init_alpha : float, optional
-            For BFGS and LBFGS, default is 0.001
+            For BFGS and LBFGS, default is 0.001.
         tol_obj : float, optional
             For BFGS and LBFGS, default is 1e-12.
+        tol_rel_obj : int, optional
+            For BFGS and LBFGS, default is 1e4.
         tol_grad : float, optional
-            For BFGS and LBFGS, default is 1e-8.
-        tol_param : float, optional
             For BFGS and LBFGS, default is 1e-8.
         tol_rel_grad : float, optional
             For BFGS and LBFGS, default is 1e7.
+        tol_param : float, optional
+            For BFGS and LBFGS, default is 1e-8.
         history_size : int, optional
             For LBFGS, default is 5.
 
