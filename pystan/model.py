@@ -459,7 +459,7 @@ class StanModel:
 
         as_vector : boolean, optional
             Indicates an OrderedDict will be returned rather than a nested
-            dictionary with keys 'par' and 'value'.
+            dictionary with keys 'par', 'value', and 'ret'.
 
         Returns
         -------
@@ -547,10 +547,10 @@ class StanModel:
         stan_args.update(kwargs)
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
 
-        ret, sample = fit._call_sampler(stan_args)
+        ret, sample, error = fit._call_sampler(stan_args)
         pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
         if not as_vector:
-            return OrderedDict([('par', pars), ('value', sample['value'])])
+            return OrderedDict([('par', pars), ('value', sample['value']), ('ret', ret), ('error', error)])
         else:
             return pars
 

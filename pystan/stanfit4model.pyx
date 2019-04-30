@@ -403,10 +403,13 @@ def _call_sampler(data, args, pars_oi=None):
             fitptr.update_param_oi(pars_oi_bytes)
 
     # Print any runtime exception but don't crash out
+    call_sampler_error = None
+    ret = 0
     try:
         ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
     except RuntimeError as e:
         print('{}: {}'.format(type(e).__name__, str(e)))
+        call_sampler_error = e
 
     holder = _pystanholder_from_stanholder(holderptr)
     # FIXME: rather than fetching the args from the holderptr, we just use
@@ -415,7 +418,7 @@ def _call_sampler(data, args, pars_oi=None):
     holder.args = _dict_from_stanargs(argsptr)
     del argsptr
     del fitptr
-    return ret, holder
+    return ret, holder, call_sampler_error
 
 def _split_pars_locs(fnames, pars):
     """Split flatnames to par and location"""
