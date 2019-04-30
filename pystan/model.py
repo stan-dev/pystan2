@@ -602,7 +602,7 @@ class StanModel:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
 
         # check that arguments in kwargs are valid
-        valid_args = {"iter", "save_iterations", "save_iterations", "refresh",
+        valid_args = {"iter", "save_iterations", "refresh",
                       "init_alpha", "tol_obj", "tol_grad", "tol_param",
                       "tol_rel_obj", "tol_rel_grad", "history_size"}
         for arg in kwargs:
