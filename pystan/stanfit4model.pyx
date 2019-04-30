@@ -401,7 +401,13 @@ def _call_sampler(data, args, pars_oi=None):
         pars_oi_bytes = [n.encode('ascii') for n in pars_oi]
         if len(pars_oi_bytes) != fitptr.param_names_oi().size():
             fitptr.update_param_oi(pars_oi_bytes)
-    ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
+
+    # Print any runtime exception but don't crash out
+    try:
+        ret = fitptr.call_sampler(deref(argsptr), deref(holderptr))
+    except RuntimeError as e:
+        print('{}: {}'.format(type(e).__name__, str(e)))
+
     holder = _pystanholder_from_stanholder(holderptr)
     # FIXME: rather than fetching the args from the holderptr, we just use
     # the argsptr we passed directly. This is a hack to solve a problem
