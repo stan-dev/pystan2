@@ -563,6 +563,8 @@ class StanModel:
         if not as_vector:
             return OrderedDict([('par', pars), ('value', sample['value']), ('ret', ret), ('error', sampler_error)])
         else:
+            # Add return and error codes to this ordered dict
+            pars.update({'__stan_return_code': ret, '__stan_error': sampler_error})
             return pars
 
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
