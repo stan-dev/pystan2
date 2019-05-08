@@ -413,7 +413,7 @@ class StanModel:
 
     def optimizing(self, data=None, seed=None,
                    init='random', sample_file=None, algorithm=None,
-                   verbose=False, as_vector=True, **kwargs):
+                   verbose=False, as_vector=True, ignore_errors=False, **kwargs):
         """Obtain a point estimate by maximizing the joint posterior.
 
         Parameters
@@ -460,6 +460,11 @@ class StanModel:
         as_vector : boolean, optional
             Indicates an OrderedDict will be returned rather than a nested
             dictionary with keys 'par', 'value', and 'ret'.
+
+        ignore_errors: boolean, optional
+            Indicates whether or not to return the set of parameters for the
+            last iteration, even if the optimization returns an error code.
+            False by default.
 
         Returns
         -------
@@ -547,10 +552,16 @@ class StanModel:
         stan_args.update(kwargs)
         stan_args = pystan.misc._get_valid_stan_args(stan_args)
 
-        ret, sample, error = fit._call_sampler(stan_args)
+        ret, sample, sampler_error = fit._call_sampler(stan_args)
         pars = pystan.misc._par_vector2dict(sample['par'], m_pars, p_dims)
+
+        # if the sampler call returned an error, and we're not ignoring it,
+        # throw an exception and break out
+        if not ignore_errors and sampler_error is not None:
+            raise RuntimeError(sampler_error)
+
         if not as_vector:
-            return OrderedDict([('par', pars), ('value', sample['value']), ('ret', ret), ('error', error)])
+            return OrderedDict([('par', pars), ('value', sample['value']), ('ret', ret), ('error', sampler_error)])
         else:
             return pars
 
