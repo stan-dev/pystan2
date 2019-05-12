@@ -141,9 +141,6 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     include_paths = [os.path.join(path, "") for path in include_paths]
     include_paths_bytes = [path.encode('utf-8') for path in include_paths]
 
-    # set to False
-    allow_undefined = False
-
     if obfuscate_model_name:
         # Make the model name depend on the code.
         model_name = (
