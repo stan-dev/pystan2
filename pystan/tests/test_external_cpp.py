@@ -49,44 +49,69 @@ inline var my_func (const var& A_var, double B, std::ostream* pstream) {
 }
 """
 
+external_cpp_code_stan_autograd = """
+template <typename T1, typename T2>
+typename boost::math::tools::promote_args<T1, T2>::type
+my_other_func (const T1& A, const T2& B, std::ostream* pstream) {
+  typedef typename boost::math::tools::promote_args<T1, T2>::type T;
+
+  T C = A*B*B+A;
+
+  return C;
+}
+"""
+
 class TestExternalCpp(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-
         with open("data/external_cpp.hpp", "w") as f:
             f.write(external_cpp_code)
+        with open("data/external_autograd_cpp.hpp", "w") as f:
+            f.write(external_cpp_code_stan_autograd)
         model_code = """
         functions {
             real my_func(real A, real B);
+            real my_other_func(real A, real B);
         }
         data {
             real B;
         }
         parameters {
             real A;
+            real D;
         }
         transformed parameters {
             real C = my_func(A, B);
+            real E = my_other_func(D, B);
         }
         model {
             C ~ std_normal();
+            E ~ normal(5,3);
         }
         """
         include_dir = os.path.join(os.path.dirname(__file__), 'data')
         cls.model = pystan.StanModel(model_code=model_code,
                                      verbose=True,
                                      allow_undefined=True,
-                                     includes=["external_cpp.hpp"],
+                                     includes=["external_cpp.hpp",
+                                               "external_autograd_cpp.hpp"],
                                      include_dirs=[include_dir],
                                      )
         #model = pystan.StanModel(model_code=model_code)
         cls.B = 4.0
         cls.fit = cls.model.sampling(data={"B" : cls.B}, iter=100, chains=2)
         os.remove("data/external_cpp.hpp")
+        os.remove("data/external_autograd_cpp.hpp")
 
     def test_external_cpp(self):
         A = self.fit["A"]
         B = self.B
         C = self.fit["C"]
         assert_array_equal(C, A * B * B + A)
+
+    def test_external_autograd_cpp(self):
+        B = self.B
+        D = self.fit["D"]
+        E = self.fit["E"]
+        assert_array_equal(E, D * B * B + D)
