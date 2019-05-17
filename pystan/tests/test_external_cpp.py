@@ -65,9 +65,10 @@ class TestExternalCpp(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        with open("data/external_cpp.hpp", "w") as f:
+        include_dir = os.path.join(os.path.dirname(__file__), 'data')
+        with open(os.path.join(include_dir, "external_cpp.hpp"), "w") as f:
             f.write(external_cpp_code)
-        with open("data/external_autograd_cpp.hpp", "w") as f:
+        with open(os.path.join(include_dir, "external_autograd_cpp.hpp"), "w") as f:
             f.write(external_cpp_code_stan_autograd)
         model_code = """
         functions {
@@ -90,7 +91,6 @@ class TestExternalCpp(unittest.TestCase):
             E ~ normal(5,3);
         }
         """
-        include_dir = os.path.join(os.path.dirname(__file__), 'data')
         cls.model = pystan.StanModel(model_code=model_code,
                                      verbose=True,
                                      allow_undefined=True,
@@ -98,7 +98,6 @@ class TestExternalCpp(unittest.TestCase):
                                                "external_autograd_cpp.hpp"],
                                      include_dirs=[include_dir],
                                      )
-        #model = pystan.StanModel(model_code=model_code)
         cls.B = 4.0
         cls.fit = cls.model.sampling(data={"B" : cls.B}, iter=100, chains=2)
         os.remove("data/external_cpp.hpp")
