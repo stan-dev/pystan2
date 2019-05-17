@@ -100,8 +100,8 @@ class TestExternalCpp(unittest.TestCase):
                                      )
         cls.B = 4.0
         cls.fit = cls.model.sampling(data={"B" : cls.B}, iter=100, chains=2)
-        os.remove("data/external_cpp.hpp")
-        os.remove("data/external_autograd_cpp.hpp")
+        os.remove(os.path.join(include_dir, "external_cpp.hpp"))
+        os.remove(os.path.join(include_dir, "external_autograd_cpp.hpp"))
 
     def test_external_cpp(self):
         A = self.fit["A"]
