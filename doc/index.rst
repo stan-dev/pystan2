@@ -30,6 +30,7 @@ Documentation
    logging
    threading_support
    windows
+   external_cpp
 
 Stan documentation
 ------------------

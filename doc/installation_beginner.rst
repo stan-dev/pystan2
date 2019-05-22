@@ -12,6 +12,7 @@ Python and would benefit from additional guidance on how to install PyStan.
 Installing PyStan requires installing:
 
 -  Python
+-  C++ -compiler
 -  Python dependencies
 -  PyStan
 
@@ -20,7 +21,7 @@ Prerequisite knowledge
 
 It is highly recommended to know what ``bash`` is and the basics of
 navigating the terminal. You can review or learn it from the `Software
-Carpentry <http://software-carpentry.org/>`_ (`bash lesson here 
+Carpentry <http://software-carpentry.org/>`_ (`bash lesson here
 <http://swcarpentry.github.io/shell-novice/>`_).
 
 Lessons 1 - 3 are probably the most important.
@@ -92,6 +93,41 @@ to install them as such:
 -  open a terminal
 -  type ``conda install numpy`` to install numpy or replace ``numpy``
    with the package you need to install
+-  common additional packages include ``arviz``, ``matplotlib``, ``pandas``,
+   ``scipy``
+
+Setting up C++ compiler
+-----------------------
+
+PyStan 2.19+ needs a C++14 compatible compiler. For GCC 4.9.3+ and
+GCC 5+ versions are up-to-date. To update your compiler, follow general
+instructions given for each platform.
+
+-  Linux: Install compiler with ``apt``/``yum``
+-  Macs: Install latest XCode, or use ``brew`` or ``macports``
+-  Windows: Follow instructions in `PyStan on Windows <_windows>`_.
+
+To use ``gcc``/``clang`` compiler from the ``conda`` follow instructions in
+https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html
+and set-up your ``CC`` environmental variable as given below. Instructions below
+assume default Anaconda environment. For ``conda-forge`` follow installation
+instructions in anaconda.org.
+
+-  open a terminal
+-  Linux: ``conda install gcc_linux-64 gxx_linux-64 -c anaconda``
+-  Macs: ``conda install clang_osx-64 clangxx_osx-64 -c anaconda``
+
+To check your compiler version
+
+- Open a terminal
+- type ``gcc --version``
+
+To use specific C++ compiler (``gcc_linux-64``), either update your ``CC`` environmental
+variable or set-up your path to include folder containing compiler
+(e.g.``which gcc_linux-64``)
+
+- type ``export CC=gcc_linux-64``
+- type ``export PATH=/path/to/Anaconda/bin:$PATH``
 
 Installing PyStan
 -----------------
@@ -99,5 +135,5 @@ Installing PyStan
 Since we have the ``numpy`` and ``cython`` dependencies we need, we can
 install the latest version of PyStan using ``pip``. To do so:
 
--  Open a terminal
+-  open a terminal
 -  type ``pip install pystan``
