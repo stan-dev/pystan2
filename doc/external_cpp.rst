@@ -14,15 +14,17 @@ gives more in-depth example using external C++.
 Setting up C++
 ==============
 
-Your C++ code either needs to provide needed gradients and partial derivatives
-to work properly. This can be done by manually coding each needed component,
-or using Stan's autodiff (special syntax).
+Your C++ code needs to provide needed gradients and partial derivatives to work
+properly. This can be done by manually implementing each needed component
+or by using Stan's autodiff (special syntax). Each function also needs to
+accept a ``std::ostream`` as a last argument.
 
 In the following instructions it is assumed that the first code is saved to
 a file called ``external_manual.hpp`` and ``external_autograd.hpp``. Both files
 are saved under ``cwd`` in a directory ``external_cpp``.
 
-The minimal example with manually coded gradients for a function ``C = A*B*B+A``:
+The following code shows a minimal example with manually implemented gradients
+for a function ``C = A*B*B+A``:
 
 .. code-block:: c++
 
@@ -134,4 +136,6 @@ is set to ``True``.
     fit = stan_model.sampling()
     print(fit)
 
-Compilation with external C++ can take longer than normally.
+Compilation with external C++ can take longer than normally. The external C++
+code is injected to the ``stanc`` translated C++ code. This injections is done
+automatically by PyStan before model compilation.
