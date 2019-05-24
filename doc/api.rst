@@ -77,7 +77,7 @@ a number of methods.
       the rest for the parameters. Parameters are listed in the same order as `pars`.
 
    .. py:method:: stansummary(pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2)
-   
+
       Summary statistic table.
       Parameters
       ----------
@@ -93,23 +93,23 @@ a number of methods.
          Table includes mean, se_mean, sd, probs_0, ..., probs_n, n_eff and Rhat.
       Examples
       --------
-      >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'  
-      >>> m = StanModel(model_code=model_code, model_name="example_model")  
-      >>> fit = m.sampling()  
-      >>> print(fit.stansummary())  
-      Inference for Stan model: example_model.  
-      4 chains, each with iter=2000; warmup=1000; thin=1;  
-      post-warmup draws per chain=1000, total post-warmup draws=4000.  
-             mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat  
-      y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0  
-      lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0  
-      Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.  
-      For each parameter, n_eff is a crude measure of effective sample size,  
-      and Rhat is the potential scale reduction factor on split chains (at  
+      >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+      >>> m = StanModel(model_code=model_code, model_name="example_model")
+      >>> fit = m.sampling()
+      >>> print(fit.stansummary())
+      Inference for Stan model: example_model.
+      4 chains, each with iter=2000; warmup=1000; thin=1;
+      post-warmup draws per chain=1000, total post-warmup draws=4000.
+             mean se_mean     sd   2.5%    25%    50%    75%  97.5%  n_eff   Rhat
+      y      0.01    0.03    1.0  -2.01  -0.68   0.02   0.72   1.97   1330    1.0
+      lp__   -0.5    0.02   0.68  -2.44  -0.66  -0.24  -0.05-5.5e-4   1555    1.0
+      Samples were drawn using NUTS at Thu Aug 17 00:52:25 2017.
+      For each parameter, n_eff is a crude measure of effective sample size,
+      and Rhat is the potential scale reduction factor on split chains (at
       convergence, Rhat=1).
 
    .. py:method:: summary(pars=None, probs=None)
-      
+
       Summarize samples (compute mean, SD, quantiles) in all chains.
       REF: stanfit-class.R summary method
       Parameters
@@ -211,11 +211,11 @@ a number of methods.
           column for mean lp__ is also included.
 
    .. py:method:: constrain_pars(np.ndarray[double, ndim=1, mode="c"] upar not None)
-      
+
       Transform parameters from unconstrained space to defined support
-   
+
    .. py:method:: unconstrain_pars(par)
-       
+
       Transform parameters from defined support to unconstrained space
 
    .. py:method:: get_seed()
@@ -223,9 +223,9 @@ a number of methods.
    .. py:method:: get_inits()
 
    .. py:method:: get_stancode()
-   
+
    .. py:property:: flatnames
-   
+
    .. py:method:: to_dataframe(pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True)
 
       Extract samples as a pandas datafriame for different parameters.
@@ -251,8 +251,8 @@ a number of methods.
       Returns
       -------
       df : pandas dataframe
-	
+
 	   Note
 	   ----
-	   Unlike default in extract (`permuted=True`) 
+	   Unlike default in extract (`permuted=True`)
 	   `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.

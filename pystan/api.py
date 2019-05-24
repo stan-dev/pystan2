@@ -18,7 +18,8 @@ logger = logging.getLogger('pystan')
 
 
 def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
-          include_paths=None, verbose=False, obfuscate_model_name=True):
+          include_paths=None, verbose=False, obfuscate_model_name=True,
+          allow_undefined=False):
     """Translate Stan model specification into C++ code.
 
     Parameters
@@ -54,6 +55,10 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         unique by the insertion of randomly generated characters.
         Generally it is recommended that this parameter be left as True.
 
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
+
     Returns
     -------
     stanc_ret : dict
@@ -65,13 +70,13 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     -----
     C++ reserved words and Stan reserved words may not be used for
     variable names; see the Stan User's Guide for a complete list.
-    
+
     The `#include` method follows a C/C++ syntax `#include foo/my_gp_funs.stan`.
     The method needs to be at the start of the row, no whitespace is allowed.
     After the included file no whitespace or comments are allowed.
     `pystan.experimental`(PyStan 2.18) has a `fix_include`-function to clean the `#include`
-    statements from the `model_code`. 
-    Example: 
+    statements from the `model_code`.
+    Example:
     `from pystan.experimental import fix_include`
     `model_code = fix_include(model_code)`
 
@@ -136,9 +141,6 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
     include_paths = [os.path.join(path, "") for path in include_paths]
     include_paths_bytes = [path.encode('utf-8') for path in include_paths]
 
-    # set to False
-    allow_undefined = False
-
     if obfuscate_model_name:
         # Make the model name depend on the code.
         model_name = (
@@ -155,7 +157,7 @@ def stanc(file=None, charset='utf-8', model_code=None, model_name="anon_model",
         filename_bytes = os.path.split(file)[-1].encode('utf-8')
 
     result = pystan._api.stanc(model_code_bytes, model_name_bytes,
-                               allow_undefined, filename_bytes, 
+                               allow_undefined, filename_bytes,
                                include_paths_bytes,
                               )
     if result['status'] == -1:  # EXCEPTION_RC is -1
@@ -178,7 +180,7 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
          data=None, pars=None, chains=4, iter=2000, warmup=None, thin=1,
          init="random", seed=None, algorithm=None, control=None, sample_file=None,
          diagnostic_file=None, verbose=False, boost_lib=None, eigen_lib=None,
-         include_paths=None, n_jobs=-1, **kwargs):
+         include_paths=None, n_jobs=-1, allow_undefined=False, **kwargs):
     """Fit a model using Stan.
 
     The `pystan.stan` function was deprecated in version 2.17 and will be
@@ -327,6 +329,10 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         Sample in parallel. If -1 all CPUs are used. If 1, no parallel
         computing code is used at all, which is useful for debugging.
 
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
+
     Returns
     -------
 
@@ -425,7 +431,8 @@ def stan(file=None, model_name="anon_model", model_code=None, fit=None,
         m = StanModel(file=file, model_name=model_name, model_code=model_code,
                       boost_lib=boost_lib, eigen_lib=eigen_lib,
                       include_paths=include_paths,
-                      obfuscate_model_name=obfuscate_model_name, verbose=verbose)
+                      obfuscate_model_name=obfuscate_model_name, verbose=verbose,
+                      allow_undefined=allow_undefined)
     # check that arguments in kwargs are valid
     valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "enable_random_init",
                   "refresh", "control"}
