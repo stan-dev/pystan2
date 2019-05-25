@@ -26,7 +26,10 @@ Important links
 Related projects
 ----------------
 
+- ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
+- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>` by @bambinos
 
 Similar projects
 ----------------
@@ -43,7 +46,7 @@ Quick Installation (Linux and macOS)
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
 (version 0.22 or greater) are required. `matplotlib <http://matplotlib.org/>`_
-is optional.
+is optional. ArviZ is recommended for visualization and analysis.
 
 PyStan and the required packages may be installed from the `Python Package Index
 <https://pypi.python.org/pypi>`_ using ``pip``.
@@ -112,6 +115,10 @@ Example
     # traceplot are available
     fit.plot()
     plt.show()
+    
+    # updated traceplot can be plotted with
+    import arviz as az
+    az.plot_trace(fit)
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
     :target: https://badge.fury.io/py/pystan
