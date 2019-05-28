@@ -30,16 +30,26 @@ Related projects
 - Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>` by @bambinos
+- Jupyter Tool StanMagic https://github.com/Arvinds-ds/stanmagic
+- Jupyter Tool JupyterStan https://github.com/janfreyberg/jupyterstan
 
 Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
 
+PyStan3 / Stan3
+------------
+The development of PyStan3 with updated API can be found under `stan-dev/pystan-next <https://github.com/stan-dev/pystan-next>`_
+
 Detailed Installation Instructions
 ----------------------------------
 Detailed installation instructions can be found in the
 `doc/installation_beginner.md <https://github.com/chendaniely/pystan/blob/develop/doc/installation_beginner.rst/>`_ file.
+
+Windows Installation Instructions
+---------------------------------
+Detailed installation instructions for Windows can be found in docs under `PyStan on Windows <https://pystan.readthedocs.io/en/latest/windows.html>`_
 
 Quick Installation (Linux and macOS)
 ------------------------------------
