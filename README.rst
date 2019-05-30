@@ -30,8 +30,8 @@ Related projects
 - Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>` by @bambinos
-- Jupyter Tool StanMagic https://github.com/Arvinds-ds/stanmagic
-- Jupyter Tool JupyterStan https://github.com/janfreyberg/jupyterstan
+- Jupyter tool: StanMagic https://github.com/Arvinds-ds/stanmagic
+- Jupyter tool: JupyterStan https://github.com/janfreyberg/jupyterstan
 
 Similar projects
 ----------------
@@ -73,6 +73,12 @@ available, PyStan may be installed from source with the following commands
    git clone --recursive https://github.com/stan-dev/pystan.git
    cd pystan
    python setup.py install
+
+To install latest development version user can also use ``pip``
+
+::
+
+    pip install git+https://github.com/stan-dev/pystan
 
 If you encounter an ``ImportError`` after compiling from source, try changing
 out of the source directory before attempting ``import pystan``. On Linux and
