@@ -76,7 +76,7 @@ install:
 
   - ECHO "Starting to build the wheel"
   # build the wheel and install it
-  - python setup.py --quiet bdist_wheel bdist_wininst
+  - python setup.py --quiet bdist_wheel
   - ps: "ls dist"
 
   - ECHO "Install generated wheel to test it"
