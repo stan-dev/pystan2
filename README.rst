@@ -29,9 +29,9 @@ Related projects
 - ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
 - Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
-- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>` by @bambinos
-- Jupyter tool: StanMagic https://github.com/Arvinds-ds/stanmagic
-- Jupyter tool: JupyterStan https://github.com/janfreyberg/jupyterstan
+- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
+- Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
+- Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
 
 Similar projects
 ----------------
