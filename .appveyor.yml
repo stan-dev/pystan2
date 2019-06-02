@@ -8,7 +8,7 @@ environment:
     WHEELHOUSE_UPLOADER_REGION: IAD
     WHEELHOUSE_UPLOADER_USERNAME: pystan-worker
     WHEELHOUSE_UPLOADER_SECRET:
-      secure: cqdCOlelH3UdBVv+FyD4nNfT5X5bB2OwqehwkxqMABKcHy1H4+t8v3jVVvTxV7uq
+      secure: mjwuqrrrl71BQoPg5t++MKlVApmBBDAr7GmQtI5YawjhdpCJtMi+Tof4P1ENDCLp
 
   matrix:
     - CONDA: 27
@@ -76,7 +76,7 @@ install:
 
   - ECHO "Starting to build the wheel"
   # build the wheel and install it
-  - python setup.py --quiet bdist_wheel bdist_wininst
+  - python setup.py --quiet bdist_wheel
   - ps: "ls dist"
 
   - ECHO "Install generated wheel to test it"
