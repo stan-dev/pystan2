@@ -145,7 +145,7 @@ Example
     :alt: travis-ci build status
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/stan-dev/pystan?branch=master
-    :target: https://ci.appveyor.com/project/ariddell/pystan/branch/master
+    :target: https://ci.appveyor.com/project/pystan/pystan/branch/master
     :alt: appveyor-ci build status
 .. |zenodo| image:: https://zenodo.org/badge/10256919.svg
     :target: https://zenodo.org/badge/latestdoi/10256919
