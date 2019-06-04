@@ -1,6 +1,7 @@
-import logging
-from .misc import *
+import logging as _logging
+from .misc import fix_include
+from .pickling_tools import load_fit
 
-logger = logging.getLogger('pystan')
+_logger = _logging.getLogger('pystan')
 
-logger.warning("This submodule contains experimental code, please use with caution")
+_logger.warning("This submodule contains experimental code, please use with caution")
