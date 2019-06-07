@@ -122,11 +122,11 @@ To check your compiler version
 - Open a terminal
 - type ``gcc --version``
 
-To use specific C++ compiler (``gcc_linux-64``), either update your ``CC`` environmental
-variable or set-up your path to include folder containing compiler
+To use specific C++ compiler (``gcc_linux-64``, ``gxx_linux-64``), either update your ``CC`` and ``CXX`` environmental
+variables or set-up your path to include folder containing compilers
 (e.g.``which gcc_linux-64``)
 
-- type ``export CC=gcc_linux-64``
+- type ``export CC=gcc_linux-64`` and ``export CC=g++_linux-64``
 - type ``export PATH=/path/to/Anaconda/bin:$PATH``
 
 Installing PyStan
