@@ -15,7 +15,10 @@ from string import ascii_letters, digits, printable, punctuation
 import sys
 import shutil
 
+from pystan._compat import PY2
 from pystan.model import load_module
+
+logger = logging.getLogger('pystan')
 
 def create_fake_model(module_name):
     """Creates a fake model with specific module name.
@@ -153,13 +156,15 @@ def get_module_name(path, open_func=None, open_kwargs=None):
         # scan first few bytes
         for i in range(500):
             byte, = f.read(1)
-            if name_loc and chr(byte) in valid_chr:
-                module_name += chr(byte)
+            if not PY2:
+                byte = chr(byte)
+            if name_loc and byte in valid_chr:
+                module_name += byte
 
                 if module_name == "stanfit":
                     break_next = True
-            elif chr(byte) == "s":
-                module_name += chr(byte)
+            elif byte == "s":
+                module_name += byte
                 name_loc = True
             elif break_next:
                 break
