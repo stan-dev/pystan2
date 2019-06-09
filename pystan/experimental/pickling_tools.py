@@ -171,7 +171,7 @@ def get_module_name(path, open_func=None, open_kwargs=None):
     return module_name
 
 
-def load_fit(path, open_func=None, open_kwargs=None, module_name=None, return_model=False):
+def unpickle_fit(path, open_func=None, open_kwargs=None, module_name=None, return_model=False):
     """Load pickled (compressed) fit object without model binary.
 
     Parameters

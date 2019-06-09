@@ -8,7 +8,7 @@ import numpy as np
 
 import pystan
 from pystan.tests.helper import get_model
-from pystan.experimental import load_fit
+from pystan.experimental import unpickle_fit
 
 class TestPickle(unittest.TestCase):
 
@@ -114,12 +114,12 @@ class TestPickleFitOnly(unittest.TestCase):
         del sys.modules[module_name]
 
     @unittest.expectedFailure
-    def test_load_fit_fail(self):
+    def test_unpickle_fit_fail(self):
         with io.open(self.pickle_file, "rb") as f:
             pickle.load(f)
 
     def test_load_fit(self):
-        fit, model = load_fit(self.pickle_fit, open_func=io.open, open_kwargs={"mode" : "rb"}, return_model=True)
+        fit, model = unpickle_fit(self.pickle_fit, open_func=io.open, open_kwargs={"mode" : "rb"}, return_model=True)
         self.assertIsNotNone(fit)
         self.assertIsNotNone(model)
         self.assertIsNotNone(fit.extract())
