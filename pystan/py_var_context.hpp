@@ -1,11 +1,17 @@
 #ifndef PYSTAN__IO__PY_VAR_CONTEXT_HPP
 #define PYSTAN__IO__PY_VAR_CONTEXT_HPP
 
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include <map>
 #include <vector>
 #include <string>
 
 #include <stan/io/var_context.hpp>
+#include <stan/io/dump.hpp>
+#include <stan/io/ends_with.hpp>
+#include <stan/io/json/json_data.hpp>
 
 /* see stan/io/dump.hpp */
 
@@ -15,7 +21,7 @@ namespace pystan {
 
     /**
      * Represents named arrays with dimensions.
-     * 
+     *
      * A py_var_context implements var_context directly
      * by passing data using the required C++ containers.
      *
@@ -26,12 +32,12 @@ namespace pystan {
      */
     class py_var_context : public stan::io::var_context {
 
-    private: 
-      std::map<std::string, 
+    private:
+      std::map<std::string,
                std::pair<std::vector<double>,
                          std::vector<size_t> > > vars_r_;
-      std::map<std::string, 
-               std::pair<std::vector<int>, 
+      std::map<std::string,
+               std::pair<std::vector<int>,
                          std::vector<size_t> > > vars_i_;
       std::vector<double> const empty_vec_r_;
       std::vector<int> const empty_vec_i_;
@@ -42,14 +48,14 @@ namespace pystan {
        * returns <code>false</code> if the values are all integers.
        *
        * @param name Variable name to test.
-       * @return <code>true</code> if the variable exists in the 
+       * @return <code>true</code> if the variable exists in the
        * real values of the dump.
        */
       bool contains_r_only(const std::string& name) const {
         return vars_r_.find(name) != vars_r_.end();
       }
 
-    public: 
+    public:
 
       /**
        * Construct a py_var_context object from the specified containers.
@@ -60,7 +66,7 @@ namespace pystan {
       py_var_context(
         std::map<std::string,
           std::pair<std::vector<double>, std::vector<size_t> > >& vars_r,
-        std::map<std::string, 
+        std::map<std::string,
           std::pair<std::vector<int>, std::vector<size_t> > >& vars_i)
       {
           vars_r_ = vars_r;
@@ -93,7 +99,7 @@ namespace pystan {
 
       /**
        * Return the double values for the variable with the specified
-       * name or null. 
+       * name or null.
        *
        * @param name Name of variable.
        * @return Values of variable.
@@ -111,7 +117,7 @@ namespace pystan {
         }
         return empty_vec_r_;
       }
-      
+
       /**
        * Return the dimensions for the double variable with the specified
        * name.
@@ -141,7 +147,7 @@ namespace pystan {
         }
         return empty_vec_i_;
       }
-      
+
       /**
        * Return the dimensions for the integer variable with the specified
        * name.
@@ -163,8 +169,8 @@ namespace pystan {
        * @param names Vector to store the list of names in.
        */
       virtual void names_r(std::vector<std::string>& names) const {
-        names.resize(0);        
-        for (std::map<std::string, 
+        names.resize(0);
+        for (std::map<std::string,
                       std::pair<std::vector<double>,
                                 std::vector<size_t> > >
                  ::const_iterator it = vars_r_.begin();
@@ -179,29 +185,48 @@ namespace pystan {
        * @param names Vector to store the list of names in.
        */
       virtual void names_i(std::vector<std::string>& names) const {
-        names.resize(0);        
-        for (std::map<std::string, 
-                      std::pair<std::vector<int>, 
+        names.resize(0);
+        for (std::map<std::string,
+                      std::pair<std::vector<int>,
                                 std::vector<size_t> > >
                  ::const_iterator it = vars_i_.begin();
              it != vars_i_.end(); ++it)
           names.push_back((*it).first);
       }
 
-      /** 
+      /**
        * Remove variable from the object.
-       * 
+       *
        * @param name Name of the variable to remove.
        * @return If variable is removed returns <code>true</code>, else
        *   returns <code>false</code>.
        */
       bool remove(const std::string& name) {
-        return (vars_i_.erase(name) > 0) 
+        return (vars_i_.erase(name) > 0)
           || (vars_r_.erase(name) > 0);
       }
 
     };
-    
+
+    std::shared_ptr<stan::io::var_context> get_var_context(const std::string file) {
+    std::fstream stream(file.c_str(), std::fstream::in);
+    if (file != "" && (stream.rdstate() & std::ifstream::failbit)) {
+      std::stringstream msg;
+      msg << "Can't open specified file, \"" << file << "\"" << std::endl;
+      throw std::invalid_argument(msg.str());
+    }
+    if (stan::io::ends_with(".json", file)) {
+      stan::json::json_data var_context(stream);
+      stream.close();
+      std::shared_ptr<stan::io::var_context> result = std::make_shared<stan::json::json_data>(var_context);
+      return result;
+    }
+    stan::io::dump var_context(stream);
+    stream.close();
+    std::shared_ptr<stan::io::var_context> result = std::make_shared<stan::io::dump>(var_context);
+    return result;
+    }
+
   }
 
 }

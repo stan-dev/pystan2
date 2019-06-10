@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 #include <stan/version.hpp>
 
@@ -113,6 +114,8 @@ namespace pystan {
     stan_args_method_t method;
     std::string diagnostic_file;
     bool diagnostic_file_flag;
+    std::string metric_file; // initial mass matrix
+    bool metric_file_flag;
     union {
       struct {
         int iter;   // number of iterations
@@ -179,6 +182,12 @@ namespace pystan {
     }
     inline const std::string& get_diagnostic_file() const {
       return diagnostic_file;
+    }
+    inline bool get_metric_file_flag() const {
+      return metric_file_flag;
+    }
+    inline const std::string& get_metric_file() const {
+      return metric_file;
     }
 
     void set_random_seed(unsigned int seed) {
@@ -421,6 +430,8 @@ namespace pystan {
         write_comment_property(ostream,"sample_file",sample_file);
       if (diagnostic_file_flag)
         write_comment_property(ostream,"diagnostic_file",diagnostic_file);
+      if (metric_file_flag)
+        write_comment_property(ostream,"metric_file",metric_file);
       write_comment_property(ostream,"append_samples",append_samples);
       write_comment(ostream);
     }
@@ -842,6 +853,9 @@ namespace pystan {
       unsigned int id = args.get_chain_id();
       double init_radius = args.get_init_radius();
 
+      std::string metric_file = args.get_metric_file();
+      std::shared_ptr<stan::io::var_context> metric_context_ptr = pystan::io::get_var_context(metric_file);
+
       if (args.get_method() == TEST_GRADIENT) {
         double epsilon = args.get_ctrl_test_grad_epsilon();
         double error = args.get_ctrl_test_grad_error();
@@ -981,12 +995,24 @@ namespace pystan {
                                                     num_warmup_save,
                                                     qoi_idx);
 
+
+
           double stepsize = args.get_ctrl_sampling_stepsize();
           double stepsize_jitter = args.get_ctrl_sampling_stepsize_jitter();
           int max_depth = args.get_ctrl_sampling_max_treedepth();
 
           if (args.get_ctrl_sampling_metric() == DENSE_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
+              if (args.get_metric_file_flag()) {
+              return_code = stan::services::sample
+                ::hmc_nuts_dense_e(model, *init_context_ptr, *metric_context_ptr,
+                                   random_seed, id, init_radius,
+                                   num_warmup, num_samples,
+                                   num_thin, save_warmup, refresh,
+                                   stepsize, stepsize_jitter, max_depth,
+                                   interrupt, logger, init_writer,
+                                   *sample_writer_ptr, diagnostic_writer);
+              } else {
               return_code = stan::services::sample
                 ::hmc_nuts_dense_e(model, *init_context_ptr,
                                    random_seed, id, init_radius,
@@ -995,6 +1021,7 @@ namespace pystan {
                                    stepsize, stepsize_jitter, max_depth,
                                    interrupt, logger, init_writer,
                                    *sample_writer_ptr, diagnostic_writer);
+              }
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
               double gamma = args.get_ctrl_sampling_adapt_gamma();
@@ -1004,8 +1031,9 @@ namespace pystan {
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
 
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_nuts_dense_e_adapt(model, *init_context_ptr,
+                ::hmc_nuts_dense_e_adapt(model, *init_context_ptr, *metric_context_ptr,
                                          random_seed, id, init_radius,
                                          num_warmup, num_samples,
                                          num_thin, save_warmup, refresh,
@@ -1014,17 +1042,40 @@ namespace pystan {
                                          t0, init_buffer, term_buffer, window,
                                          interrupt, logger, init_writer,
                                          *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_nuts_dense_e_adapt(model, *init_context_ptr,
+                                           random_seed, id, init_radius,
+                                           num_warmup, num_samples,
+                                           num_thin, save_warmup, refresh,
+                                           stepsize, stepsize_jitter, max_depth,
+                                           delta, gamma, kappa,
+                                           t0, init_buffer, term_buffer, window,
+                                           interrupt, logger, init_writer,
+                                           *sample_writer_ptr, diagnostic_writer);
+              }
             }
           } else if (args.get_ctrl_sampling_metric() == DIAG_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_nuts_diag_e(model, *init_context_ptr,
+                ::hmc_nuts_diag_e(model, *init_context_ptr, *metric_context_ptr,
                                   random_seed, id, init_radius,
                                   num_warmup, num_samples,
                                   num_thin, save_warmup, refresh,
                                   stepsize, stepsize_jitter, max_depth,
                                   interrupt, logger, init_writer,
                                   *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_nuts_diag_e(model, *init_context_ptr,
+                                    random_seed, id, init_radius,
+                                    num_warmup, num_samples,
+                                    num_thin, save_warmup, refresh,
+                                    stepsize, stepsize_jitter, max_depth,
+                                    interrupt, logger, init_writer,
+                                    *sample_writer_ptr, diagnostic_writer);
+              }
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
               double gamma = args.get_ctrl_sampling_adapt_gamma();
@@ -1034,8 +1085,9 @@ namespace pystan {
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
 
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_nuts_diag_e_adapt(model, *init_context_ptr,
+                ::hmc_nuts_diag_e_adapt(model, *init_context_ptr, *metric_context_ptr,
                                         random_seed, id, init_radius,
                                         num_warmup, num_samples,
                                         num_thin, save_warmup, refresh,
@@ -1044,6 +1096,18 @@ namespace pystan {
                                         t0, init_buffer, term_buffer, window,
                                         interrupt, logger, init_writer,
                                         *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_nuts_diag_e_adapt(model, *init_context_ptr,
+                                          random_seed, id, init_radius,
+                                          num_warmup, num_samples,
+                                          num_thin, save_warmup, refresh,
+                                          stepsize, stepsize_jitter, max_depth,
+                                          delta, gamma, kappa,
+                                          t0, init_buffer, term_buffer, window,
+                                          interrupt, logger, init_writer,
+                                          *sample_writer_ptr, diagnostic_writer);
+              }
             }
           } else if (args.get_ctrl_sampling_metric() == UNIT_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
@@ -1094,14 +1158,25 @@ namespace pystan {
 
           if (args.get_ctrl_sampling_metric() == DENSE_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_static_dense_e(model, *init_context_ptr,
+                ::hmc_static_dense_e(model, *init_context_ptr, *metric_context_ptr,
                                      random_seed, id, init_radius,
                                      num_warmup, num_samples,
                                      num_thin, save_warmup, refresh,
                                      stepsize, stepsize_jitter, int_time,
                                      interrupt, logger, init_writer,
                                      *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_static_dense_e(model, *init_context_ptr,
+                                       random_seed, id, init_radius,
+                                       num_warmup, num_samples,
+                                       num_thin, save_warmup, refresh,
+                                       stepsize, stepsize_jitter, int_time,
+                                       interrupt, logger, init_writer,
+                                       *sample_writer_ptr, diagnostic_writer);
+              }
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
               double gamma = args.get_ctrl_sampling_adapt_gamma();
@@ -1111,8 +1186,9 @@ namespace pystan {
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
 
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_static_dense_e_adapt(model, *init_context_ptr,
+                ::hmc_static_dense_e_adapt(model, *init_context_ptr, *metric_context_ptr,
                                            random_seed, id, init_radius,
                                            num_warmup, num_samples,
                                            num_thin, save_warmup, refresh,
@@ -1121,18 +1197,41 @@ namespace pystan {
                                            init_buffer, term_buffer, window,
                                            interrupt, logger, init_writer,
                                            *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_static_dense_e_adapt(model, *init_context_ptr,
+                                             random_seed, id, init_radius,
+                                             num_warmup, num_samples,
+                                             num_thin, save_warmup, refresh,
+                                             stepsize, stepsize_jitter, int_time,
+                                             delta, gamma, kappa, t0,
+                                             init_buffer, term_buffer, window,
+                                             interrupt, logger, init_writer,
+                                             *sample_writer_ptr, diagnostic_writer);
+              }
 
             }
           } else if (args.get_ctrl_sampling_metric() == DIAG_E) {
             if (!args.get_ctrl_sampling_adapt_engaged()) {
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_static_diag_e(model, *init_context_ptr,
+                ::hmc_static_diag_e(model, *init_context_ptr, *metric_context_ptr,
                                     random_seed, id, init_radius,
                                     num_warmup, num_samples,
                                     num_thin, save_warmup, refresh,
                                     stepsize, stepsize_jitter, int_time,
                                     interrupt, logger, init_writer,
                                     *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_static_diag_e(model, *init_context_ptr,
+                                      random_seed, id, init_radius,
+                                      num_warmup, num_samples,
+                                      num_thin, save_warmup, refresh,
+                                      stepsize, stepsize_jitter, int_time,
+                                      interrupt, logger, init_writer,
+                                      *sample_writer_ptr, diagnostic_writer);
+              }
 
             } else {
               double delta = args.get_ctrl_sampling_adapt_delta();
@@ -1143,8 +1242,9 @@ namespace pystan {
               unsigned int term_buffer = args.get_ctrl_sampling_adapt_term_buffer();
               unsigned int window = args.get_ctrl_sampling_adapt_window();
 
+              if (args.get_metric_file_flag()) {
               return_code = stan::services::sample
-                ::hmc_static_diag_e_adapt(model, *init_context_ptr,
+                ::hmc_static_diag_e_adapt(model, *init_context_ptr, *metric_context_ptr,
                                           random_seed, id, init_radius,
                                           num_warmup, num_samples,
                                           num_thin, save_warmup, refresh,
@@ -1153,6 +1253,18 @@ namespace pystan {
                                           init_buffer, term_buffer, window,
                                           interrupt, logger, init_writer,
                                           *sample_writer_ptr, diagnostic_writer);
+              } else {
+                return_code = stan::services::sample
+                  ::hmc_static_diag_e_adapt(model, *init_context_ptr,
+                                            random_seed, id, init_radius,
+                                            num_warmup, num_samples,
+                                            num_thin, save_warmup, refresh,
+                                            stepsize, stepsize_jitter, int_time,
+                                            delta, gamma, kappa, t0,
+                                            init_buffer, term_buffer, window,
+                                            interrupt, logger, init_writer,
+                                            *sample_writer_ptr, diagnostic_writer);
+              }
             }
           } else if (args.get_ctrl_sampling_metric() == UNIT_E) {
             if (args.get_ctrl_sampling_adapt_engaged()) {
@@ -1306,6 +1418,7 @@ namespace pystan {
         delete sample_writer_ptr;
       }
       init_context_ptr.reset();
+      metric_context_ptr.reset();
       return return_code;
     }
   }
