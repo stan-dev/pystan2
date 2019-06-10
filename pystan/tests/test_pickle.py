@@ -1,11 +1,14 @@
+import io
 import os
 import pickle
 import sys
 import tempfile
 import unittest
+import numpy as np
 
 import pystan
-
+from pystan.tests.helper import get_model
+from pystan.experimental import unpickle_fit
 
 class TestPickle(unittest.TestCase):
 
@@ -87,3 +90,41 @@ class TestPickle(unittest.TestCase):
         model1 = pystan.StanModel(model_code=model_code, model_name="normal1")
         model2 = pystan.StanModel(model_code=model_code, model_name="normal1")
         self.assertNotEqual(model1.module_name, model2.module_name)
+
+class TestPickleFitOnly(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+        model = get_model("standard_normal_model",
+                          model_code, model_name="normal1",
+                          verbose=True, obfuscate_model_name=False)
+        fit = model.sampling()
+        tempfolder = tempfile.mkdtemp()
+        cls.pickle_fit = os.path.join(tempfolder, 'stanfit.pkl')
+        cls.pickle_extract = os.path.join(tempfolder, 'stanextract.pkl')
+        with io.open(cls.pickle_fit, mode="wb") as f:
+            pickle.dump(fit, f)
+
+        with io.open(cls.pickle_extract, mode="wb") as f:
+            pickle.dump(fit.extract(), f)
+
+        module_name = model.module.__name__
+        del model
+        del sys.modules[module_name]
+
+    @unittest.expectedFailure
+    def test_unpickle_fit_fail(self):
+        with io.open(self.pickle_file, "rb") as f:
+            pickle.load(f)
+
+    def test_load_fit(self):
+        fit, model = unpickle_fit(self.pickle_fit, open_func=io.open, open_kwargs={"mode" : "rb"}, return_model=True)
+        self.assertIsNotNone(fit)
+        self.assertIsNotNone(model)
+        self.assertIsNotNone(fit.extract())
+        self.assertTrue("y" in fit.extract())
+
+        with io.open(self.pickle_extract, "rb") as f:
+            extract = pickle.load(f)
+        self.assertTrue(np.all(fit.extract()["y"] == extract["y"]))

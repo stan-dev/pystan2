@@ -31,6 +31,7 @@ Documentation
    threading_support
    windows
    external_cpp
+   unpickling_fit_without_model
 
 Stan documentation
 ------------------
