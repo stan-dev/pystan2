@@ -479,8 +479,8 @@ def _config_argss(chains, iter, warmup, thin,
     all_control = {
         "adapt_engaged", "adapt_gamma", "adapt_delta", "adapt_kappa",
         "adapt_t0", "adapt_init_buffer", "adapt_term_buffer", "adapt_window",
-        "stepsize", "stepsize_jitter", "metric", "int_time", "max_treedepth",
-        "epsilon", "error"
+        "stepsize", "stepsize_jitter", "metric", "int_time",
+        "max_treedepth", "epsilon", "error"
     }
     all_metrics = {"unit_e", "diag_e", "dense_e"}
 
@@ -511,6 +511,22 @@ def _config_argss(chains, iter, warmup, thin,
 
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
+
+    metric_file = kwargs.pop("metric_file", False)
+    if isinstance(metric_file, dict):
+        for i in range(chains):
+            if i not in metric_file:
+                msg = "Invalid value for init_inv_metric found (keys={}). " \
+                      "Use either a dictionary with chain_index as keys (0,1,2,...)" \
+                      "or ndarray."
+                msg = msg.format(list(metric_file.keys()))
+                raise ValueError(msg)
+            argss[i]['metric_file'] = metric_file[i]
+    elif isinstance(metric_file, str):
+        for i in range(chains):
+            argss[i]['metric_file'] = metric_file
+    else:
+        argss[i]['metric_file'] = ""
 
     for i in range(chains):
         argss[i].update(kwargs)
@@ -543,11 +559,14 @@ def _get_valid_stan_args(base_args=None):
     else:
         args['method'] = stan_args_method_t.SAMPLING
     args['sample_file_flag'] = True if args.get('sample_file') else False
-    args['sample_file'] = args.get('sample_file', '').encode('ascii')
+    args['sample_file'] = args.get('sample_file', '').replace('\\', '/').encode('ascii')
     args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
-    args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
+    args['diagnostic_file'] = args.get('diagnostic_file', '').replace('\\', '/').encode('ascii')
     # NB: argument named "seed" not "random_seed"
     args['random_seed'] = args.get('seed', int(time.time()))
+
+    args['metric_file_flag'] = True if args.get('metric_file') else False
+    args['metric_file'] = args.get('metric_file', '').replace('\\', '/').encode('ascii')
 
     if args['method'] == stan_args_method_t.VARIATIONAL:
         # variational does not use a `control` map like sampling
