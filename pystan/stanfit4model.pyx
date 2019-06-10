@@ -281,6 +281,8 @@ cdef void _set_stanargs_from_dict(StanArgs* p, dict args):
     p.method = args['method'].value
     p.diagnostic_file = args['diagnostic_file']
     p.diagnostic_file_flag = args['diagnostic_file_flag']
+    p.metric_file = args['metric_file']
+    p.metric_file_flag = args['metric_file_flag']
     if args['method'] == stan_args_method_t.SAMPLING:
         p.ctrl.sampling.iter = args['ctrl']['sampling']['iter']
         p.ctrl.sampling.refresh = args['ctrl']['sampling']['refresh']

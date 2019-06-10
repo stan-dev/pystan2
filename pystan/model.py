@@ -709,6 +709,7 @@ class StanModel:
             - `stepsize`: float, positive
             - `stepsize_jitter`: float, between 0 and 1
             - `metric` : str, {"unit_e", "diag_e", "dense_e"}
+            - `mass_matrix` : ndarray or str
 
             In addition, depending on which algorithm is used, different parameters
             can be set as in Stan for sampling. For the algorithm HMC we can set
@@ -761,6 +762,7 @@ class StanModel:
             parameter count is higher than 1000, unless user explicitly defines
             ``check_hmc_diagnostics=True``.
 
+
         Examples
         --------
         >>> from pystan import StanModel
@@ -788,6 +790,33 @@ class StanModel:
             if warmup  > 0:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
+
+        inv_metric_dir = None
+        mass_matrix = control.pop("mass_matrix", None) if isinstance(control, dict) else None
+        if isinstance(mass_matrix, dict):
+            metric_file = {}
+            for key in list(mass_matrix.keys()):
+                values = mass_matrix[key]
+                if not isinstance(values, str):
+                    if inv_metric_dir is None:
+                        inv_metric_dir = tempfile.mkdtemp()
+                    metric_filename = "inv_metric_chain_{}.Rdata".format(str(key))
+                    metric_path = os.path.join(inv_metric_dir, metric_filename)
+                    pystan.misc.stan_rdump(dict(inv_metric=values), metric_path)
+                    metric_file[key] = metric_path
+                else:
+                    metric_file[key] = values
+        elif not isinstance(mass_matrix, str) and mass_matrix:
+            inv_metric_dir = tempfile.mkdtemp()
+            metric_filename = "inv_metric.Rdata"
+            metric_path = os.path.join(inv_metric_dir, metric_filename)
+            pystan.misc.stan_rdump(dict(inv_metric=mass_matrix), metric_path)
+            metric_file = metric_path
+        elif isinstance(mass_matrix, str):
+            metric_file = mass_matrix
+        else:
+            metric_file = ""
+        kwargs["metric_file"] = metric_file
 
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
@@ -818,7 +847,7 @@ class StanModel:
 
         check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', None)
         # check that arguments in kwargs are valid
-        valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
+        valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control", "metric_file"}
         for arg in kwargs:
             if arg not in valid_args:
                 raise ValueError("Parameter `{}` is not recognized.".format(arg))
@@ -876,6 +905,9 @@ class StanModel:
         fit.stan_args = args_list
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
+
+        if inv_metric_dir is not None:
+            shutil.rmtree(inv_metric_dir, ignore_errors=True)
 
         # If problems are found in the fit, this will print diagnostic
         # messages.

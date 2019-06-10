@@ -74,6 +74,7 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         uint adapt_window
         double adapt_t0
         sampling_metric_t metric  # UNIT_E, DIAG_E, DENSE_E
+        # string init_inv_metric
         double stepsize  # default to 1
         double stepsize_jitter
         int max_treedepth  # for NUTS, default to 10.
@@ -129,6 +130,8 @@ cdef extern from "stan_fit.hpp" namespace "pystan":
         string diagnostic_file
         bool diagnostic_file_flag
         ctrl_t ctrl
+        string metric_file
+        bool metric_file_flag
 
     cdef cppclass StanHolder:
         int num_failed
