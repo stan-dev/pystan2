@@ -767,7 +767,7 @@ class StanModel:
                     metric_file[key] = metric_path
                 else:
                     metric_file[key] = values
-        elif not isinstance(mass_matrix, str) and mass_matrix:
+        elif isinstance(mass_matrix, Iterable):
             inv_metric_dir = tempfile.mkdtemp()
             metric_filename = "inv_metric.Rdata"
             metric_path = os.path.join(inv_metric_dir, metric_filename)

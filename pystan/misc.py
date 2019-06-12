@@ -1331,3 +1331,60 @@ def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, 
         if not header:
             df.drop(columns='permutation_order', inplace=True)
     return df
+
+def get_stepsize(fit):
+    """Parse stepsize from fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+
+    Returns
+    -------
+    list
+        Returns an empty list if step sizes
+        are not found in ``fit.get_adaptation_info``.
+    """
+    stepsizes = []
+    for adaptation_info in fit.get_adaptation_info():
+        for line in adaptation_info.splitlines():
+            if "Step size" in line:
+                stepsizes.append(float(line.split("=", maxsplit=1)[1].strip()))
+                break
+    return stepsizes
+
+def get_mass_matrix(fit):
+    """Parse mass-matrices from the fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+
+    Returns
+    -------
+    list
+        Returns an empty list if mass matrix
+        is not found in ``fit.get_adaptation_info()``.
+    """
+    mass_matrices = []
+    if not (("ctrl" in fit.stan_args[0]) and ("sampling" in fit.stan_args[0]["ctrl"])):
+        return mass_matrices
+    metric = [args["ctrl"]["sampling"]["metric"].name for args in fit.stan_args]
+    for adaptation_info, metric_name in zip(fit.get_adaptation_info(), metric):
+        iter_adaptation_info = iter(adaptation_info.splitlines())
+        mass_list = []
+        for line in iter_adaptation_info:
+            if any(value in line for value in ["Step size", "Adaptation"]):
+                continue
+            elif "inverse mass matrix" in line:
+                for line in iter_adaptation_info:
+                    stripped_set = set(line.replace("# ", "").replace(" ", "").replace(",", ""))
+                    if stripped_set.issubset(set(".-1234567890")):
+                        mass_matrix = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
+                        if metric_name == "DENSE_E":
+                            mass_matrix = np.atleast_2d(mass_matrix)
+                        mass_list.append(mass_matrix)
+                    else:
+                        break
+        mass_matrices.append(np.concatenate(mass_list))
+    return mass_matrices
