@@ -892,6 +892,36 @@ cdef class StanFit4Model:
     def get_stanmodel(self):
         return self.stanmodel
 
+    def get_stepsize(self):
+        """Parse stepsize from fit object
+
+        Parameters
+        ----------
+        fit : StanFit4Model
+
+        Returns
+        -------
+        list
+            Returns an empty list if step sizes
+            are not found in ``fit.get_adaptation_info``.
+        """
+        return pystan.misc.get_stepsize(fit=self)
+
+    def get_mass_matrix(self):
+        """Parse mass-matrices from the fit object
+
+        Parameters
+        ----------
+        fit : StanFit4Model
+
+        Returns
+        -------
+        list
+            Returns an empty list if mass matrix
+            is not found in ``fit.get_adaptation_info()``.
+        """
+        return pystan.misc.get_mass_matrix(fit=self)
+
     def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
         """Extract samples as a pandas dataframe for different parameters.
 
