@@ -721,9 +721,13 @@ class StanModel:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
 
+        # this needs to be done here:
+        # the tempfiles are deleted after sampling has been done
+        # each chain gets unique file
         inv_metric_dir = None
         mass_matrix = control.pop("mass_matrix", None) if isinstance(control, dict) else None
         if isinstance(mass_matrix, dict):
+            # handle dictionary input
             metric_file = {}
             for key in list(mass_matrix.keys()):
                 values = mass_matrix[key]
@@ -735,17 +739,40 @@ class StanModel:
                     pystan.misc.stan_rdump(dict(inv_metric=values), metric_path)
                     metric_file[key] = metric_path
                 else:
-                    metric_file[key] = values
-        elif isinstance(mass_matrix, Iterable):
-            inv_metric_dir = tempfile.mkdtemp()
-            metric_filename = "inv_metric.Rdata"
-            metric_path = os.path.join(inv_metric_dir, metric_filename)
-            pystan.misc.stan_rdump(dict(inv_metric=mass_matrix), metric_path)
-            metric_file = metric_path
+                    if not os.path.exists(values):
+                        raise ValueError("mass matrix file was not found: {}".format(values))
+                    if any(os.path.normpath(os.path.abspath(values))==os.path.normpath(os.path.abspath(item)) for item in metric_file.values()):
+                        if inv_metric_dir is None:
+                            inv_metric_dir = tempfile.mkdtemp()
+                        metric_filename = "inv_metric_chain_{}.Rdata".format(str(key))
+                        metric_path = os.path.join(inv_metric_dir, metric_filename)
+                        metric_file[key] = metric_path
+                    else:
+                        metric_file[key] = values
         elif isinstance(mass_matrix, str):
-            metric_file = mass_matrix
+            # handle str paths
+            if not os.path.exists(mass_matrix):
+                raise ValueError("mass matrix file was not found: {}".format(mass_matrix))
+            inv_metric_dir = tempfile.mkdtemp()
+            metric_file = dict()
+            for i in range(chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(i)
+                metric_path = os.path.join(inv_metric_dir, metric_filename)
+                shutil.copy(mass_matrix, metric_path)
+                metric_file[i] = metric_path
+        elif isinstance(mass_matrix, Iterable):
+            # handle ndarray / lists
+            inv_metric_dir = tempfile.mkdtemp()
+            metric_file = dict()
+            for i in range(chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(i)
+                metric_path = os.path.join(inv_metric_dir, metric_filename)
+                pystan.misc.stan_rdump(dict(inv_metric=mass_matrix), metric_path)
+                metric_file[i] = metric_path
         else:
+            # ignore
             metric_file = ""
+
         kwargs["metric_file"] = metric_file
 
         seed = pystan.misc._check_seed(seed)
