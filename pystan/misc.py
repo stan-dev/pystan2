@@ -530,6 +530,9 @@ def _config_argss(chains, iter, warmup, thin,
 
     for i in range(chains):
         argss[i].update(kwargs)
+        if "stepsize" in kwargs["control"]:
+            if isinstance(kwargs["control"]["stepsize"], Sequence):
+                argss[i]["control"]["stepsize"] = kwargs["control"]["stepsize"][i]
         argss[i] = _get_valid_stan_args(argss[i])
 
     return argss
@@ -559,14 +562,14 @@ def _get_valid_stan_args(base_args=None):
     else:
         args['method'] = stan_args_method_t.SAMPLING
     args['sample_file_flag'] = True if args.get('sample_file') else False
-    args['sample_file'] = args.get('sample_file', '').replace('\\', '/').encode('ascii')
+    args['sample_file'] = args.get('sample_file', '').encode('ascii')
     args['diagnostic_file_flag'] = True if args.get('diagnostic_file') else False
-    args['diagnostic_file'] = args.get('diagnostic_file', '').replace('\\', '/').encode('ascii')
+    args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
     # NB: argument named "seed" not "random_seed"
     args['random_seed'] = args.get('seed', int(time.time()))
 
     args['metric_file_flag'] = True if args.get('metric_file') else False
-    args['metric_file'] = args.get('metric_file', '').replace('\\', '/').encode('ascii')
+    args['metric_file'] = args.get('metric_file', '').encode('ascii')
 
     if args['method'] == stan_args_method_t.VARIATIONAL:
         # variational does not use a `control` map like sampling
