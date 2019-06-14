@@ -1436,6 +1436,6 @@ def get_last_position(fit):
 
     chains = fit.sim["chains"]
     for i in range(chains):
-        extract_pos = {key : values[i, -1] for key, values in extracted.items()}
+        extract_pos = {key : values[-1, i] for key, values in extracted.items()}
         positions.append(extract_pos)
     return positions

@@ -24,6 +24,7 @@ Documentation
    installation_cvodes
    optimizing
    avoiding_recompilation
+   mass_matrix
    differences_pystan_rstan
    api
    conversion
