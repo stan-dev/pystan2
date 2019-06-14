@@ -19,9 +19,9 @@ from pystan._compat import PY2, string_types
 
 from collections import OrderedDict
 if PY2:
-    from collections import Callable, Sequence
+    from collections import Callable, Iterable, Sequence
 else:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 import inspect
 import io
 import itertools
@@ -32,6 +32,7 @@ import os
 import random
 import re
 import sys
+import shutil
 import tempfile
 import time
 
@@ -480,7 +481,7 @@ def _config_argss(chains, iter, warmup, thin,
         "adapt_engaged", "adapt_gamma", "adapt_delta", "adapt_kappa",
         "adapt_t0", "adapt_init_buffer", "adapt_term_buffer", "adapt_window",
         "stepsize", "stepsize_jitter", "metric", "int_time",
-        "max_treedepth", "epsilon", "error"
+        "max_treedepth", "epsilon", "error", "mass_matrix"
     }
     all_metrics = {"unit_e", "diag_e", "dense_e"}
 
@@ -512,25 +513,51 @@ def _config_argss(chains, iter, warmup, thin,
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
 
-    metric_file = kwargs.pop("metric_file", False)
-    if isinstance(metric_file, dict):
-        for i in range(chains):
-            if i not in metric_file:
-                msg = "Invalid value for init_inv_metric found (keys={}). " \
-                      "Use either a dictionary with chain_index as keys (0,1,2,...)" \
-                      "or ndarray."
-                msg = msg.format(list(metric_file.keys()))
-                raise ValueError(msg)
-            argss[i]['metric_file'] = metric_file[i]
-    elif isinstance(metric_file, str):
-        for i in range(chains):
-            argss[i]['metric_file'] = metric_file
-    else:
-        argss[i]['metric_file'] = ""
+    if control is not None and "mass_matrix" in control:
+        mass_matrix = control.pop("mass_matrix")
+        metric_dir = tempfile.mkdtemp()
+        if isinstance(mass_matrix, dict):
+            for i in range(chains):
+                if i not in mass_matrix:
+                    msg = "Invalid value for init_inv_metric found (keys={}). " \
+                          "Use either a dictionary with chain_index as keys (0,1,2,...)" \
+                          "or ndarray."
+                    msg = msg.format(list(metric_file.keys()))
+                    raise ValueError(msg)
+                mass_values = mass_matrix[i]
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                if isinstance(mass_values, str):
+                    if not os.path.exists(mass_values):
+                        raise ValueError("mass matrix file was not found: {}".format(mass_values))
+                    shutil.copy(mass_values, metric_path)
+                else:
+                    stan_rdump(dict(inv_metric=mass_values), metric_path)
+                argss[i]['metric_file'] = metric_path
+        elif isinstance(mass_matrix, str):
+            if not os.path.exists(mass_matrix):
+                raise ValueError("mass matrix file was not found: {}".format(mass_matrix))
+            for i in range(chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                shutil.copy(mass_matrix, metric_path)
+                argss[i]['metric_file'] = metric_path
+        elif isinstance(mass_matrix, Iterable):
+            metric_filename = "inv_metric_chain_0.Rdata"
+            metric_path = os.path.join(metric_dir, metric_filename)
+            stan_rdump(dict(inv_metric=mass_matrix), metric_path)
+            argss[0]['metric_file'] = metric_path
+            for i in range(1, chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                shutil.copy(argss[i-1]['metric_file'], metric_path)
+                argss[i]['metric_file'] = metric_path
+        else:
+            argss[i]['metric_file'] = ""
 
     for i in range(chains):
         argss[i].update(kwargs)
-        if "stepsize" in kwargs["control"]:
+        if ("control" in kwargs) and ("stepsize" in kwargs["control"]):
             if isinstance(kwargs["control"]["stepsize"], Sequence):
                 argss[i]["control"]["stepsize"] = kwargs["control"]["stepsize"][i]
         argss[i] = _get_valid_stan_args(argss[i])
@@ -1352,7 +1379,7 @@ def get_stepsize(fit):
     for adaptation_info in fit.get_adaptation_info():
         for line in adaptation_info.splitlines():
             if "Step size" in line:
-                stepsizes.append(float(line.split("=", maxsplit=1)[1].strip()))
+                stepsizes.append(float(line.split("=")[1].strip()))
                 break
     return stepsizes
 
@@ -1391,3 +1418,24 @@ def get_mass_matrix(fit):
                         break
         mass_matrices.append(np.concatenate(mass_list))
     return mass_matrices
+
+def get_last_position(fit):
+    """Parse last position from fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+
+    Returns
+    -------
+    list
+        list contains a dictionary of last draw from each chain.
+    """
+    positions = []
+    extracted = fit.extract(permuted=False, pars=fit.model_pars)
+
+    chains = fit.sim["chains"]
+    for i in range(chains):
+        extract_pos = {key : values[i, -1] for key, values in extracted.items()}
+        positions.append(extract_pos)
+    return positions

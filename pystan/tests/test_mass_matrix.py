@@ -121,8 +121,7 @@ class TestMassMatrix(unittest.TestCase):
         fit = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         mass_matrix_ = fit.get_mass_matrix()
-        print(mass_matrix)
-        print(mass_matrix_)
+
         assert all(mm.shape == (3*4,) for mm in mass_matrix_)
         assert all(np.all(mass_matrix == mm) for mm in mass_matrix_)
 

@@ -791,60 +791,6 @@ class StanModel:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
 
-        # this needs to be done here:
-        # the tempfiles are deleted after sampling has been done
-        # each chain gets unique file
-        inv_metric_dir = None
-        mass_matrix = control.pop("mass_matrix", None) if isinstance(control, dict) else None
-        if isinstance(mass_matrix, dict):
-            # handle dictionary input
-            metric_file = {}
-            for key in list(mass_matrix.keys()):
-                values = mass_matrix[key]
-                if not isinstance(values, str):
-                    if inv_metric_dir is None:
-                        inv_metric_dir = tempfile.mkdtemp()
-                    metric_filename = "inv_metric_chain_{}.Rdata".format(str(key))
-                    metric_path = os.path.join(inv_metric_dir, metric_filename)
-                    pystan.misc.stan_rdump(dict(inv_metric=values), metric_path)
-                    metric_file[key] = metric_path
-                else:
-                    if not os.path.exists(values):
-                        raise ValueError("mass matrix file was not found: {}".format(values))
-                    if any(os.path.normpath(os.path.abspath(values))==os.path.normpath(os.path.abspath(item)) for item in metric_file.values()):
-                        if inv_metric_dir is None:
-                            inv_metric_dir = tempfile.mkdtemp()
-                        metric_filename = "inv_metric_chain_{}.Rdata".format(str(key))
-                        metric_path = os.path.join(inv_metric_dir, metric_filename)
-                        metric_file[key] = metric_path
-                    else:
-                        metric_file[key] = values
-        elif isinstance(mass_matrix, str):
-            # handle str paths
-            if not os.path.exists(mass_matrix):
-                raise ValueError("mass matrix file was not found: {}".format(mass_matrix))
-            inv_metric_dir = tempfile.mkdtemp()
-            metric_file = dict()
-            for i in range(chains):
-                metric_filename = "inv_metric_chain_{}.Rdata".format(i)
-                metric_path = os.path.join(inv_metric_dir, metric_filename)
-                shutil.copy(mass_matrix, metric_path)
-                metric_file[i] = metric_path
-        elif isinstance(mass_matrix, Iterable):
-            # handle ndarray / lists
-            inv_metric_dir = tempfile.mkdtemp()
-            metric_file = dict()
-            for i in range(chains):
-                metric_filename = "inv_metric_chain_{}.Rdata".format(i)
-                metric_path = os.path.join(inv_metric_dir, metric_filename)
-                pystan.misc.stan_rdump(dict(inv_metric=mass_matrix), metric_path)
-                metric_file[i] = metric_path
-        else:
-            # ignore
-            metric_file = ""
-
-        kwargs["metric_file"] = metric_file
-
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
 
@@ -874,7 +820,7 @@ class StanModel:
 
         check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', None)
         # check that arguments in kwargs are valid
-        valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control", "metric_file"}
+        valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
             if arg not in valid_args:
                 raise ValueError("Parameter `{}` is not recognized.".format(arg))
@@ -933,7 +879,8 @@ class StanModel:
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
 
-        if inv_metric_dir is not None:
+        if args_list[0]["metric_file_flag"]:
+            inv_metric_dir, _ = os.path.split(args_list[0]["metric_file"])
             shutil.rmtree(inv_metric_dir, ignore_errors=True)
 
         # If problems are found in the fit, this will print diagnostic

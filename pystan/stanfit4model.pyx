@@ -922,6 +922,20 @@ cdef class StanFit4Model:
         """
         return pystan.misc.get_mass_matrix(fit=self)
 
+    def get_last_position(self):
+        """Parse last position from fit object
+
+        Parameters
+        ----------
+        fit : StanFit4Model
+
+        Returns
+        -------
+        list
+            list contains a dictionary of last draw from each chain.
+        """
+        return pystan.misc.get_last_position(fit=self)
+
     def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
         """Extract samples as a pandas dataframe for different parameters.
 
