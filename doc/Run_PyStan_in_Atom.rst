@@ -11,12 +11,12 @@ Steps
 - Install `Atom <http://atom.io>`_. Atom will be added to your path variable during the installation.
 - Launch `Atom <http://atom.io>`_ in your activated Stan environment as follows:
   
-  1. Open Anaconda Promt or compand prompt.
+  1. Open Anaconda Prompt or Command Prompt.
       
-      a) First time only on comand prompt: Initialise anaconda on the command prompt by typing ``conda init``. This will allow you to run conda commands with command prompt as you would with Anaconda Prompt.
+      a) First time only on Command Prompt: Initialise anaconda on the Command Prompt by typing ``conda init``. This will allow you to run conda commands with Command Prompt as you would with Anaconda Prompt.
 
   2. Activate your Stan environment with ``activate myenv``, where ``myenv`` is the name of your environment such as ``stan_env``.
-  3. Type ``atom`` to launch the Atom (once launched you can close the comand prompt window if you like).
+  3. Type ``atom`` to launch the Atom editor (once launched you can close the comand prompt window if you like).
 
 Test
 ------
