@@ -481,7 +481,7 @@ def _config_argss(chains, iter, warmup, thin,
         "adapt_engaged", "adapt_gamma", "adapt_delta", "adapt_kappa",
         "adapt_t0", "adapt_init_buffer", "adapt_term_buffer", "adapt_window",
         "stepsize", "stepsize_jitter", "metric", "int_time",
-        "max_treedepth", "epsilon", "error", "mass_matrix"
+        "max_treedepth", "epsilon", "error", "inv_metric"
     }
     all_metrics = {"unit_e", "diag_e", "dense_e"}
 
@@ -513,39 +513,39 @@ def _config_argss(chains, iter, warmup, thin,
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
 
-    if control is not None and "mass_matrix" in control:
-        mass_matrix = control.pop("mass_matrix")
+    if control is not None and "inv_metric" in control:
+        inv_metric = control.pop("inv_metric")
         metric_dir = tempfile.mkdtemp()
-        if isinstance(mass_matrix, dict):
+        if isinstance(inv_metric, dict):
             for i in range(chains):
-                if i not in mass_matrix:
+                if i not in inv_metric:
                     msg = "Invalid value for init_inv_metric found (keys={}). " \
                           "Use either a dictionary with chain_index as keys (0,1,2,...)" \
                           "or ndarray."
                     msg = msg.format(list(metric_file.keys()))
                     raise ValueError(msg)
-                mass_values = mass_matrix[i]
+                mass_values = inv_metric[i]
                 metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
                 metric_path = os.path.join(metric_dir, metric_filename)
                 if isinstance(mass_values, str):
                     if not os.path.exists(mass_values):
-                        raise ValueError("mass matrix file was not found: {}".format(mass_values))
+                        raise ValueError("inverse metric file was not found: {}".format(mass_values))
                     shutil.copy(mass_values, metric_path)
                 else:
                     stan_rdump(dict(inv_metric=mass_values), metric_path)
                 argss[i]['metric_file'] = metric_path
-        elif isinstance(mass_matrix, str):
-            if not os.path.exists(mass_matrix):
-                raise ValueError("mass matrix file was not found: {}".format(mass_matrix))
+        elif isinstance(inv_metric, str):
+            if not os.path.exists(inv_metric):
+                raise ValueError("inverse metric  file was not found: {}".format(inv_metric))
             for i in range(chains):
                 metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
                 metric_path = os.path.join(metric_dir, metric_filename)
-                shutil.copy(mass_matrix, metric_path)
+                shutil.copy(inv_metric, metric_path)
                 argss[i]['metric_file'] = metric_path
-        elif isinstance(mass_matrix, Iterable):
+        elif isinstance(inv_metric, Iterable):
             metric_filename = "inv_metric_chain_0.Rdata"
             metric_path = os.path.join(metric_dir, metric_filename)
-            stan_rdump(dict(inv_metric=mass_matrix), metric_path)
+            stan_rdump(dict(inv_metric=inv_metric), metric_path)
             argss[0]['metric_file'] = metric_path
             for i in range(1, chains):
                 metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
@@ -1383,8 +1383,8 @@ def get_stepsize(fit):
                 break
     return stepsizes
 
-def get_mass_matrix(fit):
-    """Parse mass-matrices from the fit object
+def get_inv_metric(fit):
+    """Parse inverse metric from the fit object
 
     Parameters
     ----------
@@ -1393,16 +1393,16 @@ def get_mass_matrix(fit):
     Returns
     -------
     list
-        Returns an empty list if mass matrix
+        Returns an empty list if inverse metric
         is not found in ``fit.get_adaptation_info()``.
     """
-    mass_matrices = []
+    inv_metrics = []
     if not (("ctrl" in fit.stan_args[0]) and ("sampling" in fit.stan_args[0]["ctrl"])):
-        return mass_matrices
+        return inv_metrics
     metric = [args["ctrl"]["sampling"]["metric"].name for args in fit.stan_args]
     for adaptation_info, metric_name in zip(fit.get_adaptation_info(), metric):
         iter_adaptation_info = iter(adaptation_info.splitlines())
-        mass_list = []
+        inv_metric_list = []
         for line in iter_adaptation_info:
             if any(value in line for value in ["Step size", "Adaptation"]):
                 continue
@@ -1410,14 +1410,14 @@ def get_mass_matrix(fit):
                 for line in iter_adaptation_info:
                     stripped_set = set(line.replace("# ", "").replace(" ", "").replace(",", ""))
                     if stripped_set.issubset(set(".-1234567890")):
-                        mass_matrix = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
+                        inv_metric = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
                         if metric_name == "DENSE_E":
-                            mass_matrix = np.atleast_2d(mass_matrix)
-                        mass_list.append(mass_matrix)
+                            inv_metric = np.atleast_2d(inv_metric)
+                        inv_metric_list.append(inv_metric)
                     else:
                         break
-        mass_matrices.append(np.concatenate(mass_list))
-    return mass_matrices
+        inv_metrics.append(np.concatenate(inv_metric_list))
+    return inv_metrics
 
 def get_last_position(fit):
     """Parse last position from fit object

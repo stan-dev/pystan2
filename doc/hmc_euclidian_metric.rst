@@ -1,26 +1,31 @@
-.. _mass_matrix:
+.. _hmc_euclidian_metric:
 
 .. currentmodule:: pystan
 
-============
- Mass matrix
-============
+======================
+ HMC: Euclidian Metric
+======================
 
-Mass matrix is one part of the tuned parameters for hmc. See
+Euclidian Metric (also known as mass matrix) is one of the tuned parameters for hmc algorithm. See
 `hmc-algorithm-parameters <https://mc-stan.org/docs/2_19/reference-manual/hmc-algorithm-parameters.html>`_.
 
-Two examples are shown where it is possible to use pre-tuned mass-matrix with other
+Two examples are shown where it is possible to use pre-tuned metric-matrix with other
 pre-tuned parameters.
 
+-------------------------------------
 Example 1: (pseudo-)continue sampling
 -------------------------------------
+
 The first example shows an example how to (pseudo-)continue chains to get more draws to old fit.
+The method is described as pseudo due to fact that continued sampling does not equal sampling
+done in one step. With user provided seed, this procedure is reproducible.
 This procedure needs some manual processing and ArviZ is recommended for further analysis.
 To make this reproducible, user can manually set seed for each fit.
 
 .. code-block:: python
 
     from pystan import StanModel
+    from pystan.constants import MAX_UINT
 
     # bernoulli model
     model_code = """
@@ -40,20 +45,35 @@ To make this reproducible, user can manually set seed for each fit.
 
     data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
     sm = StanModel(model_code=model_code)
-    fit = sm.sampling(data=data)
+    # initial seed can also be chosen by user
+    # MAX_UINT = 2147483647
+    seed = np.random.randint(0, MAX_UINT, size=1)
+    fit = sm.sampling(data=data, seed=seed)
 
     # reuse tuned parameters
     stepsize = fit.get_stepsize()
-    mass_matrix = fit.get_mass_matrix()
+    inv_metric = fit.get_inv_metric()
     init = fit.get_last_position()
 
-    mass_matrix_dict = dict(enumerate(mass_matrix))
+    # use chain order as a key
+    inv_metric_dict = dict(enumerate(inv_metric))
 
-    control = {"stepsize" : stepsize, "mass_matrix" : mass_matrix_dict}
-    fit2 = sm.sampling(data=data, warmup=0, iter=1000, control=control, init=init)
+    # increment seed by 1
+    seed2 = seed + 1
+
+    control = {"stepsize" : stepsize, "inv_metric" : inv_metric_dict}
+    fit2 = sm.sampling(data=data,
+                       warmup=0,
+                       iter=1000,
+                       control=control,
+                       init=init,
+                       seed=seed2)
 
 User needs to combine the draws manually. This can be done with ``numpy.concatenate``
-and the resulting combined draws can be further analyzed with ArviZ.
+or with ``arviz.concat`` with ``dim="draw"`` option. Combined draws can be further analyzed with ArviZ.
+
+Case 1: ``numpy.concatenate``
+=============================
 
 .. code-block:: python
 
@@ -74,17 +94,41 @@ and the resulting combined draws can be further analyzed with ArviZ.
     inference_data = az.from_dict(posterior=combined)
 
     # summary
-    print(az.summary(inference_data, index_origin=1))
+    summary = az.summary(inference_data, index_origin=1)
+    print(summary) # pandas.DataFrame
 
     # traceplot
     az.plot_trace(inference_data)
 
+
+Case 2: ``arviz.concat``
+========================
+
+.. code-block:: python
+
+    # Needs ArviZ version 0.4.2+
+    import arviz as az
+    # create InferenceData objects
+    inference_data1 = az.from_pystan(fit1)
+    inference_data2 = az.from_pystan(fit2)
+
+    inference_data = az.concat(inference_data1, inference_data2, dim="draw")
+
+    # summary
+    summary = az.summary(inference_data, index_origin=1)
+    print(summary) # pandas.DataFrame'
+
+    # traceplot
+    az.plot_trace(inference_data)
+
+
+---------------------------------
 Example 2: Pretune hmc parameters
 ---------------------------------
-The seconds example goes through example how to use pre-tuned variables. With large and slow models,
+The seconds example goes through the process how to use pre-tuned variables. With large and slow models,
 it is sometimes convenient to reuse the prelearned tuning parameters.
 This enables user to skip warmup period for new chains. Example code will first run warmup for
-one chain and then reuse the mass matrix, stepsize and last sample location for further chains.
+one chain and then reuse the inverse metric matrix, stepsize and last sample location for further chains.
 
 .. code-block:: python
 
@@ -112,25 +156,26 @@ one chain and then reuse the mass matrix, stepsize and last sample location for 
 
     # reuse tuned parameters
     stepsize = fit_warmup.get_stepsize()[0] # select chain 1
-    mass_matrix = fit_warmup.get_mass_matrix()[0] # select chain 1
+    inv_metric = fit_warmup.get_inv_metric()[0] # select chain 1
     last_position = fit_warmup.get_last_position()[0] # select chain 1
     chains = 4
     init = [last_position for _ in range(chains)]
 
-    control = {"stepsize" : stepsize, "mass_matrix" : mass_matrix}
+    control = {"stepsize" : stepsize, "inv_metric" : inv_metric}
     fit = sm.sampling(data=data, warmup=0, chains=4, iter=1000, control=control, init=init)
     print(fit)
 
 
 Shape and usage
 ---------------
-The shape of the inserted mass matrix changes depending on the used algorithm.
+The shape of the inserted inverse metric changes depending on the used algorithm.
 The default algorithm with NUTS is ``diag_e``, which means that only the diagonal
-of the mass matrix is used. This also means that the shape of the mass matrix is
+of the inverse metric matrix is used. This also means that the shape of the inverse metric is
 ``(n_flatnames,)``. With other algorithm ``dense_e`` the full matrix is defined
-and the mass matrix shape is ``(n_flatnames, n_flatnames)``. The mass matrix needs
-to be strictly positive definite.
+and the inverse metric matrix shape is ``(n_flatnames, n_flatnames)``. The inverse
+metric matrix needs to be strictly positive definite.
 
-The mass matrix is given for the ``.sampling`` method inside the ``control`` dictionary.
-The ``mass_matrix`` can be either iterable (list, tuple, ndarray), dictionary of iterable
-or string (path to Rdump or JSON file with parameter "inv_metric" and values from the iterable).
+The inverse metric matrix is given for the ``.sampling`` method inside the ``control`` dictionary.
+The ``inv_metric`` can be either iterable (list, tuple, ndarray), dictionary of iterable with chain
+order as the key or ``inv_metric`` can be a string (path to Rdump or JSON file with a
+parameter "inv_metric").

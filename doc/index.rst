@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+====================================
 PyStan: The Python Interface to Stan
 ====================================
 
@@ -24,7 +25,7 @@ Documentation
    installation_cvodes
    optimizing
    avoiding_recompilation
-   mass_matrix
+   hmc_euclidian_metric
    differences_pystan_rstan
    api
    conversion
@@ -37,9 +38,14 @@ Documentation
 Stan documentation
 ------------------
 
-- Stan: http://mc-stan.org/
-- Stan User's Guide and Reference Manual, available at http://mc-stan.org
+- `Stan: http://mc-stan.org/ <https://mc-stan.org/>`_
+- `Stan User's Guide and Reference Manual, available at http://mc-stan.org <https://mc-stan.org/users/documentation/>`_
 - `BUGS Examples <https://github.com/stan-dev/example-models/wiki/BUGS-Examples>`_
+
+Stan Discourse
+--------------
+
+- `Stan Discourse https://discourse.mc-stan.org/ <https://discourse.mc-stan.org/>`_
 
 Important links
 ---------------
@@ -48,11 +54,25 @@ Important links
 - HTML documentation: http://pystan.readthedocs.org
 - Issue tracker: https://github.com/stan-dev/pystan/issues
 
+Related projects
+----------------
+
+- ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
+- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
+- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
+- Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
+- Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
+
 Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
 - emcee: http://dan.iel.fm/emcee/current/
+
+PyStan3 / Stan3
+---------------
+The development of PyStan3 with updated API can be found under `stan-dev/pystan-next <https://github.com/stan-dev/pystan-next>`_
 
 Indices and tables
 ------------------

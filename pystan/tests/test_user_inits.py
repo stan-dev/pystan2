@@ -87,7 +87,7 @@ class TestUserInitsMatrix(unittest.TestCase):
             model {
             for (k in 1:K)
                 for (d in 1:D)
-                  beta[k,d] ~ normal(if_else(d==2,100, 0),1);
+                  beta[k,d] ~ normal((d==2?100:0),1);
            }
         """
         cls.model = pystan.StanModel(model_code=model_code)
