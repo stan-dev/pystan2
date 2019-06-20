@@ -670,7 +670,7 @@ class StanModel:
             - `stepsize`: float, positive
             - `stepsize_jitter`: float, between 0 and 1
             - `metric` : str, {"unit_e", "diag_e", "dense_e"}
-            - `mass_matrix` : ndarray or str
+            - `inv_metric` : np.ndarray or str
 
             In addition, depending on which algorithm is used, different parameters
             can be set as in Stan for sampling. For the algorithm HMC we can set

@@ -907,8 +907,8 @@ cdef class StanFit4Model:
         """
         return pystan.misc.get_stepsize(fit=self)
 
-    def get_mass_matrix(self):
-        """Parse mass-matrices from the fit object
+    def get_inv_metric(self):
+        """Parse inverse metrics from the fit object
 
         Parameters
         ----------
@@ -917,10 +917,10 @@ cdef class StanFit4Model:
         Returns
         -------
         list
-            Returns an empty list if mass matrix
+            Returns an empty list if inverse metric
             is not found in ``fit.get_adaptation_info()``.
         """
-        return pystan.misc.get_mass_matrix(fit=self)
+        return pystan.misc.get_inv_metric(fit=self)
 
     def get_last_position(self):
         """Parse last position from fit object
