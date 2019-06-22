@@ -1383,18 +1383,21 @@ def get_stepsize(fit):
                 break
     return stepsizes
 
-def get_inv_metric(fit):
+def get_inv_metric(fit, as_dict=False):
     """Parse inverse metric from the fit object
 
     Parameters
     ----------
     fit : StanFit4Model
+    as_dict : bool, optional
 
     Returns
     -------
-    list
+    list or dict
         Returns an empty list if inverse metric
         is not found in ``fit.get_adaptation_info()``.
+        If `as_dict` returns a dictionary which can be used with
+        `.sampling` method.
     """
     inv_metrics = []
     if not (("ctrl" in fit.stan_args[0]) and ("sampling" in fit.stan_args[0]["ctrl"])):
@@ -1417,7 +1420,7 @@ def get_inv_metric(fit):
                     else:
                         break
         inv_metrics.append(np.concatenate(inv_metric_list))
-    return inv_metrics
+    return inv_metrics if not as_dict else dict(enumerate(inv_metrics))
 
 def get_last_position(fit):
     """Parse last position from fit object
