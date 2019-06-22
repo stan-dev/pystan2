@@ -52,16 +52,14 @@ To make this reproducible, user can manually set seed for each fit.
 
     # reuse tuned parameters
     stepsize = fit.get_stepsize()
-    inv_metric = fit.get_inv_metric()
+    # by default .get_inv_metric returns a list
+    inv_metric = fit.get_inv_metric(as_dict=True)
     init = fit.get_last_position()
-
-    # use chain order as a key
-    inv_metric_dict = dict(enumerate(inv_metric))
 
     # increment seed by 1
     seed2 = seed + 1
 
-    control = {"stepsize" : stepsize, "inv_metric" : inv_metric_dict}
+    control = {"stepsize" : stepsize, "inv_metric" : inv_metric}
     fit2 = sm.sampling(data=data,
                        warmup=0,
                        iter=1000,
