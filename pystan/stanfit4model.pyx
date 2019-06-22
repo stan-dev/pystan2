@@ -907,7 +907,7 @@ cdef class StanFit4Model:
         """
         return pystan.misc.get_stepsize(fit=self)
 
-    def get_inv_metric(self):
+    def get_inv_metric(self, as_dict=False):
         """Parse inverse metrics from the fit object
 
         Parameters
@@ -920,7 +920,7 @@ cdef class StanFit4Model:
             Returns an empty list if inverse metric
             is not found in ``fit.get_adaptation_info()``.
         """
-        return pystan.misc.get_inv_metric(fit=self)
+        return pystan.misc.get_inv_metric(fit=self, as_dict=as_dict)
 
     def get_last_position(self):
         """Parse last position from fit object
