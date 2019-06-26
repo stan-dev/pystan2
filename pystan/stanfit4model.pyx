@@ -912,7 +912,8 @@ cdef class StanFit4Model:
 
         Parameters
         ----------
-        fit : StanFit4Model
+        as_dict : bool, optional
+        
 
         Returns
         -------
