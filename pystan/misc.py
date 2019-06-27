@@ -1412,7 +1412,7 @@ def get_inv_metric(fit, as_dict=False):
             elif "inverse mass matrix" in line:
                 for line in iter_adaptation_info:
                     stripped_set = set(line.replace("# ", "").replace(" ", "").replace(",", ""))
-                    if stripped_set.issubset(set(".-1234567890")):
+                    if stripped_set.issubset(set(".-1234567890e")):
                         inv_metric = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
                         if metric_name == "DENSE_E":
                             inv_metric = np.atleast_2d(inv_metric)
