@@ -555,11 +555,21 @@ def _config_argss(chains, iter, warmup, thin,
         else:
             argss[i]['metric_file'] = ""
 
+    stepsize_list = None
+    if "control" in kwargs and "stepsize" in kwargs["control"]:
+        if isinstance(kwargs["control"]["stepsize"], Sequence):
+            stepsize_list = kwargs["control"]["stepsize"]
+            if len(kwargs["control"]["stepsize"]) == 1:
+                kwargs["control"]["stepsize"] = kwargs["control"]["stepsize"][0]
+            elif len(kwargs["control"]["stepsize"]) != chains:
+                raise ValueError("stepsize length needs to equal chain count.")
+            else:
+                stepsize_list = kwargs["control"]["stepsize"]
+
     for i in range(chains):
         argss[i].update(kwargs)
-        if ("control" in kwargs) and ("stepsize" in kwargs["control"]):
-            if isinstance(kwargs["control"]["stepsize"], Sequence):
-                argss[i]["control"]["stepsize"] = kwargs["control"]["stepsize"][i]
+        if stepsize_list is not None:
+            argss[i]["control"]["stepsize"] = stepsize_list[i]
         argss[i] = _get_valid_stan_args(argss[i])
 
     return argss

@@ -55,7 +55,7 @@ class TestEuclidianMetric(unittest.TestCase):
         inv_metric = self.pos_def_matrix_diag_e
         stepsize = self.stepsize_diag_e
         pystan.misc.stan_rdump({"inv_metric" : inv_metric}, path)
-        control_dict = {"metric" : "diag_e", "inv_metric" : path, "stepsize" : stepsize}
+        control_dict = {"metric" : "diag_e", "inv_metric" : path, "stepsize" : stepsize, "adapt_engaged" : False}
         fit = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         inv_metric_ = fit.get_inv_metric()
@@ -79,7 +79,7 @@ class TestEuclidianMetric(unittest.TestCase):
             paths.append(path)
             inv_metrics.append(inv_metric)
         stepsize = self.stepsize_diag_e
-        control_dict = {"metric" : "diag_e", "inv_metric" : dict(enumerate(paths)), "stepsize" : stepsize}
+        control_dict = {"metric" : "diag_e", "inv_metric" : dict(enumerate(paths)), "stepsize" : stepsize, "adapt_engaged" : False}
         fit = sm.sampling(chains=4, data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         inv_metric_ = fit.get_inv_metric()
@@ -100,7 +100,7 @@ class TestEuclidianMetric(unittest.TestCase):
         inv_metric = self.pos_def_matrix_dense_e
         stepsize = self.stepsize_diag_e
         pystan.misc.stan_rdump({"inv_metric" : inv_metric}, path)
-        control_dict = {"metric" : "dense_e", "inv_metric" : path, "stepsize" : stepsize}
+        control_dict = {"metric" : "dense_e", "inv_metric" : path, "stepsize" : stepsize, "adapt_engaged" : False}
         fit = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         inv_metric_ = fit.get_inv_metric()
@@ -117,7 +117,7 @@ class TestEuclidianMetric(unittest.TestCase):
 
         inv_metric = self.pos_def_matrix_diag_e
         stepsize = self.stepsize_diag_e
-        control_dict = {"metric" : "diag_e", "inv_metric" : inv_metric, "stepsize" : stepsize}
+        control_dict = {"metric" : "diag_e", "inv_metric" : inv_metric, "stepsize" : stepsize, "adapt_engaged" : False}
         fit = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         inv_metric_ = fit.get_inv_metric()
@@ -130,7 +130,7 @@ class TestEuclidianMetric(unittest.TestCase):
 
         inv_metric = self.pos_def_matrix_dense_e
         stepsize = self.stepsize_diag_e
-        control_dict = {"metric" : "dense_e", "inv_metric" : inv_metric, "stepsize" : stepsize}
+        control_dict = {"metric" : "dense_e", "inv_metric" : inv_metric, "stepsize" : stepsize, "adapt_engaged" : False}
         fit = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
 
         inv_metric_ = fit.get_inv_metric()
@@ -146,13 +146,12 @@ class TestEuclidianMetric(unittest.TestCase):
         stepsize = fit1.get_stepsize()
 
         control_dict = {"inv_metric" : dict(enumerate(inv_metric_fit1)), "metric" : "diag_e", "adapt_engaged" : True, "stepsize" : stepsize}
-        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
+        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=10, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
         inv_metric_fit2 = fit2.get_inv_metric()
 
         for inv_metric1, inv_metric2 in zip(inv_metric_fit1, inv_metric_fit2):
             assert inv_metric1.shape == (3*4,)
             assert inv_metric2.shape == (3*4,)
-            assert np.all(inv_metric1 == inv_metric2)
 
     def test_inv_metric_nuts_diag_e_adapt_false(self):
         sm = self.model
@@ -180,13 +179,12 @@ class TestEuclidianMetric(unittest.TestCase):
         stepsize = fit1.get_stepsize()
 
         control_dict = {"inv_metric" : dict(enumerate(inv_metric_fit1)), "metric" : "dense_e", "adapt_engaged" : True, "stepsize" : stepsize}
-        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
+        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=10, iter=10, algorithm="NUTS", control=control_dict, check_hmc_diagnostics=False, seed=14)
         inv_metric_fit2 = fit2.get_inv_metric()
 
         for inv_metric1, inv_metric2 in zip(inv_metric_fit1, inv_metric_fit2):
             assert inv_metric1.shape == (3*4,3*4)
             assert inv_metric2.shape == (3*4,3*4)
-            assert np.all(inv_metric1 == inv_metric2)
 
     def test_inv_metric_nuts_dense_e_adapt_false(self):
         sm = self.model
@@ -214,13 +212,12 @@ class TestEuclidianMetric(unittest.TestCase):
         stepsize = fit1.get_stepsize()
 
         control_dict = {"inv_metric" : dict(enumerate(inv_metric_fit1)), "metric" : "diag_e", "adapt_engaged" : True, "stepsize" : stepsize}
-        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
+        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=10, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
         inv_metric_fit2 = fit2.get_inv_metric()
 
         for inv_metric1, inv_metric2 in zip(inv_metric_fit1, inv_metric_fit2):
             assert inv_metric1.shape == (3*4,)
             assert inv_metric2.shape == (3*4,)
-            assert np.all(inv_metric1 == inv_metric2)
 
     def test_inv_metric_hmc_diag_e_adapt_false(self):
         sm = self.model
@@ -246,19 +243,18 @@ class TestEuclidianMetric(unittest.TestCase):
         inv_metric = self.pos_def_matrix_dense_e
         stepsize = self.stepsize_diag_e
         control_dict = {"metric" : "dense_e", "adapt_engaged" : True, "inv_metric" : inv_metric, "stepsize" : stepsize}
-        fit1 = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
+        fit1 = sm.sampling(data=dict(K=3, D=4), warmup=10, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
         inv_metric_fit1 = fit1.get_inv_metric()
         stepsize = fit1.get_stepsize()
 
 
         control_dict = {"inv_metric" : dict(enumerate(inv_metric_fit1)), "metric" : "dense_e", "adapt_engaged" : True, "stepsize" : stepsize}
-        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=0, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
+        fit2 = sm.sampling(data=dict(K=3, D=4), warmup=10, iter=10, algorithm="HMC", control=control_dict, check_hmc_diagnostics=False, seed=14)
         inv_metric_fit2 = fit2.get_inv_metric()
 
         for inv_metric1, inv_metric2 in zip(inv_metric_fit1, inv_metric_fit2):
             assert inv_metric1.shape == (3*4,3*4)
             assert inv_metric2.shape == (3*4,3*4)
-            assert np.all(inv_metric1 == inv_metric2)
 
     def test_inv_metric_hmc_dense_e_adapt_false(self):
         sm = self.model

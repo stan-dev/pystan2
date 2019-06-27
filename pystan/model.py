@@ -667,7 +667,7 @@ class StanModel:
             In addition, the algorithm HMC (called 'static HMC' in Stan) and NUTS
             share the following parameters:
 
-            - `stepsize`: float, positive
+            - `stepsize`: float or list of floats, positive
             - `stepsize_jitter`: float, between 0 and 1
             - `metric` : str, {"unit_e", "diag_e", "dense_e"}
             - `inv_metric` : np.ndarray or str
@@ -700,7 +700,7 @@ class StanModel:
             for all chains.
 
         init_r : float, optional
-            `init_r` is only valid if `init` == "random". In this case, the intial
+            `init_r` is only valid if `init` == "random". In this case, the initial
             values are simulated from [-`init_r`, `init_r`] rather than using the
             default interval (see the manual of Stan).
 
@@ -751,7 +751,8 @@ class StanModel:
             if warmup  > 0:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
-
+        elif algorithm == "NUTS" and warmup == 0 and control.get("adapt_engaged", True):
+            raise ValueError("Warmup samples must be greater than 0 when adaptation is enabled (`adapt_engaged=True`)")
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
 
