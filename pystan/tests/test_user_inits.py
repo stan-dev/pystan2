@@ -25,9 +25,9 @@ class TestUserInits(unittest.TestCase):
 
     def test_user_init(self):
         model, data = self.model, self.data
-        fit1 = model.sampling(iter=10, chains=1, seed=2, data=data, init=[dict(mu=4)], warmup=0)
+        fit1 = model.sampling(iter=10, chains=1, seed=2, data=data, init=[dict(mu=4)], warmup=0, control={"adapt_engaged" : False})
         self.assertEqual(fit1.get_inits()[0]['mu'], 4)
-        fit2 = model.sampling(iter=10, chains=1, seed=2, data=data, init=[dict(mu=400)], warmup=0)
+        fit2 = model.sampling(iter=10, chains=1, seed=2, data=data, init=[dict(mu=400)], warmup=0, control={"adapt_engaged" : False})
         self.assertEqual(fit2.get_inits()[0]['mu'], 400)
         self.assertFalse(all(fit1.extract()['mu'] == fit2.extract()['mu']))
 
@@ -37,7 +37,7 @@ class TestUserInits(unittest.TestCase):
         def make_inits(chain_id):
             return dict(mu=chain_id)
 
-        fit1 = model.sampling(iter=10, chains=4, seed=2, data=data, init=make_inits, warmup=0)
+        fit1 = model.sampling(iter=10, chains=4, seed=2, data=data, init=make_inits, warmup=0, control={"adapt_engaged" : False})
         for i, inits in enumerate(fit1.get_inits()):
             self.assertEqual(inits['mu'], i)
 
@@ -49,7 +49,7 @@ class TestUserInits(unittest.TestCase):
 
         chain_id = [9, 10, 11, 12]
         fit1 = model.sampling(iter=10, chains=4, seed=2, data=data,
-                              init=make_inits, warmup=0, chain_id=chain_id)
+                              init=make_inits, warmup=0, chain_id=chain_id, control={"adapt_engaged" : False})
         for i, inits in zip(chain_id, fit1.get_inits()):
             self.assertEqual(inits['mu'], i)
 
@@ -68,7 +68,7 @@ class TestUserInits(unittest.TestCase):
         """
         data = self.data
         # NOTE: we are only specifying 'mu' and not 'sigma' (partial inits)
-        fit = pystan.stan(model_code=model_code, iter=10, chains=1, seed=2, data=data, init=[dict(mu=4)], warmup=0)
+        fit = pystan.stan(model_code=model_code, iter=10, chains=1, seed=2, data=data, init=[dict(mu=4)], warmup=0, control={"adapt_engaged" : False})
         self.assertIsNotNone(fit)
 
 
@@ -97,11 +97,11 @@ class TestUserInitsMatrix(unittest.TestCase):
         model, data = self.model, self.data
         beta = np.ones((data['K'], data['D']))
         fit1 = model.sampling(iter=10, chains=1, seed=2,
-                              data=data, init=[dict(beta=beta)], warmup=0)
+                              data=data, init=[dict(beta=beta)], warmup=0, control={"adapt_engaged" : False})
         np.testing.assert_equal(fit1.get_inits()[0]['beta'], beta)
         beta = 5 * np.ones((data['K'], data['D']))
         fit2 = model.sampling(iter=10, chains=1, seed=2,
-                              data=data, init=[dict(beta=beta)], warmup=0)
+                              data=data, init=[dict(beta=beta)], warmup=0, control={"adapt_engaged" : False})
         np.testing.assert_equal(fit2.get_inits()[0]['beta'], beta)
 
     def test_user_initfun(self):
@@ -112,6 +112,6 @@ class TestUserInitsMatrix(unittest.TestCase):
         def make_inits(chain_id):
             return dict(beta=beta * chain_id)
 
-        fit1 = model.sampling(iter=10, chains=4, seed=2, data=data, init=make_inits, warmup=0)
+        fit1 = model.sampling(iter=10, chains=4, seed=2, data=data, init=make_inits, warmup=0, control={"adapt_engaged" : False})
         for i, inits in enumerate(fit1.get_inits()):
             np.testing.assert_equal(beta * i, inits['beta'])
