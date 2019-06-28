@@ -913,7 +913,7 @@ cdef class StanFit4Model:
         Parameters
         ----------
         as_dict : bool, optional
-        
+
 
         Returns
         -------
@@ -923,19 +923,21 @@ cdef class StanFit4Model:
         """
         return pystan.misc.get_inv_metric(fit=self, as_dict=as_dict)
 
-    def get_last_position(self):
+    def get_last_position(self, warmup=False):
         """Parse last position from fit object
 
         Parameters
         ----------
-        fit : StanFit4Model
+        warmup : bool
+            If True, returns the last warmup position, when warmup has been done.
+            Otherwise function returns the first sample position.
 
         Returns
         -------
         list
             list contains a dictionary of last draw from each chain.
         """
-        return pystan.misc.get_last_position(fit=self)
+        return pystan.misc.get_last_position(fit=self, warmup=warmup)
 
     def to_dataframe(self, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
         """Extract samples as a pandas dataframe for different parameters.

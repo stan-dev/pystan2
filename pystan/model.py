@@ -751,8 +751,9 @@ class StanModel:
             if warmup  > 0:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
-        elif algorithm == "NUTS" and warmup == 0 and control.get("adapt_engaged", True):
-            raise ValueError("Warmup samples must be greater than 0 when adaptation is enabled (`adapt_engaged=True`)")
+        elif algorithm == "NUTS" and warmup == 0:
+            if (isinstance(control, dict) and control.get("adapt_engaged", True)) or control is None:
+                raise ValueError("Warmup samples must be greater than 0 when adaptation is enabled (`adapt_engaged=True`)")
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
 
