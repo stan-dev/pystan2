@@ -555,11 +555,21 @@ def _config_argss(chains, iter, warmup, thin,
         else:
             argss[i]['metric_file'] = ""
 
+    stepsize_list = None
+    if "control" in kwargs and "stepsize" in kwargs["control"]:
+        if isinstance(kwargs["control"]["stepsize"], Sequence):
+            stepsize_list = kwargs["control"]["stepsize"]
+            if len(kwargs["control"]["stepsize"]) == 1:
+                kwargs["control"]["stepsize"] = kwargs["control"]["stepsize"][0]
+            elif len(kwargs["control"]["stepsize"]) != chains:
+                raise ValueError("stepsize length needs to equal chain count.")
+            else:
+                stepsize_list = kwargs["control"]["stepsize"]
+
     for i in range(chains):
         argss[i].update(kwargs)
-        if ("control" in kwargs) and ("stepsize" in kwargs["control"]):
-            if isinstance(kwargs["control"]["stepsize"], Sequence):
-                argss[i]["control"]["stepsize"] = kwargs["control"]["stepsize"][i]
+        if stepsize_list is not None:
+            argss[i]["control"]["stepsize"] = stepsize_list[i]
         argss[i] = _get_valid_stan_args(argss[i])
 
     return argss
@@ -1375,6 +1385,7 @@ def get_stepsize(fit):
         Returns an empty list if step sizes
         are not found in ``fit.get_adaptation_info``.
     """
+    fit._verify_has_samples()
     stepsizes = []
     for adaptation_info in fit.get_adaptation_info():
         for line in adaptation_info.splitlines():
@@ -1399,6 +1410,7 @@ def get_inv_metric(fit, as_dict=False):
         If `as_dict` returns a dictionary which can be used with
         `.sampling` method.
     """
+    fit._verify_has_samples()
     inv_metrics = []
     if not (("ctrl" in fit.stan_args[0]) and ("sampling" in fit.stan_args[0]["ctrl"])):
         return inv_metrics
@@ -1412,7 +1424,7 @@ def get_inv_metric(fit, as_dict=False):
             elif "inverse mass matrix" in line:
                 for line in iter_adaptation_info:
                     stripped_set = set(line.replace("# ", "").replace(" ", "").replace(",", ""))
-                    if stripped_set.issubset(set(".-1234567890")):
+                    if stripped_set.issubset(set(".-1234567890e")):
                         inv_metric = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
                         if metric_name == "DENSE_E":
                             inv_metric = np.atleast_2d(inv_metric)
@@ -1422,23 +1434,31 @@ def get_inv_metric(fit, as_dict=False):
         inv_metrics.append(np.concatenate(inv_metric_list))
     return inv_metrics if not as_dict else dict(enumerate(inv_metrics))
 
-def get_last_position(fit):
+def get_last_position(fit, warmup=False):
     """Parse last position from fit object
 
     Parameters
     ----------
     fit : StanFit4Model
+    warmup : bool
+        If True, returns the last warmup position, when warmup has been done.
+        Otherwise function returns the first sample position.
 
     Returns
     -------
     list
         list contains a dictionary of last draw from each chain.
     """
+    fit._verify_has_samples()
     positions = []
-    extracted = fit.extract(permuted=False, pars=fit.model_pars)
+    extracted = fit.extract(permuted=False, pars=fit.model_pars, inc_warmup=warmup)
+
+    draw_location = -1
+    if warmup:
+        draw_location += max(1, fit.sim["warmup"])
 
     chains = fit.sim["chains"]
     for i in range(chains):
-        extract_pos = {key : values[-1, i] for key, values in extracted.items()}
+        extract_pos = {key : values[draw_location, i] for key, values in extracted.items()}
         positions.append(extract_pos)
     return positions

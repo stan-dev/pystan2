@@ -21,7 +21,7 @@ class TestStanfit(unittest.TestCase):
         """
         sm = StanModel(model_code=code)
         with self.assertRaises(RuntimeError):
-            sm.sampling(init='0', iter=1, chains=1)
+            sm.sampling(init='0', iter=1, chains=1, control={"adapt_engaged" : False})
 
     def test_grad_log(self):
         y = np.array([0.70,  -0.16,  0.77, -1.37, -1.99,  1.35, 0.08,
@@ -91,6 +91,6 @@ class TestStanfit(unittest.TestCase):
         sf2 = stan(fit=sf, iter=20, algorithm='HMC', data=dict(y=y, N=20),
                     control=dict(adapt_engaged=False, stepsize=stepsize0))
         self.assertEqual(sf2.get_sampler_params()[0]['stepsize__'][0], stepsize0)
-        sf3 = stan(fit=sf, iter=1, data=dict(y=y, N=20), init=0, chains=1)
+        sf3 = stan(fit=sf, iter=1, data=dict(y=y, N=20), init=0, chains=1, control={"adapt_engaged" : False})
         i_u = sf3.unconstrain_pars(sf3.get_inits()[0])
         np.testing.assert_equal(i_u, [0, 0])

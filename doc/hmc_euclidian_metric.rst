@@ -59,7 +59,10 @@ To make this reproducible, user can manually set seed for each fit.
     # increment seed by 1
     seed2 = seed + 1
 
-    control = {"stepsize" : stepsize, "inv_metric" : inv_metric}
+    control = {"stepsize" : stepsize,
+               "inv_metric" : inv_metric,
+               "adapt_engaged" : False
+               }
     fit2 = sm.sampling(data=data,
                        warmup=0,
                        iter=1000,
@@ -150,7 +153,11 @@ one chain and then reuse the inverse metric matrix, stepsize and last sample loc
 
     data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
     sm = StanModel(model_code=model_code)
-    fit_warmup = sm.sampling(data=data, chains=1, warmup=500, iter=501, check_hmc_diagnostics=False)
+    fit_warmup = sm.sampling(data=data,
+                             chains=1,
+                             warmup=500,
+                             iter=501,
+                             check_hmc_diagnostics=False)
 
     # reuse tuned parameters
     stepsize = fit_warmup.get_stepsize()[0] # select chain 1
@@ -159,8 +166,16 @@ one chain and then reuse the inverse metric matrix, stepsize and last sample loc
     chains = 4
     init = [last_position for _ in range(chains)]
 
-    control = {"stepsize" : stepsize, "inv_metric" : inv_metric}
-    fit = sm.sampling(data=data, warmup=0, chains=4, iter=1000, control=control, init=init)
+    control = {"stepsize" : stepsize,
+               "inv_metric" : inv_metric,
+               "adapt_engaged" : False}
+
+    fit = sm.sampling(data=data,
+                      warmup=0,
+                      chains=4,
+                      iter=1000,
+                      control=control,
+                      init=init)
     print(fit)
 
 
