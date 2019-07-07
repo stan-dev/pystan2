@@ -134,17 +134,27 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     rownames_maxwidth = max(len(n) for n in rownames)
     max_col_width = 7
     min_col_width = 5
-    widths = [rownames_maxwidth] + [max(max_col_width, max(len(n) + 1, min_col_width)) for n in colnames]
+    max_col_header_num_width = [max(max_col_width, max(len(n) + 1, min_col_width)) for n in colnames]
+    rows = []
+    for row in arr:
+        row_nums = []
+        for j, (num, width) in enumerate(zip(row, max_col_header_num_width)):
+            if colnames[j] == "n_eff":
+                num = int(round(num, 0)) if not np.isnan(num) else num
+            num = _format_number(num, n_digits, max_col_width - 1)
+            row_nums.append(num)
+            if len(num) + 1 > max_col_header_num_width[j]:
+                max_col_header_num_width[j] = len(num) + 1
+        rows.append(row_nums)
+    widths = [rownames_maxwidth] + max_col_header_num_width
     header = '{:>{width}}'.format('', width=widths[0])
     for name, width in zip(colnames, widths[1:]):
         header += '{name:>{width}}'.format(name=name, width=width)
     lines = [header]
-    for rowname, row in zip(rownames, arr):
+    for rowname, row in zip(rownames, rows):
         line = '{name:{width}}'.format(name=rowname, width=widths[0])
         for j, (num, width) in enumerate(zip(row, widths[1:])):
-            if colnames[j] == 'n_eff':
-                num = int(round(num, 0)) if not np.isnan(num) else num
-            line += '{num:>{width}}'.format(num=_format_number(num, n_digits, max_col_width - 1), width=width)
+            line += '{num:>{width}}'.format(num=num, width=width)
         lines.append(line)
     return '\n'.join(lines)
 
