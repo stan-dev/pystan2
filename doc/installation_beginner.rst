@@ -109,7 +109,7 @@ instructions given for each platform.
 
 To use ``gcc``/``clang`` compiler from the ``conda`` follow instructions in
 https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html
-and set-up your ``CC`` environmental variable as given below. Instructions below
+and set-up your ``CC`` and ``CXX`` environmental variables as given below. Instructions below
 assume default Anaconda environment. For ``conda-forge`` follow installation
 instructions in anaconda.org.
 
@@ -120,14 +120,26 @@ instructions in anaconda.org.
 To check your compiler version
 
 - Open a terminal
-- type ``gcc --version``
+- Linux: type ``gcc --version``
+- OSX: type ``clang --version``
 
-To use specific C++ compiler (``gcc_linux-64``, ``gxx_linux-64``), either update your ``CC`` and ``CXX`` environmental
+To use specific C++ compiler (Linux: ``gcc_linux-64``, ``gxx_linux-64``, OSX: ``clang_osx-64``, ``clangxx_osx-64``), either update your ``CC`` and ``CXX`` environmental
 variables or set-up your path to include folder containing compilers
 (e.g.``which gcc_linux-64``)
 
-- type ``export CC=gcc_linux-64`` and ``export CC=g++_linux-64``
+- type ``export CC=gcc_linux-64`` and ``export CXX=g++_linux-64``
 - type ``export PATH=/path/to/Anaconda/bin:$PATH``
+
+Conda will create a new name for the compiler. You'll need to search in the `<path to conda>/bin` folder to find the name. `which python` will show this location. For example:
+
+- Open a terminal
+- OSX: type ``ls <path to python env>/bin/ | grep clang``
+
+You should see two compilers like ``x86_64-apple-darwin13.4.0-clang`` and ``x86_64-apple-darwin13.4.0-clang++``.
+
+- type ``export CC=x86_64-apple-darwin13.4.0-clang`` and ``export CXX=x86_64-apple-darwin13.4.0-clang++``
+
+
 
 Installing PyStan
 -----------------
