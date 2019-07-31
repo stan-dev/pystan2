@@ -1,6 +1,10 @@
 language: c
 dist: xenial
 sudo: required
+branches:
+  only:
+  - master
+  - develop
 os:
   - linux
 git:
