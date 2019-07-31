@@ -1,3 +1,4 @@
+skip_branch_with_pr: true
 version: '{build}'
 image: Visual Studio 2015
 platform:
