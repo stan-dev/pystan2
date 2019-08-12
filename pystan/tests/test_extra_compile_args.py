@@ -40,6 +40,7 @@ class TestExtraCompileArgs(unittest.TestCase):
             pystan.StanModel(model_code=model_code, model_name="normal1",
                              extra_compile_args=extra_compile_args)
 
+    @unittest.skip("temporarily disabled due to STAN_THREADS issue in Stan 2.20")
     def test_threading_support(self):
         # Dont test with Windows with MinGW-w64 (GCC)
         if sys.platform.startswith("win"):
