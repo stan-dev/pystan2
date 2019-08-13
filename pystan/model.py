@@ -271,7 +271,7 @@ class StanModel:
         # module_name needs to be unique so that each model instance has its own module
         nonce = abs(hash((self.model_name, time.time())))
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
-        lib_dir = tempfile.mkdtemp()
+        lib_dir = tempfile.mkdtemp(prefix='pystan_')
         pystan_dir = os.path.dirname(__file__)
         if include_dirs is None:
             include_dirs = []
