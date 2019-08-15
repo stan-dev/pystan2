@@ -6,8 +6,11 @@
  What's New
 ============
 
-TBD (TBD)
-=========
+v2.20.0.0 (15. Aug 2019)
+========================
+- Update Stan source to v2.20.0 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.20.0>`_)
+- Fix: Use prefix 'pystan_' with tempfolder (@ahartikainen)
+- Reminder: Python 2 is not supported after 2019-12-31. PyStan will phase out testing of Python 2 after this point.
 
 v2.19.0.0 (31. Mar 2019)
 ========================
