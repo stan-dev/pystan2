@@ -1,29 +1,21 @@
-.. _threading_support:
+.. _gpu_support:
 
 .. currentmodule:: pystan
 
 ===================================
-Threading Support with Pystan 2.18+
+GPU Support with Pystan 2.19+
 ===================================
 
 Notice! This is an experimental feature and is not tested or supported officially with PyStan 2.
-Official multithreading support will land with PyStan 3.
+Official GPU support will land with PyStan 3.
 
-By default, `stan-math` is not thread safe. Stan 2.18+ has ability to switch on
-threading support with compile time arguments.
+See https://github.com/stan-dev/math/wiki/OpenCL-GPU-Routines
 
-See https://github.com/stan-dev/math/wiki/Threading-Support
+Please follow instructions in the above url to enable OpenCL with your GPU.
 
-Due to use of `multiprocessing` to parallelize chains, user needs to be aware of the cpu usage.
-This means that each chain will use `STAN_NUM_THREADS` cpu cores and this can have an affect on performance.
+Due to use of `multiprocessing` to parallelize chains, user needs to be aware of the gpu usage.
+This means that each chain will use the same gpu and its cores. This can have an affect on performance.
 
-Windows
-=======
-
-These instructions are invalid on Windows with MingW-W64 compiler and should not be used.
-Usage will crash the current Python session, which means that no sampling can be done.
-
-see https://github.com/Alexpux/MINGW-packages/issues/2519 and https://sourceforge.net/p/mingw-w64/bugs/445/
 
 Example
 =======
@@ -31,77 +23,95 @@ Example
 .. code-block:: python
 
     import pystan
+    import numpy as np
     import os
-    import sys
+    import platform
 
-    # set environmental variable STAN_NUM_THREADS
-    # Use 4 cores per chain
-    os.environ['STAN_NUM_THREADS'] = "4"
+    # Set CC environmental variable
+    os.environ['CC'] = "g++"
 
-    # Example model
-    # see http://discourse.mc-stan.org/t/cant-make-cmdstan-2-18-in-windows/5088/18
+    # Example model: Gaussian process
+    # see https://mc-stan.org/docs/2_20/stan-users-guide/fit-gp-section.html
     stan_code = """
-    functions {
-      vector bl_glm(vector mu_sigma, vector beta,
-                    real[] x, int[] y) {
-        vector[2] mu = mu_sigma[1:2];
-        vector[2] sigma = mu_sigma[3:4];
-        real lp = normal_lpdf(beta | mu, sigma);
-        real ll = bernoulli_logit_lpmf(y | beta[1] + beta[2] * to_vector(x));
-        return [lp + ll]';
-      }
-    }
     data {
-      int<lower = 0> K;
-      int<lower = 0> N;
-      vector[N] x;
-      int<lower = 0, upper = 1> y[N];
+      int<lower=1> N;
+      real x[N];
+      vector[N] y;
     }
     transformed data {
-      int<lower = 0> J = N / K;
-      real x_r[K, J];
-      int<lower = 0, upper = 1> x_i[K, J];
-      {
-        int pos = 1;
-        for (k in 1:K) {
-          int end = pos + J - 1;
-          x_r[k] = to_array_1d(x[pos:end]);
-          x_i[k] = y[pos:end];
-          pos += J;
-        }
-      }
+      vector[N] mu = rep_vector(0, N);
     }
     parameters {
-      vector[2] beta[K];
-      vector[2] mu;
-      vector<lower=0>[2] sigma;
+      real<lower=0> rho;
+      real<lower=0> alpha;
+      real<lower=0> sigma;
     }
     model {
-      mu ~ normal(0, 2);
-      sigma ~ normal(0, 2);
-      target += sum(map_rect(bl_glm, append_row(mu, sigma),
-                             beta, x_r, x_i));
+      matrix[N, N] L_K;
+      matrix[N, N] K = cov_exp_quad(x, alpha, rho);
+      real sq_sigma = square(sigma);
+
+      // diagonal elements
+      for (n in 1:N)
+        K[n, n] = K[n, n] + sq_sigma;
+
+      L_K = cholesky_decompose(K);
+
+      rho ~ inv_gamma(5, 5);
+      alpha ~ std_normal();
+      sigma ~ std_normal();
+
+      y ~ multi_normal_cholesky(mu, L_K);
     }
     """
 
-    stan_data = dict(
-        K = 4,
-        N = 12,
-        x = [1.204, -0.573, -1.35, -1.157,
-             -1.29, 0.515, 1.496, 0.918,
-             0.517, 1.092, -0.485, -2.157],
-        y = [1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1]
-    )
+    # use clinfo to select correct IDs
+    # clinfo -l
+    extra_compile_args = [
+        '-DSTAN_OPENCL',
+        '-DOPENCL_DEVICE_ID=0',
+        '-DOPENCL_PLATFORM_ID=0',
+    ]
 
-    extra_compile_args = ['-pthread', '-DSTAN_THREADS']
+    # On Windows define GPU_LIB
+    # and setup extra_link_args
+    if platform.system() == "Windows":
+
+        # add path to $CUDA or $AMDAPPSDKROOT
+        GPU_LIB = "..."
+
+        # if -lOpenCL does not work
+        # user can link with (absolute) path
+        # for the correct OpenCl.dll
+        opencl_dll = None # "C:/Windows/System32/OpenCL.dll"
+
+        extra_link_args = [
+            '-L"{}"'.format(GPU_LIB),
+            '-lOpenCL' if opencl_dll is None else opencl_dll
+        ]
+    else:
+        extra_link_args = []
 
     stan_model = pystan.StanModel(
         model_code=stan_code,
         extra_compile_args=extra_compile_args
     )
 
-    # use the default 4 chains == 4 parallel process
-    # used cores = min(cpu_cores, 4*STAN_NUM_THREADS)
-    fit = stan_model.sampling(data=stan_data, n_jobs=4)
+
+    # synthetic data for the example
+    np.random.seed(15)
+    N = 601
+    x = np.sort(np.random.rand(N))
+    y = np.sin(np.linspace(-11, 11, N)) + np.random.randn(N)/10
+    stan_data = {"N" : N, "x" : x, "y" : y}
+
+    # while the model is sampled, check your GPU usage
+    # with suitable activity monitor
+    fit = stan_model.sampling(
+        data=stan_data,
+        n_jobs=1,
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args
+    )
 
     print(fit)

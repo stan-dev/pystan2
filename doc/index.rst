@@ -31,6 +31,7 @@ Documentation
    conversion
    logging
    threading_support
+   gpu_support
    windows
    external_cpp
    unpickling_fit_without_model
