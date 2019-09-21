@@ -1,5 +1,5 @@
 import logging
-from .misc import fix_include
+from .misc import fix_include, windows_short_path
 from .pickling_tools import unpickle_fit
 
 logger = logging.getLogger('pystan')
