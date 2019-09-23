@@ -12,6 +12,7 @@ if PY2:
 else:
     from collections.abc import Callable, Iterable
 import datetime
+import glob
 import io
 import itertools
 import logging
@@ -273,6 +274,7 @@ class StanModel:
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
         lib_dir = tempfile.mkdtemp(prefix='pystan_')
         pystan_dir = os.path.dirname(__file__)
+
         if include_dirs is None:
             include_dirs = []
         elif not isinstance(include_dirs, list):
@@ -285,7 +287,7 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
-            np.get_include(),
+            np.get_include()
         ]
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
@@ -378,9 +380,11 @@ class StanModel:
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
                     '-std=c++1y',
-                    "-D_hypot=hypot",
-                    "-pthread",
-                    "-fexceptions",
+                    '-D_hypot=hypot',
+                    '-pthread',
+                    '-fexceptions',
+                    '-include',
+                    'stan_sundials_printf_override.hpp',
                 ] + extra_compile_args
         else:
             # linux or macOS
@@ -390,12 +394,46 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
+                '-include', 
+                'stan_sundials_printf_override.hpp'
             ] + extra_compile_args
+
+
+        ## cvodes sources
+
+        # cvodes sources are complied and linked together with the Stan model
+        # extension module. This is not ideal. In theory, build_clib could be
+        # used to build a library once and models would be complied and then
+        # linked with this library. This would save 7 or more seconds from every build.
+        # But such a strategy is frustrated by the
+        # lack of ``install_clib`` functionality in Python's distutils.
+        #
+        # TODO: numpy provides install_clib functionality, use that.
+
+        sundials_excluded = {
+            "nvector/openmp",
+            "nvector/openmpdev",
+            "nvector/parallel",
+            "nvector/parhyp",
+            "nvector/petsc",
+            "nvector/pthreads",
+            "sundials_mpi",
+            "sunlinsol/klu",
+            "sunlinsol/lapack",
+            "sunlinsol/super",
+        }
+        sundials_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'sundials_4.1.0', 'src')
+        sundials_sources = [
+            path for path in glob.glob("{}/**/*.c".format(sundials_src_path))
+            if not any(item in path.replace("\\", "/") for item in sundials_excluded)
+        ]
+
+
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
                               language="c++",
-                              sources=[pyx_file] + cvodes_sources,
+                              sources=[pyx_file] + sundials_sources,
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args)

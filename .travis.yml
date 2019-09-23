@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - develop
+  - cvodes
 os:
   - linux
 git:
