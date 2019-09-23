@@ -12,6 +12,7 @@ if PY2:
 else:
     from collections.abc import Callable, Iterable
 import datetime
+import glob
 import io
 import itertools
 import logging
@@ -319,33 +320,24 @@ class StanModel:
         # lack of ``install_clib`` functionality in Python's distutils.
         #
         # TODO: numpy provides install_clib functionality, use that.
-        cvodes_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'cvodes_2.9.0', 'src')
-        cvodes_sources = [
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodea.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodea_io.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_band.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_bandpre.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_bbdpre.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_dense.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_diag.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_direct.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_io.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_sparse.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spbcgs.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spgmr.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_spils.c'),
-            os.path.join(cvodes_src_path, 'cvodes', 'cvodes_sptfqmr.c'),
-            os.path.join(cvodes_src_path, 'nvec_ser', 'nvector_serial.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_band.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_dense.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_direct.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_iterative.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_math.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_nvector.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_spbcgs.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_spgmr.c'),
-            os.path.join(cvodes_src_path, 'sundials', 'sundials_sptfqmr.c'),
+        
+        sundials_excluded = {
+            "nvector/openmp",
+            "nvector/openmpdev",
+            "nvector/parallel",
+            "nvector/parhyp",
+            "nvector/petsc",
+            "nvector/pthreads",
+            "sundials_mpi",
+            "sunlinsol/klu",
+            "sunlinsol/lapack",
+            "sunlinsol/super",
+        }
+
+        sundials_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'sundials_4.1.0', 'src')
+        sundials_sources = [
+                path for path in glob.glob("{}/**/*.c".format(sundials_src_path))
+                if not any(item in path.replace("\\", "/") for item in sundials_excluded)
         ]
 
         stan_macros = [
@@ -381,6 +373,8 @@ class StanModel:
                     "-D_hypot=hypot",
                     "-pthread",
                     "-fexceptions",
+                    "-include",
+                    "stan_sundials_printf_override.hpp",
                 ] + extra_compile_args
         else:
             # linux or macOS
@@ -390,12 +384,14 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
+                '-include',
+                'stan_sundials_printf_override.hpp',
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
                               language="c++",
-                              sources=[pyx_file] + cvodes_sources,
+                              sources=[pyx_file] + sundials_sources,
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args)
