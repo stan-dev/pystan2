@@ -12,7 +12,6 @@ if PY2:
 else:
     from collections.abc import Callable, Iterable
 import datetime
-import glob
 import io
 import itertools
 import logging
@@ -26,7 +25,8 @@ import tempfile
 import time
 
 import distutils
-from distutils.core import Extension
+from distutils.core import Extension, Distribution
+from distutils.command.build_clib import build_clib
 
 import Cython
 from Cython.Build.Inline import _get_build_extension
@@ -40,6 +40,72 @@ import pystan.diagnostics
 
 logger = logging.getLogger('pystan')
 
+def _build_libraries(self, libraries):
+    """Fork distutils.build_clib.build_libraries to enable compiler flags."""
+    for (lib_name, build_info) in libraries:
+        sources = build_info.get('sources')
+        if sources is None or not isinstance(sources, (list, tuple)):
+            raise DistutilsSetupError(
+                   "in 'libraries' option (library '%s'), "
+                   "'sources' must be present and must be "
+                   "a list of source filenames" % lib_name)
+        sources = list(sources)
+
+        distutils.command.build_clib.log.info("building '%s' library", lib_name)
+
+        macros = build_info.get('macros')
+        include_dirs = build_info.get('include_dirs')
+        extra_postargs = build_info.get('extra_postargs')
+        objects = self.compiler.compile(sources,
+                                        output_dir=self.build_temp,
+                                        macros=macros,
+                                        include_dirs=include_dirs,
+                                        extra_postargs=extra_postargs,
+                                        debug=self.debug)
+
+        self.compiler.create_static_lib(objects, lib_name,
+                                        output_dir=self.build_clib,
+                                        debug=self.debug)
+
+# overwrite the default class method
+build_clib.build_libraries = _build_libraries
+
+def _get_build_clib():
+    """Convenience function to create build_clib class instance."""
+    dist = Distribution()
+    config_files = dist.find_config_files()
+    dist.parse_config_files(config_files)
+    build_clibrary = build_clib(dist)
+    build_clibrary.finalize_options()
+    return build_clibrary
+
+def _build_clib(sources, include_dirs_c, lib_dir, extra_args):
+    """Build C-library."""
+    libraries = [("libsundials", {
+        "sources" : sources,
+        "include_dirs" : include_dirs_c,
+        "extra_postargs" : extra_args,
+    })]
+
+    build_clibrary = _get_build_clib()
+    build_clibrary.libraries = libraries
+    build_clibrary.include_dirs = include_dirs_c
+    if platform.system() != 'Windows':
+        build_clibrary.build_temp = lib_dir
+        build_clibrary.build_clib = lib_dir
+    else:
+        # build_temp and build_clib are currently broken for linker
+        # in the mingw32 compiler class. This forces to save .o
+        # files next to .c files on Windows.
+        lib_dir = None
+    build_clibrary.run()
+
+    objects = []
+    for _, build_info in libraries:
+        obj = build_clibrary.compiler.object_filenames(build_info["sources"], output_dir=lib_dir)
+        objects.extend(obj)
+
+    return objects
 
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
@@ -310,9 +376,14 @@ class StanModel:
             s = template.safe_substitute(model_cppname=self.model_cppname)
             outfile.write(s)
 
-        ## cvodes sources
+        if extra_compile_args is None:
+            extra_compile_args = []
 
-        # cvodes sources are complied and linked together with the Stan model
+        distutils.log.set_verbosity(verbose)
+        build_extension = _get_build_extension()
+        ## sundials sources
+
+        # sundials sources are compiled and linked together with the Stan model
         # extension module. This is not ideal. In theory, build_clib could be
         # used to build a library once and models would be complied and then
         # linked with this library. This would save 7 or more seconds from every build.
@@ -320,7 +391,7 @@ class StanModel:
         # lack of ``install_clib`` functionality in Python's distutils.
         #
         # TODO: numpy provides install_clib functionality, use that.
-        
+
         sundials_excluded = {
             "nvector/openmp",
             "nvector/openmpdev",
@@ -335,10 +406,54 @@ class StanModel:
         }
 
         sundials_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'sundials_4.1.0', 'src')
-        sundials_sources = [
-                path for path in glob.glob("{}/**/*.c".format(sundials_src_path))
-                if not any(item in path.replace("\\", "/") for item in sundials_excluded)
+        sundials_sources = []
+        for sun_root, _, sunfiles in os.walk(sundials_src_path):
+            for sunfile in sunfiles:
+                if os.path.splitext(sunfile)[1] == ".c":
+                    path = os.path.join(sun_root, sunfile).replace("\\", "/")
+                    if not any(item in path for item in sundials_excluded):
+                        sundials_sources.append(path)
+
+        include_dirs_c = [
+            lib_dir,
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
         ]
+
+        extra_compile_args_c = []
+        if platform.platform() == 'Windows':
+            if build_extension.compiler in (None, 'msvc'):
+                logger.warning("MSVC compiler is not supported")
+                extra_compile_args_c.extend([
+                    '/EHsc',
+                    '-DBOOST_DATE_TIME_NO_LIB'
+                ])
+            else:
+                # Windows, but not msvc, likely mingw
+                # fix bug in MingW-W64
+                # use posix threads
+                extra_compile_args_c.extend([
+                    '-O2',
+                    '-Wno-unused-function',
+                    '-Wno-uninitialized',
+                    '-std=c11',
+                    "-D_hypot=hypot",
+                    "-pthread",
+                    "-fexceptions",
+                    "-include",
+                    "stan_sundials_printf_override.hpp",
+                ] + [item for item in extra_compile_args if "std=c++" not in extra_compile_args])
+        else:
+            # linux or macOS
+            extra_compile_args_c.extend([
+                '-O2',
+                '-Wno-unused-function',
+                '-Wno-uninitialized',
+                '-std=c11',
+                "-include",
+                "stan_sundials_printf_override.hpp",
+            ] + [item for item in extra_compile_args if "std=c++" not in extra_compile_args])
+
+        sundials_objects = _build_clib(sundials_sources, include_dirs_c, lib_dir, extra_compile_args_c)
 
         stan_macros = [
             ('BOOST_RESULT_OF_USE_TR1', None),
@@ -346,13 +461,10 @@ class StanModel:
             ('BOOST_DISABLE_ASSERTS', None),
         ]
 
-        build_extension = _get_build_extension()
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
-        if extra_compile_args is None:
-            extra_compile_args = []
 
-        if platform.platform().startswith('Win'):
+        if platform.platform() == 'Windows':
             if build_extension.compiler in (None, 'msvc'):
                 logger.warning("MSVC compiler is not supported")
                 extra_compile_args = [
@@ -388,12 +500,12 @@ class StanModel:
                 'stan_sundials_printf_override.hpp',
             ] + extra_compile_args
 
-        distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
                               language="c++",
-                              sources=[pyx_file] + sundials_sources,
+                              sources=[pyx_file],
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
+                              extra_objects=sundials_objects,
                               extra_compile_args=extra_compile_args)
 
         cython_include_dirs = ['.', pystan_dir]
