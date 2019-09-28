@@ -31,9 +31,7 @@ assume you have installed Python as packaged in the `Anaconda
 Python distribution <https://www.anaconda.com/download/#windows>`_
 or `Miniconda distribution <https://conda.io/miniconda.html>`_.
 The Anaconda distribution is well-maintained and includes packages such as Numpy
-which PyStan requires. The following instructions assume that you are using Windows 7 
-(`Windows 10 disregards user choice and user privacy
-<https://www.eff.org/deeplinks/2016/08/windows-10-microsoft-blatantly-disregards-user-choice-and-privacy-deep-dive>`_).
+which PyStan requires. The following instructions assume that you are using Windows 7 or more.
 
 Open Command prompt
 ===================
