@@ -90,14 +90,8 @@ def _build_clib(sources, include_dirs_c, lib_dir, extra_args):
     build_clibrary = _get_build_clib()
     build_clibrary.libraries = libraries
     build_clibrary.include_dirs = include_dirs_c
-    if platform.system() != 'Windows':
-        build_clibrary.build_temp = lib_dir
-        build_clibrary.build_clib = lib_dir
-    else:
-        # build_temp and build_clib are currently broken for linker
-        # in the mingw32 compiler class. This forces to save .o
-        # files next to .c files on Windows.
-        lib_dir = None
+    build_clibrary.build_temp = lib_dir
+    build_clibrary.build_clib = lib_dir
     build_clibrary.run()
 
     objects = []
@@ -420,7 +414,7 @@ class StanModel:
         ]
 
         extra_compile_args_c = []
-        if platform.platform() == 'Windows':
+        if platform.system() == 'Windows':
             if build_extension.compiler in (None, 'msvc'):
                 logger.warning("MSVC compiler is not supported")
                 extra_compile_args_c.extend([
@@ -464,7 +458,7 @@ class StanModel:
         # compile stan models with optimization (-O2)
         # (stanc is compiled without optimization (-O0) currently, see #33)
 
-        if platform.platform() == 'Windows':
+        if platform.system() == 'Windows':
             if build_extension.compiler in (None, 'msvc'):
                 logger.warning("MSVC compiler is not supported")
                 extra_compile_args = [
