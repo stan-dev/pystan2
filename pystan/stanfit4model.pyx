@@ -670,9 +670,9 @@ cdef class StanFit4Model:
             update = len(self._repr_pars)-1 != self._repr_num
         if self._repr_pars is not None and not update:
             return self._repr_pars
-        elif len(self.flatnames) > self._repr_num:
+        elif len(self.sim["fnames_oi"]) > self._repr_num:
             logger.warning("Truncated summary with the 'fit.__repr__' method. For the full summary use 'print(fit)'")
-            self._set_repr_pars(self.flatnames[:self._repr_num-1] + ['lp__'])
+            self._set_repr_pars(self.sim["fnames_oi"][:self._repr_num-1] + ['lp__'])
             return self._repr_pars
 
     def _set_repr_num(self, n):
@@ -683,7 +683,7 @@ cdef class StanFit4Model:
 
     def __repr__(self):
         pars = self._get_repr_pars()
-        if pars is not None and len(self.flatnames) > len(pars):
+        if pars is not None and len(self.sim["fnames_oi"]) > len(pars):
             s = "\nWarning: Shown data is truncated to {} parameters".format(len(pars))
             s += "\nFor the full summary use 'print(fit)'\n\n"
             s += pystan.misc.stansummary(self, pars=pars)
