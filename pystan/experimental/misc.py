@@ -46,7 +46,7 @@ def fix_include(model_code):
 
 class EvalLogProb:
     """Evaluate log-p and grad log-p without sampling step."""
-    def __init__(self, data, *, model=None, fit=None, model_code=None, file=None, model_kwargs=None):
+    def __init__(self, data, model=None, fit=None, model_code=None, file=None, model_kwargs=None):
         """Wrap log_prob and grad_log_prob for Stan model with data.
 
         Parameters
