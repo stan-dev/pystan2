@@ -45,7 +45,7 @@ The development of PyStan3 with updated API can be found under `stan-dev/pystan-
 Detailed Installation Instructions
 ----------------------------------
 Detailed installation instructions can be found in the
-`doc/installation_beginner.md <https://github.com/chendaniely/pystan/blob/develop/doc/installation_beginner.rst/>`_ file.
+`doc/installation_beginner.md <doc/installation_beginner.rst/>`_ file.
 
 Windows Installation Instructions
 ---------------------------------
@@ -87,7 +87,7 @@ OS X ``cd /tmp`` will work.
 Example
 -------
 
-::
+.. code-block:: python
 
     import pystan
     import numpy as np
