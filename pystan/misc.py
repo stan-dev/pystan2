@@ -340,13 +340,13 @@ def _summary_sim(sim, pars, probs):
     msd = np.row_stack([x['msd'] for x in lmsdq])
     quan = np.row_stack([x['quan'] for x in lmsdq])
     probs_str = tuple(["{:g}%".format(100*p) for p in probs])
-    msd.shape = (tidx_len, 2)
-    quan.shape = (tidx_len, probs_len)
+    msd = msd.reshape(tidx_len, 2, order='F')
+    quan = quan.reshape(tidx_len, probs_len, order='F')
 
     c_msd = np.row_stack([x['c_msd'] for x in lmsdq])
     c_quan = np.row_stack([x['c_quan'] for x in lmsdq])
-    c_msd.shape = (tidx_len, 2, n_chains)
-    c_quan.shape = (tidx_len, probs_len, n_chains)
+    c_msd = c_msd.reshape(tidx_len, 2, n_chains, order='F')
+    c_quan = c_quan.reshape(tidx_len, probs_len, n_chains, order='F')
     sim_attr_args = sim.get('args', None)
     if sim_attr_args is None:
         cids = list(range(n_chains))
