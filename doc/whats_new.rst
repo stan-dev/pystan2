@@ -6,8 +6,11 @@
  What's New
 ============
 
-TBD (TBD)
-=========
+v2.19.1.0 (25. Oct 2019)
+========================
+- Update Stan source to v2.19.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.19.1>`_)
+- Fix order of per-chain values returned by Fit ``summary`` (`GH646 <https://github.com/stan-dev/pystan/issues/646>`_)
+- Inverse mass matrix can be provided (`GH505 <https://github.com/stan-dev/rstan/issues/505>`_)
 
 v2.19.0.0 (31. Mar 2019)
 ========================
