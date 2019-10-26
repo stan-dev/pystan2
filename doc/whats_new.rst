@@ -6,7 +6,7 @@
  What's New
 ============
 
-v2.19.1.0 (25. Oct 2019)
+v2.19.1.1 (25. Oct 2019)
 ========================
 - Update Stan source to v2.19.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.19.1>`_)
 - Fix order of per-chain values returned by Fit ``summary`` (`GH646 <https://github.com/stan-dev/pystan/issues/646>`_)
