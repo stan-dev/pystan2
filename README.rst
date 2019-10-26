@@ -39,7 +39,7 @@ Similar projects
 - PyMC: http://pymc-devs.github.io/pymc/
 
 PyStan3 / Stan3
-------------
+---------------
 The development of PyStan3 with updated API can be found under `stan-dev/pystan-next <https://github.com/stan-dev/pystan-next>`_
 
 Detailed Installation Instructions
