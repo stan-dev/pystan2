@@ -11,7 +11,7 @@ WHEEL_HEAD="${PACKAGE}-${VERSION}"
 WIN_TAIL32="win32.whl"
 WIN_TAIL64="win_amd64.whl"
 MANYLINUX1_TAIL64="manylinux1_x86_64.whl"
-MACOS_TAIL64="macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl"
+MACOS_TAIL64="macosx_10_6_intel.whl"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 mkdir -p "$DIR/../dist"
