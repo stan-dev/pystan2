@@ -211,6 +211,7 @@ def setup_package():
                     license=LICENSE,
                     url=URL,
                     long_description=LONG_DESCRIPTION,
+                    long_description_content_type='text/x-rst',
                     classifiers=CLASSIFIERS,
                     **extra_setuptools_args)
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
