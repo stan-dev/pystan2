@@ -6,6 +6,9 @@
  What's New
 ============
 
+TBD
+===
+
 v2.19.1.1 (25. Oct 2019)
 ========================
 - Update Stan source to v2.19.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.19.1>`_)
