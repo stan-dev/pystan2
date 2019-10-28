@@ -28,7 +28,7 @@ import os
 import platform
 import sys
 
-LONG_DESCRIPTION = open('README.rst').read()
+LONG_DESCRIPTION = codecs.open('README.rst', encoding='utf-8').read()
 NAME         = 'pystan'
 DESCRIPTION  = 'Python interface to Stan, a package for Bayesian inference'
 AUTHOR       = 'PyStan Developers'
@@ -101,8 +101,8 @@ from distutils.extension import Extension
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
-                     'pystan/stan/lib/stan_math/lib/boost_1.66.0',
-                     'pystan/stan/lib/stan_math/lib/sundials_3.1.0/include']
+                     'pystan/stan/lib/stan_math/lib/boost_1.69.0',
+                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include']
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -115,13 +115,13 @@ extra_compile_args = [
     '-ftemplate-depth-256',
     '-Wno-unused-function',
     '-Wno-uninitialized',
-    '-std=c++11',
+    '-std=c++1y',
 ]
 
 if platform.platform().startswith('Win'):
     from Cython.Build.Inline import _get_build_extension
     if _get_build_extension().compiler in (None, 'msvc'):
-        logger.warning("MSVC is not supported")
+        print("Warning: MSVC is not supported")
         extra_compile_args = [
             '/EHsc',
             '-DBOOST_DATE_TIME_NO_LIB',
@@ -140,16 +140,17 @@ if platform.platform().startswith('Win'):
 stanc_sources = [
     "pystan/stan/src/stan/lang/ast_def.cpp",
     "pystan/stan/src/stan/lang/grammars/bare_type_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/block_var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/expression07_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/expression_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/functions_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/indexes_grammar_inst.cpp",
+    "pystan/stan/src/stan/lang/grammars/local_var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/program_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/semantic_actions_def.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_2_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/term_grammar_inst.cpp",
-    "pystan/stan/src/stan/lang/grammars/var_decls_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/whitespace_grammar_inst.cpp",
 ]
 
@@ -167,7 +168,10 @@ extensions = [
               include_dirs=stan_include_dirs,
               extra_compile_args=extra_compile_args),
     # _misc.pyx does not use Stan libs
-    Extension("pystan._misc", ["pystan/_misc.pyx"], language='c++')
+    Extension("pystan._misc",
+              ["pystan/_misc.pyx"],
+              language='c++',
+              extra_compile_args=extra_compile_args)
 ]
 
 
@@ -180,16 +184,11 @@ stan_files_all = sum(
     [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
      for path, dirs, files in os.walk('pystan/stan/src/')], [])
 
-stan_math_files_all = sum(
-    [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
-     for path, dirs, files in os.walk('pystan/math/')], [])
-
 lib_files_all = sum(
     [[os.path.join(path.replace('pystan/', ''), fn) for fn in files]
      for path, dirs, files in os.walk('pystan/stan/lib/')], [])
 
 package_data_pats += stan_files_all
-package_data_pats += stan_math_files_all
 package_data_pats += lib_files_all
 
 
@@ -212,6 +211,7 @@ def setup_package():
                     license=LICENSE,
                     url=URL,
                     long_description=LONG_DESCRIPTION,
+                    long_description_content_type='text/x-rst',
                     classifiers=CLASSIFIERS,
                     **extra_setuptools_args)
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]

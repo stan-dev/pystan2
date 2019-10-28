@@ -21,7 +21,6 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-sys.path.insert(0, os.path.abspath('sphinxext'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 # Mock imports for readthedocs
@@ -63,11 +62,10 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.pngmath',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosummary',
-    'numpydoc'
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

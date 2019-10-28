@@ -1,3 +1,4 @@
+skip_branch_with_pr: true
 version: '{build}'
 image: Visual Studio 2015
 platform:
@@ -8,7 +9,7 @@ environment:
     WHEELHOUSE_UPLOADER_REGION: IAD
     WHEELHOUSE_UPLOADER_USERNAME: pystan-worker
     WHEELHOUSE_UPLOADER_SECRET:
-      secure: cqdCOlelH3UdBVv+FyD4nNfT5X5bB2OwqehwkxqMABKcHy1H4+t8v3jVVvTxV7uq
+      secure: mjwuqrrrl71BQoPg5t++MKlVApmBBDAr7GmQtI5YawjhdpCJtMi+Tof4P1ENDCLp
 
   matrix:
     - CONDA: 27
@@ -31,7 +32,6 @@ install:
   - ps: "ls \"C:/\""
   - SET "CONDAPATH=conda%CONDA%"
   - if %CONDA%==27 (SET "CONDAPATH=conda")
-  - if %CONDA%==37 (SET "CONDAPATH=conda36")
   - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
 
   - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
@@ -41,11 +41,16 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
 
-  - if %CONDA%==37 (CALL conda create -n py37 python=3.7 -y -q)
-  - if %CONDA%==37 (CALL conda activate py37)
-
+  - conda install git -y -q
+  - git config --system core.longpaths true
   # checkout submodules
   - git submodule update --init --recursive
+
+  # remove long paths
+  - SETLOCAL ENABLEDELAYEDEXPANSION
+  - FOR /D /R "pystan/stan/lib/stan_math/lib" %%D IN (doc) DO @IF EXIST "%%D" RD /S /Q "%%D"
+  - FOR /D /R "pystan/stan/lib/stan_math/lib" %%D IN (test) DO @IF EXIST "%%D" RD /S /Q "%%D"
+
   # Check that we have the expected version and architecture for Python
   - python --version
   - python -c "import struct; print(struct.calcsize('P') * 8)"
@@ -53,9 +58,9 @@ install:
   # setup conda - use default channel
   - conda update --all -q
   - conda info
-  - conda install numpy cython scipy matplotlib pandas setuptools libpython m2w64-toolchain -c msys2 -q
+  - conda install numpy cython scipy matplotlib pandas setuptools libpython m2w64-toolchain
   # test numpy
-  - python -c "import numpy as np; print('numpy imported succesfull')"
+  - python -c "import numpy as np; print('numpy import was succesfull')"
   # test gcc version
   - gcc --version
   # Upgrade to the latest version of pip to avoid it displaying warnings
@@ -67,9 +72,12 @@ install:
   - pip install -q -r requirements.txt
   - pip install -q -r test-requirements.txt
 
+  - conda list
+  - pip freeze
+
   - ECHO "Starting to build the wheel"
   # build the wheel and install it
-  - python setup.py --quiet bdist_wheel bdist_wininst
+  - python setup.py --quiet bdist_wheel
   - ps: "ls dist"
 
   - ECHO "Install generated wheel to test it"
@@ -88,13 +96,12 @@ test_script:
   - ECHO "Starting the tests"
   - "python -c \"import nose; nose.main()\" --nocapture pystan.tests.test_basic \
      pystan.tests.test_basic_array pystan.tests.test_basic_matrix \
-     pystan.tests.test_basic_pars pystan.tests.test_chains pystan.tests.test_ess \
-     pystan.tests.test_extra_compile_args pystan.tests.test_extract \
-     pystan.tests.test_fixed_param pystan.tests.test_linear_regression \
-     pystan.tests.test_misc pystan.tests.test_misc_args pystan.tests.test_optimizing_example \
-     pystan.tests.test_pickle pystan.tests.test_stan_file_io pystan.tests.test_stanc \
-     pystan.tests.test_unconstrain_pars pystan.tests.test_user_inits pystan.tests.test_utf8
-     pystan.tests.test_vb" 
+     pystan.tests.test_basic_pars pystan.tests.test_ess \
+     pystan.tests.test_extract pystan.tests.test_fixed_param \
+     pystan.tests.test_linear_regression pystan.tests.test_misc \
+     pystan.tests.test_misc_args pystan.tests.test_optimizing_example \
+     pystan.tests.test_stanc pystan.tests.test_unconstrain_pars \
+     pystan.tests.test_utf8 pystan.tests.test_vb"
   # Move back to the project folder
   - cd ..
   - ECHO "End of testing"

@@ -19,9 +19,9 @@ from pystan._compat import PY2, string_types
 
 from collections import OrderedDict
 if PY2:
-    from collections import Callable, Sequence
+    from collections import Callable, Iterable, Sequence
 else:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 import inspect
 import io
 import itertools
@@ -32,9 +32,9 @@ import os
 import random
 import re
 import sys
+import shutil
 import tempfile
 import time
-import warnings
 
 import numpy as np
 try:
@@ -115,7 +115,7 @@ def stansummary(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_su
 
 def _print_stanfit(fit, pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2):
     # warning added in PyStan 2.17.0
-    warnings.warn('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
+    logger.warning('Function `_print_stanfit` is deprecated and will be removed in a future version. '\
                   'Use `stansummary` instead.', DeprecationWarning)
     return stansummary(fit, pars=pars, probs=probs, digits_summary=digits_summary)
 
@@ -134,17 +134,27 @@ def _array_to_table(arr, rownames, colnames, n_digits):
     rownames_maxwidth = max(len(n) for n in rownames)
     max_col_width = 7
     min_col_width = 5
-    widths = [rownames_maxwidth] + [max(max_col_width, max(len(n) + 1, min_col_width)) for n in colnames]
+    max_col_header_num_width = [max(max_col_width, max(len(n) + 1, min_col_width)) for n in colnames]
+    rows = []
+    for row in arr:
+        row_nums = []
+        for j, (num, width) in enumerate(zip(row, max_col_header_num_width)):
+            if colnames[j] == "n_eff":
+                num = int(round(num, 0)) if not np.isnan(num) else num
+            num = _format_number(num, n_digits, max_col_width - 1)
+            row_nums.append(num)
+            if len(num) + 1 > max_col_header_num_width[j]:
+                max_col_header_num_width[j] = len(num) + 1
+        rows.append(row_nums)
+    widths = [rownames_maxwidth] + max_col_header_num_width
     header = '{:>{width}}'.format('', width=widths[0])
     for name, width in zip(colnames, widths[1:]):
         header += '{name:>{width}}'.format(name=name, width=width)
     lines = [header]
-    for rowname, row in zip(rownames, arr):
+    for rowname, row in zip(rownames, rows):
         line = '{name:{width}}'.format(name=rowname, width=widths[0])
         for j, (num, width) in enumerate(zip(row, widths[1:])):
-            if colnames[j] == 'n_eff':
-                num = int(round(num, 0)) if not np.isnan(num) else num
-            line += '{num:>{width}}'.format(num=_format_number(num, n_digits, max_col_width - 1), width=width)
+            line += '{num:>{width}}'.format(num=num, width=width)
         lines.append(line)
     return '\n'.join(lines)
 
@@ -330,13 +340,13 @@ def _summary_sim(sim, pars, probs):
     msd = np.row_stack([x['msd'] for x in lmsdq])
     quan = np.row_stack([x['quan'] for x in lmsdq])
     probs_str = tuple(["{:g}%".format(100*p) for p in probs])
-    msd.shape = (tidx_len, 2)
-    quan.shape = (tidx_len, probs_len)
+    msd = msd.reshape(tidx_len, 2, order='F')
+    quan = quan.reshape(tidx_len, probs_len, order='F')
 
     c_msd = np.row_stack([x['c_msd'] for x in lmsdq])
     c_quan = np.row_stack([x['c_quan'] for x in lmsdq])
-    c_msd.shape = (tidx_len, 2, n_chains)
-    c_quan.shape = (tidx_len, probs_len, n_chains)
+    c_msd = c_msd.reshape(tidx_len, 2, n_chains, order='F')
+    c_quan = c_quan.reshape(tidx_len, probs_len, n_chains, order='F')
     sim_attr_args = sim.get('args', None)
     if sim_attr_args is None:
         cids = list(range(n_chains))
@@ -480,8 +490,8 @@ def _config_argss(chains, iter, warmup, thin,
     all_control = {
         "adapt_engaged", "adapt_gamma", "adapt_delta", "adapt_kappa",
         "adapt_t0", "adapt_init_buffer", "adapt_term_buffer", "adapt_window",
-        "stepsize", "stepsize_jitter", "metric", "int_time", "max_treedepth",
-        "epsilon", "error"
+        "stepsize", "stepsize_jitter", "metric", "int_time",
+        "max_treedepth", "epsilon", "error", "inv_metric"
     }
     all_metrics = {"unit_e", "diag_e", "dense_e"}
 
@@ -513,8 +523,63 @@ def _config_argss(chains, iter, warmup, thin,
     if diagnostic_file is not None:
         raise NotImplementedError("diagnostic_file not implemented yet.")
 
+    if control is not None and "inv_metric" in control:
+        inv_metric = control.pop("inv_metric")
+        metric_dir = tempfile.mkdtemp()
+        if isinstance(inv_metric, dict):
+            for i in range(chains):
+                if i not in inv_metric:
+                    msg = "Invalid value for init_inv_metric found (keys={}). " \
+                          "Use either a dictionary with chain_index as keys (0,1,2,...)" \
+                          "or ndarray."
+                    msg = msg.format(list(metric_file.keys()))
+                    raise ValueError(msg)
+                mass_values = inv_metric[i]
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                if isinstance(mass_values, str):
+                    if not os.path.exists(mass_values):
+                        raise ValueError("inverse metric file was not found: {}".format(mass_values))
+                    shutil.copy(mass_values, metric_path)
+                else:
+                    stan_rdump(dict(inv_metric=mass_values), metric_path)
+                argss[i]['metric_file'] = metric_path
+        elif isinstance(inv_metric, str):
+            if not os.path.exists(inv_metric):
+                raise ValueError("inverse metric  file was not found: {}".format(inv_metric))
+            for i in range(chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                shutil.copy(inv_metric, metric_path)
+                argss[i]['metric_file'] = metric_path
+        elif isinstance(inv_metric, Iterable):
+            metric_filename = "inv_metric_chain_0.Rdata"
+            metric_path = os.path.join(metric_dir, metric_filename)
+            stan_rdump(dict(inv_metric=inv_metric), metric_path)
+            argss[0]['metric_file'] = metric_path
+            for i in range(1, chains):
+                metric_filename = "inv_metric_chain_{}.Rdata".format(str(i))
+                metric_path = os.path.join(metric_dir, metric_filename)
+                shutil.copy(argss[i-1]['metric_file'], metric_path)
+                argss[i]['metric_file'] = metric_path
+        else:
+            argss[i]['metric_file'] = ""
+
+    stepsize_list = None
+    if "control" in kwargs and "stepsize" in kwargs["control"]:
+        if isinstance(kwargs["control"]["stepsize"], Sequence):
+            stepsize_list = kwargs["control"]["stepsize"]
+            if len(kwargs["control"]["stepsize"]) == 1:
+                kwargs["control"]["stepsize"] = kwargs["control"]["stepsize"][0]
+            elif len(kwargs["control"]["stepsize"]) != chains:
+                raise ValueError("stepsize length needs to equal chain count.")
+            else:
+                stepsize_list = kwargs["control"]["stepsize"]
+
     for i in range(chains):
         argss[i].update(kwargs)
+        if stepsize_list is not None:
+            argss[i]["control"]["stepsize"] = stepsize_list[i]
         argss[i] = _get_valid_stan_args(argss[i])
 
     return argss
@@ -549,6 +614,9 @@ def _get_valid_stan_args(base_args=None):
     args['diagnostic_file'] = args.get('diagnostic_file', '').encode('ascii')
     # NB: argument named "seed" not "random_seed"
     args['random_seed'] = args.get('seed', int(time.time()))
+
+    args['metric_file_flag'] = True if args.get('metric_file') else False
+    args['metric_file'] = args.get('metric_file', '').encode('ascii')
 
     if args['method'] == stan_args_method_t.VARIATIONAL:
         # variational does not use a `control` map like sampling
@@ -693,18 +761,18 @@ def _check_seed(seed):
         try:
             seed = int(seed)
         except ValueError:
-            warnings.warn("`seed` must be castable to an integer")
+            logger.warning("`seed` must be castable to an integer")
             seed = None
         else:
             if seed < 0:
-                warnings.warn("`seed` may not be negative")
+                logger.warning("`seed` may not be negative")
                 seed = None
             elif seed > MAX_UINT:
                 raise ValueError('`seed` is too large; max is {}'.format(MAX_UINT))
     elif isinstance(seed, np.random.RandomState):
         seed = seed.randint(0, MAX_UINT)
     elif seed is not None:
-        warnings.warn('`seed` has unexpected type')
+        logger.warning('`seed` has unexpected type')
         seed = None
 
     if seed is None:
@@ -1133,109 +1201,274 @@ def read_rdump(filename):
         d[name.strip()] = _rdump_value_to_numpy(value.strip())
     return d
 
-def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True):
+def to_dataframe(fit, pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True, header=True):
     """Extract samples as a pandas dataframe for different parameters.
 
     Parameters
     ----------
     pars : {str, sequence of str}
-       parameter (or quantile) name(s).
+        parameter (or quantile) name(s).
     permuted : bool
-       If True, returned samples are permuted. All chains are
-       merged and warmup samples are discarded.
+        If True, returned samples are permuted.
+        If inc_warmup is True, warmup samples have negative order.
     dtypes : dict
         datatype of parameter(s).
-        If nothing is passed, np.float will be used for all parameters.
+        If nothing is passed, float will be used for all parameters.
     inc_warmup : bool
-       If True, warmup samples are kept; otherwise they are
-       discarded. If `permuted` is True, `inc_warmup` is ignored.
+        If True, warmup samples are kept; otherwise they are
+        discarded.
     diagnostics : bool
-	   If True, include MCMC diagnostics in dataframe.
-	   If `permuted` is True, `diagnostics` is ignored.
+        If True, include hmc diagnostics in dataframe.
+    header : bool
+       If True, include header columns.
 
     Returns
     -------
     df : pandas dataframe
+        Returned dataframe contains: [header_df]|[draws_df]|[diagnostics_df],
+        where all groups are optional.
+        To exclude draws_df use `pars=[]`.
 
     """
     try:
         import pandas as pd
     except ImportError:
         raise ImportError("Pandas module not found. You can install pandas with: pip install pandas")
-    if inc_warmup is True and permuted is True:
-        logging.warning("`inc_warmup` ignored when `permuted` is True.")
-    if diagnostics is True and permuted is True:
-        logging.warning("`diagnostics` ignored when `permuted` is True.")
-    if dtypes is not None and permuted is False and pars is None:
-        logging.warning("`dtypes` ignored when `permuted` is False and `pars` is None")
 
     fit._verify_has_samples()
-
+    pars_original = pars
     if pars is None:
         pars = fit.sim['pars_oi']
     elif isinstance(pars, string_types):
         pars = [pars]
-    pars = pystan.misc._remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+    if pars:
+        pars = pystan.misc._remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+        allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
+        _check_pars(allpars, pars)
+
     if dtypes is None:
         dtypes = {}
 
-    allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
-    pystan.misc._check_pars(allpars, pars)
+    n_kept = [s if inc_warmup else s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    chains = len(fit.sim['samples'])
 
-    tidx = pystan.misc._pars_total_indexes(fit.sim['pars_oi'],
-                                           fit.sim['dims_oi'],
-                                           fit.sim['fnames_oi'],
-                                           pars)
+    diagnostic_type = {'divergent__':int,
+                       'energy__':float,
+                       'treedepth__':int,
+                       'accept_stat__':float,
+                       'stepsize__':float,
+                       'n_leapfrog__':int}
 
-    n_kept = [s-w for s, w in zip(fit.sim['n_save'], fit.sim['warmup2'])]
+    header_dict = OrderedDict()
+    if header:
+        idx = np.concatenate([np.full(n_kept[chain], chain, dtype=int) for chain in range(chains)])
+        warmup = [np.zeros(n_kept[chain], dtype=np.int64) for chain in range(chains)]
 
-    df = pd.DataFrame()
-    if permuted:
-        for par in pars:
-            sss = [pystan.misc._get_kept_samples(p, fit.sim)
-                   for p in tidx[par]]
-            ss = np.column_stack(sss)
-            if par in dtypes.keys():
-                ss = ss.astype(dtypes[par])
-            if ss.shape[1] == 1:
-                df[par] = ss[:,0]
-            else:
-                par_flatnames = [
-                flatname for flatname in fit.flatnames if flatname.startswith(par)
-                ]
-                for idx in np.arange(ss.shape[1]):
-                    column_name = par_flatnames[idx]
-                    df[column_name] = ss[:,idx]
-    else:
-        n_save = fit.sim['n_save'][0]
-        if not inc_warmup:
-            n_save = n_save - fit.sim['warmup2'][0]
-        chain_count = fit.sim['chains']+1
-        df['chain'] =  (np.arange(1,chain_count)[:,np.newaxis]*np.ones((chain_count-1,n_save))).astype(int).flatten()
-        df['chain_idx'] = np.tile(np.arange(1,n_save+1),(chain_count-1,1)).flatten()
-	# Specify whether row is from warmup, 0 means not in warmup
-        df['warmup'] = 0
-        # Modify this below if sample is from warmup
         if inc_warmup:
-            for n in range(0,chain_count-1):
-                df.loc[
-                n*fit.sim['n_save'][n]:
-                n*fit.sim['n_save'][n]+fit.sim['warmup2'][n]-1,'warmup'
-                ] = 1
-        if diagnostics == True:
-            diagnostic_type = {'divergent':int,'energy':float,'treedepth':int,
-			                   'accept_stat':float, 'stepsize':float, 'n_leapfrog':int}
-            for diag, diag_dtype in diagnostic_type.items():
-                diag_list = []
-                for n in range(0,chain_count-1):
-                    diag_list.append(fit.get_sampler_params()[n][diag + '__'][-n_save:].astype(diag_dtype))
-                df[diag + '__'] = np.hstack(diag_list)
+            draw = []
+            for chain, w in zip(range(chains), fit.sim['warmup2']):
+                warmup[chain][:w] = 1
+                draw.append(np.arange(n_kept[chain], dtype=np.int64) - w)
+            draw = np.concatenate(draw)
+        else:
+            draw = np.concatenate([np.arange(n_kept[chain], dtype=np.int64) for chain in range(chains)])
+        warmup = np.concatenate(warmup)
 
-        for n in range(len(fit.sim['fnames_oi'])):
-            par = fit.sim['fnames_oi'][n]
-            if (par in pars) or (par[:par.find('[')] in pars):
-                chains = pystan.misc._get_samples(n, fit.sim, inc_warmup)
-                samples = np.array(chains).T
-                column_name = fit.sim['fnames_oi'][n]
-                df[column_name] = samples.T.flatten()
+        header_dict = OrderedDict(zip(['chain', 'draw', 'warmup'], [idx, draw, warmup]))
+
+    if permuted:
+        if inc_warmup:
+            chain_permutation = []
+            chain_permutation_order = []
+            permutation = []
+            permutation_order = []
+            for chain, p, w in zip(range(chains), fit.sim['permutation'], fit.sim['warmup2']):
+                chain_permutation.append(list(range(-w, 0)) + p)
+                chain_permutation_order.append(list(range(-w, 0)) + list(np.argsort(p)))
+                permutation.append(sum(n_kept[:chain])+chain_permutation[-1]+w)
+                permutation_order.append(sum(n_kept[:chain])+chain_permutation_order[-1]+w)
+            chain_permutation = np.concatenate(chain_permutation)
+            chain_permutation_order = np.concatenate(chain_permutation_order)
+            permutation = np.concatenate(permutation)
+            permutation_order = np.concatenate(permutation_order)
+
+        else:
+            chain_permutation = np.concatenate(fit.sim['permutation'])
+            chain_permutation_order = np.concatenate([np.argsort(item) for item in fit.sim['permutation']])
+            permutation = np.concatenate([sum(n_kept[:chain])+p for chain, p in enumerate(fit.sim['permutation'])])
+            permutation_order = np.argsort(permutation)
+
+        header_dict["permutation"] = permutation
+        header_dict["chain_permutation"] = chain_permutation
+        header_dict["permutation_order"] = permutation_order
+        header_dict["chain_permutation_order"] = chain_permutation_order
+
+    if header:
+        header_df = pd.DataFrame.from_dict(header_dict)
+    else:
+        if permuted:
+            header_df = pd.DataFrame.from_dict({"permutation_order" : header_dict["permutation_order"]})
+        else:
+            header_df = pd.DataFrame()
+
+    fnames_set = set(fit.sim['fnames_oi'])
+    pars_set = set(pars)
+    if pars_original is None or fnames_set == pars_set:
+        dfs = [pd.DataFrame.from_dict(pyholder.chains).iloc[-n:] for pyholder, n in zip(fit.sim['samples'], n_kept)]
+        df = pd.concat(dfs, axis=0, sort=False, ignore_index=True)
+        if dtypes:
+            if not fnames_set.issuperset(pars_set):
+                par_keys = OrderedDict([(par, []) for par in fit.sim['pars_oi']])
+                for key in fit.sim['fnames_oi']:
+                    par = key.split("[")
+                    par = par[0]
+                    par_keys[par].append(key)
+
+            for par, dtype in dtypes.items():
+                if isinstance(dtype, (float, np.float64)):
+                    continue
+                for key in par_keys.get(par, [par]):
+                    df.loc[:, key] = df.loc[:, key].astype(dtype)
+
+    elif pars:
+        par_keys = dict()
+        if not fnames_set.issuperset(pars_set):
+            par_keys = OrderedDict([(par, []) for par in fit.sim['pars_oi']])
+            for key in fit.sim['fnames_oi']:
+                par = key.split("[")
+                par = par[0]
+                par_keys[par].append(key)
+
+        columns = []
+        for par in pars:
+            columns.extend(par_keys.get(par, [par]))
+        columns = list(np.unique(columns))
+
+        df = pd.DataFrame(index=np.arange(sum(n_kept)), columns=columns, dtype=float)
+        for key in columns:
+            key_values = []
+            for chain, (pyholder, n) in enumerate(zip(fit.sim['samples'], n_kept)):
+                key_values.append(pyholder.chains[key][-n:])
+            df.loc[:, key] = np.concatenate(key_values)
+
+        for par, dtype in dtypes.items():
+            if isinstance(dtype, (float, np.float64)):
+                continue
+            for key in par_keys.get(par, [par]):
+                df.loc[:, key] = df.loc[:, key].astype(dtype)
+    else:
+        df = pd.DataFrame()
+
+    if diagnostics:
+        diagnostics_dfs = []
+        for idx, (pyholder, permutation, n) in enumerate(zip(fit.sim['samples'], fit.sim['permutation'], n_kept), 1):
+            diagnostics_df = pd.DataFrame(pyholder['sampler_params'], index=pyholder['sampler_param_names']).T
+            diagnostics_df = diagnostics_df.iloc[-n:, :]
+            for key, dtype in diagnostic_type.items():
+                if key in diagnostics_df:
+                    diagnostics_df.loc[:, key] = diagnostics_df.loc[:, key].astype(dtype)
+            diagnostics_dfs.append(diagnostics_df)
+        if diagnostics_dfs:
+            diagnostics_df = pd.concat(diagnostics_dfs, axis=0, sort=False, ignore_index=True)
+        else:
+            diagnostics_df = pd.DataFrame()
+    else:
+        diagnostics_df = pd.DataFrame()
+
+    df = pd.concat((header_df, df, diagnostics_df), axis=1, sort=False)
+    if permuted:
+        df.sort_values(by='permutation_order', inplace=True)
+        if not header:
+            df.drop(columns='permutation_order', inplace=True)
     return df
+
+def get_stepsize(fit):
+    """Parse stepsize from fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+
+    Returns
+    -------
+    list
+        Returns an empty list if step sizes
+        are not found in ``fit.get_adaptation_info``.
+    """
+    fit._verify_has_samples()
+    stepsizes = []
+    for adaptation_info in fit.get_adaptation_info():
+        for line in adaptation_info.splitlines():
+            if "Step size" in line:
+                stepsizes.append(float(line.split("=")[1].strip()))
+                break
+    return stepsizes
+
+def get_inv_metric(fit, as_dict=False):
+    """Parse inverse metric from the fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+    as_dict : bool, optional
+
+    Returns
+    -------
+    list or dict
+        Returns an empty list if inverse metric
+        is not found in ``fit.get_adaptation_info()``.
+        If `as_dict` returns a dictionary which can be used with
+        `.sampling` method.
+    """
+    fit._verify_has_samples()
+    inv_metrics = []
+    if not (("ctrl" in fit.stan_args[0]) and ("sampling" in fit.stan_args[0]["ctrl"])):
+        return inv_metrics
+    metric = [args["ctrl"]["sampling"]["metric"].name for args in fit.stan_args]
+    for adaptation_info, metric_name in zip(fit.get_adaptation_info(), metric):
+        iter_adaptation_info = iter(adaptation_info.splitlines())
+        inv_metric_list = []
+        for line in iter_adaptation_info:
+            if any(value in line for value in ["Step size", "Adaptation"]):
+                continue
+            elif "inverse mass matrix" in line:
+                for line in iter_adaptation_info:
+                    stripped_set = set(line.replace("# ", "").replace(" ", "").replace(",", ""))
+                    if stripped_set.issubset(set(".-1234567890e")):
+                        inv_metric = np.array(list(map(float, line.replace("# ", "").strip().split(","))))
+                        if metric_name == "DENSE_E":
+                            inv_metric = np.atleast_2d(inv_metric)
+                        inv_metric_list.append(inv_metric)
+                    else:
+                        break
+        inv_metrics.append(np.concatenate(inv_metric_list))
+    return inv_metrics if not as_dict else dict(enumerate(inv_metrics))
+
+def get_last_position(fit, warmup=False):
+    """Parse last position from fit object
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+    warmup : bool
+        If True, returns the last warmup position, when warmup has been done.
+        Otherwise function returns the first sample position.
+
+    Returns
+    -------
+    list
+        list contains a dictionary of last draw from each chain.
+    """
+    fit._verify_has_samples()
+    positions = []
+    extracted = fit.extract(permuted=False, pars=fit.model_pars, inc_warmup=warmup)
+
+    draw_location = -1
+    if warmup:
+        draw_location += max(1, fit.sim["warmup"])
+
+    chains = fit.sim["chains"]
+    for i in range(chains):
+        extract_pos = {key : values[draw_location, i] for key, values in extracted.items()}
+        positions.append(extract_pos)
+    return positions

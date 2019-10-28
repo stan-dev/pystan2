@@ -26,24 +26,37 @@ Important links
 Related projects
 ----------------
 
+- ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
+- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
+- Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
+- Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
 
 Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
 
+PyStan3 / Stan3
+---------------
+The development of PyStan3 with updated API can be found under `stan-dev/pystan-next <https://github.com/stan-dev/pystan-next>`_
+
 Detailed Installation Instructions
 ----------------------------------
 Detailed installation instructions can be found in the
-`doc/installation_beginner.md <https://github.com/chendaniely/pystan/blob/develop/doc/installation_beginner.rst/>`_ file.
+`doc/installation_beginner.md <doc/installation_beginner.rst/>`_ file.
+
+Windows Installation Instructions
+---------------------------------
+Detailed installation instructions for Windows can be found in docs under `PyStan on Windows <https://pystan.readthedocs.io/en/latest/windows.html>`_
 
 Quick Installation (Linux and macOS)
 ------------------------------------
 
 `NumPy  <http://www.numpy.org/>`_ and `Cython <http://www.cython.org/>`_
 (version 0.22 or greater) are required. `matplotlib <http://matplotlib.org/>`_
-is optional.
+is optional. ArviZ is recommended for visualization and analysis.
 
 PyStan and the required packages may be installed from the `Python Package Index
 <https://pypi.python.org/pypi>`_ using ``pip``.
@@ -61,6 +74,12 @@ available, PyStan may be installed from source with the following commands
    cd pystan
    python setup.py install
 
+To install latest development version user can also use ``pip``
+
+::
+
+    pip install git+https://github.com/stan-dev/pystan
+
 If you encounter an ``ImportError`` after compiling from source, try changing
 out of the source directory before attempting ``import pystan``. On Linux and
 OS X ``cd /tmp`` will work.
@@ -68,7 +87,7 @@ OS X ``cd /tmp`` will work.
 Example
 -------
 
-::
+.. code-block:: python
 
     import pystan
     import numpy as np
@@ -112,6 +131,10 @@ Example
     # traceplot are available
     fit.plot()
     plt.show()
+    
+    # updated traceplot can be plotted with
+    import arviz as az
+    az.plot_trace(fit)
 
 .. |pypi| image:: https://badge.fury.io/py/pystan.png
     :target: https://badge.fury.io/py/pystan
@@ -121,9 +144,10 @@ Example
     :target: https://travis-ci.org/stan-dev/pystan
     :alt: travis-ci build status
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/stan-dev/pystan?branch=master
-    :target: https://ci.appveyor.com/project/ariddell/pystan/branch/master
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/49e69yl5ngxkpmab?svg=true
+    :target: https://ci.appveyor.com/project/pystan/pystan
     :alt: appveyor-ci build status
+
 .. |zenodo| image:: https://zenodo.org/badge/10256919.svg
     :target: https://zenodo.org/badge/latestdoi/10256919
     :alt: zenodo citation DOI 

@@ -23,7 +23,6 @@ import string
 import sys
 import tempfile
 import time
-import warnings
 
 import distutils
 from distutils.core import Extension
@@ -77,7 +76,7 @@ def _map_parallel(function, args, n_jobs):
             del _sem  # cleanup
         except (ImportError, OSError) as e:
             multiprocessing = None
-            warnings.warn('%s. _map_parallel will operate in serial mode' % (e,))
+            logger.warning('{}. _map_parallel will operate in serial mode'.format(e))
     if multiprocessing and int(n_jobs) not in (0, 1):
         if n_jobs == -1:
             n_jobs = None
@@ -142,6 +141,18 @@ class StanModel:
     verbose : boolean, False by default
         Indicates whether intermediate output should be piped to the console.
         This output may be useful for debugging.
+
+    allow_undefined : boolean, False by default
+        If True, the C++ code can be written even if there are undefined
+        functions.
+
+    includes : list, None by default
+        If not None, the elements of this list will be assumed to be the
+        names of custom C++ header files that should be included.
+
+    include_dirs : list, None by default
+        If not None, the directories in this list are added to the search
+        path of the compiler.
 
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
@@ -212,7 +223,8 @@ class StanModel:
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, include_paths=None,
                  boost_lib=None, eigen_lib=None, verbose=False,
-                 obfuscate_model_name=True, extra_compile_args=None):
+                 obfuscate_model_name=True, extra_compile_args=None,
+                 allow_undefined=False, include_dirs=None, includes=None):
 
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
@@ -221,7 +233,8 @@ class StanModel:
                                          model_name=model_name,
                                          verbose=verbose,
                                          include_paths=include_paths,
-                                         obfuscate_model_name=obfuscate_model_name)
+                                         obfuscate_model_name=obfuscate_model_name,
+                                         allow_undefined=allow_undefined)
 
         if not isinstance(stanc_ret, dict):
             raise ValueError("stanc_ret must be an object returned by stanc.")
@@ -239,6 +252,9 @@ class StanModel:
         self.model_cppcode = stanc_ret['cppcode']
         self.model_include_paths = stanc_ret['include_paths']
 
+        if allow_undefined or include_dirs or includes:
+            logger.warning("External C++ interface is an experimental feature. Be careful.")
+
         msg = "COMPILING THE C++ CODE FOR MODEL {} NOW."
         logger.info(msg.format(self.model_name))
         if verbose:
@@ -255,20 +271,32 @@ class StanModel:
         # module_name needs to be unique so that each model instance has its own module
         nonce = abs(hash((self.model_name, time.time())))
         self.module_name = 'stanfit4{}_{}'.format(self.model_name, nonce)
-        lib_dir = tempfile.mkdtemp()
+        lib_dir = tempfile.mkdtemp(prefix='pystan_')
         pystan_dir = os.path.dirname(__file__)
-        include_dirs = [
+        if include_dirs is None:
+            include_dirs = []
+        elif not isinstance(include_dirs, list):
+            raise TypeError("'include_dirs' needs to be a list: type={}".format(type(include_dirs)))
+        include_dirs += [
             lib_dir,
             pystan_dir,
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.66.0"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_3.1.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
             np.get_include(),
         ]
 
         model_cpp_file = os.path.join(lib_dir, self.model_cppname + '.hpp')
+        if includes is not None:
+            code = ""
+            for fn in includes:
+                code += '#include "{0}"\n'.format(fn)
+            ind = self.model_cppcode.index("static int current_statement_begin__;")
+            self.model_cppcode = "\n".join([
+                self.model_cppcode[:ind], code, self.model_cppcode[ind:]
+            ])
         with io.open(model_cpp_file, 'w', encoding='utf-8') as outfile:
             outfile.write(self.model_cppcode)
 
@@ -349,7 +377,7 @@ class StanModel:
                     '-ftemplate-depth-256',
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
-                    '-std=c++11',
+                    '-std=c++1y',
                     "-D_hypot=hypot",
                     "-pthread",
                     "-fexceptions",
@@ -361,7 +389,7 @@ class StanModel:
                 '-ftemplate-depth-256',
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
-                '-std=c++11',
+                '-std=c++1y',
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
@@ -413,8 +441,8 @@ class StanModel:
     @property
     def dso(self):
         # warning added in PyStan 2.8.0
-        warnings.warn('Accessing the module with `dso` is deprecated and will be removed in a future version. '\
-                      'Use `module` instead.', DeprecationWarning)
+        logger.warning('DeprecationWarning: Accessing the module with `dso` is deprecated and will be removed in a future version. '\
+                       'Use `module` instead.')
         return self.module
 
     def get_cppcode(self):
@@ -519,15 +547,17 @@ class StanModel:
         save_iterations : bool, optional
         refresh : int, optional
         init_alpha : float, optional
-            For BFGS and LBFGS, default is 0.001
+            For BFGS and LBFGS, default is 0.001.
         tol_obj : float, optional
             For BFGS and LBFGS, default is 1e-12.
+        tol_rel_obj : int, optional
+            For BFGS and LBFGS, default is 1e4.
         tol_grad : float, optional
-            For BFGS and LBFGS, default is 1e-8.
-        tol_param : float, optional
             For BFGS and LBFGS, default is 1e-8.
         tol_rel_grad : float, optional
             For BFGS and LBFGS, default is 1e7.
+        tol_param : float, optional
+            For BFGS and LBFGS, default is 1e-8.
         history_size : int, optional
             For LBFGS, default is 5.
 
@@ -553,9 +583,10 @@ class StanModel:
         m_pars = fit._get_param_names()
         p_dims = fit._get_param_dims()
 
-        idx_of_lp = m_pars.index('lp__')
-        del m_pars[idx_of_lp]
-        del p_dims[idx_of_lp]
+        if 'lp__' in m_pars:
+            idx_of_lp = m_pars.index('lp__')
+            del m_pars[idx_of_lp]
+            del p_dims[idx_of_lp]
 
         if isinstance(init, numbers.Number):
             init = str(init)
@@ -573,7 +604,7 @@ class StanModel:
             stan_args['sample_file'] = pystan.misc._writable_sample_file(sample_file)
 
         # check that arguments in kwargs are valid
-        valid_args = {"iter", "save_iterations", "save_iterations", "refresh",
+        valid_args = {"iter", "save_iterations", "refresh",
                       "init_alpha", "tol_obj", "tol_grad", "tol_param",
                       "tol_rel_obj", "tol_rel_grad", "history_size"}
         for arg in kwargs:
@@ -675,9 +706,10 @@ class StanModel:
             In addition, the algorithm HMC (called 'static HMC' in Stan) and NUTS
             share the following parameters:
 
-            - `stepsize`: float, positive
+            - `stepsize`: float or list of floats, positive
             - `stepsize_jitter`: float, between 0 and 1
             - `metric` : str, {"unit_e", "diag_e", "dense_e"}
+            - `inv_metric` : np.ndarray or str
 
             In addition, depending on which algorithm is used, different parameters
             can be set as in Stan for sampling. For the algorithm HMC we can set
@@ -707,7 +739,7 @@ class StanModel:
             for all chains.
 
         init_r : float, optional
-            `init_r` is only valid if `init` == "random". In this case, the intial
+            `init_r` is only valid if `init` == "random". In this case, the initial
             values are simulated from [-`init_r`, `init_r`] rather than using the
             default interval (see the manual of Stan).
 
@@ -726,7 +758,10 @@ class StanModel:
 
         check_hmc_diagnostics : bool, optional
             After sampling run `pystan.diagnostics.check_hmc_diagnostics` function.
-            Default is `True`.
+            Default is `True`. Checks for n_eff and rhat skipped if the flat
+            parameter count is higher than 1000, unless user explicitly defines
+            ``check_hmc_diagnostics=True``.
+
 
         Examples
         --------
@@ -755,7 +790,9 @@ class StanModel:
             if warmup  > 0:
                 logger.warning("`warmup=0` forced with `algorithm=\"Fixed_param\"`.")
             warmup = 0
-
+        elif algorithm == "NUTS" and warmup == 0:
+            if (isinstance(control, dict) and control.get("adapt_engaged", True)) or control is None:
+                raise ValueError("Warmup samples must be greater than 0 when adaptation is enabled (`adapt_engaged=True`)")
         seed = pystan.misc._check_seed(seed)
         fit = self.fit_class(data, seed)
 
@@ -783,7 +820,7 @@ class StanModel:
             raise ValueError("The number of chains is less than one; sampling"
                              "not done.")
 
-        check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', True)
+        check_hmc_diagnostics = kwargs.pop('check_hmc_diagnostics', None)
         # check that arguments in kwargs are valid
         valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
         for arg in kwargs:
@@ -844,9 +881,23 @@ class StanModel:
         fit.stanmodel = self
         fit.date = datetime.datetime.now()
 
+        if args_list[0]["metric_file_flag"]:
+            inv_metric_dir, _ = os.path.split(args_list[0]["metric_file"])
+            shutil.rmtree(inv_metric_dir, ignore_errors=True)
+
         # If problems are found in the fit, this will print diagnostic
         # messages.
-        if check_hmc_diagnostics and algorithm in ("NUTS", "HMC"):
+        if (check_hmc_diagnostics is None and algorithm in ("NUTS", "HMC")) and fit.mode != 1:
+            if n_flatnames > 1000:
+                msg = "Maximum (flat) parameter count (1000) exceeded: " +\
+                      "skipping diagnostic tests for n_eff and Rhat.\n" +\
+                      "To run all diagnostics call pystan.check_hmc_diagnostics(fit)"
+                logger.warning(msg)
+                checks = ["divergence", "treedepth", "energy"]
+                pystan.diagnostics.check_hmc_diagnostics(fit, checks=checks)  # noqa
+            else:
+                pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
+        elif (check_hmc_diagnostics and algorithm in ("NUTS", "HMC")) and fit.mode != 1:
             pystan.diagnostics.check_hmc_diagnostics(fit)  # noqa
 
         return fit

@@ -24,4 +24,4 @@ cdef extern from "py_var_context.hpp" namespace "pystan::io":
     cdef cppclass py_var_context(var_context):
         py_var_context(map[string, pair[vector[double], vector[size_t]]]&,
                        map[string, pair[vector[int], vector[size_t]]]&)
-
+    cdef get_var_context(const string&)

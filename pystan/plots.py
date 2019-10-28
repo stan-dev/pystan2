@@ -14,7 +14,8 @@ def traceplot(fit, pars, dtypes, **kwargs):
     # FIXME: write a to_pymc(_trace) function
     # Deprecation warning added in PyStan 2.18
     logger.warning("Deprecation warning."\
-                   " In future, use ArviZ library (`pip install arviz`)")
+                   " PyStan plotting deprecated, use ArviZ library (Python 3.5+)."\
+                   " `pip install arviz`; `arviz.plot_trace(fit)`)")
     try:
         from pystan.external.pymc import plots
     except ImportError:

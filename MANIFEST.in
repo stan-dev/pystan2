@@ -18,7 +18,14 @@ prune pystan/stan/src/test
 # unused parts of the stan math source
 prune pystan/stan/lib/stan_math/doc
 prune pystan/stan/lib/stan_math/doxygen
+prune pystan/stan/lib/stan_math/lib/boost_*/doc
+prune pystan/stan/lib/stan_math/lib/boost_*/libs
+prune pystan/stan/lib/stan_math/lib/boost_*/more
+prune pystan/stan/lib/stan_math/lib/boost_*/status
+prune pystan/stan/lib/stan_math/lib/boost_*/tools
 prune pystan/stan/lib/stan_math/lib/cpplint_*
+prune pystan/stan/lib/stan_math/lib/eigen_*/unsupported/doc
 prune pystan/stan/lib/stan_math/lib/gtest_*
 prune pystan/stan/lib/stan_math/make
 prune pystan/stan/lib/stan_math/test
+recursive-exclude pystan/stan/lib/stan_math *.html *.css

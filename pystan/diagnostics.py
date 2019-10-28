@@ -1,5 +1,6 @@
 import pystan
-import pickle
+from pystan.misc import _check_pars, _remove_empty_pars
+from pystan._compat import string_types
 import numpy as np
 import logging
 
@@ -7,7 +8,7 @@ logger = logging.getLogger('pystan')
 
 # Diagnostics modified from Betancourt's stan_utility.py module
 
-def check_div(fit, verbose = True, per_chain = False):
+def check_div(fit, verbose=True, per_chain=False):
     """Check for transitions that ended with a divergence
 
     Parameters
@@ -19,7 +20,7 @@ def check_div(fit, verbose = True, per_chain = False):
         the function conveys diagnostic information. If it is ``True``
         (the default) or an integer greater than zero, then a
         diagnostic message is printed only if there are divergent
-        transitions. If it is an integer greater than 1, then extra
+        transitions. If it is an integer greater than 2, then extra
         diagnostic messages are printed.
     per_chain : bool, optional
         Print the number of divergent transitions in each chain
@@ -56,7 +57,7 @@ def check_div(fit, verbose = True, per_chain = False):
 
             N = divergent.size
             logger.warning('{} of {} iterations ended '.format(n, N) +
-                           'with a divergence ({}%).'.format(100 * n / N))
+                           'with a divergence ({:.3g} %).'.format(100 * n / N))
 
             if per_chain:
                 chain_len, num_chains = divergent.shape
@@ -66,7 +67,7 @@ def check_div(fit, verbose = True, per_chain = False):
                         logger.warning('Chain {}: {} of {} iterations ended '.format(chain_num + 1,
                                                                                      n_for_chains[chain_num],
                                                                                      chain_len) +
-                                       'with a divergence ({}%).'.format(100 * n_for_chains[chain_num] /
+                                       'with a divergence ({:.3g} %).'.format(100 * n_for_chains[chain_num] /
                                                                          chain_len))
 
             try:
@@ -83,13 +84,13 @@ def check_div(fit, verbose = True, per_chain = False):
 
         return False
     else:
-        if verbosity > 1:
+        if verbosity > 2:
             logger.info('No divergent transitions found.')
 
         return True
 
 
-def check_treedepth(fit, verbose = True, per_chain = False):
+def check_treedepth(fit, verbose=True, per_chain=False):
     """Check for transitions that ended prematurely due to maximum tree
     depth limit
 
@@ -103,7 +104,7 @@ def check_treedepth(fit, verbose = True, per_chain = False):
         (the default) or an integer greater than zero, then a
         diagnostic message is printed only if there are transitions
         that ended ended prematurely due to maximum tree depth
-        limit. If it is an integer greater than 1, then extra
+        limit. If it is an integer greater than 2, then extra
         diagnostic messages are printed.
     per_chain : bool, optional
         Print the number of prematurely ending transitions in each chain
@@ -137,15 +138,15 @@ def check_treedepth(fit, verbose = True, per_chain = False):
     except:
         raise ValueError('Cannot obtain value of max_treedepth from fit object')
 
-    n_for_chain =  (depths >= max_treedepth).sum(axis=0)
+    n_for_chains =  (depths >= max_treedepth).sum(axis=0)
 
-    n = n_for_chain.sum()
+    n = n_for_chains.sum()
 
     if n > 0:
         if verbosity > 0:
             N = depths.size
             logger.warning(('{} of {} iterations saturated the maximum tree depth of {}'
-                                + ' ({}%)').format(n, N, max_treedepth, 100 * n / N))
+                                + ' ({:.3g} %)').format(n, N, max_treedepth, 100 * n / N))
 
             if per_chain:
                 chain_len, num_chains = depths.shape
@@ -155,7 +156,7 @@ def check_treedepth(fit, verbose = True, per_chain = False):
                         logger.warning('Chain {}: {} of {} saturated '.format(chain_num + 1,
                                                                               n_for_chains[chain_num],
                                                                               chain_len) +
-                                       'the maximum tree depth of {} ({}%).'.format(max_treedepth,
+                                       'the maximum tree depth of {} ({:.3g} %).'.format(max_treedepth,
                                                                                     100 * n_for_chains[chain_num] /
                                                                                     chain_len))
 
@@ -164,12 +165,12 @@ def check_treedepth(fit, verbose = True, per_chain = False):
 
         return False
     else:
-        if verbosity > 1:
+        if verbosity > 2:
             logger.info('No transitions that ended prematurely due to maximum tree depth limit')
 
         return True
 
-def check_energy(fit, verbose = True):
+def check_energy(fit, verbose=True):
     """Checks the energy Bayesian fraction of missing information (E-BFMI)
 
     Parameters
@@ -181,7 +182,7 @@ def check_energy(fit, verbose = True):
         the function conveys diagnostic information. If it is ``True``
         (the default) or an integer greater than zero, then a
         diagnostic message is printed only if there is low E-BFMI in
-        one or more chains. If it is an integer greater than 1, then
+        one or more chains. If it is an integer greater than 2, then
         extra diagnostic messages are printed.
 
 
@@ -205,7 +206,7 @@ def check_energy(fit, verbose = True):
     try:
         energies = np.column_stack([y['energy__'] for y in sampler_params])
     except:
-        raise ValueError('energy__ not in sampler params of fit object')
+        raise ValueError('Cannot access energy information from fit object')
 
     chain_len, num_chains = energies.shape
 
@@ -220,18 +221,18 @@ def check_energy(fit, verbose = True):
 
         if e_bfmi[chain_num] < 0.2:
             if verbosity > 0:
-                logger.warning('Chain {}: E-BFMI = {}'.format(chain_num + 1,
+                logger.warning('Chain {}: E-BFMI = {:.3g}'.format(chain_num + 1,
                                                               e_bfmi[chain_num]))
 
             no_warning = False
         else:
-            if verbosity > 1:
-                logger.info('Chain {}: E-BFMI (= {}) '.format(chain_num + 1,
+            if verbosity > 2:
+                logger.info('Chain {}: E-BFMI (= {:.3g}) '.format(chain_num + 1,
                                                               e_bfmi[chain_num]) +
                             'equals or exceeds threshold of 0.2.')
 
     if no_warning:
-        if verbosity > 1:
+        if verbosity > 2:
             logger.info('E-BFMI indicated no pathological behavior')
 
         return True
@@ -241,12 +242,15 @@ def check_energy(fit, verbose = True):
 
         return False
 
-def check_n_eff(fit, verbose = True):
+def check_n_eff(fit, pars=None, verbose=True):
     """Checks the effective sample size per iteration
 
     Parameters
     ----------
     fit : StanFit4Model object
+    pars : {str, sequence of str}, optional
+        Parameter (or quantile) name(s). Test only specific parameters.
+        Raises an exception if parameter is not valid.
     verbose : bool or int, optional
         If ``verbose`` is ``False`` or a nonpositive integer, no
         diagnostic messages are printed, and only the return value of
@@ -254,7 +258,8 @@ def check_n_eff(fit, verbose = True):
         (the default) or an integer greater than zero, then a
         diagnostic message is printed only if there are effective
         sample sizes that appear pathologically low. If it is an
-        integer greater than 1, then extra diagnostic messages are
+        integer greater than 1, then parameter (quantile) diagnostics
+        are printed. If integer is greater than 2 extra diagnostic messages are
         printed.
 
 
@@ -264,38 +269,55 @@ def check_n_eff(fit, verbose = True):
         ``True`` if there are no problems with effective sample size
         and ``False`` otherwise.
 
-    Raises
-    ------
-    ValueError
-        If the output of ``fit.summary()`` has no information about
-        effective sample size (i.e., n_eff).
-
     """
 
     verbosity = int(verbose)
 
-    fit_summary = fit.summary(probs=[0.5])
-
-    try:
-        n_effs_index = fit_summary['summary_colnames'].index('n_eff')
-    except:
-        raise ValueError('Summary of fit object appears to lack information on effective sample size')
-
-    n_effs = fit_summary['summary'][:, n_effs_index]
-    names = fit_summary['summary_rownames']
     n_iter = sum(fit.sim['n_save'])-sum(fit.sim['warmup2'])
 
+    if pars is None:
+        pars = fit.sim['fnames_oi']
+    else:
+        if isinstance(pars, string_types):
+            pars = [pars]
+        pars = _remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+        allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
+        _check_pars(allpars, pars)
+        packed_pars = set(pars) - set(fit.sim['fnames_oi'])
+        if packed_pars:
+            unpack_dict = {}
+            for par_unpacked in fit.sim['fnames_oi']:
+                par_packed = par_unpacked.split("[")[0]
+                if par_packed not in unpack_dict:
+                    unpack_dict[par_packed] = []
+                unpack_dict[par_packed].append(par_unpacked)
+            pars_unpacked = []
+            for par in pars:
+                if par in packed_pars:
+                    pars_unpacked.extend(unpack_dict[par])
+                else:
+                    pars_unpacked.append(par)
+            pars = pars_unpacked
+
+    par_n_dict = {}
+    for n, par in enumerate(fit.sim['fnames_oi']):
+        par_n_dict[par] = n
+
     no_warning = True
-    for n_eff, name in zip(n_effs, names):
+    for name in pars:
+        n = par_n_dict[name]
+        n_eff = pystan.chains.ess(fit.sim, n)
         ratio = n_eff / n_iter
         if ((ratio < 0.001) or np.isnan(ratio) or np.isinf(ratio)):
-            if verbosity > 0:
-                logger.warning('n_eff / iter for parameter {} is {}!'.format(name, ratio))
+            if verbosity > 1:
+                logger.warning('n_eff / iter for parameter {} is {:.3g}!'.format(name, ratio))
 
             no_warning = False
+            if verbosity <= 1:
+                break
 
     if no_warning:
-        if verbosity > 1:
+        if verbosity > 2:
             logger.info('n_eff / iter looks reasonable for all parameters')
 
         return True
@@ -305,12 +327,15 @@ def check_n_eff(fit, verbose = True):
 
         return False
 
-def check_rhat(fit, verbose = True):
+def check_rhat(fit, pars=None, verbose=True):
     """Checks the potential scale reduction factors, i.e., Rhat values
 
     Parameters
     ----------
     fit : StanFit4Model object
+    pars : {str, sequence of str}, optional
+        Parameter (or quantile) name(s). Test only specific parameters.
+        Raises an exception if parameter is not valid.
     verbose : bool or int, optional
         If ``verbose`` is ``False`` or a nonpositive integer, no
         diagnostic messages are printed, and only the return value of
@@ -318,7 +343,8 @@ def check_rhat(fit, verbose = True):
         (the default) or an integer greater than zero, then a
         diagnostic message is printed only if there are Rhat values
         too far from 1. If ``verbose`` is an integer greater than 1,
-        then extra diagnostic messages are printed.
+        parameter (quantile) diagnostics are printed. If ``verbose``
+        is an integer greater than 2, then extra diagnostic messages are printed.
 
 
     Returns
@@ -327,37 +353,54 @@ def check_rhat(fit, verbose = True):
         ``True`` if there are no problems with with Rhat and ``False``
         otherwise.
 
-    Raises
-    ------
-    ValueError
-        If the output of ``fit.summary()`` has no information about
-        Rhat.
-
     """
 
     verbosity = int(verbose)
 
-    fit_summary = fit.summary(probs=[0.5])
+    if pars is None:
+        pars = fit.sim['fnames_oi']
+    else:
+        if isinstance(pars, string_types):
+            pars = [pars]
+        pars = _remove_empty_pars(pars, fit.sim['pars_oi'], fit.sim['dims_oi'])
+        allpars = fit.sim['pars_oi'] + fit.sim['fnames_oi']
+        _check_pars(allpars, pars)
+        packed_pars = set(pars) - set(fit.sim['fnames_oi'])
+        if packed_pars:
+            unpack_dict = {}
+            for par_unpacked in fit.sim['fnames_oi']:
+                par_packed = par_unpacked.split("[")[0]
+                if par_packed not in unpack_dict:
+                    unpack_dict[par_packed] = []
+                unpack_dict[par_packed].append(par_unpacked)
+            pars_unpacked = []
+            for par in pars:
+                if par in packed_pars:
+                    pars_unpacked.extend(unpack_dict[par])
+                else:
+                    pars_unpacked.append(par)
+            pars = pars_unpacked
 
-    try:
-        Rhat_index = fit_summary['summary_colnames'].index('Rhat')
-    except:
-        raise ValueError('Summary of fit object appears to lack information on Rhat')
-
-    rhats = fit_summary['summary'][:, Rhat_index]
-    names = fit_summary['summary_rownames']
+    par_n_dict = {}
+    for n, par in enumerate(fit.sim['fnames_oi']):
+        par_n_dict[par] = n
 
     no_warning = True
-    for rhat, name in zip(rhats, names):
+    for name in pars:
+        n = par_n_dict[name]
+        rhat = pystan.chains.splitrhat(fit.sim, n)
+
         if (np.isnan(rhat) or np.isinf(rhat) or (rhat > 1.1) or (rhat < 0.9)):
 
-            if verbosity > 0:
-                logger.warning('Rhat for parameter {} is {}!'.format(name, rhat))
+            if verbosity > 1:
+                logger.warning('Rhat for parameter {} is {:.3g}!'.format(name, rhat))
 
             no_warning = False
+            if verbosity <= 1:
+                break
 
     if no_warning:
-        if verbosity > 1:
+        if verbosity > 2:
             logger.info('Rhat looks reasonable for all parameters')
 
         return True
@@ -367,8 +410,8 @@ def check_rhat(fit, verbose = True):
 
         return False
 
-def check_hmc_diagnostics(fit, verbose = True, per_chain = False):
-    """Checks all MCMC diagnostics
+def check_hmc_diagnostics(fit, pars=None, verbose=True, per_chain=False, checks=None):
+    """Checks all hmc diagnostics
 
     Parameters
     ----------
@@ -379,11 +422,15 @@ def check_hmc_diagnostics(fit, verbose = True, per_chain = False):
         the function conveys diagnostic information. If it is ``True``
         (the default) or an integer greater than zero, then diagnostic
         messages are printed only for diagnostic checks that fail. If
-        ``verbose`` is an integer greater than 1, then extra
-        diagnostic messages are printed.
+        ``verbose`` is an integer greater than 1, then parameter
+        (quantile) diagnostics are printed. If ``verbose`` is
+        greater than 2, then extra diagnostic messages are printed.
     per_chain : bool, optional
         Where applicable, print diagnostics on a per-chain basis. This
         applies mainly to the divergence and treedepth checks.
+    checks : list, {"n_eff", "Rhat", "divergence", "treedepth", "energy"}, optional
+        By default run all checks. If ``checks`` is defined, run only
+        checks given in ``checks``
 
 
     Returns
@@ -401,36 +448,57 @@ def check_hmc_diagnostics(fit, verbose = True, per_chain = False):
     # For consistency with the individual diagnostic functions
     verbosity = int(verbose)
 
+    all_checks = {"n_eff", "Rhat", "divergence", "treedepth", "energy"}
+    if checks is None:
+        checks = all_checks
+    else:
+        undefined_checks = []
+        for c in checks:
+            # accept lowercase Rhat
+            if c == "rhat":
+                continue
+            if c not in all_checks:
+                undefined_checks.append(c)
+        if undefined_checks:
+            ucstr = "[" + ", ".join(undefined_checks) + "]"
+            msg = "checks: {} are not legal checks: {}".format(ucstr, all_checks)
+            raise TypeError(msg)
+
     out_dict = {}
 
-    try:
-        out_dict['n_eff'] = check_n_eff(fit, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of effective sample size (n_eff)')
+    if "n_eff" in checks:
+        try:
+            out_dict['n_eff'] = check_n_eff(fit, pars, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of effective sample size (n_eff)')
 
-    try:
-        out_dict['Rhat'] = check_rhat(fit, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of potential scale reduction factors (Rhat)')
+    if ("Rhat" in checks) or ("rhat" in checks):
+        try:
+            out_dict['Rhat'] = check_rhat(fit, pars, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of potential scale reduction factors (Rhat)')
 
-    try:
-        out_dict['divergence'] = check_div(fit, verbose, per_chain)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of divergent transitions (divergence)')
+    if "divergence" in checks:
+        try:
+            out_dict['divergence'] = check_div(fit, verbose, per_chain)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of divergent transitions (divergence)')
 
-    try:
-        out_dict['treedepth'] = check_treedepth(fit, verbose, per_chain)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of transitions ending prematurely due to maximum tree depth limit (treedepth)')
+    if "treedepth" in checks:
+        try:
+            out_dict['treedepth'] = check_treedepth(fit, verbose, per_chain)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of transitions ending prematurely due to maximum tree depth limit (treedepth)')
 
-    try:
-        out_dict['energy'] = check_energy(fit, verbose)
-    except ValueError:
-        if verbosity > 0:
-            logger.warning('Skipping check of E-BFMI (energy)')
+    if "energy" in checks:
+        try:
+            out_dict['energy'] = check_energy(fit, verbose)
+        except ValueError:
+            if verbosity > 0:
+                logger.warning('Skipping check of E-BFMI (energy)')
 
     return out_dict
