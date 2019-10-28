@@ -13,7 +13,6 @@ environment:
 
   matrix:
     - CONDA: 27
-    - CONDA: 35
     - CONDA: 36
     - CONDA: 37
 
