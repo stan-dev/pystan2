@@ -500,7 +500,8 @@ class StanModel:
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
                               extra_objects=sundials_objects,
-                              extra_compile_args=extra_compile_args)
+                              extra_compile_args=extra_compile_args
+                              )
 
         cython_include_dirs = ['.', pystan_dir]
 
