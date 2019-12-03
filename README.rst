@@ -38,6 +38,7 @@ Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
+- emcee: http://dan.iel.fm/emcee/current/
 
 PyStan3 / Stan3
 ---------------
