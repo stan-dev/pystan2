@@ -321,7 +321,7 @@ class StanModel:
         if extra_compile_args is None:
             extra_compile_args = []
 
-        if platform.platform().startswith('Win'):
+        if platform.system() == 'Windows':
             if build_extension.compiler in (None, 'msvc'):
                 logger.warning("MSVC compiler is not supported")
                 extra_compile_args = [
@@ -343,6 +343,10 @@ class StanModel:
                     "-pthread",
                     "-fexceptions",
                 ] + extra_compile_args
+                if platform.architecture()[0] == "64bit":
+                    # fix undefined variable
+                    # see https://github.com/cython/cython/issues/2670#issuecomment-432212671
+                    extra_compile_args.append("-DMS_WIN64")
         else:
             # linux or macOS
             extra_compile_args = [
