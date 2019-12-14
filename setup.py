@@ -102,7 +102,9 @@ stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
                      'pystan/stan/lib/stan_math/lib/boost_1.69.0',
-                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include']
+                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include',
+                     'pystan/stan/lib/stan_math/lib/tbb_2019_U8/include/tbb',
+                     ]
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -118,7 +120,7 @@ extra_compile_args = [
     '-std=c++1y',
 ]
 
-if platform.platform().startswith('Win'):
+if platform.system() == 'Windows':
     from Cython.Build.Inline import _get_build_extension
     if _get_build_extension().compiler in (None, 'msvc'):
         print("Warning: MSVC is not supported")
@@ -152,6 +154,7 @@ stanc_sources = [
     "pystan/stan/src/stan/lang/grammars/statement_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/term_grammar_inst.cpp",
     "pystan/stan/src/stan/lang/grammars/whitespace_grammar_inst.cpp",
+
 ]
 
 extensions = [

@@ -285,6 +285,7 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb_2019_U8", "include", "tbb"),
             np.get_include(),
         ]
 
