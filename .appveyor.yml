@@ -12,7 +12,6 @@ environment:
       secure: mjwuqrrrl71BQoPg5t++MKlVApmBBDAr7GmQtI5YawjhdpCJtMi+Tof4P1ENDCLp
 
   matrix:
-    - CONDA: 27
     - CONDA: 35
     - CONDA: 36
     - CONDA: 37
@@ -31,7 +30,6 @@ install:
   - ECHO "Filesystem root:"
   - ps: "ls \"C:/\""
   - SET "CONDAPATH=conda%CONDA%"
-  - if %CONDA%==27 (SET "CONDAPATH=conda")
   - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
 
   - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
