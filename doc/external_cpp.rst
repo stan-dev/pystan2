@@ -133,7 +133,8 @@ is set to ``True``.
                                   includes=include_files,
                                   include_dirs=include_dir,
                                  )
-    fit = stan_model.sampling()
+    stan_data = {"B" : 0.1}
+    fit = stan_model.sampling(data=stan_data)
     print(fit)
 
 Compilation with external C++ can take longer than normally. The external C++
