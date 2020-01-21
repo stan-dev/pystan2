@@ -131,7 +131,7 @@ is set to ``True``.
                                   verbose=True,
                                   allow_undefined=True,
                                   includes=include_files,
-                                  include_dirs=[include_dir],
+                                  include_dirs=include_dir,
                                  )
     fit = stan_model.sampling()
     print(fit)
