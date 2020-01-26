@@ -125,13 +125,13 @@ is set to ``True``.
     model_code = """...
                  """
 
-    include_dir = [os.path.join(".", "external_cpp")]
+    include_dirs = [os.path.join(".", "external_cpp")]
     include_files = ["external_manual.hpp", "external_autograd.hpp"]
     stan_model = pystan.StanModel(model_code=model_code,
                                   verbose=True,
                                   allow_undefined=True,
                                   includes=include_files,
-                                  include_dirs=include_dir,
+                                  include_dirs=include_dirs,
                                  )
     stan_data = {"B" : 0.1}
     fit = stan_model.sampling(data=stan_data)
