@@ -139,7 +139,11 @@ You should see two compilers like ``x86_64-apple-darwin13.4.0-clang`` and ``x86_
 
 - type ``export CC=x86_64-apple-darwin13.4.0-clang`` and ``export CXX=x86_64-apple-darwin13.4.0-clang++``
 
+If not using Anaconda (in Linux OS)
+---------------------
 
+- You need to install gcc-7 using this `reference <https://forums.linuxmint.com/viewtopic.php?p=1465419&sid=72631feb0aa7bc551f199c606aecf256#p1465419>`_.
+- Set-up your path to include folder containing compilers (e.g. In case ``which gcc-7`` returns ``/usr/bin/gcc-7``) then add ``export CC=/usr/bin/gcc-7`` and ``export CXX=/usr/bin/g++-7`` to your ~/.bashrc file.
 
 Installing PyStan
 -----------------
