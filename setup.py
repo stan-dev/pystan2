@@ -73,6 +73,10 @@ def find_version(*parts):
     return finder.version
 
 
+def build_tbb():
+    pass
+
+
 ###############################################################################
 # Optional setuptools features
 # We need to import setuptools early, if we want setuptools features,
@@ -102,7 +106,8 @@ stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
                      'pystan/stan/lib/stan_math/lib/boost_1.69.0',
-                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include']
+                     'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include',
+                     'pystan/stan/lib/stan_math/lib/tbb']
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -118,7 +123,7 @@ extra_compile_args = [
     '-std=c++1y',
 ]
 
-if platform.platform().startswith('Win'):
+if platform.system() == 'Windows':
     from Cython.Build.Inline import _get_build_extension
     if _get_build_extension().compiler in (None, 'msvc'):
         print("Warning: MSVC is not supported")
@@ -214,6 +219,7 @@ def setup_package():
                     long_description_content_type='text/x-rst',
                     classifiers=CLASSIFIERS,
                     **extra_setuptools_args)
+    build_tbb()
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
                                in ('--help-commands', 'egg_info', '--version', 'clean')):
         # For these actions, neither Numpy nor Cython is required.

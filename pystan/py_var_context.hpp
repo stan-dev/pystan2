@@ -11,7 +11,6 @@
 #include <stan/io/var_context.hpp>
 #include <stan/io/dump.hpp>
 #include <stan/io/ends_with.hpp>
-#include <stan/io/json/json_data.hpp>
 
 /* see stan/io/dump.hpp */
 
@@ -168,7 +167,7 @@ namespace pystan {
        *
        * @param names Vector to store the list of names in.
        */
-      virtual void names_r(std::vector<std::string>& names) const {
+      void names_r(std::vector<std::string>& names) const {
         names.resize(0);
         for (std::map<std::string,
                       std::pair<std::vector<double>,
@@ -184,7 +183,7 @@ namespace pystan {
        *
        * @param names Vector to store the list of names in.
        */
-      virtual void names_i(std::vector<std::string>& names) const {
+      void names_i(std::vector<std::string>& names) const {
         names.resize(0);
         for (std::map<std::string,
                       std::pair<std::vector<int>,
@@ -206,6 +205,40 @@ namespace pystan {
           || (vars_r_.erase(name) > 0);
       }
 
+      /**
+       * Check variable dimensions against variable declaration.
+       *
+       * @param stage stan program processing stage
+       * @param name variable name
+       * @param base_type declared stan variable type
+       * @param dims variable dimensions
+       * @throw std::runtime_error if mismatch between declared
+       *        dimensions and dimensions found in context.
+       */
+      void validate_dims(
+        const std::string& stage, const std::string& name,
+        const std::string& base_type,
+        const std::vector<size_t>& dims_declared) const {
+        bool is_int_type = base_type == "int";
+        if (is_int_type) {
+          if (!contains_i(name)) {
+            std::stringstream msg;
+            msg << (contains_r(name) ? "int variable contained non-int values"
+                                     : "variable does not exist")
+                << "; processing stage=" << stage << "; variable name=" << name
+                << "; base type=" << base_type;
+            throw std::runtime_error(msg.str());
+          }
+        } else {
+          if (!contains_r(name)) {
+            std::stringstream msg;
+            msg << "variable does not exist"
+                << "; processing stage=" << stage << "; variable name=" << name
+                << "; base type=" << base_type;
+            throw std::runtime_error(msg.str());
+          }
+        }
+
     };
 
     std::shared_ptr<stan::io::var_context> get_var_context(const std::string file) {
@@ -215,19 +248,13 @@ namespace pystan {
       msg << "Can't open specified file, \"" << file << "\"" << std::endl;
       throw std::invalid_argument(msg.str());
     }
-    if (stan::io::ends_with(".json", file)) {
-      stan::json::json_data var_context(stream);
-      stream.close();
-      std::shared_ptr<stan::io::var_context> result = std::make_shared<stan::json::json_data>(var_context);
-      return result;
-    }
     stan::io::dump var_context(stream);
     stream.close();
     std::shared_ptr<stan::io::var_context> result = std::make_shared<stan::io::dump>(var_context);
     return result;
     }
 
-  }
+  };
 
 }
 
