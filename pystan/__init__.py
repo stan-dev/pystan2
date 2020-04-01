@@ -7,7 +7,7 @@
 import logging
 
 from pystan.api import stanc, stan
-from pystan.misc import read_rdump, stan_rdump, stansummary
+from pystan.misc import read_rdump, stan_rdump, stansummary, add_libtbb_path
 from pystan.diagnostics import check_hmc_diagnostics
 from pystan.model import StanModel
 from pystan.lookup import lookup
@@ -16,6 +16,9 @@ logger = logging.getLogger('pystan')
 logger.addHandler(logging.NullHandler())
 if len(logger.handlers) == 1:
     logging.basicConfig(level=logging.INFO)
+
+add_libtbb_path()
+del add_libtbb_path
 
 # following PEP 386
 # See also https://docs.openstack.org/pbr/latest/user/semver.html

@@ -57,6 +57,10 @@ def load_module(module_name, module_path):
 def _map_parallel(function, args, n_jobs):
     """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
     # Following the error checking found in joblib
+    if n_jobs < 1:
+        n_jobs = os.cpu_count()
+    os.environ["STAN_NUM_THREADS"] = str(n_jobs)
+    n_jobs=1
     multiprocessing = int(os.environ.get('JOBLIB_MULTIPROCESSING', 1)) or None
     if multiprocessing:
         try:
@@ -340,9 +344,10 @@ class StanModel:
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
                     '-std=c++1y',
-                    "-D_hypot=hypot",
-                    "-pthread",
-                    "-fexceptions",
+                    '-D_hypot=hypot',
+                    '-pthread',
+                    '-fexceptions',
+                    '-DSTAN_THREADS'
                 ] + extra_compile_args
         else:
             # linux or macOS
@@ -352,6 +357,7 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
+                '-DSTAN_THREADS'
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
@@ -360,7 +366,10 @@ class StanModel:
                               sources=[pyx_file],
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
-                              extra_compile_args=extra_compile_args)
+                              libraries=["tbb"],
+                              library_dirs=[os.path.abspath(os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb"))],
+                              extra_compile_args=extra_compile_args,
+                              )
 
         cython_include_dirs = ['.', pystan_dir]
 

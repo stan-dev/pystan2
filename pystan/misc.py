@@ -28,6 +28,7 @@ import itertools
 import logging
 import math
 from numbers import Number
+import platform
 import os
 import random
 import re
@@ -1472,3 +1473,20 @@ def get_last_position(fit, warmup=False):
         extract_pos = {key : values[draw_location, i] for key, values in extracted.items()}
         positions.append(extract_pos)
     return positions
+
+def add_libtbb_path():
+    """Add libtbb to PATH on Windows."""
+    if platform.system() == 'Windows':
+        # Add tbb to the $PATH on Windows
+        libtbb = os.getenv('STAN_TBB')
+        if libtbb is None:
+            libtbb = os.path.join(
+                os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
+            )
+        os.environ['PATH'] = ';'.join(
+            list(
+                OrderedDict.fromkeys(
+                    [libtbb] + os.getenv('PATH', '').split(';')
+                )
+            )
+        )

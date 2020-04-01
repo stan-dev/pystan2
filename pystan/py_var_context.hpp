@@ -239,6 +239,7 @@ namespace pystan {
           }
         }
 
+      };
     };
 
     std::shared_ptr<stan::io::var_context> get_var_context(const std::string file) {
@@ -254,7 +255,7 @@ namespace pystan {
     return result;
     }
 
-  };
+  }
 
 }
 
