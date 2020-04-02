@@ -27,6 +27,7 @@ import time
 
 import distutils
 from distutils.core import Extension
+from glob import glob
 
 import Cython
 from Cython.Build.Inline import _get_build_extension
@@ -47,10 +48,7 @@ def build_tbb():
     cwd = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
     subprocess.check_call(cmd, cwd=cwd)
     build_dir = os.path.join(cwd, "build")
-    if platform.system() == "Windows":
-        build_object_dir = glob(os.path.join(build_dir, "windows*gcc*_release"))[0]
-    else:
-        build_object_dir = glob(os.path.join(build_dir, "*_release"))[0]
+    build_object_dir = glob(os.path.join(build_dir, "gcc*_release"))[0]
     tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
     if os.path.exists(tbb_dir):
         rmtree(tbb_dir)
