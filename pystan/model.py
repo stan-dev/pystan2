@@ -53,6 +53,9 @@ def build_tbb():
     if os.path.exists(tbb_dir):
         rmtree(tbb_dir)
     shutil.copytree(build_object_dir, tbb_dir)
+    print(tbb_dir)
+    print(os.listdir(tbb_dir))
+    print(os.environ)
 
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
