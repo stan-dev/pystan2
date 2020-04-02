@@ -24,8 +24,10 @@
 #-----------------------------------------------------------------------------
 import ast
 import codecs
+from glob import glob
 import os
 import platform
+import subprocess
 import sys
 
 LONG_DESCRIPTION = codecs.open('README.rst', encoding='utf-8').read()
@@ -74,7 +76,19 @@ def find_version(*parts):
 
 
 def build_tbb():
-    pass
+    make = "make" if platform.system() != "Windows" else "mingw32-make"
+    cmd = [make, "--target=gcc"]
+    cwd = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
+    subprocess.check_call(cmd, cwd=cwd)
+    build_dir = os.path.join(cwd, "build")
+    if platform.system() == "Windows":
+        build_object_dir = glob(os.path.join(build_dir, "windows*gcc*_release"))[0]
+    else:
+        build_object_dir = glob(os.path.join(build_dir, "*_release"))[0]
+    tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
+    if os.path.exists(tbb_dir):
+        rmtree(tbb_dir)
+    shutil.copytree(build_object_dir, tbb_dir)
 
 
 ###############################################################################
@@ -107,7 +121,7 @@ stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
                      'pystan/stan/lib/stan_math/lib/boost_1.69.0',
                      'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include',
-                     'pystan/stan/lib/stan_math/lib/tbb']
+                     'pystan/stan/lib/stan_math/lib/tbb_2019_U8/include']
 stan_macros = [
     ('BOOST_DISABLE_ASSERTS', None),
     ('BOOST_NO_DECLTYPE', None),
@@ -219,7 +233,6 @@ def setup_package():
                     long_description_content_type='text/x-rst',
                     classifiers=CLASSIFIERS,
                     **extra_setuptools_args)
-    build_tbb()
     if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
                                in ('--help-commands', 'egg_info', '--version', 'clean')):
         # For these actions, neither Numpy nor Cython is required.
@@ -248,6 +261,7 @@ def setup_package():
         metadata['cmdclass'] = {'install': install.install}
     try:
         dist.run_commands()
+        build_tbb()
     except KeyboardInterrupt:
         raise SystemExit("Interrupted")
     except (IOError, os.error) as exc:
