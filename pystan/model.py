@@ -40,6 +40,21 @@ import pystan.diagnostics
 logger = logging.getLogger('pystan')
 
 
+def build_tbb():
+    make = "make" if platform.system() != "Windows" else "mingw32-make"
+    cmd = [make, "--target=gcc"]
+    cwd = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
+    subprocess.check_call(cmd, cwd=cwd)
+    build_dir = os.path.join(cwd, "build")
+    if platform.system() == "Windows":
+        build_object_dir = glob(os.path.join(build_dir, "windows*gcc*_release"))[0]
+    else:
+        build_object_dir = glob(os.path.join(build_dir, "*_release"))[0]
+    tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
+    if os.path.exists(tbb_dir):
+        rmtree(tbb_dir)
+    shutil.copytree(build_object_dir, tbb_dir)
+
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""
@@ -230,6 +245,12 @@ class StanModel:
                  obfuscate_model_name=True, extra_compile_args=None,
                  allow_undefined=False, include_dirs=None, includes=None):
 
+
+        tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
+        if not os.path.exists(tbb_dir):
+            build_tbb()
+
+
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
                                          charset=charset,
@@ -367,7 +388,7 @@ class StanModel:
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
                               libraries=["tbb"],
-                              library_dirs=[os.path.abspath(os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb"))],
+                              library_dirs=[os.path.abspath(tbb_dir)],
                               extra_compile_args=extra_compile_args,
                               )
 

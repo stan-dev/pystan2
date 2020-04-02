@@ -75,22 +75,6 @@ def find_version(*parts):
     return finder.version
 
 
-def build_tbb():
-    make = "make" if platform.system() != "Windows" else "mingw32-make"
-    cmd = [make, "--target=gcc"]
-    cwd = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
-    subprocess.check_call(cmd, cwd=cwd)
-    build_dir = os.path.join(cwd, "build")
-    if platform.system() == "Windows":
-        build_object_dir = glob(os.path.join(build_dir, "windows*gcc*_release"))[0]
-    else:
-        build_object_dir = glob(os.path.join(build_dir, "*_release"))[0]
-    tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
-    if os.path.exists(tbb_dir):
-        rmtree(tbb_dir)
-    shutil.copytree(build_object_dir, tbb_dir)
-
-
 ###############################################################################
 # Optional setuptools features
 # We need to import setuptools early, if we want setuptools features,
@@ -261,7 +245,6 @@ def setup_package():
         metadata['cmdclass'] = {'install': install.install}
     try:
         dist.run_commands()
-        build_tbb()
     except KeyboardInterrupt:
         raise SystemExit("Interrupted")
     except (IOError, os.error) as exc:
