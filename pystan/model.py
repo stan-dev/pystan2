@@ -367,7 +367,8 @@ class StanModel:
                     '-D_hypot=hypot',
                     '-pthread',
                     '-fexceptions',
-                    '-DSTAN_THREADS'
+                    '-DSTAN_THREADS',
+                    '-D_REENTRANT',
                 ] + extra_compile_args
         else:
             # linux or macOS
@@ -377,7 +378,8 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
-                '-DSTAN_THREADS'
+                '-DSTAN_THREADS',
+                '-D_REENTRANT',
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
