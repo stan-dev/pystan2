@@ -103,7 +103,7 @@ from distutils.extension import Extension
 stan_include_dirs = ['pystan/stan/src',
                      'pystan/stan/lib/stan_math/',
                      'pystan/stan/lib/stan_math/lib/eigen_3.3.3',
-                     'pystan/stan/lib/stan_math/lib/boost_1.69.0',
+                     'pystan/stan/lib/stan_math/lib/boost_1.72.0',
                      'pystan/stan/lib/stan_math/lib/sundials_4.1.0/include',
                      'pystan/stan/lib/stan_math/lib/tbb_2019_U8/include']
 stan_macros = [
