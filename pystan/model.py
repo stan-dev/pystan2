@@ -43,7 +43,7 @@ logger = logging.getLogger('pystan')
 
 def build_tbb():
     make = "make" if platform.system() != "Windows" else "mingw32-make"
-    cmd = [make, "--compiler=gcc"]
+    cmd = [make, "compiler=gcc"]
     cwd = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
     subprocess.check_call(cmd, cwd=cwd)
     build_dir = os.path.join(cwd, "build")
