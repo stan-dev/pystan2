@@ -1476,7 +1476,7 @@ def get_last_position(fit, warmup=False):
 
 def add_libtbb_path():
     """Add libtbb to PATH on Windows."""
-    if platform.system() == 'Windows':
+    if True: #platform.system() == 'Windows':
         # Add tbb to the $PATH on Windows
         libtbb = os.getenv('STAN_TBB')
         if libtbb is None:

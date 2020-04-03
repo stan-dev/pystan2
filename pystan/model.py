@@ -43,19 +43,49 @@ logger = logging.getLogger('pystan')
 
 
 def build_tbb():
-    make = "make" if platform.system() != "Windows" else "mingw32-make"
-    cmd = [make, "compiler=gcc"]
-    cwd = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb_2019_U8')
+    """Build tbb."""
+    stan_math_lib = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib')
+
+    make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
+    cmd = [make]
+
+    tbb_root = os.path.join(stan_math_lib, 'tbb_2019_U8').replace("\\", "/")
+    tbb_src = os.path.join(tbb_root, 'src').replace("\\", "/")
+
+    cmd.extend(['-C', tbb_root])
+    cmd.append('tbb_build_dir={}'.format(stan_math_lib))
+    cmd.append('tbb_build_prefix=tbb')
+    cmd.append('tbb_root={}'.format(tbb_root))
+
+    cmd.append('stdver=c++14')
+
+    compiler = os.getenv('TBB_COMPILER', 'gcc')
+    cmd.append('compiler={}'.format(compiler))
+
+    cwd = os.path.dirname(__file__)
     subprocess.check_call(cmd, cwd=cwd)
-    build_dir = os.path.join(cwd, "build")
-    build_object_dir = glob(os.path.join(build_dir, "*gcc*_release"))[0]
-    tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
-    if os.path.exists(tbb_dir):
-        rmtree(tbb_dir)
-    shutil.copytree(build_object_dir, tbb_dir)
-    print(tbb_dir)
-    print(os.listdir(tbb_dir))
-    print(os.environ)
+
+    tbb_debug = os.path.join(stan_math_lib, "tbb_debug")
+    tbb_release = os.path.join(stan_math_lib, "tbb_release")
+    tbb_dir = os.path.join(stan_math_lib, "tbb")
+
+    if not os.path.exists(tbb_dir):
+        os.makedirs(tbb_dir)
+
+    if os.path.exists(tbb_debug):
+        shutil.rmtree(tbb_debug)
+
+    extension = ".so" if platform.system() != "Windows" else ".dll"
+
+    tbb_shared = "tbb{}".format(extension)
+    tbbmalloc_shared = "tbbmalloc{}".format(extension)
+    tbbmalloc_proxy_shared = "tbbmalloc_proxy{}".format(extension)
+
+    shutil.copy2(os.path.join(tbb_release, tbb_shared), os.path.join(tbb_dir, tbb_shared))
+    shutil.copy2(os.path.join(tbb_release, tbbmalloc_shared), os.path.join(tbb_dir, tbbmalloc_shared))
+    shutil.copy2(os.path.join(tbb_release, tbbmalloc_proxy_shared), os.path.join(tbb_dir, tbbmalloc_proxy_shared))
+
+    shutil.rmtree(tbb_release)
 
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
@@ -248,8 +278,9 @@ class StanModel:
                  allow_undefined=False, include_dirs=None, includes=None):
 
 
-        tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib','tbb')
-        if not os.path.exists(tbb_dir):
+        tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
+        tbb_shared = os.path.join(tbb_dir, "tbb" + ".so" if platform.system() != "Windows" else ".dll")
+        if not os.path.exists(tbb_shared):
             build_tbb()
 
 
@@ -391,7 +422,7 @@ class StanModel:
                               sources=[pyx_file],
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
-                              libraries=["tbb"],
+                              libraries=["tbb", "tbbmalloc", "tbbmalloc_proxy"],
                               library_dirs=[os.path.abspath(tbb_dir)],
                               extra_compile_args=extra_compile_args,
                               )

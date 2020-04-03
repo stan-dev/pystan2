@@ -5,6 +5,8 @@ doc/_build
 __pycache__
 *.a
 *.so
+*.dll
+*.pyd
 *.cpp
 *.pyc
 *.egg-info
