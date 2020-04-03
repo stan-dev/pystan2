@@ -101,14 +101,15 @@ def _map_parallel(function, args, n_jobs):
         try:
             import multiprocessing
             import multiprocessing.pool
+            if n_jobs < 1:
+                n_jobs = multiprocessing.cpu_count()
         except ImportError:
             multiprocessing = None
+            n_jobs = 1
         if sys.platform.startswith("win") and PY2:
             msg = "Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1"
             logger.warning(msg)
             n_jobs = 1
-    if n_jobs < 1:
-        n_jobs = multiprocessing.cpu_count()
     os.environ["STAN_NUM_THREADS"] = str(n_jobs)
     n_jobs=1
 
