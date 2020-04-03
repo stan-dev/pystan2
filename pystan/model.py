@@ -96,10 +96,6 @@ def load_module(module_name, module_path):
 def _map_parallel(function, args, n_jobs):
     """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
     # Following the error checking found in joblib
-    if n_jobs < 1:
-        n_jobs = os.cpu_count()
-    os.environ["STAN_NUM_THREADS"] = str(n_jobs)
-    n_jobs=1
     multiprocessing = int(os.environ.get('JOBLIB_MULTIPROCESSING', 1)) or None
     if multiprocessing:
         try:
@@ -111,6 +107,11 @@ def _map_parallel(function, args, n_jobs):
             msg = "Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1"
             logger.warning(msg)
             n_jobs = 1
+    if n_jobs < 1:
+        n_jobs = multiprocessing.cpu_count()
+    os.environ["STAN_NUM_THREADS"] = str(n_jobs)
+    n_jobs=1
+
     # 2nd stage: validate that locking is available on the system and
     #            issue a warning if not
     if multiprocessing:
