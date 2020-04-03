@@ -269,7 +269,6 @@ class StanModel:
 
 
         tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
-        tbb_shared = os.path.join(tbb_dir, "tbb" + ".so" if platform.system() != "Windows" else ".dll")
         if not os.path.exists(tbb_shared):
             build_tbb()
 
