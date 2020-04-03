@@ -75,7 +75,9 @@ def build_tbb():
     if os.path.exists(tbb_debug):
         shutil.rmtree(tbb_debug)
 
-    shutil.move(tbb_release, tbb_dir)
+    for name in os.listdir(tbb_release):
+        srcname = os.path.join(tbb_release, name)
+        shutil.move(srcname, tbb_dir)
 
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
@@ -416,6 +418,7 @@ class StanModel:
                               libraries=["tbb"],
                               library_dirs=[tbb_dir],
                               extra_compile_args=extra_compile_args,
+                              extra_link_args=["-ltbb"]
                               )
 
         cython_include_dirs = ['.', pystan_dir]
