@@ -417,8 +417,7 @@ class StanModel:
                               include_dirs=include_dirs,
                               libraries=["tbb"],
                               library_dirs=[tbb_dir],
-                              extra_compile_args=extra_compile_args,
-                              extra_link_args=["-ltbb"]
+                              extra_compile_args=extra_compile_args
                               )
 
         cython_include_dirs = ['.', pystan_dir]
