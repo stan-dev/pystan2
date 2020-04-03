@@ -269,7 +269,7 @@ class StanModel:
 
 
         tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
-        if not os.path.exists(tbb_shared):
+        if not os.path.exists(tbb_dir):
             build_tbb()
 
 
