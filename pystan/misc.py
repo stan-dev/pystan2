@@ -1476,24 +1476,17 @@ def get_last_position(fit, warmup=False):
 
 def add_libtbb_path():
     """Add libtbb to PATH on Windows."""
-    libtbb = os.getenv('STAN_TBB')
-    if libtbb is None:
-        libtbb = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
-        ))
     if platform.system() == "Windows":
+        libtbb = os.getenv('STAN_TBB')
+        if libtbb is None:
+            libtbb = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
+            ))
+
         os.environ['PATH'] = ';'.join(
             list(
                 OrderedDict.fromkeys(
                     [libtbb] + os.getenv('PATH', '').split(';')
-                )
-            )
-        )
-    else:
-        os.environ['LD_LIBRARY_PATH'] = ';'.join(
-            list(
-                OrderedDict.fromkeys(
-                    [libtbb] + os.getenv('LD_LIBRARY_PATH', '').split(';')
                 )
             )
         )

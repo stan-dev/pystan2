@@ -396,6 +396,7 @@ class StanModel:
                     '-DSTAN_THREADS',
                     '-D_REENTRANT',
                 ] + extra_compile_args
+            extra_link_args = []
         else:
             # linux or macOS
             extra_compile_args = [
@@ -406,8 +407,8 @@ class StanModel:
                 '-std=c++1y',
                 '-DSTAN_THREADS',
                 '-D_REENTRANT',
-                '-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir)),
             ] + extra_compile_args
+            extra_link_args = ['-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir))]
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
@@ -417,7 +418,8 @@ class StanModel:
                               include_dirs=include_dirs,
                               libraries=["tbb"],
                               library_dirs=[tbb_dir],
-                              extra_compile_args=extra_compile_args
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args,
                               )
 
         cython_include_dirs = ['.', pystan_dir]
