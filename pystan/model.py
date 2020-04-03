@@ -406,7 +406,7 @@ class StanModel:
                 '-std=c++1y',
                 '-DSTAN_THREADS',
                 '-D_REENTRANT',
-                '-L{}'.format(os.path.abspath(tbb_dir)),
+                '--rpath={}'.format(os.path.abspath(tbb_dir)),
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
