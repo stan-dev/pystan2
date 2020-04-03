@@ -269,6 +269,7 @@ class StanModel:
 
 
         tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
+        tbb_dir = os.path.abspath(tbb_dir)
         if not os.path.exists(tbb_dir):
             build_tbb()
 
@@ -403,6 +404,7 @@ class StanModel:
                 '-std=c++1y',
                 '-DSTAN_THREADS',
                 '-D_REENTRANT',
+                '-L{}'.format(os.path.abspath(tbb_dir)),
             ] + extra_compile_args
 
         distutils.log.set_verbosity(verbose)
@@ -411,8 +413,8 @@ class StanModel:
                               sources=[pyx_file],
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
-                              libraries=["tbb", "tbbmalloc", "tbbmalloc_proxy"],
-                              library_dirs=[os.path.abspath(tbb_dir)],
+                              libraries=["tbb"],
+                              library_dirs=[tbb_dir],
                               extra_compile_args=extra_compile_args,
                               )
 
