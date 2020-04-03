@@ -75,17 +75,7 @@ def build_tbb():
     if os.path.exists(tbb_debug):
         shutil.rmtree(tbb_debug)
 
-    extension = ".so" if platform.system() != "Windows" else ".dll"
-
-    tbb_shared = "tbb{}".format(extension)
-    tbbmalloc_shared = "tbbmalloc{}".format(extension)
-    tbbmalloc_proxy_shared = "tbbmalloc_proxy{}".format(extension)
-
-    shutil.copy2(os.path.join(tbb_release, tbb_shared), os.path.join(tbb_dir, tbb_shared))
-    shutil.copy2(os.path.join(tbb_release, tbbmalloc_shared), os.path.join(tbb_dir, tbbmalloc_shared))
-    shutil.copy2(os.path.join(tbb_release, tbbmalloc_proxy_shared), os.path.join(tbb_dir, tbbmalloc_proxy_shared))
-
-    shutil.rmtree(tbb_release)
+    shutil.move(tbb_release, tbb_dir)
 
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
