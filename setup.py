@@ -24,7 +24,6 @@
 #-----------------------------------------------------------------------------
 import ast
 import codecs
-from glob import glob
 import os
 import platform
 import subprocess
@@ -73,6 +72,48 @@ def find_version(*parts):
     finder = VersionFinder()
     finder.visit(ast.parse(read(*parts)))
     return finder.version
+
+###############################################################################
+
+def build_tbb():
+    """Build tbb."""
+    stan_math_lib = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib')
+
+    make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
+    cmd = [make]
+
+    tbb_root = os.path.join(stan_math_lib, 'tbb_2019_U8').replace("\\", "/")
+    tbb_src = os.path.join(tbb_root, 'src').replace("\\", "/")
+
+    cmd.extend(['-C', tbb_root])
+    cmd.append('tbb_build_dir={}'.format(stan_math_lib))
+    cmd.append('tbb_build_prefix=tbb')
+    cmd.append('tbb_root={}'.format(tbb_root))
+
+    cmd.append('stdver=c++14')
+
+    compiler = os.getenv('TBB_COMPILER', 'gcc')
+    cmd.append('compiler={}'.format(compiler))
+
+    cwd = os.path.dirname(__file__)
+    subprocess.check_call(cmd, cwd=cwd)
+
+    tbb_debug = os.path.join(stan_math_lib, "tbb_debug")
+    tbb_release = os.path.join(stan_math_lib, "tbb_release")
+    tbb_dir = os.path.join(stan_math_lib, "tbb")
+
+    if not os.path.exists(tbb_dir):
+        os.makedirs(tbb_dir)
+
+    if os.path.exists(tbb_debug):
+        shutil.rmtree(tbb_debug)
+
+    for name in os.listdir(tbb_release):
+        srcname = os.path.join(tbb_release, name)
+        shutil.move(srcname, tbb_dir)
+
+    if os.path.exists(tbb_release):
+        shutil.rmtree(tbb_release)
 
 
 ###############################################################################
@@ -181,6 +222,11 @@ extensions = [
 ## package data
 package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv',
                      'tests/data/*.stan', 'lookuptable/*.txt']
+
+# Build tbb before setup if needed
+tbb_path = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib', 'tbb')
+if not os.path.exists(tbb_path):
+    build_tbb()
 
 # get every file under pystan/stan/src and pystan/stan/lib
 stan_files_all = sum(

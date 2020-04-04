@@ -71,7 +71,6 @@ available, PyStan may be installed from source with the following commands
 ::
 
    git clone --recursive https://github.com/stan-dev/pystan.git
-   cd pystan
    python setup.py install
 
 To install latest development version user can also use ``pip``
@@ -83,6 +82,8 @@ To install latest development version user can also use ``pip``
 If you encounter an ``ImportError`` after compiling from source, try changing
 out of the source directory before attempting ``import pystan``. On Linux and
 OS X ``cd /tmp`` will work.
+
+``make`` (``mingw32-make`` on Windows) is a requirement for building from source.
 
 Example
 -------
@@ -131,7 +132,7 @@ Example
     # traceplot are available
     fit.plot()
     plt.show()
-    
+
     # updated traceplot can be plotted with
     import arviz as az
     az.plot_trace(fit)
@@ -150,4 +151,4 @@ Example
 
 .. |zenodo| image:: https://zenodo.org/badge/10256919.svg
     :target: https://zenodo.org/badge/latestdoi/10256919
-    :alt: zenodo citation DOI 
+    :alt: zenodo citation DOI

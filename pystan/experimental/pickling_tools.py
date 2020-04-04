@@ -36,8 +36,6 @@ def create_fake_model(module_name):
     if tbb_dir is None:
         tbb_dir = os.path.join(os.path.dirname(__file__), '..', 'stan', 'lib', 'stan_math', 'lib','tbb')
         tbb_dir = os.path.abspath(tbb_dir)
-        if not os.path.exists(tbb_dir):
-            build_tbb()
     else:
         tbb_dir = os.path.abspath(tbb_dir)
 
