@@ -71,6 +71,7 @@ available, PyStan may be installed from source with the following commands
 ::
 
    git clone --recursive https://github.com/stan-dev/pystan.git
+   cd pystan
    python setup.py install
 
 To install latest development version user can also use ``pip``
