@@ -19,7 +19,6 @@ import numbers
 import os
 import platform
 import shutil
-import subprocess
 import string
 import sys
 import tempfile
@@ -27,7 +26,6 @@ import time
 
 import distutils
 from distutils.core import Extension
-from glob import glob
 
 import Cython
 from Cython.Build.Inline import _get_build_extension
