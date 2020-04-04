@@ -167,7 +167,7 @@ namespace pystan {
        *
        * @param names Vector to store the list of names in.
        */
-      void names_r(std::vector<std::string>& names) const {
+      virtual void names_r(std::vector<std::string>& names) const {
         names.resize(0);
         for (std::map<std::string,
                       std::pair<std::vector<double>,
@@ -183,7 +183,7 @@ namespace pystan {
        *
        * @param names Vector to store the list of names in.
        */
-      void names_i(std::vector<std::string>& names) const {
+      virtual void names_i(std::vector<std::string>& names) const {
         names.resize(0);
         for (std::map<std::string,
                       std::pair<std::vector<int>,
