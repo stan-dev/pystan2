@@ -16,7 +16,7 @@ import sys
 import shutil
 
 from pystan._compat import PY2
-from pystan.model import load_module, build_tbb
+from pystan.model import load_module
 
 logger = logging.getLogger('pystan')
 
