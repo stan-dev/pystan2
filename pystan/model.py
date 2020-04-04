@@ -271,11 +271,14 @@ class StanModel:
                  obfuscate_model_name=True, extra_compile_args=None,
                  allow_undefined=False, include_dirs=None, includes=None):
 
-
-        tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
-        tbb_dir = os.path.abspath(tbb_dir)
-        if not os.path.exists(tbb_dir):
-            build_tbb()
+        tbb_dir = os.getenv("STAN_TBB")
+        if tbb_dir is None:
+            tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
+            tbb_dir = os.path.abspath(tbb_dir)
+            if not os.path.exists(tbb_dir):
+                build_tbb()
+        else:
+            tbb_dir = os.path.abspath(tbb_dir)
 
 
         if stanc_ret is None:
