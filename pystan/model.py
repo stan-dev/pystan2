@@ -235,9 +235,7 @@ class StanModel:
         tbb_dir = os.getenv("STAN_TBB")
         if tbb_dir is None:
             tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
-            tbb_dir = os.path.abspath(tbb_dir)
-        else:
-            tbb_dir = os.path.abspath(tbb_dir)
+        tbb_dir = os.path.abspath(tbb_dir)
 
 
         if stanc_ret is None:

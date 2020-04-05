@@ -35,9 +35,7 @@ def create_fake_model(module_name):
     tbb_dir = os.getenv("STAN_TBB")
     if tbb_dir is None:
         tbb_dir = os.path.join(os.path.dirname(__file__), '..', 'stan', 'lib', 'stan_math', 'lib','tbb')
-        tbb_dir = os.path.abspath(tbb_dir)
-    else:
-        tbb_dir = os.path.abspath(tbb_dir)
+    tbb_dir = os.path.abspath(tbb_dir)
 
     # reverse engineer the name
     model_name, nonce = module_name.replace("stanfit4", "").rsplit("_", 1)
