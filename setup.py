@@ -77,14 +77,13 @@ def find_version(*parts):
 
 def build_tbb():
     """Build tbb."""
-    stan_math_lib = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib')
+    stan_math_lib = os.path.abspath(os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib'))
     print(stan_math_lib)
     print(os.listdir(stan_math_lib))
     make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
     cmd = [make]
 
     tbb_root = os.path.join(stan_math_lib, 'tbb_2019_U8').replace("\\", "/")
-    tbb_src = os.path.join(tbb_root, 'src').replace("\\", "/")
 
     cmd.extend(['-C', tbb_root])
     cmd.append('tbb_build_dir={}'.format(stan_math_lib))
@@ -96,7 +95,7 @@ def build_tbb():
     compiler = os.getenv('TBB_COMPILER', 'gcc')
     cmd.append('compiler={}'.format(compiler))
 
-    cwd = os.path.dirname(__file__)
+    cwd = os.path.abspath(os.path.dirname(__file__))
     print(cmd)
     print(cwd)
     subprocess.check_call(cmd, cwd=cwd)
