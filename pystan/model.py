@@ -98,7 +98,7 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
     # reset STAN_NUM_THREADS
     if old_n_threads is not None:
         os.environ['STAN_NUM_THREADS'] = old_n_threads
-    else:
+    elif hasattr(os.environ, 'STAN_NUM_THREADS'):
         del os.environ['STAN_NUM_THREADS']
     return map_result
 
