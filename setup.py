@@ -26,6 +26,7 @@ import ast
 import codecs
 import os
 import platform
+import shutil
 import subprocess
 import sys
 
@@ -116,6 +117,8 @@ def build_tbb():
 
     if os.path.exists(tbb_release):
         shutil.rmtree(tbb_release)
+    print(os.listdir(stan_math_lib))
+    print(os.listdir(tbb_dir))
 
 
 ###############################################################################
