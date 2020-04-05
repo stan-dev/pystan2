@@ -79,7 +79,7 @@ def build_tbb():
     """Build tbb."""
     stan_math_lib = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib')
     print(stan_math_lib)
-    print(os.listdir(stan_math_lib)
+    print(os.listdir(stan_math_lib))
     make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
     cmd = [make]
 
