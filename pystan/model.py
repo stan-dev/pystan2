@@ -71,6 +71,7 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
             logger.warning(msg)
             n_jobs = 1
 
+    old_n_threads = os.getenv('STAN_NUM_THREADS')
     if n_threads is not None:
         os.environ['STAN_NUM_THREADS'] = str(int(n_threads))
 
@@ -94,6 +95,8 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
             pool.join()
     else:
         map_result = list(map(function, args))
+    # reset STAN_NUM_THREADS
+    os.environ['STAN_NUM_THREADS'] = old_n_threads
     return map_result
 
 
