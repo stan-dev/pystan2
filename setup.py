@@ -78,7 +78,8 @@ def find_version(*parts):
 def build_tbb():
     """Build tbb."""
     stan_math_lib = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib')
-
+    print(stan_math_lib)
+    print(os.listdir(stan_math_lib)
     make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
     cmd = [make]
 
@@ -96,6 +97,8 @@ def build_tbb():
     cmd.append('compiler={}'.format(compiler))
 
     cwd = os.path.dirname(__file__)
+    print(cmd)
+    print(cwd)
     subprocess.check_call(cmd, cwd=cwd)
 
     tbb_debug = os.path.join(stan_math_lib, "tbb_debug")
@@ -225,6 +228,7 @@ package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv',
 
 # Build tbb before setup if needed
 tbb_path = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib', 'tbb')
+print(tbb_path)
 if not os.path.exists(tbb_path):
     build_tbb()
 
