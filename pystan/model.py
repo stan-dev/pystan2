@@ -61,11 +61,8 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
         try:
             import multiprocessing
             import multiprocessing.pool
-            if n_jobs < 1:
-                n_jobs = multiprocessing.cpu_count()
         except ImportError:
             multiprocessing = None
-            n_jobs = 1
         if (platform.system() == 'Windows') and PY2:
             msg = 'Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1'
             logger.warning(msg)
@@ -74,6 +71,9 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
     old_n_threads = os.getenv('STAN_NUM_THREADS')
     if n_threads is not None:
         os.environ['STAN_NUM_THREADS'] = str(int(n_threads))
+    elif not hasattr(os.environ, 'STAN_NUM_THREADS'):
+        if multiprocessing is not None:
+            os.environ['STAN_NUM_THREADS'] = str(multiprocessing.cpu_count())
 
     # 2nd stage: validate that locking is available on the system and
     #            issue a warning if not
