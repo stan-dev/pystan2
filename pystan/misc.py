@@ -1494,7 +1494,7 @@ def add_libtbb_path():
 
 def build_stan_tbb():
     """Build tbb."""
-    stan_math_lib = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib')
+    stan_math_lib = os.path.abspath(os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib'))
 
     make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
     cmd = [make]
@@ -1512,7 +1512,7 @@ def build_stan_tbb():
     compiler = os.getenv('TBB_COMPILER', 'gcc')
     cmd.append('compiler={}'.format(compiler))
 
-    cwd = os.path.dirname(__file__)
+    cwd = os.path.abspath(os.path.dirname(__file__))
     subprocess.check_call(cmd, cwd=cwd)
 
     tbb_debug = os.path.join(stan_math_lib, "tbb_debug")
