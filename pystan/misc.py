@@ -1492,7 +1492,7 @@ def add_libtbb_path():
             )
         )
 
-def build_stan_tbb():
+def build_stan_tbb(use_debug=False):
     """Build tbb."""
     stan_math_lib = os.path.abspath(os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib'))
 
@@ -1519,6 +1519,9 @@ def build_stan_tbb():
     tbb_release = os.path.join(stan_math_lib, "tbb_release")
     tbb_dir = os.path.join(stan_math_lib, "tbb")
 
+    if use_debug:
+        tbb_release, tbb_debug = tbb_debug, tbb_release
+
     if not os.path.exists(tbb_dir):
         os.makedirs(tbb_dir)
 
@@ -1527,7 +1530,8 @@ def build_stan_tbb():
 
     for name in os.listdir(tbb_release):
         srcname = os.path.join(tbb_release, name)
-        shutil.move(srcname, tbb_dir)
+        dstname = os.path.join(tbb_dir, name)
+        shutil.move(srcname, dstname)
 
     if os.path.exists(tbb_release):
         shutil.rmtree(tbb_release)

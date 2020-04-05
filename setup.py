@@ -111,7 +111,8 @@ def build_tbb():
 
     for name in os.listdir(tbb_release):
         srcname = os.path.join(tbb_release, name)
-        shutil.move(srcname, tbb_dir)
+        dstname = os.path.join(tbb_dir, name)
+        shutil.move(srcname, dstname)
 
     if os.path.exists(tbb_release):
         shutil.rmtree(tbb_release)
@@ -225,9 +226,9 @@ package_data_pats = ['*.hpp', '*.pxd', '*.pyx', 'tests/data/*.csv',
                      'tests/data/*.stan', 'lookuptable/*.txt']
 
 # Build tbb before setup if needed
-tbb_path = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib', 'tbb')
-print(tbb_path)
-if not os.path.exists(tbb_path):
+tbb_dir = os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib', 'tbb')
+tbb_dir = os.path.abspath(tbb_dir)
+if not os.path.exists(tbb_dir):
     build_tbb()
 
 # get every file under pystan/stan/src and pystan/stan/lib

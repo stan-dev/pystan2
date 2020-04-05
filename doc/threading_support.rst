@@ -3,6 +3,102 @@
 .. currentmodule:: pystan
 
 ===================================
+Threading Support with Pystan 2.22+
+===================================
+
+PyStan (Stan) uses intel TBB library to handle threading for in-chain parallel computing.
+
+Threading on automatically and the number of threads for each chain can be controlled in
+two ways. The first and recommended way is to use `n_threads` argument given to the `.sampling`
+ method. The second way is to define and use `STAN_NUM_THREADS` environmental variable.
+
+Due to use of `multiprocessing` to parallelize chains, user needs to be aware of the cpu usage.
+This means that each chain will use `STAN_NUM_THREADS` cpu cores and this can have an affect on performance.
+By default, n_threads is set to `multiprocessing.cpu_count`.
+PyStan3 uses full threading based approach, where the thread counts are not limited to individual chains.
+
+Windows
+=======
+
+Intel TBB handled threading is supported on Windows.
+
+
+Example
+=======
+
+.. code-block:: python
+
+    import pystan
+
+    # Example model
+    # see http://discourse.mc-stan.org/t/cant-make-cmdstan-2-18-in-windows/5088/18
+    stan_code = """
+    functions {
+      vector bl_glm(vector mu_sigma, vector beta,
+                    real[] x, int[] y) {
+        vector[2] mu = mu_sigma[1:2];
+        vector[2] sigma = mu_sigma[3:4];
+        real lp = normal_lpdf(beta | mu, sigma);
+        real ll = bernoulli_logit_lpmf(y | beta[1] + beta[2] * to_vector(x));
+        return [lp + ll]';
+      }
+    }
+    data {
+      int<lower = 0> K;
+      int<lower = 0> N;
+      vector[N] x;
+      int<lower = 0, upper = 1> y[N];
+    }
+    transformed data {
+      int<lower = 0> J = N / K;
+      real x_r[K, J];
+      int<lower = 0, upper = 1> x_i[K, J];
+      {
+        int pos = 1;
+        for (k in 1:K) {
+          int end = pos + J - 1;
+          x_r[k] = to_array_1d(x[pos:end]);
+          x_i[k] = y[pos:end];
+          pos += J;
+        }
+      }
+    }
+    parameters {
+      vector[2] beta[K];
+      vector[2] mu;
+      vector<lower=0>[2] sigma;
+    }
+    model {
+      mu ~ normal(0, 2);
+      sigma ~ normal(0, 2);
+      target += sum(map_rect(bl_glm, append_row(mu, sigma),
+                             beta, x_r, x_i));
+    }
+    """
+
+    stan_data = dict(
+        K = 4,
+        N = 12,
+        x = [1.204, -0.573, -1.35, -1.157,
+             -1.29, 0.515, 1.496, 0.918,
+             0.517, 1.092, -0.485, -2.157],
+        y = [1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1]
+    )
+
+    stan_model = pystan.StanModel(model_code=stan_code)
+
+    # on Windows + scripts remember to use function
+    # for calling Stan program and launch the main
+    # process under ``__name__ == '__main__'`` -block.
+    # use the default 4 chains == 4 parallel process
+    # used cores = min(cpu_cores, 4*STAN_NUM_THREADS)
+
+    fit = stan_model.sampling(data=stan_data, n_jobs=4, n_threads=4)
+
+    print(fit)
+
+
+===================================
 Threading Support with Pystan 2.18+
 ===================================
 
