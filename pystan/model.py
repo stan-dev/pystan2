@@ -68,11 +68,10 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
             logger.warning(msg)
             n_jobs = 1
 
-    old_n_threads = os.getenv('STAN_NUM_THREADS')
     if n_threads is not None:
         os.environ['STAN_NUM_THREADS'] = str(int(n_threads))
-    elif not hasattr(os.environ, 'STAN_NUM_THREADS'):
-        if multiprocessing is not None:
+    else:
+        if multiprocessing:
             os.environ['STAN_NUM_THREADS'] = str(multiprocessing.cpu_count())
 
     # 2nd stage: validate that locking is available on the system and
@@ -96,8 +95,6 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
     else:
         map_result = list(map(function, args))
     # reset STAN_NUM_THREADS
-    if old_n_threads is not None:
-        os.environ['STAN_NUM_THREADS'] = old_n_threads
     elif hasattr(os.environ, 'STAN_NUM_THREADS'):
         del os.environ['STAN_NUM_THREADS']
     return map_result
@@ -238,10 +235,9 @@ class StanModel:
                  obfuscate_model_name=True, extra_compile_args=None,
                  allow_undefined=False, include_dirs=None, includes=None):
 
-        tbb_dir = os.getenv("STAN_TBB")
-        if tbb_dir is None:
-            tbb_dir = os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb')
-        tbb_dir = os.path.abspath(tbb_dir)
+        tbb_dir = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb'
+        ))
 
 
         if stanc_ret is None:

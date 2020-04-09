@@ -1476,62 +1476,11 @@ def get_last_position(fit, warmup=False):
     return positions
 
 def add_libtbb_path():
-    """Add libtbb to PATH on Windows."""
-    if platform.system() == "Windows":
-        libtbb = os.getenv('STAN_TBB')
-        if libtbb is None:
-            libtbb = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
-            ))
+    """Add libtbb to PATH."""
+    libtbb = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
+    ))
 
-        os.environ['PATH'] = ';'.join(
-            list(
-                OrderedDict.fromkeys(
-                    [libtbb] + os.getenv('PATH', '').split(';')
-                )
-            )
-        )
-
-def build_stan_tbb(use_debug=False):
-    """Build tbb."""
-    stan_math_lib = os.path.abspath(os.path.join(os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib'))
-
-    make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
-    cmd = [make]
-
-    tbb_root = os.path.join(stan_math_lib, 'tbb_2019_U8').replace("\\", "/")
-    tbb_src = os.path.join(tbb_root, 'src').replace("\\", "/")
-
-    cmd.extend(['-C', tbb_root])
-    cmd.append('tbb_build_dir={}'.format(stan_math_lib))
-    cmd.append('tbb_build_prefix=tbb')
-    cmd.append('tbb_root={}'.format(tbb_root))
-
-    cmd.append('stdver=c++14')
-
-    compiler = os.getenv('TBB_COMPILER', 'gcc')
-    cmd.append('compiler={}'.format(compiler))
-
-    cwd = os.path.abspath(os.path.dirname(__file__))
-    subprocess.check_call(cmd, cwd=cwd)
-
-    tbb_debug = os.path.join(stan_math_lib, "tbb_debug")
-    tbb_release = os.path.join(stan_math_lib, "tbb_release")
-    tbb_dir = os.path.join(stan_math_lib, "tbb")
-
-    if use_debug:
-        tbb_release, tbb_debug = tbb_debug, tbb_release
-
-    if not os.path.exists(tbb_dir):
-        os.makedirs(tbb_dir)
-
-    if os.path.exists(tbb_debug):
-        shutil.rmtree(tbb_debug)
-
-    for name in os.listdir(tbb_release):
-        srcname = os.path.join(tbb_release, name)
-        dstname = os.path.join(tbb_dir, name)
-        shutil.move(srcname, dstname)
-
-    if os.path.exists(tbb_release):
-        shutil.rmtree(tbb_release)
+    os.environ['PATH'] = ';'.join(
+        list(OrderedDict.fromkeys([libtbb] + os.getenv('PATH', '').split(';')))
+    )

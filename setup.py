@@ -80,7 +80,7 @@ def build_tbb():
     """Build tbb."""
     stan_math_lib = os.path.abspath(os.path.join(os.path.dirname(__file__), 'pystan', 'stan', 'lib', 'stan_math', 'lib'))
 
-    make = os.getenv('MAKE', 'make' if platform.system() != 'Windows' else 'mingw32-make')
+    make = 'make' if platform.system() != 'Windows' else 'mingw32-make'
     cmd = [make]
 
     tbb_root = os.path.join(stan_math_lib, 'tbb_2019_U8').replace("\\", "/")
@@ -92,8 +92,7 @@ def build_tbb():
 
     cmd.append('stdver=c++14')
 
-    compiler = os.getenv('TBB_COMPILER', 'gcc')
-    cmd.append('compiler={}'.format(compiler))
+    cmd.append('compiler=gcc')
 
     cwd = os.path.abspath(os.path.dirname(__file__))
 
