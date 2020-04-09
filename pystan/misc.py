@@ -28,7 +28,6 @@ import itertools
 import logging
 import math
 from numbers import Number
-import platform
 import os
 import random
 import re
