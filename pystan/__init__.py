@@ -13,6 +13,7 @@ from pystan.model import StanModel
 from pystan.lookup import lookup
 
 logger = logging.getLogger('pystan')
+logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 # following PEP 386
