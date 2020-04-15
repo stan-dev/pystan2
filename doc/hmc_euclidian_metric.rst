@@ -190,5 +190,4 @@ metric matrix needs to be strictly positive definite.
 
 The inverse metric matrix is given for the ``.sampling`` method inside the ``control`` dictionary.
 The ``inv_metric`` can be either iterable (list, tuple, ndarray), dictionary of iterable with chain
-order as the key or ``inv_metric`` can be a string (path to Rdump or JSON file with a
-parameter "inv_metric").
+order as the key or ``inv_metric`` can be a string (path to Rdump file with a parameter ``inv_metric``).
