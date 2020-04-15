@@ -108,6 +108,9 @@ def build_tbb():
     if os.path.exists(tbb_debug):
         shutil.rmtree(tbb_debug)
 
+    shutil.move(os.path.join(tbb_root, 'include'), tbb_dir)
+    shutil.rmtree(tbb_root)
+
     for name in os.listdir(tbb_release):
         srcname = os.path.join(tbb_release, name)
         dstname = os.path.join(tbb_dir, name)
