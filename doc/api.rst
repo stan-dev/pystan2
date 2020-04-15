@@ -10,7 +10,7 @@ API
    stanc
    StanModel
 
-:ref:`StanFit4model <StanFit4model>` instances are also documented on this page.
+:ref:``StanFit4model <StanFit4model>`` instances are also documented on this page.
 
 
 .. automodule:: pystan
@@ -38,7 +38,7 @@ a number of methods.
       pars : sequence of str
           names of parameters
 
-      This is currently an alias for the `traceplot` method.
+      This is currently an alias for the ``traceplot`` method.
 
    .. py:method:: extract(pars=None, permuted=True, inc_warmup=False, dtypes=None)
 
@@ -53,7 +53,7 @@ a number of methods.
           warmup samples are discarded.
       inc_warmup : bool
          If True, warmup samples are kept; otherwise they are discarded. If
-         `permuted` is True, `inc_warmup` is ignored.
+         ``permuted`` is True, ``inc_warmup`` is ignored.
       dtypes : dict
          datatype of parameter(s).
          If nothing is passed, np.float will be used for all parameters.
@@ -62,19 +62,19 @@ a number of methods.
       Returns
 
       samples : dict or array
-      If `permuted` is True, return dictionary with samples for each
-      parameter (or other quantity) named in `pars`.
+      If ``permuted`` is True, return dictionary with samples for each
+      parameter (or other quantity) named in ``pars``.
 
-      If `permuted` is False and `pars` is None, an array is returned. The first dimension of
+      If ``permuted`` is False and ``pars`` is None, an array is returned. The first dimension of
       the array is for the iterations; the second for the number of chains;
       the third for the parameters. Vectors and arrays are expanded to one
       parameter (a scalar) per cell, with names indicating the third dimension.
-      Parameters are listed in the same order as `model_pars` and `flatnames`.
+      Parameters are listed in the same order as ``model_pars`` and ``flatnames``.
 
-      If `permuted` is False and `pars` is not None, return dictionary with samples for each
-      parameter (or other quantity) named in `pars`. The first dimension of
+      If ``permuted`` is False and ``pars`` is not None, return dictionary with samples for each
+      parameter (or other quantity) named in ``pars``. The first dimension of
       the sample array is for the iterations; the second for the number of chains;
-      the rest for the parameters. Parameters are listed in the same order as `pars`.
+      the rest for the parameters. Parameters are listed in the same order as ``pars``.
 
    .. py:method:: stansummary(pars=None, probs=(0.025, 0.25, 0.5, 0.75, 0.975), digits_summary=2)
 
@@ -127,7 +127,7 @@ a number of methods.
          se_mean, sd, probs_0, ..., probs_n, n_eff, and Rhat. Array indexed by
          'c_summary' breaks down the statistics by chain and has dimensions
          (num_params, num_statistics_c_summary, num_chains). Statistics for
-         `c_summary` are the same as for `summary` with the exception that
+         ``c_summary`` are the same as for ``summary`` with the exception that
          se_mean, n_eff, and Rhat are absent. Row names and column names are
          also included in the OrderedDict.
 
@@ -159,7 +159,7 @@ a number of methods.
       Python, we need to be careful.  For example, if we are interested in
       finding the mode of parameters on the constrained space, we then do not
       need the adjustment.  For this reason, there is an argument named
-      `adjust_transform` for functions `log_prob` and `grad_log_prob`.
+      ``adjust_transform`` for functions ``log_prob`` and ``grad_log_prob``.
 
    .. py:method:: grad_log_prob(upars, adjust_transform=True)
 
@@ -187,17 +187,17 @@ a number of methods.
       Get the log-posterior (up to an additive constant) for all chains.
 
       Each element of the returned array is the log-posterior for
-      a chain. Optional parameter `inc_warmup` indicates whether to
+      a chain. Optional parameter ``inc_warmup`` indicates whether to
       include the warmup period.
 
 
    .. py:method:: get_sampler_params(inc_warmup=True)
 
-      Obtain the parameters used for the sampler such as `stepsize` and
-      `treedepth`. The results are returned as a list, each element of which
+      Obtain the parameters used for the sampler such as ``stepsize`` and
+      ``treedepth``. The results are returned as a list, each element of which
       is an OrderedDict a chain. The dictionary has number of elements
       corresponding to the number of parameters used in the sampler. Optional
-      parameter `inc_warmup` indicates whether to include the warmup period.
+      parameter ``inc_warmup`` indicates whether to include the warmup period.
 
    .. py:method:: get_posterior_mean()
 
@@ -226,15 +226,15 @@ a number of methods.
 
    .. py:property:: flatnames
 
-   .. py:method:: to_dataframe(pars=None, permuted=True, dtypes=None, inc_warmup=False, diagnostics=True)
+   .. py:method:: to_dataframe(pars=None, permuted=False, dtypes=None, inc_warmup=False, diagnostics=True)
 
-      Extract samples as a pandas datafriame for different parameters.
+      Extract samples as a pandas dataframe.
 
       Parameters
       ----------
       pars : {str, sequence of str}
-         parameter (or quantile) name(s). If `permuted` is False,
-         `pars` is ignored.
+         parameter (or quantile) name(s). If ``permuted`` is False,
+         ``pars`` is ignored.
       permuted : bool, default False
          If True, returned samples are permuted. All chains are
          merged and warmup samples are discarded.
@@ -243,16 +243,16 @@ a number of methods.
          If nothing is passed, np.float will be used for all parameters.
       inc_warmup : bool
          If True, warmup samples are kept; otherwise they are
-         discarded. If `permuted` is True, `inc_warmup` is ignored.
+         discarded. If ``permuted`` is True, ``inc_warmup`` is ignored.
       diagnostics : bool
          If True, include MCMC diagnostics in dataframe.
-         If `permuted` is True, `diagnostics` is ignored.
+         If ``permuted`` is True, ``diagnostics`` is ignored.
 
       Returns
       -------
-      df : pandas dataframe
+      pandas.dataframe
 
-	   Note
-	   ----
-	   Unlike default in extract (`permuted=True`)
-	   `.to_dataframe` method returns non-permuted samples (`permuted=False`) with diagnostics params included.
+      Note
+      ----
+      Unlike default in extract (``permuted=True``)
+      ``.to_dataframe`` method returns non-permuted samples (``permuted=False``) with diagnostics params included.
