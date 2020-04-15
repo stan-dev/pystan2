@@ -7,10 +7,7 @@ Logging
 =======
 
 PyStan uses logging-module from the Python Standard library to output messages for the user. 
-By default, messages are sent to ``sys.stdout``. For more information and usage see logging-module <https://docs.python.org/3.7/library/logging.handlers.html> and logging-cookbook <https://docs.python.org/3/howto/logging-cookbook.html>
-
-- https://docs.python.org/3.7/library/logging.handlers.html
-- https://docs.python.org/3/howto/logging-cookbook.html
+By default, messages are sent to ``sys.stdout``. For more information and usage see `logging-module <https://docs.python.org/3.7/library/logging.handlers.html>`_ and `logging-cookbook <https://docs.python.org/3/howto/logging-cookbook.html>`_
 
 Advanced users
 ==============
