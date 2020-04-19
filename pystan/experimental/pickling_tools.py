@@ -32,9 +32,7 @@ def create_fake_model(module_name):
     StanModel
         Dummy StanModel object with specific module name.
     """
-    tbb_dir = os.getenv("STAN_TBB")
-    if tbb_dir is None:
-        tbb_dir = os.path.join(os.path.dirname(__file__), '..', 'stan', 'lib', 'stan_math', 'lib','tbb')
+    tbb_dir = os.path.join(os.path.dirname(__file__), '..', 'stan', 'lib', 'stan_math', 'lib','tbb')
     tbb_dir = os.path.abspath(tbb_dir)
 
     # reverse engineer the name
@@ -170,7 +168,7 @@ def get_module_name(path, open_func=None, open_kwargs=None):
     module_name = ""
     with open_func(path, **open_kwargs) as f:
         # scan first few bytes
-        for i in range(500):
+        for i in range(10000):
             byte, = f.read(1)
             if not PY2:
                 byte = chr(byte)
