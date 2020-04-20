@@ -42,6 +42,9 @@ logger = logging.getLogger('pystan')
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""
+    if platform.system() == "Windows":
+        pystan.misc.add_libtbb_path()
+
     if sys.version_info >= (3,0):
         import pyximport
         pyximport.install()
@@ -229,6 +232,7 @@ class StanModel:
     'anon_model'
 
     """
+
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, include_paths=None,
                  boost_lib=None, eigen_lib=None, verbose=False,

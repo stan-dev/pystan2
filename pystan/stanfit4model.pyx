@@ -38,7 +38,6 @@ np.import_array()
 # python imports
 from collections import OrderedDict
 import logging
-import platform
 import warnings
 
 import numpy as np
@@ -50,9 +49,6 @@ from pystan.constants import (sampling_algo_t, optim_algo_t, variational_algo_t,
                               sampling_metric_t, stan_args_method_t)
 
 logger = logging.getLogger('pystan')
-
-if platform.system() == "Windows":
-    pystan.misc.add_libtbb_path()
 
 cdef extern from "boost/random/additive_combine.hpp" namespace "boost::random":
     cdef cppclass additive_combine_engine[T, U]:
