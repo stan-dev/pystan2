@@ -8,14 +8,11 @@ Threading Support with Pystan 2.22+
 
 PyStan (Stan) uses intel TBB library to handle threading for in-chain parallel computing.
 
-Threading on automatically and the number of threads for each chain can be controlled in
-two ways. The first and recommended way is to use `n_threads` argument given to the `.sampling`
- method. The second way is to define and use `STAN_NUM_THREADS` environmental variable.
+Threading is on automatically. The number of threads for each chain can be controlled with
+`STAN_NUM_THREADS` environmental variable.
 
 Due to use of `multiprocessing` to parallelize chains, user needs to be aware of the cpu usage.
 This means that each chain will use `STAN_NUM_THREADS` cpu cores and this can have an affect on performance.
-By default, n_threads is set to `multiprocessing.cpu_count`.
-PyStan3 uses full threading based approach, where the thread counts are not limited to individual chains.
 
 Windows
 =======
@@ -28,6 +25,7 @@ Example
 
 .. code-block:: python
 
+    import os
     import pystan
 
     # Example model
@@ -93,7 +91,8 @@ Example
     # use the default 4 chains == 4 parallel process
     # used cores = min(cpu_cores, 4*STAN_NUM_THREADS)
 
-    fit = stan_model.sampling(data=stan_data, n_jobs=4, n_threads=4)
+    os.environ["STAN_NUM_THREADS"] = "4"
+    fit = stan_model.sampling(data=stan_data, n_jobs=4)
 
     print(fit)
 
