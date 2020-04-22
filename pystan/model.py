@@ -56,7 +56,7 @@ def load_module(module_name, module_path):
         return imp.load_module(module_name, *module_info)
 
 
-def _map_parallel(function, args, n_jobs, n_threads=None):
+def _map_parallel(function, args, n_jobs):
     """multiprocessing.Pool(processors=n_jobs).map with some error checking"""
     # Following the error checking found in joblib
     multiprocessing = int(os.environ.get('JOBLIB_MULTIPROCESSING', 1)) or None
@@ -66,17 +66,10 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
             import multiprocessing.pool
         except ImportError:
             multiprocessing = None
-        if (platform.system() == 'Windows') and PY2:
+        if sys.platform.startswith("win") and PY2:
             msg = 'Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1'
             logger.warning(msg)
             n_jobs = 1
-
-    if n_threads is not None:
-        os.environ['STAN_NUM_THREADS'] = str(int(n_threads))
-    else:
-        if multiprocessing:
-            os.environ['STAN_NUM_THREADS'] = str(multiprocessing.cpu_count())
-
     # 2nd stage: validate that locking is available on the system and
     #            issue a warning if not
     if multiprocessing:
@@ -97,9 +90,6 @@ def _map_parallel(function, args, n_jobs, n_threads=None):
             pool.join()
     else:
         map_result = list(map(function, args))
-    # reset STAN_NUM_THREADS
-    if hasattr(os.environ, 'STAN_NUM_THREADS'):
-        del os.environ['STAN_NUM_THREADS']
     return map_result
 
 
@@ -232,7 +222,6 @@ class StanModel:
     'anon_model'
 
     """
-
     def __init__(self, file=None, charset='utf-8', model_name="anon_model",
                  model_code=None, stanc_ret=None, include_paths=None,
                  boost_lib=None, eigen_lib=None, verbose=False,
@@ -617,7 +606,7 @@ class StanModel:
     def sampling(self, data=None, pars=None, chains=4, iter=2000,
                  warmup=None, thin=1, seed=None, init='random',
                  sample_file=None, diagnostic_file=None, verbose=False,
-                 algorithm=None, control=None, n_jobs=-1, n_threads=None, **kwargs):
+                 algorithm=None, control=None, n_jobs=-1, **kwargs):
         """Draw samples from the model.
 
         Parameters
@@ -713,9 +702,6 @@ class StanModel:
         n_jobs : int, optional
             Sample in parallel. If -1 all CPUs are used. If 1, no parallel
             computing code is used at all, which is useful for debugging.
-
-        n_threads : int, optional
-            In-chain parallel computing with map_rect.
 
         Returns
         -------
@@ -842,7 +828,7 @@ class StanModel:
         assert len(args_list) == chains
         call_sampler_args = izip(itertools.repeat(data), args_list, itertools.repeat(pars))
         call_sampler_star = self.module._call_sampler_star
-        ret_and_samples = _map_parallel(call_sampler_star, call_sampler_args, n_jobs, n_threads)
+        ret_and_samples = _map_parallel(call_sampler_star, call_sampler_args, n_jobs)
         samples = [smpl for _, smpl in ret_and_samples]
 
         # _organize_inits strips out lp__ (RStan does it in this method)
