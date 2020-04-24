@@ -363,7 +363,7 @@ class StanModel:
                 '-Wno-uninitialized',
                 '-std=c++1y',
                 '-DSTAN_THREADS',
-                '-D_REENTRANT',
+                '-D_REENTRANT', # stan-math requires _REENTRANT being defined during compilation to make lgamma_r available.
             ] + extra_compile_args
             extra_link_args = ['-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir))]
 
