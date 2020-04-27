@@ -156,6 +156,12 @@ class StanModel:
         If not None, the directories in this list are added to the search
         path of the compiler.
 
+    libraries : list, None by default
+        External libraries used for model compilation.
+
+    library_dirs : list, None by default
+        Location for external libraries used for the model compilation.
+
     kwargs : keyword arguments
         Additional arguments passed to `stanc`.
 
@@ -227,7 +233,7 @@ class StanModel:
                  boost_lib=None, eigen_lib=None, verbose=False,
                  obfuscate_model_name=True, extra_compile_args=None,
                  extra_link_args=None, allow_undefined=False,
-                 include_dirs=None, includes=None):
+                 include_dirs=None, includes=None, libraries=None, library_dirs=None):
 
         tbb_dir = os.path.abspath(os.path.join(
             os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb'
@@ -370,6 +376,14 @@ class StanModel:
 
         if extra_link_args is None:
             extra_link_args = []
+
+        if libraries is None:
+            libraries = []
+        libraries = ["tbb"] + libraries
+
+        if library_dirs is None:
+            library_dirs = []
+        library_dirs = [tbb_dir] + library_dirs
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
