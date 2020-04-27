@@ -46,7 +46,7 @@ To make this reproducible, user can manually set seed for each fit.
     data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
     sm = StanModel(model_code=model_code)
     # initial seed can also be chosen by user
-    # MAX_UINT = 2147483647
+    MAX_UINT = 2147483647
     seed = np.random.randint(0, MAX_UINT, size=1)
     fit = sm.sampling(data=data, seed=seed)
 

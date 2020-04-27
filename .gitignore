@@ -1,10 +1,13 @@
 build/
 dist/
 doc/_build
+pystan/tests/cached_models
 
 __pycache__
 *.a
 *.so
+*.dll
+*.pyd
 *.cpp
 *.pyc
 *.egg-info
