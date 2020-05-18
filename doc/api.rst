@@ -10,7 +10,7 @@ API
    stanc
    StanModel
 
-:ref:``StanFit4model <StanFit4model>`` instances are also documented on this page.
+:ref:`StanFit4model <StanFit4model>`_ instances are also documented on this page.
 
 
 .. automodule:: pystan
