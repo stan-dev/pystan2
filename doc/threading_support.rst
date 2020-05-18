@@ -104,13 +104,13 @@ Threading Support with Pystan 2.18+
 Notice! This is an experimental feature and is not tested or supported officially with PyStan 2.
 Official multithreading support will land with PyStan 3.
 
-By default, `stan-math` is not thread safe. Stan 2.18+ has ability to switch on
+By default, ``stan-math`` is not thread safe. Stan 2.18+ has ability to switch on
 threading support with compile time arguments.
 
 See https://github.com/stan-dev/math/wiki/Threading-Support
 
-Due to use of `multiprocessing` to parallelize chains, user needs to be aware of the cpu usage.
-This means that each chain will use `STAN_NUM_THREADS` cpu cores and this can have an affect on performance.
+Due to use of ``multiprocessing`` to parallelize chains, user needs to be aware of the cpu usage.
+This means that each chain will use ``STAN_NUM_THREADS`` cpu cores and this can have an affect on performance.
 
 Windows
 =======
