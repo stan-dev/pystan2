@@ -53,6 +53,7 @@ To make this reproducible, user can manually set seed for each fit.
     # reuse tuned parameters
     stepsize = fit.get_stepsize()
     # by default .get_inv_metric returns a list
+    # dict should always go from 0 -> chains-1
     inv_metric = fit.get_inv_metric(as_dict=True)
     init = fit.get_last_position()
 
