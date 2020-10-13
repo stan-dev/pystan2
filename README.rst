@@ -14,6 +14,8 @@ For more information on `Stan <http://mc-stan.org>`_ and its modeling language,
 see the Stan User's Guide and Reference Manual at `http://mc-stan.org/
 <http://mc-stan.org/>`_.
 
+.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
+
 Important links
 ---------------
 
