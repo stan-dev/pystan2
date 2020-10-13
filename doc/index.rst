@@ -13,6 +13,8 @@ Carlo.
 
 License: Open source, GPL3
 
+.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
+
 Documentation
 -------------
 
