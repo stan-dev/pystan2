@@ -14,6 +14,8 @@ For more information on `Stan <http://mc-stan.org>`_ and its modeling language,
 see the Stan User's Guide and Reference Manual at `http://mc-stan.org/
 <http://mc-stan.org/>`_.
 
+.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
+
 Important links
 ---------------
 
@@ -27,16 +29,25 @@ Related projects
 ----------------
 
 - ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
-- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
-- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
-- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
 - Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
 - Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
+- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
+
+Projects using PyStan
+---------------------
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
+- BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
+- hBayesDM: `hierarchical Bayesian modeling of Decision-Making tasks <https://hbayesdm.readthedocs.io>`_ by @CCS-Lab
 
 Similar projects
 ----------------
 
 - PyMC: http://pymc-devs.github.io/pymc/
+- emcee: http://dan.iel.fm/emcee/current/
+
+PyStan3 / Stan3
+---------------
+The development of PyStan3 with updated API can be found under `stan-dev/pystan-next <https://github.com/stan-dev/pystan-next>`_
 
 PyStan3 / Stan3
 ---------------
@@ -83,6 +94,8 @@ To install latest development version user can also use ``pip``
 If you encounter an ``ImportError`` after compiling from source, try changing
 out of the source directory before attempting ``import pystan``. On Linux and
 OS X ``cd /tmp`` will work.
+
+``make`` (``mingw32-make`` on Windows) is a requirement for building from source.
 
 Example
 -------
@@ -131,7 +144,11 @@ Example
     # traceplot are available
     fit.plot()
     plt.show()
-    
+
+    # updated traceplot can be plotted with
+    import arviz as az
+    az.plot_trace(fit)
+
     # updated traceplot can be plotted with
     import arviz as az
     az.plot_trace(fit)
@@ -150,4 +167,4 @@ Example
 
 .. |zenodo| image:: https://zenodo.org/badge/10256919.svg
     :target: https://zenodo.org/badge/latestdoi/10256919
-    :alt: zenodo citation DOI 
+    :alt: zenodo citation DOI

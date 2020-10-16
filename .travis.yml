@@ -19,11 +19,9 @@ compiler:
   - gcc
 env:
   - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
   - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
   - TRAVIS_PYTHON_VERSION=3.7 TESTS_EXCLUDE_RE='^test_[a-p].*\.py'
   - TRAVIS_PYTHON_VERSION=2.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
-  - TRAVIS_PYTHON_VERSION=3.5 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
   - TRAVIS_PYTHON_VERSION=3.6 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
   - TRAVIS_PYTHON_VERSION=3.7 TESTS_EXCLUDE_RE='^test_[^a-p].*\.py'
 notifications:

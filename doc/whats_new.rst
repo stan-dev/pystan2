@@ -6,6 +6,11 @@
  What's New
 ============
 
+TBD
+===
+- Update Stan source to v2.22.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.22.1>`_)
+- Intel TBB supported threading. On by default. Supported on all the main OS (Linux, macOS, Windows).
+
 v2.19.1.1 (25. Oct 2019)
 ========================
 - Update Stan source to v2.19.1 (`release notes <https://github.com/stan-dev/stan/releases/tag/v2.19.1>`_)

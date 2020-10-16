@@ -149,3 +149,21 @@ install the latest version of PyStan using ``pip``. To do so:
 
 -  open a terminal
 -  type ``pip install pystan``
+
+
+Checking that it works
+----------------------
+
+Open a python prompt, and run the following code
+
+.. code-block:: python
+
+    import pystan
+    model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+    model = pystan.StanModel(model_code=model_code, verbose=True) 
+
+If it fails with "fatal error: 'Python.h' file not found", please use conda or install the appropriate python headers library.
+
+If it fails with "fatal error: 'ios' file not found", please run `xcode-select --install`, or open XCode and agree to the licensing terms.
+
+If it fails with a different error, please file a bug.
