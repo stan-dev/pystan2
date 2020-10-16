@@ -32,8 +32,7 @@ install:
   - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
 
   - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
-  - if %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" root)
-  - if NOT %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" base)
+  - CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" base
 
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda

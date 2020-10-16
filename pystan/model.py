@@ -50,11 +50,11 @@ def _build_libraries(self, libraries):
                    "'sources' must be present and must be "
                    "a list of source filenames" % lib_name)
         sources = list(sources)
-
         distutils.command.build_clib.log.info("building '%s' library", lib_name)
 
         macros = build_info.get('macros')
         include_dirs = build_info.get('include_dirs')
+
         extra_postargs = build_info.get('extra_postargs')
         objects = self.compiler.compile(sources,
                                         output_dir=self.build_temp,
@@ -402,6 +402,7 @@ class StanModel:
             "nvector/parhyp",
             "nvector/petsc",
             "nvector/pthreads",
+            "kinsol/fcmix",
             "sundials_mpi",
             "sunlinsol/klu",
             "sunlinsol/lapack",
@@ -410,17 +411,22 @@ class StanModel:
 
         sundials_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'sundials_4.1.0', 'src')
         sundials_sources = []
+        extra_include_dirs = []
         for sun_root, _, sunfiles in os.walk(sundials_src_path):
             for sunfile in sunfiles:
                 if os.path.splitext(sunfile)[1] == ".c":
                     path = os.path.join(sun_root, sunfile).replace("\\", "/")
                     if not any(item in path for item in sundials_excluded):
                         sundials_sources.append(path)
+                if os.path.splitext(sunfile)[1] in (".h", ".hpp"):
+                    path = os.path.join(sun_root, sunfile).replace("\\", "/")
+                    if not any(item in path for item in extra_include_dirs):
+                        extra_include_dirs.append(os.path.split(path)[0])
 
         include_dirs_c = [
             lib_dir,
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
-        ]
+        ] + extra_include_dirs
 
         extra_compile_args_c = []
         if platform.system() == 'Windows':
@@ -513,7 +519,7 @@ class StanModel:
                               language="c++",
                               sources=[pyx_file],
                               define_macros=stan_macros,
-                              include_dirs=include_dirs,
+                              include_dirs=include_dirs+extra_include_dirs,
                               libraries=["tbb"],
                               library_dirs=[tbb_dir],
                               extra_objects=sundials_objects,
