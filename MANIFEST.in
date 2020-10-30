@@ -3,7 +3,6 @@ include MANIFEST.in LICENSE README.rst setup.py
 graft doc
 prune doc/_build
 
-global-exclude *.so
 global-exclude *.pyc
 global-exclude .git*
 global-exclude *.png

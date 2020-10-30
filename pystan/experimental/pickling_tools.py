@@ -32,6 +32,9 @@ def create_fake_model(module_name):
     StanModel
         Dummy StanModel object with specific module name.
     """
+    tbb_dir = os.path.join(os.path.dirname(__file__), '..', 'stan', 'lib', 'stan_math', 'lib','tbb')
+    tbb_dir = os.path.abspath(tbb_dir)
+
     # reverse engineer the name
     model_name, nonce = module_name.replace("stanfit4", "").rsplit("_", 1)
     # create minimal code
@@ -57,8 +60,9 @@ def create_fake_model(module_name):
         os.path.join(pystan_dir, "stan", "src"),
         os.path.join(pystan_dir, "stan", "lib", "stan_math"),
         os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-        os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
+        os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.72.0"),
         os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
+        os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb", "include"),
         np.get_include(),
     ]
 
@@ -107,7 +111,10 @@ def create_fake_model(module_name):
                 "-D_hypot=hypot",
                 "-pthread",
                 "-fexceptions",
+                '-DSTAN_THREADS',
+                '-D_REENTRANT',
             ] + extra_compile_args
+        extra_link_args = []
     else:
         # linux or macOS
         extra_compile_args = [
@@ -116,14 +123,21 @@ def create_fake_model(module_name):
             '-Wno-unused-function',
             '-Wno-uninitialized',
             '-std=c++1y',
+            '-DSTAN_THREADS',
+            '-D_REENTRANT',
         ] + extra_compile_args
+        extra_link_args = ['-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir))]
 
     extension = Extension(name=module_name,
                           language="c++",
                           sources=[pyx_file],
                           define_macros=stan_macros,
                           include_dirs=include_dirs,
-                          extra_compile_args=extra_compile_args)
+                          libraries=["tbb"],
+                          library_dirs=[tbb_dir],
+                          extra_compile_args=extra_compile_args,
+                          extra_link_args=extra_link_args
+                          )
 
     cython_include_dirs = ['.', pystan_dir]
 
@@ -154,7 +168,7 @@ def get_module_name(path, open_func=None, open_kwargs=None):
     module_name = ""
     with open_func(path, **open_kwargs) as f:
         # scan first few bytes
-        for i in range(500):
+        for i in range(10000):
             byte, = f.read(1)
             if not PY2:
                 byte = chr(byte)

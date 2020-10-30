@@ -13,6 +13,8 @@ Carlo.
 
 License: Open source, GPL3
 
+.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
+
 Documentation
 -------------
 
@@ -58,11 +60,12 @@ Related projects
 ----------------
 
 - ArviZ: `Exploratory analysis of Bayesian models with Python <https://github.com/arviz-devs/arviz>`_ by @arviz-devs
-- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
-- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
+- hBayesDM: `hierarchical Bayesian modeling of Decision-Making tasks <https://hbayesdm.readthedocs.io>`_ by @CCS-Lab
 - Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
 - Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
+- Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 
 Similar projects
 ----------------

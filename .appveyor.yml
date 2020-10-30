@@ -12,7 +12,6 @@ environment:
       secure: mjwuqrrrl71BQoPg5t++MKlVApmBBDAr7GmQtI5YawjhdpCJtMi+Tof4P1ENDCLp
 
   matrix:
-    - CONDA: 35
     - CONDA: 36
     - CONDA: 37
 
@@ -33,8 +32,7 @@ install:
   - if %PLATFORM%==x64 (SET "CONDAPATH=%CONDAPATH%-x64")
 
   - CALL "C:\\Mini%CONDAPATH%\\Scripts\\conda.exe" info --envs
-  - if %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" root)
-  - if NOT %CONDA%==35 (CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" base)
+  - CALL "C:\\Mini%CONDAPATH%\\Scripts\\activate.bat" base
 
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
@@ -96,11 +94,12 @@ test_script:
      pystan.tests.test_basic_array pystan.tests.test_basic_matrix \
      pystan.tests.test_cvodes \
      pystan.tests.test_basic_pars pystan.tests.test_ess \
-     pystan.tests.test_extract pystan.tests.test_fixed_param \
-     pystan.tests.test_linear_regression pystan.tests.test_misc \
-     pystan.tests.test_misc_args pystan.tests.test_optimizing_example \
-     pystan.tests.test_stanc pystan.tests.test_unconstrain_pars \
-     pystan.tests.test_utf8 pystan.tests.test_vb"
+     pystan.tests.test_extra_compile_args pystan.tests.test_extract \
+     pystan.tests.test_fixed_param  pystan.tests.test_linear_regression \
+     pystan.tests.test_misc pystan.tests.test_misc_args \
+     pystan.tests.test_optimizing_example pystan.tests.test_stanc \
+     pystan.tests.test_unconstrain_pars pystan.tests.test_utf8 \
+     pystan.tests.test_vb"
   # Move back to the project folder
   - cd ..
   - ECHO "End of testing"

@@ -23,7 +23,4 @@ Now install a version of PyStan which compiles and uses the SUNDIALS library:
 
 (Support for the SUNDIALS library is not included by default because it slows down compilation of every Stan program by several seconds.)
 
-Consult the "Stan Language Manual" (linked to in the `Stan Documentation`_) for an example of a complete Stan program with a system definition and solver call.
-
-.. _Stan Documentation:: http://mc-stan.org/users/documentation/index.html
-
+Consult the "Stan Language Manual" (linked to in the `Stan Documentation <http://mc-stan.org/users/documentation/index.html>`_) for an example of a complete Stan program with a system definition and solver call.

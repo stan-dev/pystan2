@@ -50,11 +50,11 @@ def _build_libraries(self, libraries):
                    "'sources' must be present and must be "
                    "a list of source filenames" % lib_name)
         sources = list(sources)
-
         distutils.command.build_clib.log.info("building '%s' library", lib_name)
 
         macros = build_info.get('macros')
         include_dirs = build_info.get('include_dirs')
+
         extra_postargs = build_info.get('extra_postargs')
         objects = self.compiler.compile(sources,
                                         output_dir=self.build_temp,
@@ -104,6 +104,9 @@ def _build_clib(sources, include_dirs_c, lib_dir, extra_args):
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""
+    if platform.system() == "Windows":
+        pystan.misc.add_libtbb_path()
+
     if sys.version_info >= (3,0):
         import pyximport
         pyximport.install()
@@ -126,7 +129,7 @@ def _map_parallel(function, args, n_jobs):
         except ImportError:
             multiprocessing = None
         if sys.platform.startswith("win") and PY2:
-            msg = "Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1"
+            msg = 'Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1'
             logger.warning(msg)
             n_jobs = 1
     # 2nd stage: validate that locking is available on the system and
@@ -287,6 +290,11 @@ class StanModel:
                  obfuscate_model_name=True, extra_compile_args=None,
                  allow_undefined=False, include_dirs=None, includes=None):
 
+        tbb_dir = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb'
+        ))
+
+
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
                                          charset=charset,
@@ -344,8 +352,9 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.72.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb", "include"),
             np.get_include(),
         ]
 
@@ -393,6 +402,7 @@ class StanModel:
             "nvector/parhyp",
             "nvector/petsc",
             "nvector/pthreads",
+            "kinsol/fcmix",
             "sundials_mpi",
             "sunlinsol/klu",
             "sunlinsol/lapack",
@@ -401,17 +411,22 @@ class StanModel:
 
         sundials_src_path = os.path.join(pystan_dir, 'stan', 'lib', 'stan_math', 'lib', 'sundials_4.1.0', 'src')
         sundials_sources = []
+        extra_include_dirs = []
         for sun_root, _, sunfiles in os.walk(sundials_src_path):
             for sunfile in sunfiles:
                 if os.path.splitext(sunfile)[1] == ".c":
                     path = os.path.join(sun_root, sunfile).replace("\\", "/")
                     if not any(item in path for item in sundials_excluded):
                         sundials_sources.append(path)
+                if os.path.splitext(sunfile)[1] in (".h", ".hpp"):
+                    path = os.path.join(sun_root, sunfile).replace("\\", "/")
+                    if not any(item in path for item in extra_include_dirs):
+                        extra_include_dirs.append(os.path.split(path)[0])
 
         include_dirs_c = [
             lib_dir,
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
-        ]
+        ] + extra_include_dirs
 
         extra_compile_args_c = []
         if platform.system() == 'Windows':
@@ -476,12 +491,15 @@ class StanModel:
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
                     '-std=c++1y',
-                    "-D_hypot=hypot",
-                    "-pthread",
-                    "-fexceptions",
+                    '-D_hypot=hypot',
+                    '-pthread',
+                    '-fexceptions',
+                    '-DSTAN_THREADS',
+                    '-D_REENTRANT',
                     "-include",
                     "stan_sundials_printf_override.hpp",
                 ] + extra_compile_args
+            extra_link_args = []
         else:
             # linux or macOS
             extra_compile_args = [
@@ -490,17 +508,23 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
+                '-DSTAN_THREADS',
+                '-D_REENTRANT', # stan-math requires _REENTRANT being defined during compilation to make lgamma_r available.
                 '-include',
                 'stan_sundials_printf_override.hpp',
             ] + extra_compile_args
+            extra_link_args = ['-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir))]
 
         extension = Extension(name=self.module_name,
                               language="c++",
                               sources=[pyx_file],
                               define_macros=stan_macros,
-                              include_dirs=include_dirs,
+                              include_dirs=include_dirs+extra_include_dirs,
+                              libraries=["tbb"],
+                              library_dirs=[tbb_dir],
                               extra_objects=sundials_objects,
-                              extra_compile_args=extra_compile_args
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args,
                               )
 
         cython_include_dirs = ['.', pystan_dir]

@@ -46,13 +46,14 @@ To make this reproducible, user can manually set seed for each fit.
     data = dict(N=10, y=[0, 1, 0, 1, 0, 1, 0, 1, 1, 1])
     sm = StanModel(model_code=model_code)
     # initial seed can also be chosen by user
-    # MAX_UINT = 2147483647
+    MAX_UINT = 2147483647
     seed = np.random.randint(0, MAX_UINT, size=1)
     fit = sm.sampling(data=data, seed=seed)
 
     # reuse tuned parameters
     stepsize = fit.get_stepsize()
     # by default .get_inv_metric returns a list
+    # dict should always go from 0 -> chains-1
     inv_metric = fit.get_inv_metric(as_dict=True)
     init = fit.get_last_position()
 
@@ -190,5 +191,4 @@ metric matrix needs to be strictly positive definite.
 
 The inverse metric matrix is given for the ``.sampling`` method inside the ``control`` dictionary.
 The ``inv_metric`` can be either iterable (list, tuple, ndarray), dictionary of iterable with chain
-order as the key or ``inv_metric`` can be a string (path to Rdump or JSON file with a
-parameter "inv_metric").
+order as the key or ``inv_metric`` can be a string (path to Rdump file with a parameter ``inv_metric``).

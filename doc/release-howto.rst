@@ -37,6 +37,8 @@ Update Documentation
   - ``git rebase master readthedocs``
   - ``git push --force origin readthedocs``
 
+- Manually trigger a build on the readthedocs website.
+
 Build source distribution and wheels
 ====================================
 
@@ -62,17 +64,9 @@ the directory ``dist/``.
 Upload Source Distribution and Wheels to PyPI
 =============================================
 
-*NOTE: EXPERIMENTAL*
-
-- Sign source distribution and wheels::
-
-    for fn in dist/*{.tar.gz,.whl}; do
-        gpg --detach-sign -a -u C3542448245BEC68F43070E4CCB669D9761F0CAC "$fn"
-    done
-
 - Upload source distribution and wheels::
 
-    python3 -m twine upload --skip-existing dist/*{.tar.gz,.whl,.asc}
+    python3 -m twine upload --skip-existing dist/*.tar.gz dist/*.whl
 
 If ``twine`` prompts for a username and password abort the process with
 Control-C and enter your PyPI credentials in ``$HOME/.pypirc``. (For more
@@ -113,9 +107,9 @@ Make Release Announcement
 -------------------------
 
 Post a message to the Stan discourse forum. The following is an example from
-PyStan 2.14.0.0 (subject is "pystan 2.14.0.0 released on PyPI")::
+PyStan 2.19.1.1::
 
-    PyStan 2.17.0.0 is now available on PyPI. You may upgrade with
+    PyStan 2.19.1.1 is now available on PyPI. You may upgrade with
 
          python3 -m pip install --upgrade pystan
 
