@@ -65,6 +65,7 @@ Related projects
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
 - Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
 - Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
+- Orbit: `Object-oRiented BayesIan Timeseries models <https://github.com/uber/orbit>`_ by @uber
 
 Similar projects
 ----------------
