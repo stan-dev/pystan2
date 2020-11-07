@@ -39,10 +39,12 @@ import pystan.diagnostics
 
 logger = logging.getLogger('pystan')
 
-
 def load_module(module_name, module_path):
     """Load the module named `module_name` from  `module_path`
     independently of the Python version."""
+    if platform.system() == "Windows":
+        pystan.misc.add_libtbb_path()
+
     if sys.version_info >= (3,0):
         import pyximport
         pyximport.install()
@@ -65,7 +67,7 @@ def _map_parallel(function, args, n_jobs):
         except ImportError:
             multiprocessing = None
         if sys.platform.startswith("win") and PY2:
-            msg = "Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1"
+            msg = 'Multiprocessing is not supported on Windows with Python 2.X. Setting n_jobs=1'
             logger.warning(msg)
             n_jobs = 1
     # 2nd stage: validate that locking is available on the system and
@@ -226,6 +228,11 @@ class StanModel:
                  obfuscate_model_name=True, extra_compile_args=None,
                  allow_undefined=False, include_dirs=None, includes=None):
 
+        tbb_dir = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib','tbb'
+        ))
+
+
         if stanc_ret is None:
             stanc_ret = pystan.api.stanc(file=file,
                                          charset=charset,
@@ -283,8 +290,9 @@ class StanModel:
             os.path.join(pystan_dir, "stan", "src"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "eigen_3.3.3"),
-            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.69.0"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "boost_1.72.0"),
             os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "sundials_4.1.0", "include"),
+            os.path.join(pystan_dir, "stan", "lib", "stan_math", "lib", "tbb", "include"),
             np.get_include(),
         ]
 
@@ -339,10 +347,13 @@ class StanModel:
                     '-Wno-unused-function',
                     '-Wno-uninitialized',
                     '-std=c++1y',
-                    "-D_hypot=hypot",
-                    "-pthread",
-                    "-fexceptions",
+                    '-D_hypot=hypot',
+                    '-pthread',
+                    '-fexceptions',
+                    '-DSTAN_THREADS',
+                    '-D_REENTRANT',
                 ] + extra_compile_args
+            extra_link_args = []
         else:
             # linux or macOS
             extra_compile_args = [
@@ -351,7 +362,10 @@ class StanModel:
                 '-Wno-unused-function',
                 '-Wno-uninitialized',
                 '-std=c++1y',
+                '-DSTAN_THREADS',
+                '-D_REENTRANT', # stan-math requires _REENTRANT being defined during compilation to make lgamma_r available.
             ] + extra_compile_args
+            extra_link_args = ['-Wl,-rpath,{}'.format(os.path.abspath(tbb_dir))]
 
         distutils.log.set_verbosity(verbose)
         extension = Extension(name=self.module_name,
@@ -359,7 +373,11 @@ class StanModel:
                               sources=[pyx_file],
                               define_macros=stan_macros,
                               include_dirs=include_dirs,
-                              extra_compile_args=extra_compile_args)
+                              libraries=["tbb"],
+                              library_dirs=[tbb_dir],
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args,
+                              )
 
         cython_include_dirs = ['.', pystan_dir]
 

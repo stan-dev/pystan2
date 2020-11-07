@@ -16,12 +16,6 @@ class TestExtraCompileArgs(unittest.TestCase):
             '-Wno-unused-function',
             '-Wno-uninitialized',
         ]
-        if sys.platform.startswith("win"):
-            extra_compile_args.extend([
-                "-D_hypot=hypot",
-                "-pthread",
-                "-fexceptions"
-            ])
         model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
         model = pystan.StanModel(model_code=model_code, model_name="normal1",
                                  extra_compile_args=extra_compile_args)
@@ -41,13 +35,8 @@ class TestExtraCompileArgs(unittest.TestCase):
                              extra_compile_args=extra_compile_args)
 
     def test_threading_support(self):
-        # Dont test with Windows with MinGW-w64 (GCC)
-        if sys.platform.startswith("win"):
-            return
         # Set up environmental variable
         os.environ['STAN_NUM_THREADS'] = "2"
-        # Enable threading
-        extra_compile_args = ['-pthread', '-DSTAN_THREADS']
         stan_code = """
         functions {
           vector bl_glm(vector mu_sigma, vector beta,
@@ -99,10 +88,7 @@ class TestExtraCompileArgs(unittest.TestCase):
                  0.517, 1.092, -0.485, -2.157],
             y = [1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1]
         )
-        stan_model = pystan.StanModel(
-            model_code=stan_code,
-            extra_compile_args=extra_compile_args
-        )
+        stan_model = pystan.StanModel(model_code=stan_code)
         for i in range(10):
             try:
                 fit = stan_model.sampling(data=stan_data, chains=2, iter=200, n_jobs=1)

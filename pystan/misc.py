@@ -1471,3 +1471,13 @@ def get_last_position(fit, warmup=False):
         extract_pos = {key : values[draw_location, i] for key, values in extracted.items()}
         positions.append(extract_pos)
     return positions
+
+def add_libtbb_path():
+    """Add libtbb to PATH."""
+    libtbb = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 'stan', 'lib', 'stan_math', 'lib', 'tbb'
+    ))
+
+    os.environ['PATH'] = ';'.join(
+        list(OrderedDict.fromkeys([libtbb] + os.getenv('PATH', '').split(';')))
+    )
