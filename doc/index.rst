@@ -64,7 +64,7 @@ Related projects
 - hBayesDM: `hierarchical Bayesian modeling of Decision-Making tasks <https://hbayesdm.readthedocs.io>`_ by @CCS-Lab
 - Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
 - Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
-- Orbit: `Object-oRiented BayesIan Timeseries models <https://github.com/uber/orbit/tree/dev>`_ by @uber
+- Orbit: `Object-oRiented BayesIan Timeseries models <https://github.com/uber/orbit>`_ by @uber
 - Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 
