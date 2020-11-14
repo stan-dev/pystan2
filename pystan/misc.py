@@ -462,7 +462,10 @@ def _config_argss(chains, iter, warmup, thin,
         inits_specified = True
     if not inits_specified and isinstance(init, Callable):
         ## test if function takes argument named "chain_id"
-        if "chain_id" in inspect.getfullargspec(init).args:
+        if "chain_id" in (
+            inspect.getfullargspec(init).args if hasattr(inspect, inspect.getfullargspec) 
+            else inspect.getargspec(init).args
+        ):
             inits = [init(chain_id=id) for id in chain_id]
         else:
             inits = [init()] * chains
