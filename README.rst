@@ -35,9 +35,10 @@ Related projects
 
 Projects using PyStan
 ---------------------
-- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
 - hBayesDM: `hierarchical Bayesian modeling of Decision-Making tasks <https://hbayesdm.readthedocs.io>`_ by @CCS-Lab
+- Orbit: `Object-oRiented BayesIan Timeseries models <https://github.com/uber/orbit>`_ by @uber
+- Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 
 Similar projects
 ----------------
