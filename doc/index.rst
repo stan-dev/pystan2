@@ -71,7 +71,7 @@ Related projects
 Similar projects
 ----------------
 
-- PyMC: https://pymc-devs.github.io/pymc/
+- PyMC3: https://docs.pymc.io/
 - emcee: https://emcee.readthedocs.io/en/stable/
 
 PyStan3 / Stan3
