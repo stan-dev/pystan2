@@ -7,7 +7,7 @@ PyStan doesn't automatically run in `Atom <http://atom.io>`_ even if we use scri
 
 Steps
 ------
-- Install PyStan as explained `here <http://pystan.readthedocs.io/en/latest/windows.html#windows>`_.
+- Install PyStan as explained `here <http://pystan2.readthedocs.io/en/latest/windows.html#windows>`_.
 - Install `Atom <http://atom.io>`_. Atom will be added to your path variable during the installation.
 - Launch `Atom <http://atom.io>`_ in your activated Stan environment as follows:
   
@@ -20,7 +20,7 @@ Steps
 
 Test
 ------
-To check if you can now run PyStan in Atom, copy and run the example code from the `installation doc <http://pystan.readthedocs.io/en/latest/windows.html#windows>`_.
+To check if you can now run PyStan in Atom, copy and run the example code from the `installation doc <http://pystan2.readthedocs.io/en/latest/windows.html#windows>`_.
 
 >>> import pystan
 >>> model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
