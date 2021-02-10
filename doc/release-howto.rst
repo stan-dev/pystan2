@@ -115,7 +115,7 @@ PyStan 2.19.1.1::
 
     A list of changes is available in the customary location:
 
-    http://pystan.readthedocs.io/en/latest/whats_new.html
+    http://pystan2.readthedocs.io/en/latest/whats_new.html
 
 TODO
 ====

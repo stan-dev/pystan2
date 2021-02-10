@@ -7,6 +7,8 @@ PyStan: The Python Interface to Stan
 
 |pypi| |travis| |appveyor| |zenodo|
 
+.. tip:: PyStan 3 is available for Linux and macOS users. Visit the `PyStan 3 documentation <https://pystan.readthedocs.io/en/latest/>`_ for details. PyStan 2 is not maintained.
+
 **PyStan** provides a Python interface to Stan, a package for Bayesian inference
 using the No-U-Turn sampler, a variant of Hamiltonian Monte Carlo.
 
@@ -14,12 +16,11 @@ For more information on `Stan <http://mc-stan.org>`_ and its modeling language,
 see the Stan User's Guide and Reference Manual at `http://mc-stan.org/
 <http://mc-stan.org/>`_.
 
-.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
 
 Important links
 ---------------
 
-- HTML documentation: https://pystan.readthedocs.org
+- HTML documentation: https://pystan2.readthedocs.org
 - Issue tracker: https://github.com/stan-dev/pystan/issues
 - Source code repository: https://github.com/stan-dev/pystan
 - Stan: http://mc-stan.org/
@@ -57,7 +58,7 @@ Detailed installation instructions can be found in the
 
 Windows Installation Instructions
 ---------------------------------
-Detailed installation instructions for Windows can be found in docs under `PyStan on Windows <https://pystan.readthedocs.io/en/latest/windows.html>`_
+Detailed installation instructions for Windows can be found in docs under `PyStan on Windows <https://pystan2.readthedocs.io/en/latest/windows.html>`_
 
 Quick Installation (Linux and macOS)
 ------------------------------------
