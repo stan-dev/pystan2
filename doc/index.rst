@@ -7,13 +7,14 @@
 PyStan: The Python Interface to Stan
 ====================================
 
+.. tip:: PyStan 3 is available for Linux and macOS users. Visit the `PyStan 3 documentation <https://pystan.readthedocs.io/en/latest/>`_ for details. PyStan 2 is not maintained.
+
 PyStan provides an interface to `Stan <http://mc-stan.org>`_, a package for
 Bayesian inference using the No-U-Turn sampler, a variant of Hamiltonian Monte
 Carlo.
 
 License: Open source, GPL3
 
-.. tip:: PyStan 3 Beta is available for Linux and macOS users. Testers are welcome. Visit the `PyStan 3 documentation <https://pystan-next.readthedocs.io/en/latest/>`_ for details.
 
 Documentation
 -------------
@@ -53,7 +54,7 @@ Important links
 ---------------
 
 - Source code repo: https://github.com/stan-dev/pystan
-- HTML documentation: http://pystan.readthedocs.org
+- HTML documentation: http://pystan2.readthedocs.org
 - Issue tracker: https://github.com/stan-dev/pystan/issues
 
 Related projects
