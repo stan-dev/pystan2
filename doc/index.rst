@@ -63,7 +63,6 @@ Related projects
 - Prophet: `Timeseries forecasting <https://facebook.github.io/prophet/>`_ by @facebook
 - Scikit-learn integration: `pystan-sklearn <https://github.com/rgerkin/pystan-sklearn>`_ by @rgerkin.
 - BAMBI: `BAyesian Model-Building Interface <https://github.com/bambinos/bambi>`_ by @bambinos
-- Orbit:   `Object-oRiented BayesIan Timeseries models <https://github.com/uber/orbit>`_  by @uber
 - Jupyter tool: `StanMagic <https://github.com/Arvinds-ds/stanmagic>`_ by @Arvinds-ds
 - Jupyter tool: `JupyterStan <https://github.com/janfreyberg/jupyterstan>`_ by @janfreyberg
 
